@@ -1,0 +1,12 @@
+[project]
+name = "neuromaps-nhp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "mypy>=1.18.2",
+    "niwrap>=0.6.3",
+    "pytest>=8.4.2",
+    "ruff>=0.13.1",
+]

@@ -1,0 +1,30 @@
+name: Setup Python Environment with uv
+description: Sets up Python, installs uv, and creates the virtual environment.
+inputs:
+  only-dev:
+    description: Whether to install only dev dependencies
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+  - name: Install uv
+    uses: astral-sh/setup-uv@v5
+    with:
+      enable-cache: true
+
+  - name: Set up Python
+    uses: actions/setup-python@v5
+    with:
+      python-version-file: pyproject.toml
+
+  - name: Install dependencies
+    if: steps.cache-venv.outputs.cache-hit != 'true'
+    shell: bash
+    run: |-
+      if [[ "${{ inputs.only-dev }}" == "true" ]]; then
+        uv sync --only-dev
+      else
+        uv sync
+      fi
