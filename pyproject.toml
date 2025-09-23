@@ -1,76 +1,10 @@
 [project]
 name = "neuromaps-nhp"
-description = "A toolbox for projecting, resampling, and comparing NHP brain maps"
-license = {file = "LICENSE"}
+version = "0.1.0"
+description = "Add your description here"
 readme = "README.md"
-dynamic = ["version"]
-requires-python = ">=3.10"
-keywords = ["network neuroscience", "connectomics"]
-authors = [{name = "CMI DAIR", email = "dair@childmind.org"}]
-classifiers = [
-  "Development Status :: 3 - Alpha",
-  "Intended Audience :: Science/Research",
-  "License :: OSI Approved",
-  "Programming Language :: Python :: 3 :: Only"
-]
+requires-python = ">=3.12"
 dependencies = [
-  "niwrap>=0.6.3",
-  "nibabel>=5.2.1"
+    "niwrap>=0.6.3",
+    "pytest>=8.4.2",
 ]
-
-[dependency-groups]
-dev = [
-  "deptry>=0.23.1",
-  "mypy>=1.18.2",
-  "pre-commit>=4.3.0",
-  "pytest>=8.4.2",
-  "pytest-cov>=7.0.0",
-  "ruff>=0.13.1"
-]
-docs = [
-  "pdoc>=15.0.4"
-]
-
-[build-system]
-requires = ["hatchling", "hatch-vcs"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build]
-source = ["src"]
-
-[tool.hatch.build.hooks.vcs]
-version-file = "src/neuromaps_nhp/_version.py"
-
-[tool.hatch.version]
-source = "vcs"
-
-[tool.pytest.ini_options]
-pythonpath = ["src"]
-testpaths = ["tests"]
-
-[tool.mypy]
-ignore_missing_imports = true
-
-[tool.ruff]
-line-length = 88
-indent-width = 4
-src = ["src"]
-target-version = "py312"
-
-[tool.ruff.lint]
-select = ["ANN", "D", "E", "F", "I"]
-ignore = []
-fixable = ["ALL"]
-unfixable = []
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
-
-[tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = []
-
-[too.ruff.format]
-quote-style = "double"
-indent-style = "space"
-skip-magic-trailing-comma = false
-line-ending = "auto"
