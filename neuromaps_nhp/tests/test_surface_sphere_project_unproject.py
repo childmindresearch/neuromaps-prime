@@ -2,21 +2,11 @@ import pytest
 import os
 from pathlib import Path
 
-from styxdefs import set_global_runner
-from styxsingularity import SingularityRunner
 from niwrap import workbench as wb
 import nibabel as nib
 
-
 from neuromaps_nhp.utils.surface_sphere_project_unproject import surface_sphere_project_unproject
-
-my_runner = SingularityRunner(
-    images={"brainlife/connectome_workbench:1.5.0-freesurfer-update": "/home/bshrestha/projects/Tfunck/neuromaps.sif"}
-)
-data_dir = Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp/.temp-niwrap-data").resolve()
-my_runner.data_dir = data_dir
-set_global_runner(my_runner)
-
+from neuromaps_nhp.config import Config
 
 @pytest.mark.parametrize(
     "sphere_in,sphere_project_to,sphere_unproject_from,sphere_out",
@@ -25,7 +15,7 @@ set_global_runner(my_runner)
             str(Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii")),
             str(Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii")),
             str(Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii")),
-            str(data_dir / "out_sphere.surf.gii"),
+            str(Config.data_dir / "out_sphere.surf.gii"),
         ),
         # Add more tuples here for additional test cases
     ]
