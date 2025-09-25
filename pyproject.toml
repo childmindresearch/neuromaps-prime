@@ -13,15 +13,23 @@ classifiers = [
   "License :: OSI Approved",
   "Programming Language :: Python :: 3 :: Only"
 ]
-dependencies = ["niwrap>=0.6.3"]
+dependencies = [
+  "neuromaps>=0.0.5",
+  "niwrap>=0.6.3",
+  "nibabel>=5.2.1",
+  "pytest>=8.4.2",
+  "pytest-cov>=7.0.0",
+  "nilearn>=0.11",
+  "numpy>=1.25",
+  "scipy>=1.12",
+  "setuptools>=68.0.0"  # added to fix pkg_resources error
+]
 
 [dependency-groups]
 dev = [
   "deptry>=0.23.1",
   "mypy>=1.18.2",
   "pre-commit>=4.3.0",
-  "pytest>=8.4.2",
-  "pytest-cov>=7.0.0",
   "ruff>=0.13.1"
 ]
 docs = [
@@ -43,7 +51,8 @@ source = "vcs"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-testpaths = ["tests"]
+testpaths = ["src/neuromaps_nhp/tests"]
+filterwarnings = ["ignore::UserWarning:pkg_resources"]
 
 [tool.mypy]
 ignore_missing_imports = true
