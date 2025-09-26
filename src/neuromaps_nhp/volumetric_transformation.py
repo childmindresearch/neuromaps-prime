@@ -1,10 +1,37 @@
-import re
+import subprocess
 from pathlib import Path
 import nibabel as nib
 from neuromaps.utils import tmpname, run
 import warnings
 
-def _vol_to_vol(source, target, method='linear', allow_res_mismatch=False):
+
+def _extract_res(nii_file: Path):
+    """
+    Extract voxel spacing from a NIfTI file using Workbench (wb_command).
+
+    Parameters
+    ----------
+    nii_file : Path
+        Path to a NIfTI file.
+
+    Returns
+    -------
+    tuple of float
+        The voxel spacing (dx, dy, dz) in mm.
+    """
+    cmd = ["wb_command", "-file-information", str(nii_file)]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"wb_command failed: {result.stderr}")
+
+    for line in result.stdout.splitlines():
+        if "spacing:" in line.lower():
+            spacing_values = line.split(":", 1)[1].replace("mm", "").strip()
+            return tuple(float(x.strip()) for x in spacing_values.split(","))
+    raise ValueError(f"Cannot determine resolution for {nii_file}")
+
+
+def _vol_to_vol(source, target, method='linear', allow_res_mismatch=True):
     """
     Use niwrap to implement antsApplyTransforms to brain volumes in Neuromaps NHP.
 
@@ -18,40 +45,29 @@ def _vol_to_vol(source, target, method='linear', allow_res_mismatch=False):
         Interpolation method. Default is 'linear'.
     allow_res_mismatch : bool, optional
         If True, will run transformation even if source and target resolutions differ.
-        Default is False (raises a warning and proceeds anyway).
+        Default is True.
 
     Returns
     -------
     transformed : nib.Nifti1Image
         Source volume resampled to the target space.
     """
+
+    # ensure absolute paths
     source = Path(source).resolve()
     target = Path(target).resolve()
 
-    # helper: extract resolution from filename
-    def _extract_res(fname: Path) -> str:
-        fname = Path(fname).name
-        m = re.search(r"_res-([0-9p]+mm)", fname)
-        if not m:
-            raise ValueError(f"Cannot extract resolution from filename: {fname}")
-        return m.group(1)
-
+    # get voxel spacing using Workbench
     src_res = _extract_res(source)
     trg_res = _extract_res(target)
 
+    # warn if source and target voxel spacings differ
     if src_res != trg_res:
-        msg = f"Source ({src_res}) and target ({trg_res}) resolutions differ."
+        msg = f"Source resolution {src_res} and target resolution {trg_res} differ."
         if allow_res_mismatch:
-            warnings.warn(msg + " Proceeding with transformation.", UserWarning)
+            warnings.warn(msg + " : ", UserWarning)
         else:
-            warnings.warn(msg + " Transformation may resample differently than intended.", UserWarning)
-
-    # if source and target are identical resolution, return the source
-    if src_res == trg_res:
-        return nib.load(source)
-
-    if method not in ('linear', 'nearest'):
-        raise ValueError(f"Invalid method: {method}. Must be 'linear' or 'nearest'.")
+            raise ValueError(msg + " Set allow_res_mismatch=True to override.")
 
     tmp_out = tmpname('.nii')
     interp_map = {'linear': 'Linear', 'nearest': 'NearestNeighbor'}
@@ -60,10 +76,10 @@ def _vol_to_vol(source, target, method='linear', allow_res_mismatch=False):
     cmd = f"antsApplyTransforms -d 3 -i {source} -r {target} -o {tmp_out} -n {interp_map[method]}"
     run(cmd, quiet=True)
 
-    # Load transformed output
+    # load transformed output
     transformed = nib.load(tmp_out)
 
-    # Clean up temporary file
+    # remove temp file
     tmp_out.unlink(missing_ok=True)
 
     return transformed
