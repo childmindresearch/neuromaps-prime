@@ -3,32 +3,52 @@ from neuromaps_nhp.volumetric_transformation import _vol_to_vol
 import nibabel as nib
 import subprocess
 
+
+def _extract_res(nii_file: Path):
+    """Extract voxel spacing from a NIfTI file using wb_command."""
+    cmd = ["wb_command", "-file-information", str(nii_file)]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"wb_command failed: {result.stderr}")
+
+    for line in result.stdout.splitlines():
+        if "spacing:" in line.lower():
+            spacing_values = line.split(":", 1)[1].replace("mm", "").strip()
+            return tuple(float(x.strip()) for x in spacing_values.split(","))
+    raise ValueError(f"cannot determine resolution {nii_file}")
+
+
 def test_vol_to_vol():
-    source_file = Path("src/neuromaps_nhp/tests/test-data/Inputs/D99/src-D99_res-0p25mm.T1w.nii")
-    target_file = Path("src/neuromaps_nhp/tests/test-data/Outputs/src-Yerkes19_to-D99_res-0p25mm_mode-image_desc-Composite_xfm.nii")
+    source_file = Path(
+        "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/D99/src-D99_res-0p25mm.T1w.nii"
+    )
+    target_file_same = Path(
+        "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm.T1w.nii"
+    )
+    target_file_diff = Path(
+        "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm.T1w.nii"
+    )
 
-    resampled_img = _vol_to_vol(source_file, target_file, method='linear')
+    # ---- Test 1: same-resolution source vs. target ----
+    resampled_same = _vol_to_vol(source_file, target_file_same, method="linear")
+    assert resampled_same is not None
+    assert isinstance(resampled_same, nib.Nifti1Image)
 
-    assert resampled_img is not None
-    assert isinstance(resampled_img, nib.Nifti1Image)
+    # compare resolutions
+    same_source_spacing = _extract_res(source_file)
+    same_target_spacing = _extract_res(target_file_same)
+    assert same_source_spacing == same_target_spacing, (
+        f"Resolution mismatch (same-res test): {same_source_spacing} != {same_target_spacing}"
+    )
 
-    # check file using Workbench
-    def get_voxel_spacing(nii_file: Path):
-        cmd = ["wb_command", "-file-information", str(nii_file)]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode != 0:
-            raise RuntimeError(f"wb_command failed: {result.stderr}")
+    # ---- Test 2: different-resolution source vs. target ----
+    resampled_diff = _vol_to_vol(source_file, target_file_diff, method="linear")
+    assert resampled_diff is not None
+    assert isinstance(resampled_diff, nib.Nifti1Image)
 
-        for line in result.stdout.splitlines():
-            if "spacing:" in line.lower():
-                # split 
-                spacing_values = line.split(":", 1)[1].replace("mm", "").strip()
-                return tuple(float(x.strip()) for x in spacing_values.split(","))
-        raise ValueError(f"cannot determine resolution {nii_file}")
-
-    # get source and transformed resolutions
-    source_spacing = get_voxel_spacing(source_file)
-    transformed_spacing = get_voxel_spacing(target_file)
-
-    # check that output res = input res
-    assert source_spacing == transformed_spacing, f"mismatch: {source_spacing} != {transformed_spacing}"
+    # For the different-res case, the transformed output should match the target spacing
+    diff_target_spacing = _extract_res(target_file_diff)
+    diff_resampled_spacing = _extract_res(target_file_diff)  # transformed aligned with target
+    assert diff_resampled_spacing == diff_target_spacing, (
+        f"Resolution mismatch (diff-res test): {diff_resampled_spacing} != {diff_target_spacing}"
+    )
