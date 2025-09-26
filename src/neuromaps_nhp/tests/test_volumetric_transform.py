@@ -1,5 +1,5 @@
 from pathlib import Path
-from neuromaps_nhp.volumetric_transformation import _vol_to_vol
+from neuromaps_nhp.transforms import _vol_to_vol
 import nibabel as nib
 import subprocess
 
