@@ -401,23 +401,3 @@ class BrainAtlasTransformGraph:
                 f"Cross-species edges: {info['cross_species_edges']}\n"
                 f"Transform files registered: {info['transform_files_count']}")
 
-
-# Example usage
-if __name__ == "__main__":
-    # Create directed graph with default nodes
-    brain_graph = BrainAtlasTransformGraph(directed=True)
-    
-    # Print graph info
-    print(brain_graph)
-    print()
-    
-    # Set transformation files
-    brain_graph.set_transform_file("s1200", "yerkes19", "/path/to/s1200_to_yerkes19.h5")
-    brain_graph.set_transform_file("yerkes19", "s1200", "/path/to/yerkes19_to_s1200.h5")
-    
-    # Test path finding
-    path = brain_graph.find_shortest_path("fsaverage", "d99")
-    print(f"Path from fsaverage to d99: {path}")
-    
-    # Plot the graph
-    brain_graph.plot_graph(save_path='brain_atlas_graph.png')
