@@ -48,6 +48,7 @@ class Paths:
         
         # Initialize default values
         info = {
+            'resource_name': None,
             'filename': filepath.name,
             'filepath': str(filepath),
             'source': None,
@@ -121,6 +122,9 @@ class Paths:
             if density_match:
                 info['density'] = f"{density_match.group(1)}k"
         
+        # if src-D99_to-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii, then resource_name is midthickness
+        info["resource_name"] = filename.split('.')[0].split('_')[-1]
+
         return info
     
     def create_atlas_info_csv(self, output_path: Path = None) -> pd.DataFrame:
@@ -167,3 +171,7 @@ class Paths:
         
         return df
     
+if __name__ == "__main__":
+    paths = Paths()
+    atlas_df = paths.create_atlas_info_csv()
+    transforms_df = paths.create_transforms_info_csv()

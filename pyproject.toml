@@ -15,6 +15,7 @@ classifiers = [
 ]
 dependencies = [
     "matplotlib>=3.10.6",
+    "networkx>=3.4.2",
     "niwrap>=0.6.3",
     "pandas>=2.3.2",
 ]
@@ -75,3 +76,9 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
