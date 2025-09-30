@@ -15,6 +15,13 @@ def _vol_to_vol(source: Path, target: Path) -> Path:
     source = Path(source)
     target = Path(target)
 
+    '''
+    Can add a warning in the future if we want to allow for volumes to be resampled back 
+    to the original resolution in the target space,but generally, we would expect the output 
+    to be in the resolution of the target image. Given we are transforming to the target space, 
+    the warning is left out for now.
+    '''
+
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii"
     interp = ants.ants_apply_transforms_linear_params()
     output = ants.ants_apply_transforms_warped_output_params(str(out_file))
