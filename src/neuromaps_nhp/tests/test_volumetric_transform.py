@@ -4,6 +4,7 @@ import nibabel as nib
 import subprocess
 
 
+'''Extract voxel spacing from a NIfTI file using wb_command.'''
 def _extract_res(nii_file: Path):
     """Extract voxel spacing from a NIfTI file using wb_command."""
     cmd = ["wb_command", "-file-information", str(nii_file)]
@@ -18,6 +19,7 @@ def _extract_res(nii_file: Path):
     raise ValueError(f"cannot determine resolution {nii_file}")
 
 
+'''Test volumetric transformation from source to target space.'''
 def test_vol_to_vol():
     source_file = Path(
         "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/D99/src-D99_res-0p25mm.T1w.nii"
@@ -30,25 +32,29 @@ def test_vol_to_vol():
     )
 
     # ---- Test 1: same-resolution source vs. target ----
-    resampled_same = _vol_to_vol(source_file, target_file_same, method="linear")
-    assert resampled_same is not None
-    assert isinstance(resampled_same, nib.Nifti1Image)
+    resampled_same_path = _vol_to_vol(source_file, target_file_same)
+    assert resampled_same_path.exists()
+
+    resampled_same_img = nib.load(resampled_same_path)
+    assert isinstance(resampled_same_img, nib.Nifti1Image)
 
     # compare resolutions
     same_source_spacing = _extract_res(source_file)
-    same_target_spacing = _extract_res(target_file_same)
-    assert same_source_spacing == same_target_spacing, (
-        f"Resolution mismatch (same-res test): {same_source_spacing} != {same_target_spacing}"
+    same_resampled_spacing = _extract_res(resampled_same_path)
+    assert same_source_spacing == same_resampled_spacing, (
+        f"Resolution mismatch (same-res test): {same_source_spacing} != {same_resampled_spacing}"
     )
 
     # ---- Test 2: different-resolution source vs. target ----
-    resampled_diff = _vol_to_vol(source_file, target_file_diff, method="linear")
-    assert resampled_diff is not None
-    assert isinstance(resampled_diff, nib.Nifti1Image)
+    resampled_diff_path = _vol_to_vol(source_file, target_file_diff)
+    assert resampled_diff_path.exists()
 
-    # For the different-res case, the transformed output should match the target spacing
+    resampled_diff_img = nib.load(resampled_diff_path)
+    assert isinstance(resampled_diff_img, nib.Nifti1Image)
+
+    # transformed output should match the target spacing
     diff_target_spacing = _extract_res(target_file_diff)
-    diff_resampled_spacing = _extract_res(target_file_diff)  # transformed aligned with target
+    diff_resampled_spacing = _extract_res(resampled_diff_path)
     assert diff_resampled_spacing == diff_target_spacing, (
         f"Resolution mismatch (diff-res test): {diff_resampled_spacing} != {diff_target_spacing}"
     )
