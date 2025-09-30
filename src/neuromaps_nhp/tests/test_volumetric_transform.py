@@ -1,43 +1,38 @@
 from pathlib import Path
-from neuromaps_nhp.transforms import _vol_to_vol, _extract_res
 import nibabel as nib
+from neuromaps_nhp.transforms import _vol_to_vol, _extract_res
 
-'''Test volumetric transformation from source to target space.'''
-def test_vol_to_vol():
-    source_file = Path(
-        "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/D99/src-D99_res-0p25mm.T1w.nii"
-    )
-    target_file_same = Path(
-        "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm.T1w.nii"
-    )
-    target_file_diff = Path(
-        "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm.T1w.nii"
-    )
+class TestVolToVol:
+    """Class-based tests for volumetric transformation using _vol_to_vol."""
 
-    # ---- Test 1: same-resolution source vs. target ----
-    resampled_same_path = _vol_to_vol(source_file, target_file_same)
-    assert resampled_same_path.exists()
+    def setup_class(self):
+        """Set up file paths for source and target volumes."""
+        self.source_file = Path(
+            "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/D99/src-D99_res-0p25mm.T1w.nii"
+        )
+        self.target_same = Path(
+            "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm.T1w.nii"
+        )
+        self.target_diff = Path(
+            "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm.T1w.nii"
+        )
 
-    resampled_same_img = nib.load(resampled_same_path)
-    assert isinstance(resampled_same_img, nib.Nifti1Image)
+    def test_same_resolution(self):
+        """Test transformation when source and target have the same resolution."""
+        result_path = _vol_to_vol(self.source_file, self.target_same)
+        assert result_path.exists(), "Transformed file was not created"
+        img = nib.load(str(result_path))
+        assert isinstance(img, nib.Nifti1Image), "Output is not a Nifti1Image"
+        assert _extract_res(result_path) == _extract_res(self.target_same), (
+            f"Resolution mismatch: {_extract_res(result_path)} != {_extract_res(self.target_same)}"
+        )
 
-    # compare resolutions
-    same_source_spacing = _extract_res(source_file)
-    same_resampled_spacing = _extract_res(resampled_same_path)
-    assert same_source_spacing == same_resampled_spacing, (
-        f"Resolution mismatch (same-res test): {same_source_spacing} != {same_resampled_spacing}"
-    )
-
-    # ---- Test 2: different-resolution source vs. target ----
-    resampled_diff_path = _vol_to_vol(source_file, target_file_diff)
-    assert resampled_diff_path.exists()
-
-    resampled_diff_img = nib.load(resampled_diff_path)
-    assert isinstance(resampled_diff_img, nib.Nifti1Image)
-
-    # transformed output should match the target spacing
-    diff_target_spacing = _extract_res(target_file_diff)
-    diff_resampled_spacing = _extract_res(resampled_diff_path)
-    assert diff_resampled_spacing == diff_target_spacing, (
-        f"Resolution mismatch (diff-res test): {diff_resampled_spacing} != {diff_target_spacing}"
-    )
+    def test_different_resolution(self):
+        """Test transformation when source and target have different resolutions."""
+        result_path = _vol_to_vol(self.source_file, self.target_diff)
+        assert result_path.exists(), "Transformed file was not created"
+        img = nib.load(str(result_path))
+        assert isinstance(img, nib.Nifti1Image), "Output is not a Nifti1Image"
+        assert _extract_res(result_path) == _extract_res(self.target_diff), (
+            f"Resolution mismatch: {_extract_res(result_path)} != {_extract_res(self.target_diff)}"
+        )
