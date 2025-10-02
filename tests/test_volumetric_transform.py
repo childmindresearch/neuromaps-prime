@@ -21,7 +21,7 @@ class TestVolToVol:
         """Test transformation when source and target have the same resolution."""
         result_path = _vol_to_vol(self.source_file, self.target_same)
         assert result_path.exists(), "Transformed file was not created"
-        img = nib.load(str(result_path))
+        img = nib.load(result_path)
         assert isinstance(img, nib.Nifti1Image), "Output is not a Nifti1Image"
         assert _extract_res(result_path) == _extract_res(self.target_same), (
             f"Resolution mismatch: {_extract_res(result_path)} != {_extract_res(self.target_same)}"
@@ -31,7 +31,7 @@ class TestVolToVol:
         """Test transformation when source and target have different resolutions."""
         result_path = _vol_to_vol(self.source_file, self.target_diff)
         assert result_path.exists(), "Transformed file was not created"
-        img = nib.load(str(result_path))
+        img = nib.load(result_path)
         assert isinstance(img, nib.Nifti1Image), "Output is not a Nifti1Image"
         assert _extract_res(result_path) == _extract_res(self.target_diff), (
             f"Resolution mismatch: {_extract_res(result_path)} != {_extract_res(self.target_diff)}"
