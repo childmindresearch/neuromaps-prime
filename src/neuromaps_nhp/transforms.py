@@ -25,8 +25,8 @@ def _vol_to_vol(source: Path, target: Path):
     output = ants.ants_apply_transforms_warped_output_params(str(out_file))
 
     ants.ants_apply_transforms(
-        input_image=str(source),
-        reference_image=str(target),
+        input_image=source,
+        reference_image=target,
         output=output,
         interpolation=interp,
         dimensionality=3
