@@ -28,8 +28,7 @@ def _vol_to_vol(source: Path, target: Path):
         input_image=source,
         reference_image=target,
         output=output,
-        interpolation=interp,
-        dimensionality=3
+        interpolation=interp
     )
 
     return out_file
