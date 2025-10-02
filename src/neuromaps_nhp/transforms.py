@@ -20,7 +20,7 @@ def _vol_to_vol(source: Path, target: Path):
     the warning is left out for now.
     '''
 
-    out_file = target.parent / f"{source.stem}_to_{target.stem}.nii"
+    out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
     interp = ants.ants_apply_transforms_linear_params()
     output = ants.ants_apply_transforms_warped_output_params(str(out_file))
 
