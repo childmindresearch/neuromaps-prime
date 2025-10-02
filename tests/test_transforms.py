@@ -3,7 +3,7 @@ import nibabel as nib
 import pytest
 from neuromaps_nhp.transforms import _vol_to_vol, _extract_res
 
-class TestVolToVol:
+class TestVolumetricTransform:
     """Class-based tests for volumetric transformation using _vol_to_vol."""
 
     # future- set up fixtures or use fetchers and just pass those along instead of hardcoding
