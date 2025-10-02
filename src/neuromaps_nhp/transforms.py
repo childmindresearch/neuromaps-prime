@@ -5,15 +5,13 @@ import nibabel as nib
 '''Extract voxel spacing from a NIfTI file using wb_command.'''
 def _extract_res(nii_file: Path):
     """Extract voxel spacing from a NIfTI file using nibabel."""
-    img = nib.load(str(nii_file))
+    img = nib.load(nii_file)
     return img.header.get_zooms()[:3]  
 
 '''Transform a volumetric image from source space to target space.'''
-def _vol_to_vol(source: Path, target: Path) -> Path:
+def _vol_to_vol(source: Path, target: Path):
 
     # later - include in the networkx graph, fetch and assert that the path exists
-    source = Path(source)
-    target = Path(target)
 
     '''
     Can add a warning in the future if we want to allow for volumes to be resampled back 
