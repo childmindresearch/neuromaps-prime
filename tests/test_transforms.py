@@ -1,13 +1,18 @@
+"""Tests for volumetric transformations using Neuromaps NHP."""
+
 from pathlib import Path
+
 import nibabel as nib
 import pytest
-from neuromaps_nhp.transforms import _vol_to_vol, _extract_res
+
+from neuromaps_nhp.transforms import _extract_res, _vol_to_vol
+
 
 class TestVolumetricTransform:
     """Class-based tests for volumetric transformation using _vol_to_vol."""
 
-    # future- set up fixtures or use fetchers and just pass those along instead of hardcoding
-    def setup_class(self):
+    # future- set up fetchers
+    def setup_class(self) -> None:
         """Set up file paths for source and target volumes."""
         self.source_file = Path(
             "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/D99/src-D99_res-0p25mm.T1w.nii"
@@ -20,8 +25,12 @@ class TestVolumetricTransform:
         )
 
     @pytest.mark.parametrize("target_attr", ["target_same", "target_diff"])
-    def test_vol_to_vol_resolution(self, target_attr):
+    def test_vol_to_vol_resolution(self, target_attr: str) -> None:
+        """Test that `_vol_to_vol` produces a file matching the target resolution.
 
+        Args:
+            target_attr: 'target_same' or 'target_diff'
+        """
         target_file = getattr(self, target_attr)
         result_path = _vol_to_vol(self.source_file, target_file)
         
