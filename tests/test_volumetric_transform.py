@@ -6,6 +6,7 @@ from neuromaps_nhp.transforms import _vol_to_vol, _extract_res
 class TestVolToVol:
     """Class-based tests for volumetric transformation using _vol_to_vol."""
 
+    # future- set up fixtures or use fetchers and just pass those along instead of hardcoding
     def setup_class(self):
         """Set up file paths for source and target volumes."""
         self.source_file = Path(
