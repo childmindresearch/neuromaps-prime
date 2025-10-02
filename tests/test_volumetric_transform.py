@@ -1,5 +1,6 @@
 from pathlib import Path
 import nibabel as nib
+import pytest
 from neuromaps_nhp.transforms import _vol_to_vol, _extract_res
 
 class TestVolToVol:
@@ -17,22 +18,17 @@ class TestVolToVol:
             "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm.T1w.nii"
         )
 
-    def test_same_resolution(self):
-        """Test transformation when source and target have the same resolution."""
-        result_path = _vol_to_vol(self.source_file, self.target_same)
-        assert result_path.exists(), "Transformed file was not created"
-        img = nib.load(result_path)
-        assert isinstance(img, nib.Nifti1Image), "Output is not a Nifti1Image"
-        assert _extract_res(result_path) == _extract_res(self.target_same), (
-            f"Resolution mismatch: {_extract_res(result_path)} != {_extract_res(self.target_same)}"
-        )
+    @pytest.mark.parametrize("target_attr", ["target_same", "target_diff"])
+    def test_vol_to_vol_resolution(self, target_attr):
 
-    def test_different_resolution(self):
-        """Test transformation when source and target have different resolutions."""
-        result_path = _vol_to_vol(self.source_file, self.target_diff)
+        target_file = getattr(self, target_attr)
+        result_path = _vol_to_vol(self.source_file, target_file)
+        
         assert result_path.exists(), "Transformed file was not created"
+        
         img = nib.load(result_path)
         assert isinstance(img, nib.Nifti1Image), "Output is not a Nifti1Image"
-        assert _extract_res(result_path) == _extract_res(self.target_diff), (
-            f"Resolution mismatch: {_extract_res(result_path)} != {_extract_res(self.target_diff)}"
-        )
+        
+        src_res = _extract_res(result_path)
+        trg_res = _extract_res(target_file)
+        assert src_res == trg_res, f"Resolution mismatch: {src_res} != {trg_res}"
