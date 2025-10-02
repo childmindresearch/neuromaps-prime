@@ -51,7 +51,7 @@ source = "vcs"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-testpaths = ["src/neuromaps_nhp/tests"]
+testpaths = ["tests"]
 filterwarnings = ["ignore::UserWarning:pkg_resources"]
 
 [tool.mypy]
