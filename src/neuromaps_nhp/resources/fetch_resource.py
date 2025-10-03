@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import List, Optional
 from neuromaps_nhp.config import config
 
 class Resource:
@@ -98,11 +98,11 @@ class ResourceManager:
     
     def get_filepath(self, 
                      resource_type: str,
-                     source: str, 
-                     target: str = None, 
+                     source: Path, 
+                     target: Path = None, 
                      density: str = None, 
                      hemisphere: str = None, 
-                     resource_name: str = None) -> Optional[str]:
+                     resource_name: str = None) -> Optional[Path]:
         """
         Get the filepath for a specific resource.
         
@@ -118,18 +118,18 @@ class ResourceManager:
         )
         
         if resources:
-            return str(resources[0].filepath)
+            return resources[0].filepath
         return None
 
 # Create a global instance
 resource_manager = ResourceManager()
 
 def fetch_resource(resource_type: str, 
-                   source: str, 
-                   target: str = None, 
+                   source: Path, 
+                   target: Path = None, 
                    density: str = None, 
                    hemisphere: str = None, 
-                   resource_name: str = None) -> Optional[str]:
+                   resource_name: str = None) -> Optional[Path]:
     """
     Fetch a resource filepath based on search criteria.
     
@@ -137,9 +137,9 @@ def fetch_resource(resource_type: str,
     ----------
     resource_type : str
         Type of resource: 'atlas' or 'transform'
-    source : str
+    source : Path
         Source atlas name
-    target : str, optional
+    target : Path, optional
         Target atlas name (only for transforms)
     density : str, optional
         Density specification (e.g., '32k', '41k')
@@ -150,7 +150,7 @@ def fetch_resource(resource_type: str,
         
     Returns
     -------
-    str or None
+    Path or None
         Filepath to the resource, or None if not found
         
     Examples
@@ -172,7 +172,7 @@ def fetch_resource(resource_type: str,
         resource_name=resource_name
     )
 
-def fetch_atlas(resource_name: str, source: str, density: str, hemisphere: str) -> Optional[str]:
+def fetch_atlas(resource_name: str, source: Path, density: Path, hemisphere: str) -> Optional[Path]:
     """
     Fetch atlas resource filepath.
     
@@ -180,21 +180,21 @@ def fetch_atlas(resource_name: str, source: str, density: str, hemisphere: str) 
     ----------
     resource_name : str
         Resource name (e.g., 'sphere', 'midthickness')
-    source : str
+    source : Path  
         Source atlas name
-    density : str
+    density : Path
         Density specification (e.g., '32k', '41k')
     hemisphere : str
         Hemisphere: 'left' or 'right'
         
     Returns
     -------
-    str or None
+    Path or None
         Filepath to the atlas resource
     """
     return fetch_resource('atlas', source, None, density, hemisphere, resource_name)
 
-def fetch_transform(resource_name: str, source: str, target: str, density: str, hemisphere: str) -> Optional[str]:
+def fetch_transform(resource_name: str, source: Path, target: Path, density: str, hemisphere: str) -> Optional[Path]:
     """
     Fetch transform resource filepath.
     
@@ -202,9 +202,9 @@ def fetch_transform(resource_name: str, source: str, target: str, density: str, 
     ----------
     resource_name : str
         Resource name (e.g., 'sphere', 'midthickness')
-    source : str
+    source : Path
         Source atlas name
-    target : str
+    target : Path
         Target atlas name
     density : str
         Density specification (e.g., '32k', '41k')
@@ -213,7 +213,7 @@ def fetch_transform(resource_name: str, source: str, target: str, density: str, 
         
     Returns
     -------
-    str or None
+    Path or None
         Filepath to the transform resource
     """
     return fetch_resource('transform', source, target, density, hemisphere, resource_name)

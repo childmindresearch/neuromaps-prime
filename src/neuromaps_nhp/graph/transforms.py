@@ -1,4 +1,4 @@
-from neuromaps_nhp.resources.fetch_resource import resource_manager, search_resources
+from neuromaps_nhp.resources.fetch_resource import resource_manager, search_resources, Resource
 from neuromaps_nhp.graph.transform_graph import BrainAtlasTransformGraph
 import matplotlib.pyplot as plt
 import networkx as nx

@@ -14,7 +14,6 @@ def test_fetch_atlas():
         density="32k",
         hemisphere="left"
     )
-    assert atlas_path is not None
     assert os.path.exists(atlas_path)
 
 def test_fetch_atlas_invalid():
@@ -36,7 +35,6 @@ def test_fetch_transform():
         density="32k",
         hemisphere="left"
     )
-    assert transform_path is not None
     assert os.path.exists(transform_path)
 
 def test_fetch_transform_invalid():
@@ -59,7 +57,6 @@ def test_fetch_resource_atlas():
         density="32k",
         hemisphere="left"
     )
-    assert resource_path is not None
     assert os.path.exists(resource_path)
 
 def test_fetch_resource_transform():
@@ -72,7 +69,6 @@ def test_fetch_resource_transform():
         hemisphere="left",
         resource_name="sphere"
     )
-    assert resource_path is not None
     assert os.path.exists(resource_path)
     
 def test_fetch_resource_invalid():

@@ -1,8 +1,6 @@
 """Configuration module for neuromaps-nhp library."""
-
-import os
+import pandas as pd
 from pathlib import Path
-from typing import Dict, Optional, Union
 
 from styxdefs import set_global_runner
 from styxsingularity import SingularityRunner
@@ -19,6 +17,7 @@ class Config():
         self.my_runner.data_dir = self.data_dir
 
         self.paths = Paths()
+        self.transforms_df = pd.read_csv('/home/bshrestha/projects/neuromaps_nhp/src/neuromaps_nhp/resources/transforms_paths.csv')
 
 config = Config()
 set_global_runner(config.my_runner)
