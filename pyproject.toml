@@ -16,11 +16,7 @@ classifiers = [
 dependencies = [
   "neuromaps>=0.0.5",
   "niwrap>=0.6.3",
-  "nibabel>=5.2.1",
-  "nilearn>=0.11",
-  "numpy>=1.25",
-  "scipy>=1.12",
-  "setuptools>=68.0.0"  # added to fix pkg_resources error
+  "nibabel>=5.2.1"
 ]
 
 [dependency-groups]
