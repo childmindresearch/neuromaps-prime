@@ -29,7 +29,7 @@ class BrainAtlasTransformGraph:
             Whether to create a directed graph (default: True)
         """
         # Default nodes if none provided
-        self.human_nodes = human_nodes or {"civet", "fsaverage", "fslr", "s1200"}
+        self.human_nodes = human_nodes or {"civet", "fsaverage", "s1200"}
         self.nhp_nodes = nhp_nodes or {"civetnmt", "yerkes19", "d99", "mebrains", "nmt2sym"}
         
         # Sanitize node names

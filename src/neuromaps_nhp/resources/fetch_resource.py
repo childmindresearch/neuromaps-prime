@@ -12,14 +12,36 @@ class Resource:
         self.filename = kwargs.get('filename')
         self.filepath = Path(kwargs.get('filepath'))
         self.source = kwargs.get('source')
-        self.target = kwargs.get('target')
+        
+        # Handle NaN values for target
+        target_val = kwargs.get('target')
+        self.target = None if pd.isna(target_val) else target_val
+        
         self.density = kwargs.get('density')
         self.hemisphere = kwargs.get('hemisphere')
         self.description = kwargs.get('description')
         self.file_type = kwargs.get('file_type')
+        
+        # Set resource_type based on file_type or target presence
+        if self.file_type == 'atlas' or self.target is None:
+            self.resource_type = 'atlas'
+        else:
+            self.resource_type = 'transform'
+    
+    @property
+    def is_atlas(self) -> bool:
+        """Check if this resource is an atlas."""
+        return self.resource_type == 'atlas'
+    
+    @property
+    def is_transform(self) -> bool:
+        """Check if this resource is a transform."""
+        return self.resource_type == 'transform'
     
     def __repr__(self):
-        return f"Resource({self.resource_name}, {self.source}->{self.target}, {self.density}, {self.hemisphere})"
+        return f"resource_type: {self.resource_type}, resource_name: {self.resource_name}, source: {self.source}, target: {self.target}, density: {self.density}, hemisphere: {self.hemisphere})"
+
+
 
 class ResourceManager:
     """Manager class for searching and fetching brain atlas resources."""

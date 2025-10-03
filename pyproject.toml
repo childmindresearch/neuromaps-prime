@@ -16,8 +16,10 @@ classifiers = [
 dependencies = [
     "matplotlib>=3.10.6",
     "networkx>=3.4.2",
+    "neuromaps>=0.0.5",
     "niwrap>=0.6.3",
     "pandas>=2.3.2",
+    "setuptools>=80.9.0",
 ]
 
 [dependency-groups]
