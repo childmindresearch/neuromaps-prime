@@ -3,7 +3,9 @@
 from pathlib import Path
 
 import nibabel as nib
-from niwrap import ants  #add to utils
+from niwrap import ants
+
+# future- add something to our own utils sub-module for setting up niwrap
 
 
 def _extract_res(nii_file: Path) -> tuple[float, float, float]:
