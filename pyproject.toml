@@ -48,7 +48,6 @@ source = "vcs"
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-filterwarnings = ["ignore::UserWarning:pkg_resources"]
 
 [tool.mypy]
 ignore_missing_imports = true
