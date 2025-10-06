@@ -1,8 +1,10 @@
 """Functions for volumetric transformations niwrap."""
 
 from pathlib import Path
+from typing import cast
 
 import nibabel as nib
+from nibabel.nifti1 import Nifti1Header
 from niwrap import ants
 
 # future- add something to our own utils sub-module for setting up niwrap
@@ -11,7 +13,8 @@ from niwrap import ants
 def _extract_res(nii_file: Path) -> tuple[float, float, float]:
     """Extract voxel spacing from a NIfTI file using nibabel."""
     img = nib.load(nii_file)
-    return img.header.get_zooms()[:3]  
+    header = cast(Nifti1Header, img.header)
+    return header.get_zooms()[:3]
 
 def _vol_to_vol(source: Path, target: Path) -> Path:
     """Transform a volumetric image from source space to target space."""
