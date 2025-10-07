@@ -12,6 +12,9 @@ from niwrap import ants
 
 def _extract_res(nii_file: Path) -> tuple[float, float, float]:
     """Extract voxel spacing from a NIfTI file using nibabel."""
+    # for type checking, has no effect at run-time
+    # later: handle nifti2
+
     img = nib.load(nii_file)
     header = cast(Nifti1Header, img.header)
     return header.get_zooms()[:3]
