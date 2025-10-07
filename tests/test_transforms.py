@@ -9,11 +9,23 @@ from neuromaps_nhp.transforms import _extract_res, _vol_to_vol
 
 
 class TestVolumetricTransform:
-    """Class-based tests for volumetric transformation using _vol_to_vol."""
+    """Unit tests for volumetric transformations using the `_vol_to_vol` function.
 
-    # future- set up fetchers
+    These tests ensure that transformed volumetric images:
+      - Are successfully created on disk.
+      - Maintain correct voxel resolution matching the target image.
+    """
+
     def setup_class(self) -> None:
-        """Set up file paths for source and target volumes."""
+        """Set up file paths for source and target NIfTI volumes.
+
+        This method initializes the file paths used in all subsequent tests.
+
+        Attributes:
+            source_file: Path to the source volumetric file to be transformed.
+            target_same: Path to the target volumetric file with the same resolution.
+            target_diff: Path to the target volumetric file with a different resolution.
+        """
         self.source_file = Path(
             "/Users/tamsin.rogers/Desktop/github/neuromaps/share_with_T1w/Inputs/D99/src-D99_res-0p25mm.T1w.nii"
         )
@@ -29,11 +41,17 @@ class TestVolumetricTransform:
         """Test that `_vol_to_vol` produces a file matching the target resolution.
 
         Args:
-            target_attr: 'target_same' or 'target_diff'
+            target_attr: Attribute name of the target file to test against.
+                Can be either `'target_same'` or `'target_diff'`.
+
+        Raises:
+            AssertionError: If the output file does not exist, is not a NIfTI image,
+                or if its resolution does not match the target file.
         """
         target_file = getattr(self, target_attr)
         result_path = _vol_to_vol(self.source_file, target_file)
 
+        # Verify that the output file was successfully created.
         assert result_path.exists(), "Transformed file was not created"
 
         img = nib.load(result_path)
