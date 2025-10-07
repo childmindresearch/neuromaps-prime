@@ -33,12 +33,12 @@ class TestVolumetricTransform:
         """
         target_file = getattr(self, target_attr)
         result_path = _vol_to_vol(self.source_file, target_file)
-        
+
         assert result_path.exists(), "Transformed file was not created"
-        
+
         img = nib.load(result_path)
         assert isinstance(img, nib.Nifti1Image), "Output is not a Nifti1Image"
-        
+
         src_res = _extract_res(result_path)
         trg_res = _extract_res(target_file)
         assert src_res == trg_res, f"Resolution mismatch: {src_res} != {trg_res}"
