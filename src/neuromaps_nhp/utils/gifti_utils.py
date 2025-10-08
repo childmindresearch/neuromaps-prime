@@ -7,12 +7,12 @@ import nibabel as nib
 
 def get_density(input_gifti: Path) -> str:
     """Get density of a gifti surface file based on number of vertices.
-    
+
     Parameters
     ----------
     input_gifti : Path
         Path to the input GIFTI surface file.
-    
+
     Returns:
     -------
     str
@@ -26,7 +26,7 @@ def get_density(input_gifti: Path) -> str:
 
 def get_num_vertices(input_gifti: Path) -> int:
     """Get number of vertices in a gifti surface file.
-    
+
     Parameters
     ----------
     input_gifti : Path
