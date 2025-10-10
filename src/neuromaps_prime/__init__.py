@@ -5,7 +5,6 @@ in non-human primates.
 """
 
 from .config import Config
-from .utils import gifti_utils as gifti_utils
-from .utils import niwrap_wrappers as niwrap_wrappers
+from .utils import gifti_utils, niwrap_wrappers
 
 config = Config()
