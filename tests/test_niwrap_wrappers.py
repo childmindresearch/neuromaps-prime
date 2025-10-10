@@ -26,10 +26,13 @@ from neuromaps_nhp import config
     ],
 )
 def test_surface_sphere_project_unproject(
-    sphere_in: Path,
-    sphere_project_to: Path,
-    sphere_unproject_from: Path,
-    sphere_out: Path,
+sphere_in: Path,
+sphere_project_to: Path,
+sphere_unproject_from; Path,
+sphere_out_name: str,
+tmp_path: Path
+):
+    sphere_out = tmp_path / sphere_out_name
 ) -> None:
     """Test surface_sphere_project_unproject wrapper function.
 
