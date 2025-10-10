@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from niwrap import workbench as wb
+from niwrap import workbench
 
 
 def surface_sphere_project_unproject(
