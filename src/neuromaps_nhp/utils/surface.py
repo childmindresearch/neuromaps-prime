@@ -18,10 +18,7 @@ def get_density(input_gifti: Path) -> str:
     str
         Density string (e.g., '32k', '10k').
     """
-    surface = nib.load(str(input_gifti))
-    n_vertices = surface.darrays[0].data.shape[0]
-    density = str(round(n_vertices / 1000)) + "k"
-    return density
+    return str(round(get_num_vertices(input_gifti) / 1000)) + "k"
 
 
 def get_num_vertices(input_gifti: Path) -> int:

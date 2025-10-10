@@ -9,7 +9,7 @@ def surface_sphere_project_unproject(
     sphere_in: Path,
     sphere_project_to: Path,
     sphere_unproject_from: Path,
-    sphere_out: Path,
+    sphere_out: str,
 ) -> Path:
     """Project and unproject a surface from one sphere to another.
 
@@ -21,13 +21,13 @@ def surface_sphere_project_unproject(
         Path to spherical surface to project to.
     sphere_unproject_from : Path
         Path to spherical surface to unproject from.
-    sphere_out : Path
+    sphere_out : str
         Path to output spherical surface.
 
     Returns:
     -------
-    Path
-        Path to the created output file.
+    result : Object
+        Object containing the path to the output spherical surface as result.sphere_out.
 
     Raises:
     ------
@@ -43,16 +43,13 @@ def surface_sphere_project_unproject(
             f"Sphere to unproject from not found: {sphere_unproject_from}"
         )
 
-    sphere_out.parent.mkdir(parents=True, exist_ok=True)
-
-   workbench.surface_sphere_project_unproject(
+    result = workbench.surface_sphere_project_unproject(
         sphere_in=sphere_in,
         sphere_project_to=sphere_project_to,
         sphere_unproject_from=sphere_unproject_from,
         sphere_out=sphere_out,
     )
+    if not result.sphere_out.exists():
+        raise FileNotFoundError(f"Sphere out not found: {sphere_out}")
 
-    if not sphere_out.exists():
-        raise RuntimeError(f"Failed to create output file: {sphere_out}")
-
-    return Path(sphere_out)
+    return result.sphere_out

@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from neuromaps_nhp.utils.surface import get_density, get_num_vertices
+
 
 @pytest.mark.parametrize(
     "gifti_file,expected_density",
@@ -32,8 +34,6 @@ def test_get_density(gifti_file: Path, expected_density: str) -> None:
     """Test get_density function with various mesh densities."""
     if not gifti_file.exists():
         pytest.skip(f"Test file not found: {gifti_file}")
-
-    from neuromaps_nhp.utils.gifti_utils import get_density
 
     result = get_density(gifti_file)
     assert result == expected_density
@@ -67,8 +67,6 @@ def test_get_num_vertices(gifti_file: Path, expected_range: tuple[int, int]) -> 
     """Test get_num_vertices function returns correct vertex count."""
     if not gifti_file.exists():
         pytest.skip(f"Test file not found: {gifti_file}")
-
-    from neuromaps_nhp.utils.gifti_utils import get_num_vertices
 
     result = get_num_vertices(gifti_file)
     assert isinstance(result, int)
