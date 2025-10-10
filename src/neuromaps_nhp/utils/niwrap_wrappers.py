@@ -45,11 +45,11 @@ def surface_sphere_project_unproject(
 
     sphere_out.parent.mkdir(parents=True, exist_ok=True)
 
-    wb.surface_sphere_project_unproject(
-        str(sphere_in),
-        str(sphere_project_to),
-        str(sphere_unproject_from),
-        str(sphere_out),
+   workbench.surface_sphere_project_unproject(
+        sphere_in=sphere_in,
+        sphere_project_to=sphere_project_to,
+        sphere_unproject_from=sphere_unproject_from,
+        sphere_out=sphere_out,
     )
 
     if not sphere_out.exists():
