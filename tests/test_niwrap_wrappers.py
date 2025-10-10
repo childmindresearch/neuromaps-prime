@@ -44,7 +44,7 @@ def test_surface_sphere_project_unproject(
     ------------------------
     """
     from neuromaps_nhp.utils.gifti_utils import get_num_vertices
-    from neuromaps_nhp.utils.niwrap_wrappers import surface_sphere_project_unproject
+    from neuromaps_nhp.utils import gifti_utils, niwrap_wrappers
 
     result = surface_sphere_project_unproject(
         sphere_in, sphere_project_to, sphere_unproject_from, sphere_out
