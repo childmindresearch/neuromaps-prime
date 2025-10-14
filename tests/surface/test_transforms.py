@@ -1,8 +1,9 @@
-"""Tests for niwrap wrapper functions."""
+"""Tests for surface transformations using Neuromaps NHP."""
 
 from pathlib import Path
 
-from neuromaps_nhp.utils import niwrap_wrappers, surface
+from neuromaps_nhp.surface.transforms import surface_sphere_project_unproject
+from neuromaps_nhp.surface.utils import get_vertex_count
 
 
 def test_surface_sphere_project_unproject(tmp_path: Path) -> None:
@@ -35,13 +36,13 @@ def test_surface_sphere_project_unproject(tmp_path: Path) -> None:
 
     sphere_out = f"{tmp_path}/out_sphere.surf.gii"
 
-    result = niwrap_wrappers.surface_sphere_project_unproject(
+    result = surface_sphere_project_unproject(
         sphere_in=sphere_in,
         sphere_project_to=sphere_project_to,
         sphere_unproject_from=sphere_unproject_from,
         sphere_out=sphere_out,
     )
 
-    vertices_sphere_in = surface.get_num_vertices(sphere_in)
-    vertices_sphere_out = surface.get_num_vertices(result)
+    vertices_sphere_in = get_vertex_count(sphere_in)
+    vertices_sphere_out = get_vertex_count(result.sphere_out)
     assert vertices_sphere_in == vertices_sphere_out

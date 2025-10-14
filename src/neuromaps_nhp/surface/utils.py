@@ -5,12 +5,12 @@ from pathlib import Path
 import nibabel as nib
 
 
-def get_density(input_gifti: Path) -> str:
-    """Get density of a gifti surface file based on number of vertices.
+def estimate_surface_density(surface_file: Path) -> str:
+    """Estimate density of a gifti surface file based on number of vertices.
 
     Parameters
     ----------
-    input_gifti : Path
+    surface_file : Path
         Path to the input GIFTI surface file.
 
     Returns:
@@ -18,15 +18,15 @@ def get_density(input_gifti: Path) -> str:
     str
         Density string (e.g., '32k', '10k').
     """
-    return str(round(get_num_vertices(input_gifti) / 1000)) + "k"
+    return str(round(get_vertex_count(surface_file) / 1000)) + "k"
 
 
-def get_num_vertices(input_gifti: Path) -> int:
+def get_vertex_count(surface_file: Path) -> int:
     """Get number of vertices in a gifti surface file.
 
     Parameters
     ----------
-    input_gifti : Path
+    surface_file : Path
         Path to the input GIFTI surface file.
 
     Returns:
@@ -34,5 +34,5 @@ def get_num_vertices(input_gifti: Path) -> int:
     int
         Number of vertices in the surface file.
     """
-    surface = nib.load(str(input_gifti))
+    surface = nib.load(surface_file)
     return surface.darrays[0].data.shape[0]

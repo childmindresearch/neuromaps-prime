@@ -357,7 +357,6 @@ source = { editable = "." }
 dependencies = [
     { name = "nibabel" },
     { name = "niwrap" },
-    { name = "typing-extensions" },
 ]
 
 [package.dev-dependencies]
@@ -377,7 +376,6 @@ docs = [
 requires-dist = [
     { name = "nibabel", specifier = ">=5.2.1" },
     { name = "niwrap", specifier = ">=0.6.3" },
-    { name = "typing-extensions", specifier = ">=4.15.0" },
 ]
 
 [package.metadata.requires-dev]
