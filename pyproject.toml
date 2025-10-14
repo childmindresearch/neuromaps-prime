@@ -15,8 +15,7 @@ classifiers = [
 ]
 dependencies = [
   "niwrap>=0.6.3",
-  "nibabel>=5.2.1",
-  "typing-extensions>=4.15.0"
+  "nibabel>=5.2.1"
 ]
 
 [dependency-groups]

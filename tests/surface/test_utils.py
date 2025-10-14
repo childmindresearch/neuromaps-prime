@@ -1,14 +1,14 @@
-"""Tests for gifti_utils module."""
+"""Tests for surface utils module."""
 
 from pathlib import Path
 
 import pytest
 
-from neuromaps_nhp.utils.surface import get_density, get_num_vertices
+from neuromaps_nhp.surface.utils import estimate_surface_density, get_vertex_count
 
 
 @pytest.mark.parametrize(
-    "gifti_file,expected_density",
+    "surface_file,expected_density",
     [
         (
             Path(
@@ -30,44 +30,44 @@ from neuromaps_nhp.utils.surface import get_density, get_num_vertices
         ),
     ],
 )
-def test_get_density(gifti_file: Path, expected_density: str) -> None:
-    """Test get_density function with various mesh densities."""
-    if not gifti_file.exists():
-        pytest.skip(f"Test file not found: {gifti_file}")
+def test_estimate_surface_density(surface_file: Path, expected_density: str) -> None:
+    """Test estimate_surface_density function with various mesh densities."""
+    if not surface_file.exists():
+        pytest.skip(f"Test file not found: {surface_file}")
 
-    result = get_density(gifti_file)
-    assert result == expected_density
-    assert result.endswith("k")
+    result = estimate_surface_density(surface_file)
+    assert isinstance(result, str)
+    assert result == expected_density, f"Expected {expected_density}, but got {result}"
 
 
 @pytest.mark.parametrize(
-    "gifti_file,expected_range",
+    "surface_file,expected_count",
     [
         (
             Path(
                 "/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii"
             ),
-            (30000, 35000),
+            32492,
         ),
         (
             Path(
                 "/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii"
             ),
-            (9000, 11000),
+            10242,
         ),
         (
             Path(
                 "/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii"
             ),
-            (30000, 35000),
+            32492,
         ),
     ],
 )
-def test_get_num_vertices(gifti_file: Path, expected_range: tuple[int, int]) -> None:
-    """Test get_num_vertices function returns correct vertex count."""
-    if not gifti_file.exists():
-        pytest.skip(f"Test file not found: {gifti_file}")
+def test_get_vertex_count(surface_file: Path, expected_count: int) -> None:
+    """Test get_vertex_count function returns correct vertex count."""
+    if not surface_file.exists():
+        pytest.skip(f"Test file not found: {surface_file}")
 
-    result = get_num_vertices(gifti_file)
+    result = get_vertex_count(surface_file)
     assert isinstance(result, int)
-    assert expected_range[0] <= result <= expected_range[1]
+    assert result == expected_count, f"Expected {expected_count}, but got {result}"

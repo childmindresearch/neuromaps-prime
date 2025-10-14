@@ -1,4 +1,4 @@
-"""Wrappers for niwrap functions."""
+"""Functions for surface transformations using niwrap."""
 
 from pathlib import Path
 
@@ -10,7 +10,7 @@ def surface_sphere_project_unproject(
     sphere_project_to: Path,
     sphere_unproject_from: Path,
     sphere_out: str,
-) -> Path:
+) -> workbench.SurfaceSphereProjectUnprojectOutputs:
     """Project and unproject a surface from one sphere to another.
 
     Parameters
@@ -26,7 +26,7 @@ def surface_sphere_project_unproject(
 
     Returns:
     -------
-    result : Object
+    result : workbench.SurfaceSphereProjectUnprojectOutputs
         Object containing the path to the output spherical surface as result.sphere_out.
 
     Raises:
@@ -52,4 +52,4 @@ def surface_sphere_project_unproject(
     if not result.sphere_out.exists():
         raise FileNotFoundError(f"Sphere out not found: {sphere_out}")
 
-    return result.sphere_out
+    return result
