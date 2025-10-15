@@ -2,8 +2,9 @@ from neuromaps_nhp.config import config
 from neuromaps_nhp.resources.fetch_resource import fetch_resource, fetch_atlas, fetch_transform, search_resources
 from neuromaps_nhp.graph.transform_graph import BrainAtlasTransformGraph
 from neuromaps_nhp.utils.niwrap_wrappers import surface_sphere_project_unproject, metric_resample, surface_resample
-
+from neuromaps_nhp.utils.gifti_utils import get_density
 from pathlib import Path
+from niwrap import workbench
 
 
 graph = BrainAtlasTransformGraph()
@@ -21,37 +22,48 @@ path = graph.find_shortest_path(source, target)
 print(f"Shortest path from {source} to {target}: {path}")
 # s1200 - yerkes19 - mebrains
 
-sphere_in_available = search_resources(resource_type="transform", source=path[0].lower(), target=path[1].lower(), density=density, hemisphere=hemisphere, resource_name="sphere")
-sphere_in = sphere_in_available[0].filepath #  s1200- yerkes19, 32
+sphere_in = fetch_resource(resource_type="transform", source=path[0].lower(), target=path[1].lower(), density=density, hemisphere=hemisphere, resource_name="sphere")
+#  s1200- yerkes19, 32
 
-sphere_project_to_available = search_resources(resource_type="atlas", source=path[2].lower(), hemisphere=hemisphere, density="101k", resource_name="sphere")
-sphere_project_to = sphere_project_to_available[0].filepath # yerkes19, 32
+sphere_project_to = fetch_resource(resource_type="atlas", source=path[1].lower(), hemisphere=hemisphere, density=density, resource_name="sphere")
+ # yerkes19, 32
 
-sphere_unproject_from_available = search_resources(resource_type="transform", source=path[2].lower(), target=path[1].lower(), density="101k", hemisphere=hemisphere, resource_name="sphere")
-sphere_unproject_from = sphere_unproject_from_available[0].filepath # yerkes19 - mebrains, 32
-target_density = sphere_unproject_from_available[0].density
+sphere_unproject_from = fetch_resource(resource_type="transform", source=path[1].lower(), target=path[2].lower(), density=density, hemisphere=hemisphere, resource_name="sphere")
+ # yerkes19 - mebrains, 32
 
-print(f"Available {len(sphere_in_available)} sphere_in resources: {sphere_in_available}")
-print(f"Available {len(sphere_project_to_available)} sphere_project_to resources: {sphere_project_to_available}")
-print(f"Available {len(sphere_unproject_from_available)} sphere_unproject_from resources: {sphere_unproject_from_available}")
 
-output_surface = config.data_dir / f"out_{source}_to_{target}_den-{target_density}_hemi-{hemisphere}.surf.gii"
+output_surface = config.data_dir / f"out_{source}_to_{target}_den-{density}_hemi-{hemisphere}.surf.gii"
 
+print(f" \nsphere_in: {sphere_in}, \nsphere_project_to: {sphere_project_to}, \nsphere_unproject_from: {sphere_unproject_from}, \noutput_surface: {output_surface}")
 
 resulting_transform = surface_sphere_project_unproject(
-    sphere_in=str(sphere_in.resolve()),
-    sphere_project_to=str(sphere_project_to.resolve()),
-    sphere_unproject_from=str(sphere_unproject_from.resolve()),
-    sphere_out=str(output_surface.resolve())
+    sphere_in=sphere_in,
+    sphere_project_to=sphere_project_to,
+    sphere_unproject_from=sphere_unproject_from,
+    sphere_out=str(output_surface)
 )
 
 #Apply the resulting transform to the input data
-result = metric_resample(
-    metric_in=str(input.resolve()),
-    current_sphere=str(sphere_in.resolve()),
-    new_sphere=str(output_surface.resolve()),
-    metric_out=str(config.data_dir / f"out_{source}_to_{target}_den-{target_density}_hemi-{hemisphere}_data.func.gii"),
-    method="BARYCENTRIC"
+target_surface = search_resources(resource_type="atlas", source=path[2].lower(), hemisphere=hemisphere, resource_name="midthickness")
+target_density = get_density(target_surface[0].filepath)
+
+new_sphere = fetch_resource(resource_type="atlas", source=path[2].lower(), hemisphere=hemisphere, density=target_density, resource_name="sphere")
+
+current_area = fetch_resource(resource_type="atlas", source=path[0].lower(), hemisphere=hemisphere, density=density, resource_name="midthickness")
+
+new_area = fetch_resource(resource_type="atlas", source=path[2].lower(), hemisphere=hemisphere, density=target_density, resource_name="midthickness")
+
+area_surfs = workbench.metric_resample_area_surfs_params(current_area=current_area, new_area=new_area)
+
+print(f"\nnew_sphere: {new_sphere}, \ncurrent_area: {current_area}, \nnew_area: {new_area}, \narea_surfs: {area_surfs}")
+
+result = workbench.metric_resample(
+    metric_in=input,
+    current_sphere=resulting_transform,
+    new_sphere=new_sphere,
+    metric_out=str(config.data_dir / f"out_{source}_to_{target}_den-{density}_hemi-{hemisphere}_data.func.gii"),
+    method="ADAP_BARY_AREA",
+    area_surfs= area_surfs
 )
 print(f"Data resampled and saved at: {result}")
 
