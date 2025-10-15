@@ -4,7 +4,7 @@ description = "A toolbox for projecting, resampling, and comparing NHP brain map
 license = {file = "LICENSE"}
 readme = "README.md"
 dynamic = ["version"]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 keywords = ["network neuroscience", "connectomics"]
 authors = [{name = "CMI DAIR", email = "dair@childmind.org"}]
 classifiers = [
@@ -20,6 +20,7 @@ dependencies = [
     "niwrap>=0.6.3",
     "pandas>=2.3.2",
     "setuptools>=80.9.0",
+    "yaspy",
 ]
 
 [dependency-groups]
@@ -73,14 +74,12 @@ convention = "google"
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = []
 
+[tool.uv.sources]
+yaspy = { git = "https://github.com/childmindresearch/yaspy.git" }
+
 [too.ruff.format]
 quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-dir]
-"" = "src"
