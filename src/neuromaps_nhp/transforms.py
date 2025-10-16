@@ -27,27 +27,48 @@ def _extract_res(nii_file: Path) -> tuple[float, float, float]:
     return header.get_zooms()[:3]
 
 
-def _vol_to_vol(source: Path, target: Path) -> Path:
+from pathlib import Path
+from niwrap import ants
+
+def _vol_to_vol(source: Path, target: Path, interpolator: str) -> Path:
     """Transform a volumetric image from source space to target space.
 
     Args:
         source: Path to the source NIfTI volume to be transformed.
         target: Path to the target NIfTI volume defining the reference space.
+        interpolator: Interpolation method to use. Must be one of:
+            {'linear', 'nearestNeighbor', 'multiLabel', 'gaussian', 'bSpline',
+             'cosineWindowedSinc', 'welchWindowedSinc', 'hammingWindowedSinc',
+             'lanczosWindowedSinc', 'genericLabel'}
 
     Returns:
         Path to the transformed NIfTI file written to disk.
-    """
-    # Later: include in the networkx graph, fetch and assert that the path exists.
 
+    Raises:
+        ValueError: If an unsupported interpolator is provided.
     """
-    Can add a warning in the future if we want to allow for volumes to be resampled 
-    back to the original resolution in the target space, but generally, we would expect 
-    the output to be in the resolution of the target image. Given we are transforming 
-    to the target space, the warning is left out for now.
-    """
+    accepted_interpolators = {
+        "linear", "nearestNeighbor", "multiLabel", "gaussian", "bSpline",
+        "cosineWindowedSinc", "welchWindowedSinc",
+        "hammingWindowedSinc", "lanczosWindowedSinc", "genericLabel"
+    }
+
+    if interpolator not in accepted_interpolators:
+        raise ValueError(
+            f"Unsupported interpolator '{interpolator}'. "
+            f"Must be one of {sorted(accepted_interpolators)}."
+        )
 
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
-    interp = ants.ants_apply_transforms_linear_params()
+
+    # Set interpolation parameters based on method
+    if interpolator == "linear":
+        interp = ants.ants_apply_transforms_linear_params()
+    elif interpolator == "nearestNeighbor":
+        interp = ants.ants_apply_transforms_nearest_neighbor_params()
+    else:
+        interp = interpolator
+
     output = ants.ants_apply_transforms_warped_output_params(str(out_file))
 
     ants.ants_apply_transforms(
@@ -58,3 +79,4 @@ def _vol_to_vol(source: Path, target: Path) -> Path:
     )
 
     return out_file
+
