@@ -26,10 +26,6 @@ def _extract_res(nii_file: Path) -> tuple[float, float, float]:
     header = cast(Nifti1Header, img.header)
     return header.get_zooms()[:3]
 
-
-from pathlib import Path
-from niwrap import ants
-
 def _vol_to_vol(source: Path, target: Path, interpolator: str) -> Path:
     """Transform a volumetric image from source space to target space.
 
