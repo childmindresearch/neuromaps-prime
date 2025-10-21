@@ -43,36 +43,40 @@ def _vol_to_vol(source: Path, target: Path, interp: str) -> Path:
     Raises:
         ValueError: If an unsupported interpolator is provided.
     """
-    accepted_interpolators = {
-        "linear", "nearestNeighbor", "multiLabel", "gaussian", "bSpline",
-        "cosineWindowedSinc", "welchWindowedSinc",
-        "hammingWindowedSinc", "lanczosWindowedSinc", "genericLabel"
+    # Map interpolation names to their ANTs parameter functions
+    INTERP_PARAMS = {
+        "linear": ants.ants_apply_transforms_linear_params,
+        "nearestNeighbor": ants.ants_apply_transforms_nearest_neighbor_params,
+        "multiLabel": ants.ants_apply_transforms_multi_label_params,
+        "gaussian": ants.ants_apply_transforms_gaussian_params,
+        "bSpline": ants.ants_apply_transforms_bspline_params,
+        "cosineWindowedSinc": ants.ants_apply_transforms_cosine_windowed_sinc_params,
+        "welchWindowedSinc": ants.ants_apply_transforms_welch_windowed_sinc_params,
+        "hammingWindowedSinc": ants.ants_apply_transforms_hamming_windowed_sinc_params,
+        "lanczosWindowedSinc": ants.ants_apply_transforms_lanczos_windowed_sinc_params,
+        "genericLabel": ants.ants_apply_transforms_generic_label_params,
     }
 
-    if interp not in accepted_interpolators:
+    if interp not in INTERP_PARAMS:
         raise ValueError(
-            f"Unsupported interpolator '{interp}'. "
-            f"Must be one of {sorted(accepted_interpolators)}."
+            f"Unsupported '{interp}'. Must be one of {list(INTERP_PARAMS)}."
         )
 
+    # Prepare the output path
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
 
-    # Set interpolation parameters based on method
-    if interp == "linear":
-        interp = ants.ants_apply_transforms_linear_params()
-    elif interp == "nearestNeighbor":
-        interp = ants.ants_apply_transforms_nearest_neighbor_params()
-    else:
-        interp = interp
+    # Get the ANTs interpolation parameter object
+    interp_params = INTERP_PARAMS[interp]()
 
+    # Set up output parameter object
     output = ants.ants_apply_transforms_warped_output_params(str(out_file))
 
+    # Run the transformation
     ants.ants_apply_transforms(
-        input_image=source,
-        reference_image=target,
+        input_image=str(source),
+        reference_image=str(target),
         output=output,
-        interpolation=interp,
+        interpolation=interp_params,
     )
 
     return out_file
-
