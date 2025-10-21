@@ -1,6 +1,7 @@
 """Tests for volumetric transformations using Neuromaps NHP."""
 
 from pathlib import Path
+
 import nibabel as nib
 import pytest
 
@@ -29,30 +30,31 @@ class TestVolumetricTransform:
         )
 
     @pytest.mark.parametrize("target_attr", ["target_same", "target_diff"])
-    @pytest.mark.parametrize("interpolator", ["linear", "nearestNeighbor"])
-    def test_vol_to_vol_resolution(self, target_attr: str, interpolator: str) -> None:
-        """Test that `_vol_to_vol` produces a file matching the target resolution
-        for both linear and nearest-neighbor interpolation.
+    @pytest.mark.parametrize("interp", ["linear", "nearestNeighbor"])
+    def test_vol_to_vol_resolution(self, target_attr: str, interp: str) -> None:
+        """Test that `_vol_to_vol` produces a file matching the target resolution.
+        
+        For both linear and nearest-neighbor interpolation.
 
         Args:
             target_attr: Name of the target attribute ('target_same' or 'target_diff').
-            interpolator: Interpolation method ('linear' or 'nearestNeighbor').
+            interp: Interpolation method ('linear' or 'nearestNeighbor').
 
         Raises:
             AssertionError: If the output file does not exist, is not a NIfTI image,
                 or if its resolution does not match the target file.
         """
         target_file = getattr(self, target_attr)
-        result_path = _vol_to_vol(self.source_file, target_file, interpolator=interpolator)
+        result = _vol_to_vol(self.source_file, target_file, interp=interp)
 
         # Verify that the output file was successfully created.
-        assert result_path.exists(), f"Transformed file was not created for {interpolator}"
+        assert result.exists(), f"Transformed file was not created for {interp}"
 
-        img = nib.load(result_path)
-        assert isinstance(img, nib.Nifti1Image), f"Output is not a Nifti1Image for {interpolator}"
+        img = nib.load(result)
+        assert isinstance(img, nib.Nifti1Image), f"Output not Nifti1Image for {interp}"
 
-        src_res = _extract_res(result_path)
+        src_res = _extract_res(result)
         trg_res = _extract_res(target_file)
         assert src_res == trg_res, (
-            f"Resolution mismatch ({interpolator}): {src_res} != {trg_res}"
+            f"Resolution mismatch ({interp}): {src_res} != {trg_res}"
         )

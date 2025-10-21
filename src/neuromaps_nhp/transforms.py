@@ -26,13 +26,13 @@ def _extract_res(nii_file: Path) -> tuple[float, float, float]:
     header = cast(Nifti1Header, img.header)
     return header.get_zooms()[:3]
 
-def _vol_to_vol(source: Path, target: Path, interpolator: str) -> Path:
+def _vol_to_vol(source: Path, target: Path, interp: str) -> Path:
     """Transform a volumetric image from source space to target space.
 
     Args:
         source: Path to the source NIfTI volume to be transformed.
         target: Path to the target NIfTI volume defining the reference space.
-        interpolator: Interpolation method to use. Must be one of:
+        interp: Interpolation method to use. Must be one of:
             {'linear', 'nearestNeighbor', 'multiLabel', 'gaussian', 'bSpline',
              'cosineWindowedSinc', 'welchWindowedSinc', 'hammingWindowedSinc',
              'lanczosWindowedSinc', 'genericLabel'}
@@ -49,21 +49,21 @@ def _vol_to_vol(source: Path, target: Path, interpolator: str) -> Path:
         "hammingWindowedSinc", "lanczosWindowedSinc", "genericLabel"
     }
 
-    if interpolator not in accepted_interpolators:
+    if interp not in accepted_interpolators:
         raise ValueError(
-            f"Unsupported interpolator '{interpolator}'. "
+            f"Unsupported interpolator '{interp}'. "
             f"Must be one of {sorted(accepted_interpolators)}."
         )
 
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
 
     # Set interpolation parameters based on method
-    if interpolator == "linear":
+    if interp == "linear":
         interp = ants.ants_apply_transforms_linear_params()
-    elif interpolator == "nearestNeighbor":
+    elif interp == "nearestNeighbor":
         interp = ants.ants_apply_transforms_nearest_neighbor_params()
     else:
-        interp = interpolator
+        interp = interp
 
     output = ants.ants_apply_transforms_warped_output_params(str(out_file))
 
