@@ -4,7 +4,6 @@ from pathlib import Path
 
 import nibabel as nib
 import pytest
-
 from neuromaps_nhp.transforms import _extract_res, _vol_to_vol
 
 
