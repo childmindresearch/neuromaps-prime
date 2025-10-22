@@ -26,24 +26,27 @@ def _extract_res(nii_file: Path) -> tuple[float, float, float]:
     header = cast(Nifti1Header, img.header)
     return header.get_zooms()[:3]
 
-def _vol_to_vol(source: Path, target: Path, interp: str) -> Path:
+def _vol_to_vol(
+    source: Path,
+    target: Path,
+    interp: str | None = None,
+    label: Path | None = None,
+) -> Path:
     """Transform a volumetric image from source space to target space.
 
     Args:
         source: Path to the source NIfTI volume to be transformed.
         target: Path to the target NIfTI volume defining the reference space.
-        interp: Interpolation method to use. Must be one of:
-            {'linear', 'nearestNeighbor', 'multiLabel', 'gaussian', 'bSpline',
-             'cosineWindowedSinc', 'welchWindowedSinc', 'hammingWindowedSinc',
-             'lanczosWindowedSinc', 'genericLabel'}
+        interp: Optional interpolation method. Defaults to 'linear' if None.
+        label: Optional path to a label image (required for multiLabel or genericLabel).
 
     Returns:
         Path to the transformed NIfTI file written to disk.
 
     Raises:
-        ValueError: If an unsupported interpolator is provided.
+        ValueError: If an unsupported interpolator is provided or if label is missing for label-based interpolators.
     """
-    # Map interpolation names to their ANTs parameter functions
+
     INTERP_PARAMS = {
         "linear": ants.ants_apply_transforms_linear_params,
         "nearestNeighbor": ants.ants_apply_transforms_nearest_neighbor_params,
@@ -57,21 +60,27 @@ def _vol_to_vol(source: Path, target: Path, interp: str) -> Path:
         "genericLabel": ants.ants_apply_transforms_generic_label_params,
     }
 
-    if interp not in INTERP_PARAMS:
-        raise ValueError(
-            f"Unsupported '{interp}'. Must be one of {list(INTERP_PARAMS)}."
-        )
+    # Default to linear if interp not provided
+    if interp is None:
+        interp = "linear"
 
-    # Prepare the output path
+    if interp not in INTERP_PARAMS:
+        raise ValueError(f"Unsupported '{interp}'. Must be one of {list(INTERP_PARAMS)}.")
+
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
 
-    # Get the ANTs interpolation parameter object
-    interp_params = INTERP_PARAMS[interp]()
+    # Handle label-based interpolators
+    if interp == "multiLabel":
+        if label is None:
+            raise ValueError("`label` must be provided for multiLabel interpolation.")
+        interp_params = INTERP_PARAMS[interp](label_image=str(label))
+    elif interp == "genericLabel":
+        interp_params = INTERP_PARAMS[interp]()
+    else:
+        interp_params = INTERP_PARAMS[interp]()
 
-    # Set up output parameter object
     output = ants.ants_apply_transforms_warped_output_params(str(out_file))
 
-    # Run the transformation
     ants.ants_apply_transforms(
         input_image=str(source),
         reference_image=str(target),
