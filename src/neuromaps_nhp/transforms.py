@@ -26,25 +26,20 @@ def _extract_res(nii_file: Path) -> tuple[float, float, float]:
     header = cast(Nifti1Header, img.header)
     return header.get_zooms()[:3]
 
-def _vol_to_vol(
-    source: Path,
-    target: Path,
-    interp: str | None = None,
-    label: Path | None = None,
-) -> Path:
+def _vol_to_vol(source: Path, target: Path, interp: str, label: Path | None = None) -> Path:
     """Transform a volumetric image from source space to target space.
 
     Args:
         source: Path to the source NIfTI volume to be transformed.
         target: Path to the target NIfTI volume defining the reference space.
-        interp: Optional interpolation method. Defaults to 'linear' if None.
-        label: Optional path to a label image (used by some label-based interpolators).
+        interp: Interpolation method to use.
+        label: Optional path to a label image (required for genericLabel, optional for multiLabel).
 
     Returns:
         Path to the transformed NIfTI file written to disk.
 
     Raises:
-        ValueError: If an unsupported interpolator is provided.
+        ValueError: If an unsupported interpolator is provided or if label is missing when required.
     """
 
     INTERP_PARAMS = {
@@ -60,24 +55,23 @@ def _vol_to_vol(
         "genericLabel": ants.ants_apply_transforms_generic_label_params,
     }
 
-    # Default to linear if interp not provided
-    if interp is None:
-        interp = "linear"
-
     if interp not in INTERP_PARAMS:
         raise ValueError(f"Unsupported '{interp}'. Must be one of {list(INTERP_PARAMS)}.")
 
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
 
-    # Handle label-based interpolators
+    # Interpolator-specific handling
     if interp == "multiLabel":
-        # Optional label: pass if provided, otherwise use defaults
+        # Optional label: include if provided
         if label is not None:
-            interp_params = INTERP_PARAMS[interp](label_image=str(label))
+            interp_params = INTERP_PARAMS[interp](params_=str(label))
         else:
             interp_params = INTERP_PARAMS[interp]()
     elif interp == "genericLabel":
-        interp_params = INTERP_PARAMS[interp]()
+        # Required label: must provide
+        if label is None:
+            raise ValueError("'genericLabel' interpolation requires a label image via `label`.")
+        interp_params = INTERP_PARAMS[interp](params_=str(label))
     else:
         interp_params = INTERP_PARAMS[interp]()
 
