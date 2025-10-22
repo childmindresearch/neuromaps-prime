@@ -38,13 +38,13 @@ def _vol_to_vol(
         source: Path to the source NIfTI volume to be transformed.
         target: Path to the target NIfTI volume defining the reference space.
         interp: Optional interpolation method. Defaults to 'linear' if None.
-        label: Optional path to a label image (required for multiLabel or genericLabel).
+        label: Optional path to a label image (used by some label-based interpolators).
 
     Returns:
         Path to the transformed NIfTI file written to disk.
 
     Raises:
-        ValueError: If an unsupported interpolator is provided or if label is missing for label-based interpolators.
+        ValueError: If an unsupported interpolator is provided.
     """
 
     INTERP_PARAMS = {
@@ -71,9 +71,11 @@ def _vol_to_vol(
 
     # Handle label-based interpolators
     if interp == "multiLabel":
-        if label is None:
-            raise ValueError("`label` must be provided for multiLabel interpolation.")
-        interp_params = INTERP_PARAMS[interp](label_image=str(label))
+        # Optional label: pass if provided, otherwise use defaults
+        if label is not None:
+            interp_params = INTERP_PARAMS[interp](label_image=str(label))
+        else:
+            interp_params = INTERP_PARAMS[interp]()
     elif interp == "genericLabel":
         interp_params = INTERP_PARAMS[interp]()
     else:
