@@ -15,17 +15,25 @@ classifiers = [
 ]
 dependencies = [
   "niwrap>=0.6.3",
-  "nibabel>=5.2.1"
+  "nibabel>=5.2.1",
+  "pyyaml>=6.0.2",
+  "networkx>=3.4.2",
+  "matplotlib>=3.10.7",
+  "numpy>=2.2.6",
+  "pydantic>=2.12.3",
+  "scipy>=1.15.3"
 ]
 
 [dependency-groups]
 dev = [
   "deptry>=0.23.1",
+  "matplotlib-stubs>=0.3.6",
   "mypy>=1.18.2",
   "pre-commit>=4.3.0",
   "pytest>=8.4.2",
   "pytest-cov>=7.0.0",
-  "ruff>=0.13.1"
+  "ruff>=0.13.1",
+  "types-pyyaml>=6.0.12.20250915"
 ]
 docs = [
   "pdoc>=15.0.4"

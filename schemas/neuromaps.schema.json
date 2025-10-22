@@ -4,7 +4,7 @@
     "type": "object",
     "properties": {
         "nodes": {
-            "type": "object",
+            "type": "array",
             "patternProperties": {
                 "^[A-Za-z0-9_]+$": {
                     "type": "object",
@@ -72,12 +72,12 @@
                                     "^[0-9]+k?$": {
                                         "type": "object",
                                         "properties": {
-                                            "spheres": {
+                                            "sphere": {
                                                 "$ref": "#/$defs/surfaceHemisphere"
                                             }
                                         },
                                         "required": [
-                                            "spheres"
+                                            "sphere"
                                         ],
                                         "additionalProperties": false
                                     }
