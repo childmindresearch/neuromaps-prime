@@ -55,23 +55,31 @@ def _vol_to_vol(source: Path, target: Path, interp: str, label: Path | None = No
         "genericLabel": ants.ants_apply_transforms_generic_label_params,
     }
 
+    CONTINUOUS_INTERPS = [
+    "linear",
+    "gaussian",
+    "bSpline",
+    "cosineWindowedSinc",
+    "welchWindowedSinc",
+    "hammingWindowedSinc",
+    "lanczosWindowedSinc",
+    "nearestNeighbor"
+    ]
+
+    LABEL_INTERPS = ["multiLabel"]
+
     if interp not in INTERP_PARAMS:
         raise ValueError(f"Unsupported '{interp}'. Must be one of {list(INTERP_PARAMS)}.")
 
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
 
-    # Interpolator-specific handling
-    if interp == "multiLabel":
-        # Optional label: include if provided
-        if label is not None:
-            interp_params = INTERP_PARAMS[interp](params_=str(label))
-        else:
-            interp_params = INTERP_PARAMS[interp]()
-    elif interp == "genericLabel":
-        # Required label: must provide
+    # label based interpolators
+    if interp in LABEL_INTERPS:
         if label is None:
-            raise ValueError("'genericLabel' interpolation requires a label image via `label`.")
+            raise ValueError("interpolation requires a label image via `label`.")
         interp_params = INTERP_PARAMS[interp](params_=str(label))
+    
+    # continuous interpolators
     else:
         interp_params = INTERP_PARAMS[interp]()
 

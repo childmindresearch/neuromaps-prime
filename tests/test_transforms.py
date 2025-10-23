@@ -15,9 +15,10 @@ CONTINUOUS_INTERPS = [
     "welchWindowedSinc",
     "hammingWindowedSinc",
     "lanczosWindowedSinc",
+    "nearestNeighbor"
 ]
 
-LABEL_INTERPS = ["nearestNeighbor", "multiLabel", "genericLabel"]
+LABEL_INTERPS = ["multiLabel"]
 
 
 class TestVolumetricTransform:
@@ -53,12 +54,10 @@ class TestVolumetricTransform:
         """Test label-based interpolators using a parcellation source image."""
         target_file = getattr(self, target_attr)
 
-        if interp == "nearestNeighbor":
-            result = _vol_to_vol(self.label_source, target_file, interp=interp)
-        elif interp == "multiLabel":
+        # just genericLabel for now
+        if interp in LABEL_INTERPS:
             result = _vol_to_vol(self.label_source, target_file, interp=interp, label=self.label_source)
-        else:  # genericLabel
-            result = _vol_to_vol(self.label_source, target_file, interp=interp)
+
 
         assert result.exists()
         img = nib.load(result)
