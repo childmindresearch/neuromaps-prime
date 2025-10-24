@@ -26,13 +26,13 @@ def _extract_res(nii_file: Path) -> tuple[float, float, float]:
     header = cast(Nifti1Header, img.header)
     return header.get_zooms()[:3]
 
-def _vol_to_vol(source: Path, target: Path, interp: str, label: Path | None = None) -> Path:
+def _vol_to_vol(source: Path, target: Path, interp: str | None = None, label: Path | None = None) -> Path:
     """Transform a volumetric image from source space to target space.
 
     Args:
         source: Path to the source NIfTI volume to be transformed.
         target: Path to the target NIfTI volume defining the reference space.
-        interp: Interpolation method to use.
+        interp: Interpolation method to use. Defaults to "linear" if None.
         label: Optional path to a label image (optional for multiLabel).
 
     Returns:
@@ -54,13 +54,16 @@ def _vol_to_vol(source: Path, target: Path, interp: str, label: Path | None = No
         "lanczosWindowedSinc": ants.ants_apply_transforms_lanczos_windowed_sinc_params,
     }
 
-    '''
+    # Default to "linear" if no interpolator specified
+    if not interp:
+        interp = "linear"
+
     if interp not in INTERP_PARAMS:
         raise ValueError(f"Unsupported '{interp}'. Must be one of {list(INTERP_PARAMS)}.")
-    '''
 
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
 
+    # Handle BSpline specifically
     if interp == "BSpline":
         interp_params = INTERP_PARAMS["BSpline"](order=3)
     else:
