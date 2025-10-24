@@ -47,7 +47,7 @@ def _vol_to_vol(source: Path, target: Path, interp: str, label: Path | None = No
         "nearestNeighbor": ants.ants_apply_transforms_nearest_neighbor_params,
         "multiLabel": ants.ants_apply_transforms_multi_label_params,
         "gaussian": ants.ants_apply_transforms_gaussian_params,
-        "bSpline": ants.ants_apply_transforms_bspline_params,
+        "BSpline": ants.ants_apply_transforms_bspline_params,
         "cosineWindowedSinc": ants.ants_apply_transforms_cosine_windowed_sinc_params,
         "welchWindowedSinc": ants.ants_apply_transforms_welch_windowed_sinc_params,
         "hammingWindowedSinc": ants.ants_apply_transforms_hamming_windowed_sinc_params,
@@ -55,31 +55,15 @@ def _vol_to_vol(source: Path, target: Path, interp: str, label: Path | None = No
         "genericLabel": ants.ants_apply_transforms_generic_label_params,
     }
 
-    CONTINUOUS_INTERPS = [
-    "linear",
-    "gaussian",
-    "bSpline",
-    "cosineWindowedSinc",
-    "welchWindowedSinc",
-    "hammingWindowedSinc",
-    "lanczosWindowedSinc",
-    "nearestNeighbor"
-    ]
-
-    LABEL_INTERPS = ["multiLabel"]
-
+    '''
     if interp not in INTERP_PARAMS:
         raise ValueError(f"Unsupported '{interp}'. Must be one of {list(INTERP_PARAMS)}.")
+    '''
 
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
 
-    # label based interpolators
-    if interp in LABEL_INTERPS:
-        if label is None:
-            raise ValueError("interpolation requires a label image via `label`.")
-        interp_params = INTERP_PARAMS[interp](params_=str(label))
-    
-    # continuous interpolators
+    if interp == "BSpline":
+        interp_params = INTERP_PARAMS["BSpline"](order=3)
     else:
         interp_params = INTERP_PARAMS[interp]()
 
