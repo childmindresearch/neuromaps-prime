@@ -16,7 +16,6 @@ CONTINUOUS_INTERPS = [
     "hammingWindowedSinc",
     "lanczosWindowedSinc",
     "nearestNeighbor",
-    "genericLabel",
 ]
 
 LABEL_INTERPS = ["multiLabel"]
@@ -58,7 +57,7 @@ class TestVolumetricTransform:
         if interp == "multiLabel":
             pytest.skip("Skipping multiLabel: not supported yet.")
 
-        # Test genericLabel (requires label image)
+        # Test multiLabel with params (requires label image)
         result = _vol_to_vol(self.label_source, target_file, interp=interp, label=self.label_source)
 
         assert result.exists()

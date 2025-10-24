@@ -33,7 +33,7 @@ def _vol_to_vol(source: Path, target: Path, interp: str, label: Path | None = No
         source: Path to the source NIfTI volume to be transformed.
         target: Path to the target NIfTI volume defining the reference space.
         interp: Interpolation method to use.
-        label: Optional path to a label image (required for genericLabel, optional for multiLabel).
+        label: Optional path to a label image (optional for multiLabel).
 
     Returns:
         Path to the transformed NIfTI file written to disk.
@@ -52,7 +52,6 @@ def _vol_to_vol(source: Path, target: Path, interp: str, label: Path | None = No
         "welchWindowedSinc": ants.ants_apply_transforms_welch_windowed_sinc_params,
         "hammingWindowedSinc": ants.ants_apply_transforms_hamming_windowed_sinc_params,
         "lanczosWindowedSinc": ants.ants_apply_transforms_lanczos_windowed_sinc_params,
-        "genericLabel": ants.ants_apply_transforms_generic_label_params,
     }
 
     '''
