@@ -1,5 +1,5 @@
 [project]
-name = "neuromaps-nhp"
+name = "neuromaps-prime"
 description = "A toolbox for projecting, resampling, and comparing NHP brain maps"
 license = {file = "LICENSE"}
 readme = "README.md"
@@ -39,7 +39,7 @@ build-backend = "hatchling.build"
 source = ["src"]
 
 [tool.hatch.build.hooks.vcs]
-version-file = "src/neuromaps_nhp/_version.py"
+version-file = "src/neuromaps_prime/_version.py"
 
 [tool.hatch.version]
 source = "vcs"
@@ -69,7 +69,7 @@ convention = "google"
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = []
 
-[too.ruff.format]
+[tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
