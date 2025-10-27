@@ -4,7 +4,7 @@
     "type": "object",
     "properties": {
         "nodes": {
-            "type": "object",
+            "type": "array",
             "patternProperties": {
                 "^[A-Za-z0-9_]+$": {
                     "type": "object",
