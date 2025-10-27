@@ -43,19 +43,20 @@ class TestVolumetricTransform:
         "/Users/tamsin.rogers/Desktop/github/neuromaps/"
         "share_with_T1w/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm_T1w.nii"
     )
-    
+
     @pytest.mark.parametrize("target_attr", ["target_same", "target_diff"])
     @pytest.mark.parametrize("interp", CONTINUOUS_INTERPS)
     def test_vol_to_vol_continuous(self, target_attr: str, interp: str) -> None:
         """Test continuous interpolators for volumetric transforms."""
         target_file = getattr(self, target_attr)
 
-        if interp == "gaussian":
-            pytest.skip(f"Skipping {interp}: not supported yet.")
+        # Interpolators that should raise NotImplementedError
+        if interp in {"gaussian", "BSpline"}:
+            with pytest.raises(NotImplementedError):
+                _vol_to_vol(self.t1w_source, target_file, interp=interp)
+            return
 
-        if interp == "BSpline":
-            pytest.skip(f"Skipping {interp}: not supported yet.")
-
+        # All other continuous interpolators should run normally
         result = _vol_to_vol(self.t1w_source, target_file, interp=interp)
 
         assert result.exists(), f"Output file not created for {interp}"
@@ -69,16 +70,24 @@ class TestVolumetricTransform:
         """Test label-based interpolators using a parcellation source image."""
         target_file = getattr(self, target_attr)
 
+        # Label interpolators that should raise NotImplementedError
         if interp == "multiLabel":
-            pytest.skip("Skipping multiLabel: not supported yet.")
+            with pytest.raises(NotImplementedError):
+                _vol_to_vol(
+                    self.label_source,
+                    target_file,
+                    interp=interp,
+                    label=self.label_source,
+                )
+            return
 
-        # Test multiLabel with params (requires label image)
+        # (Future) other label interpolators could be tested here
         result = _vol_to_vol(
-                self.label_source,
-                target_file,
-                interp=interp,
-                label=self.label_source,
-            )
+            self.label_source,
+            target_file,
+            interp=interp,
+            label=self.label_source,
+        )
         assert result.exists()
         img = nib.load(result)
         assert isinstance(img, nib.Nifti1Image)

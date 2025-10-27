@@ -29,8 +29,9 @@ def _extract_res(nii_file: Path) -> tuple[float, float, float]:
 def _vol_to_vol(
     source: Path,
     target: Path,
-    interp: str,
-    label: Path | None = None,) -> Path:
+    interp: str = "linear",
+    label: Path | None = None
+    ) -> Path:
     """Transform a volumetric image from source space to target space.
 
     Args:
@@ -62,31 +63,17 @@ def _vol_to_vol(
 
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
 
-    # Default to linear if not specified
-    if not interp:
-        interp = "linear"
-
-    # Handle multiLabel, which requires a label image
-    if interp == "multiLabel":
-        if label is None:
-            raise ValueError("Label image required.")
-        interp_params = INTERP_PARAMS[interp](str(label))
-
-    # Handle BSpline (not yet fully supported in niwrap)
-    elif interp == "BSpline":
-        interp_params = INTERP_PARAMS[interp](3)  # Using order 3 as an example
-
-    # All other interpolators
-    else:
-        interp_params = INTERP_PARAMS[interp]()
-
-    output = ants.ants_apply_transforms_warped_output_params(str(out_file))
+    # Handle interpolators not yet fully supported 
+    if interp == "BSpline" or interp == "gaussian" or interp == "multiLabel":
+        raise NotImplementedError(
+            f"The '{interp}' interpolation method is not yet implemented."
+        )
 
     ants.ants_apply_transforms(
         input_image=str(source),
         reference_image=str(target),
-        output=output,
-        interpolation=interp_params,
+        output=ants.ants_apply_transforms_warped_output_params(str(out_file)),
+        interpolation=INTERP_PARAMS[interp](),
     )
 
     return out_file
