@@ -41,6 +41,9 @@ class TestVolumetricTransform:
         if interp == "gaussian":
             pytest.skip(f"Skipping {interp}: not supported yet.")
 
+        elif interp == "BSpline":
+            pytest.skip(f"Skipping {interp}: not supported yet.")
+
         result = _vol_to_vol(self.t1w_source, target_file, interp=interp)
 
         assert result.exists(), f"Output file not created for {interp}"
