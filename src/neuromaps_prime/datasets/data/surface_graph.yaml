@@ -1,0 +1,27 @@
+nodes:
+- MEBRAINS:
+    description: MEBRAINS 1.0 macaque atlas
+    surfaces:
+      101k:
+        pial:
+          left: /url/to/src-MEBRAINS_den-101k_hemi-L_pial.surf.gii
+          right: /url/to/src-MEBRAINS_den-101k_hemi-R_pial.surf.gii
+        midthickness:
+          left: /url/to/src-MEBRAINS_den-101k_hemi-L_midthickness.surf.gii
+          right: /url/to/src-MEBRAINS_den-101k_hemi-R_midthickness.surf.gii
+        white:
+          left: /url/to/src-MEBRAINS_den-101k_hemi-L_white.surf.gii
+          right: /url/to/src-MEBRAINS_den-101k_hemi-R_white.surf.gii
+        spheres:
+          left: /url/to/src-MEBRAINS_den-101k_hemi-L_sphere.surf.gii
+          right: /url/to/src-MEBRAINS_den-101k_hemi-R_sphere.surf.gii
+
+edges:
+  surface_to_surface:
+  - from: MEBRAINS
+    to: Yerkes19
+    surfaces:
+      101k:
+        spheres:
+          left: url/to/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_sphere.surf.gii
+          right: url/to/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_sphere.surf.gii

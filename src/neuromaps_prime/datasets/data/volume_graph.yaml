@@ -1,0 +1,14 @@
+nodes:
+- MEBRAINS:
+    description: MEBRAINS 1.0 macaque atlas
+    volumes:
+      2mm:
+        T1w: /url/to/src-MEBRAINS_vox-2mm_T1w.nii.gz
+
+edges:
+  volume_to_volume:
+  - from: MEBRAINS
+    to: Yerkes19
+    volumes:
+      2mm:
+        composite: /path/to/src-MEBRAINS_to-Yerkes19_vox-2mm_desc-composite_xfm.nii.gz

@@ -1,0 +1,171 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "Neuromaps Graph Configuration",
+    "type": "object",
+    "properties": {
+        "nodes": {
+            "type": "array",
+            "patternProperties": {
+                "^[A-Za-z0-9_]+$": {
+                    "type": "object",
+                    "description": "Template name for a node (e.g. Yerkes19, MEBRAINS)",
+                    "properties": {
+                        "description": {
+                            "type": "string",
+                            "description": "Description for node"
+                        },
+                        "surfaces": {
+                            "type": "object",
+                            "description": "Dictionary of surface densities.",
+                            "patternProperties": {
+                                "^[0-9]+k?$": {
+                                    "type": "object",
+                                    "description": "Surface density key (number, optionally ending with 'k').",
+                                    "properties": {
+                                        "pial": {
+                                            "$ref": "#/$defs/surfaceHemisphere"
+                                        },
+                                        "midthickness": {
+                                            "$ref": "#/$defs/surfaceHemisphere"
+                                        },
+                                        "white": {
+                                            "$ref": "#/$defs/surfaceHemisphere"
+                                        },
+                                        "sphere": {
+                                            "$ref": "#/$defs/surfaceHemisphere"
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "volumes": {
+                            "$ref": "#/$defs/volumeDict"
+                        }
+                    },
+                    "required": [
+                        "description"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "edges": {
+            "type": "object",
+            "properties": {
+                "surface_to_surface": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "from": {
+                                "type": "string"
+                            },
+                            "to": {
+                                "type": "string"
+                            },
+                            "surfaces": {
+                                "type": "object",
+                                "patternProperties": {
+                                    "^[0-9]+k?$": {
+                                        "type": "object",
+                                        "properties": {
+                                            "sphere": {
+                                                "$ref": "#/$defs/surfaceHemisphere"
+                                            }
+                                        },
+                                        "required": [
+                                            "sphere"
+                                        ],
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "required": [
+                            "from",
+                            "to",
+                            "surfaces"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "volume_to_volume": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "from": {
+                                "type": "string",
+                                "description": "Source node."
+                            },
+                            "to": {
+                                "type": "string",
+                                "description": "Target node."
+                            },
+                            "volumes": {
+                                "$ref": "#/$defs/volumeDict"
+                            }
+                        },
+                        "required": [
+                            "from",
+                            "to",
+                            "volumes"
+                        ],
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "nodes",
+        "edges"
+    ],
+    "additionalProperties": false,
+    "$defs": {
+        "volumeDict": {
+            "type": "object",
+            "description": "Dictionary of volume files keyed by resolution and type.",
+            "patternProperties": {
+                "^[0-9]+mm$": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^[A-Za-z0-9_]+$": {
+                            "type": "string",
+                            "format": "uri-reference",
+                            "description": "URI pointing to a volume file (e.g., T1w, T2w)"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "surfaceHemisphere": {
+            "type": "object",
+            "description": "Represents the surface files for both hemispheres of a brain template.",
+            "properties": {
+                "left": {
+                    "type": "string",
+                    "format": "uri-reference",
+                    "description": "Surface file for left hemisphere."
+                },
+                "right": {
+                    "type": "string",
+                    "format": "uri-reference",
+                    "description": "Surface file for right hemisphere."
+                }
+            },
+            "required": [
+                "left",
+                "right"
+            ],
+            "additionalProperties": false
+        }
+    }
+}

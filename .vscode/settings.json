@@ -1,0 +1,8 @@
+{
+    "yaml.schemas": {
+        "./schemas/neuromaps.schema.json": [
+            "src/neuromaps_prime/datasets/**/*.yaml"
+        ]
+    },
+    "yaml.validate": true
+}
