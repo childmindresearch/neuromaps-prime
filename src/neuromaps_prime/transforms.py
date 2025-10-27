@@ -40,9 +40,9 @@ def _vol_to_vol(source: Path, target: Path) -> Path:
     # Later: include in the networkx graph, fetch and assert that the path exists.
 
     """
-    Can add a warning in the future if we want to allow for volumes to be resampled 
-    back to the original resolution in the target space, but generally, we would expect 
-    the output to be in the resolution of the target image. Given we are transforming 
+    Can add a warning in the future if we want to allow for volumes to be resampled
+    back to the original resolution in the target space, but generally, we would expect
+    the output to be in the resolution of the target image. Given we are transforming
     to the target space, the warning is left out for now.
     """
 
