@@ -26,7 +26,11 @@ def _extract_res(nii_file: Path) -> tuple[float, float, float]:
     header = cast(Nifti1Header, img.header)
     return header.get_zooms()[:3]
 
-def _vol_to_vol(source: Path, target: Path, interp: str, label: Path | None = None) -> Path:
+def _vol_to_vol(
+    source: Path,
+    target: Path,
+    interp: str,
+    label: Path | None = None,) -> Path:
     """Transform a volumetric image from source space to target space.
 
     Args:
@@ -39,9 +43,8 @@ def _vol_to_vol(source: Path, target: Path, interp: str, label: Path | None = No
         Path to the transformed NIfTI file written to disk.
 
     Raises:
-        ValueError: If an unsupported interpolator is provided or if label is missing when required.
+        ValueError: unsupported interpolator.
     """
-
     INTERP_PARAMS = {
         "linear": ants.ants_apply_transforms_linear_params,
         "nearestNeighbor": ants.ants_apply_transforms_nearest_neighbor_params,
@@ -55,21 +58,27 @@ def _vol_to_vol(source: Path, target: Path, interp: str, label: Path | None = No
     }
 
     if interp not in INTERP_PARAMS:
-        raise ValueError(f"Unsupported '{interp}'. Must be one of {list(INTERP_PARAMS)}.")
+        raise ValueError("Unsupported interpolator.")
 
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
 
-    # default to linear
+    # Default to linear if not specified
     if not interp:
         interp = "linear"
-    '''
 
-    # niwrap implementation currently not supported for BSpline
+    # Handle multiLabel, which requires a label image
+    if interp == "multiLabel":
+        if label is None:
+            raise ValueError("Label image required.")
+        interp_params = INTERP_PARAMS[interp](str(label))
+
+    # Handle BSpline (not yet fully supported in niwrap)
     elif interp == "BSpline":
-        interp_params = INTERP_PARAMS["BSpline"](3)
-    '''
-    
-    interp_params = INTERP_PARAMS[interp]()
+        interp_params = INTERP_PARAMS[interp](3)  # Using order 3 as an example
+
+    # All other interpolators
+    else:
+        interp_params = INTERP_PARAMS[interp]()
 
     output = ants.ants_apply_transforms_warped_output_params(str(out_file))
 
