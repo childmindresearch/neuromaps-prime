@@ -13,10 +13,7 @@ classifiers = [
   "License :: OSI Approved",
   "Programming Language :: Python :: 3 :: Only"
 ]
-dependencies = [
-  "niwrap>=0.6.3",
-  "nibabel>=5.2.1"
-]
+dependencies = ["niwrap>=0.6.3", "nibabel>=5.2.1"]
 
 [dependency-groups]
 dev = [
@@ -27,9 +24,7 @@ dev = [
   "pytest-cov>=7.0.0",
   "ruff>=0.13.1"
 ]
-docs = [
-  "pdoc>=15.0.4"
-]
+docs = ["pdoc>=15.0.4"]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
@@ -58,8 +53,12 @@ src = ["src"]
 target-version = "py312"
 
 [tool.ruff.lint]
+ignore = [
+  "ANN002",  # ignore type hinting *args
+  "ANN003",  # ignore type hinting **kwargs
+  "D417"  # ignore docstrings for *args and **kwargs
+]
 select = ["ANN", "D", "E", "F", "I"]
-ignore = []
 fixable = ["ALL"]
 unfixable = []
 
