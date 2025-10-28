@@ -5,6 +5,7 @@ from typing import Any, Callable
 
 import matplotlib.pyplot as plt
 import networkx as nx
+from matplotlib import cm
 from matplotlib.lines import Line2D
 
 
@@ -139,7 +140,7 @@ def _hierarchical_multipartite_layout(
         if n_nodes == 1:
             x_positions = [0]
         else:
-            x_positions = np.linspace(-n_nodes / 2, n_nodes / 2, n_nodes)
+            x_positions = np.linspace(-n_nodes / 2, n_nodes / 2, n_nodes).tolist()
 
         for j, node in enumerate(nodes):
             pos[node] = (x_positions[j], y_offset)
@@ -178,7 +179,7 @@ def _species_circular_layout(graph: nx.MultiDiGraph) -> dict:
             sector_width = 2 * np.pi / n_species * 0.8  # 80% of available space
             angles = np.linspace(
                 base_angle - sector_width / 2, base_angle + sector_width / 2, n_nodes
-            )
+            ).tolist()
 
         # Different radii for variety
         radii = [1.0 + 0.3 * (j % 2) for j in range(n_nodes)]
@@ -216,8 +217,8 @@ def _plot_combined_graph(
     surface_edges, volume_edges = _separate_edges(graph)
 
     # Get color maps for edges
-    surface_colors = _get_edge_colors(surface_edges, plt.cm.Set1)
-    volume_colors = _get_edge_colors(volume_edges, plt.cm.Set2)
+    surface_colors = _get_edge_colors(surface_edges, cm.Set1)
+    volume_colors = _get_edge_colors(volume_edges, cm.Set2)
 
     # Plot surface transforms
     _draw_subplot(
@@ -281,13 +282,13 @@ def _plot_single_graph(
 
     if graph_type == "surface":
         edges = _extract_surface_edges(graph)
-        edge_colors = _get_edge_colors(edges, plt.cm.Set1)
+        edge_colors = _get_edge_colors(edges, cm.Set1)
         title = "Surface Transforms"
         linestyle, arrowstyle = "-", "->"
         legend_prefix = "Surface"
     else:  # volume
         edges = _extract_volume_edges(graph)
-        edge_colors = _get_edge_colors(edges, plt.cm.Set2)
+        edge_colors = _get_edge_colors(edges, cm.Set2)
         title = "Volume Transforms"
         linestyle, arrowstyle = "--", "-|>"
         legend_prefix = "Volume"
@@ -344,7 +345,7 @@ def _get_node_colors(graph: nx.MultiDiGraph) -> tuple[list, dict]:
 
     # Create color mapping for each species
     species_colors_map = {
-        species: plt.cm.tab20(i / max(1, len(species_list) - 1))
+        species: cm.tab20(i / max(1, len(species_list) - 1))
         for i, species in enumerate(species_list)
     }
 

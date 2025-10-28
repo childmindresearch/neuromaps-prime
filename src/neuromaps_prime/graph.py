@@ -20,7 +20,6 @@ see examples/example_graph_init.py for usage.
 
 """
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Generator
@@ -29,97 +28,11 @@ import networkx as nx
 import yaml
 
 from neuromaps_prime.models import (
-    SurfaceAtlasModel,
-    SurfaceTransformModel,
-    VolumeAtlasModel,
-    VolumeTransformModel,
+    SurfaceAtlas,
+    SurfaceTransform,
+    VolumeAtlas,
+    VolumeTransform,
 )
-
-
-@dataclass
-class Resource(ABC):
-    """Abstract base class for brain template resources."""
-
-    name: str
-    description: str
-    file_path: Path
-
-    @abstractmethod
-    def fetch(self) -> Path:
-        """Fetch the resource."""
-        pass
-
-
-@dataclass
-class SurfaceAtlas(Resource):
-    """Surface atlas for brain template spaces."""
-
-    space: str
-    density: str
-    hemisphere: str
-    resource_type: str
-
-    def fetch(self) -> Path:
-        """Fetch the surface resource."""
-        return self.file_path
-
-    def __repr__(self) -> str:
-        """Custom string representation for debugging."""
-        return f"{self.name}"
-
-
-@dataclass
-class SurfaceTransform(Resource):
-    """Transform resource between brain template spaces."""
-
-    source_space: str
-    target_space: str
-    density: str
-    hemisphere: str
-    resource_type: str
-
-    def fetch(self) -> Path:
-        """Fetch the transform resource."""
-        return self.file_path
-
-    def __repr__(self) -> str:
-        """Custom string representation for debugging."""
-        return self.name
-
-
-@dataclass
-class VolumeAtlas(Resource):
-    """Volume atlas for brain template spaces."""
-
-    space: str
-    resolution: str
-    resource_type: str
-
-    def fetch(self) -> Path:
-        """Fetch the volume resource."""
-        return self.file_path
-
-    def __repr__(self) -> str:
-        """Custom string representation for debugging."""
-        return self.name
-
-
-@dataclass
-class VolumeTransform(Resource):
-    """Transform resource between brain template spaces."""
-
-    source_space: str
-    target_space: str
-    resolution: str
-    resource_type: str
-
-    def fetch(self) -> Path:
-        """Fetch the transform resource."""
-        return self.file_path
-
-    def __repr__(self) -> str:
-        """Custom string representation for debugging."""
-        return self.name
 
 
 @dataclass
@@ -247,7 +160,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             for surface_type, hemispheres in surface_types.items():
                 for hemisphere, path in hemispheres.items():
                     # Validate and yield
-                    model = SurfaceAtlasModel(
+                    yield SurfaceAtlas(
                         name=f"{node_name}_{density}_{hemisphere}_{surface_type}",
                         description=description,
                         file_path=Path(path),
@@ -256,22 +169,13 @@ class NeuromapsGraph(nx.MultiDiGraph):
                         hemisphere=hemisphere,
                         resource_type=surface_type,
                     )
-                    yield SurfaceAtlas(
-                        name=model.name,
-                        description=model.description,
-                        file_path=model.file_path,
-                        space=model.space,
-                        density=model.density,
-                        hemisphere=model.hemisphere,
-                        resource_type=model.resource_type,
-                    )
 
     def _parse_volumes(
         self, node_name: str, description: str, volumes_dict: dict
     ) -> Generator[VolumeAtlas, None, None]:
         for resolution, volume_types in volumes_dict.items():
             for volume_type, path in volume_types.items():
-                model = VolumeAtlasModel(
+                yield VolumeAtlas(
                     name=f"{node_name}_{resolution}_{volume_type}",
                     description=description,
                     file_path=Path(path),
@@ -279,21 +183,13 @@ class NeuromapsGraph(nx.MultiDiGraph):
                     resolution=resolution,
                     resource_type=volume_type,
                 )
-                yield VolumeAtlas(
-                    name=model.name,
-                    description=model.description,
-                    file_path=model.file_path,
-                    space=model.space,
-                    resolution=model.resolution,
-                    resource_type=model.resource_type,
-                )
 
     def _parse_volume_to_volume_transforms(
         self, source_name: str, target_name: str, volumes_dict: dict
     ) -> Generator[VolumeTransform, None, None]:
         for resolution, volume_types in volumes_dict.items():
             for volume_type, path in volume_types.items():
-                model = VolumeTransformModel(
+                yield VolumeTransform(
                     name=f"{source_name}_to_{target_name}_{resolution}_{volume_type}",
                     description=f"Transform from {source_name} to {target_name}",
                     file_path=Path(path),
@@ -303,25 +199,13 @@ class NeuromapsGraph(nx.MultiDiGraph):
                     resource_type=volume_type,
                 )
 
-                yield (
-                    VolumeTransform(
-                        name=model.name,
-                        description=model.description,
-                        file_path=model.file_path,
-                        source_space=model.source_space,
-                        target_space=model.target_space,
-                        resolution=model.resolution,
-                        resource_type=model.resource_type,
-                    )
-                )
-
     def _parse_surface_to_surface_transforms(
         self, source_name: str, target_name: str, surfaces_dict: dict
     ) -> Generator[SurfaceTransform, None, None]:
         for density, surface_types in surfaces_dict.items():
             for surface_type, hemispheres in surface_types.items():
                 for hemisphere, path in hemispheres.items():
-                    model = SurfaceTransformModel(
+                    yield SurfaceTransform(
                         name=f"{source_name}_to_{target_name}_{density}_{hemisphere}_{surface_type}",
                         description=f"Transform from {source_name} to {target_name}",
                         file_path=Path(path),
@@ -330,17 +214,6 @@ class NeuromapsGraph(nx.MultiDiGraph):
                         density=density,
                         hemisphere=hemisphere,
                         resource_type=surface_type,
-                    )
-
-                    yield SurfaceTransform(
-                        name=model.name,
-                        description=model.description,
-                        file_path=model.file_path,
-                        source_space=model.source_space,
-                        target_space=model.target_space,
-                        density=model.density,
-                        hemisphere=model.hemisphere,
-                        resource_type=model.resource_type,
                     )
 
     ## Public Methods ##
@@ -367,10 +240,10 @@ class NeuromapsGraph(nx.MultiDiGraph):
         # Validate input parameters using the model
         try:
             # Create a temporary model to validate the input parameters
-            validated_params = SurfaceAtlasModel(
+            validated_params = SurfaceAtlas(
                 name="",
                 description="",
-                file_path="",
+                file_path=Path(""),
                 space=space,
                 density=density,
                 hemisphere=hemisphere,
@@ -414,8 +287,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 (e.g., 'T1w', 'T2w', 'brain_mask').
 
         Returns:
-            list[VolumeAtlas]:
-                The matching VolumeAtlas resource, or an empty list if not found.
+            VolumeAtlas | None:
+                The matching VolumeAtlas resource, or None if not found.
         """
         if space not in self.nodes:
             raise ValueError(
@@ -453,8 +326,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 (e.g., 'midthickness', 'white', 'pial').
 
         Returns:
-            list[SurfaceTransform]:
-                The matching SurfaceTransform resource, or an empty list if not found.
+            SurfaceTransform | None:
+                The matching SurfaceTransform resource, or None if not found.
         """
         if not self.has_edge(source, target, key="surface_to_surface"):
             raise ValueError(
@@ -492,8 +365,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 (e.g., 'T1w', 'T2w', 'brain_mask').
 
         Returns:
-            list[VolumeTransform]:
-                The matching VolumeTransform resource, or an empty list if not found.
+            VolumeTransform:
+                The matching VolumeTransform resource, or None if not found.
         """
         if not self.has_edge(source, target, key="volume_to_volume"):
             raise ValueError(

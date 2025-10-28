@@ -31,7 +31,7 @@
                                         "white": {
                                             "$ref": "#/$defs/surfaceHemisphere"
                                         },
-                                        "spheres": {
+                                        "sphere": {
                                             "$ref": "#/$defs/surfaceHemisphere"
                                         }
                                     },
@@ -79,7 +79,7 @@
                                         "required": [
                                             "sphere"
                                         ],
-                                        "additionalProperties": false
+                                        "additionalProperties": true
                                     }
                                 },
                                 "additionalProperties": false
