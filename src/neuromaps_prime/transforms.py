@@ -70,8 +70,8 @@ def _vol_to_vol(
         )
 
     ants.ants_apply_transforms(
-        input_image=str(source),
-        reference_image=str(target),
+        input_image=source,
+        reference_image=target,
         output=ants.ants_apply_transforms_warped_output_params(str(out_file)),
         interpolation=INTERP_PARAMS[interp](),
     )
