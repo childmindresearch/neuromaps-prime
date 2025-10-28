@@ -4,6 +4,21 @@ nodes:
     volumes:
       2mm:
         T1w: /url/to/src-MEBRAINS_vox-2mm_T1w.nii.gz
+- D99:
+    description: D99 macaque atlas
+    volumes:
+      2mm:
+        T1w: 
+- NMT2Sym:
+    description: NMT2Sym macaque atlas
+    volumes:
+      2mm:
+        T1w: 
+- Yerkes19:
+    description: Yerkes19 macaque atlas
+    volumes:
+      2mm:
+        T1w: 
 
 edges:
   volume_to_volume:
@@ -12,3 +27,25 @@ edges:
     volumes:
       2mm:
         composite: /path/to/src-MEBRAINS_to-Yerkes19_vox-2mm_desc-composite_xfm.nii.gz
+  - from: MEBRAINS
+    to: D99
+  - from: MEBRAINS
+    to: NMT2Sym
+  - from: D99
+    to: MEBRAINS
+  - from: D99
+    to: NMT2Sym
+  - from: D99
+    to: Yerkes19
+  - from: NMT2Sym
+    to: MEBRAINS
+  - from: NMT2Sym
+    to: D99
+  - from: NMT2Sym
+    to: Yerkes19
+  - from: Yerkes19
+    to: MEBRAINS
+  - from: Yerkes19
+    to: D99
+  - from: Yerkes19
+    to: NMT2Sym
