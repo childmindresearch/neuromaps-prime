@@ -35,4 +35,6 @@ def get_vertex_count(surface_file: Path) -> int:
         Number of vertices in the surface file.
     """
     surface = nib.load(surface_file)
+    if not isinstance(surface, nib.GiftiImage):
+        raise TypeError("Input file is not a GIFTI surface file.")
     return surface.darrays[0].data.shape[0]

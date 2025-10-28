@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-
 from neuromaps_nhp.surface.utils import estimate_surface_density, get_vertex_count
 
 
