@@ -26,12 +26,10 @@ def _extract_res(nii_file: Path) -> tuple[float, float, float]:
     header = cast(Nifti1Header, img.header)
     return header.get_zooms()[:3]
 
+
 def _vol_to_vol(
-    source: Path,
-    target: Path,
-    interp: str = "linear",
-    label: Path | None = None
-    ) -> Path:
+    source: Path, target: Path, interp: str = "linear", label: Path | None = None
+) -> Path:
     """Transform a volumetric image from source space to target space.
 
     Args:
@@ -63,7 +61,7 @@ def _vol_to_vol(
 
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
 
-    # Handle interpolators not yet fully supported 
+    # Handle interpolators not yet fully supported
     if interp in ["BSpline", "gaussian", "multiLabel"]:
         raise NotImplementedError(
             f"The '{interp}' interpolation method is not yet implemented."
