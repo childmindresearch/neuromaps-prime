@@ -50,4 +50,3 @@ repos:
     entry: YAML files must have .yaml extension.
     language: fail
     files: \.yml$
-    
