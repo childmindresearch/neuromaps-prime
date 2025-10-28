@@ -1,16 +1,14 @@
-"""Tests for volumetric transformations using Neuromaps NHP."""
+"""Tests for volumetric transformations using Neuromaps."""
 
 from pathlib import Path
-
 import nibabel as nib
 import pytest
 
 from neuromaps_prime.transforms import _extract_res, _vol_to_vol
 
-CONTINUOUS_INTERPS = [
+# Interpolators that are currently implemented and should work
+DEVELOPED_INTERPS = [
     "linear",
-    "gaussian",
-    "BSpline",
     "cosineWindowedSinc",
     "welchWindowedSinc",
     "hammingWindowedSinc",
@@ -18,7 +16,12 @@ CONTINUOUS_INTERPS = [
     "nearestNeighbor",
 ]
 
-LABEL_INTERPS = ["multiLabel"]
+# Interpolators planned for future development (expected to raise errors)
+FUTURE_INTERPS = [
+    "gaussian",
+    "BSpline",
+    "multiLabel",
+]
 
 
 class TestVolumetricTransform:
@@ -45,50 +48,30 @@ class TestVolumetricTransform:
     )
 
     @pytest.mark.parametrize("target_attr", ["target_same", "target_diff"])
-    @pytest.mark.parametrize("interp", CONTINUOUS_INTERPS)
-    def test_vol_to_vol_continuous(self, target_attr: str, interp: str) -> None:
-        """Test continuous interpolators for volumetric transforms."""
+    @pytest.mark.parametrize("interp", DEVELOPED_INTERPS)
+    def test_vol_to_vol_developed_interps(self, target_attr: str, interp: str) -> None:
+        """Interpolators that are implemented and should complete successfully."""
         target_file = getattr(self, target_attr)
+        src_file = self.t1w_source
 
-        # Interpolators that should raise NotImplementedError
-        if interp in {"gaussian", "BSpline"}:
-            with pytest.raises(NotImplementedError):
-                _vol_to_vol(self.t1w_source, target_file, interp=interp)
-            return
-
-        # All other continuous interpolators should run normally
-        result = _vol_to_vol(self.t1w_source, target_file, interp=interp)
-
+        result = _vol_to_vol(src_file, target_file, interp=interp)
         assert result.exists(), f"Output file not created for {interp}"
+
         img = nib.load(result)
         assert isinstance(img, nib.Nifti1Image)
         assert _extract_res(result) == _extract_res(target_file)
 
     @pytest.mark.parametrize("target_attr", ["target_same", "target_diff"])
-    @pytest.mark.parametrize("interp", LABEL_INTERPS)
-    def test_vol_to_vol_label(self, target_attr: str, interp: str) -> None:
-        """Test label-based interpolators using a parcellation source image."""
+    @pytest.mark.parametrize("interp", FUTURE_INTERPS)
+    def test_vol_to_vol_future_interps(self, target_attr: str, interp: str) -> None:
+        """Interpolators planned for future support that should raise errors."""
         target_file = getattr(self, target_attr)
+        src_file = self.t1w_source
 
-        # Label interpolators that should raise NotImplementedError
-        if interp == "multiLabel":
-            with pytest.raises(NotImplementedError):
-                _vol_to_vol(
-                    self.label_source,
-                    target_file,
-                    interp=interp,
-                    label=self.label_source,
-                )
-            return
-
-        # (Future) other label interpolators could be tested here
-        result = _vol_to_vol(
-            self.label_source,
-            target_file,
-            interp=interp,
-            label=self.label_source,
-        )
-        assert result.exists()
-        img = nib.load(result)
-        assert isinstance(img, nib.Nifti1Image)
-        assert _extract_res(result) == _extract_res(target_file)
+        with pytest.raises(NotImplementedError):
+            _vol_to_vol(
+                src_file,
+                target_file,
+                interp=interp,
+                label=(self.label_source if interp == "multiLabel" else None),
+            )

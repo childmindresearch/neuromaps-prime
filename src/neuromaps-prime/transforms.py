@@ -64,7 +64,7 @@ def _vol_to_vol(
     out_file = target.parent / f"{source.stem}_to_{target.stem}.nii.gz"
 
     # Handle interpolators not yet fully supported 
-    if interp == "BSpline" or interp == "gaussian" or interp == "multiLabel":
+    if interp in ["BSpline", "gaussian", "multiLabel"]:
         raise NotImplementedError(
             f"The '{interp}' interpolation method is not yet implemented."
         )
