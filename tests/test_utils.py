@@ -88,7 +88,7 @@ class TestSetRunner:
     def test_empty_image_map(self):
         """Test exception raised when no container mappins for singularity runner."""
         with pytest.raises(ValueError, match="No container mappings"):
-            utils.set_runner("singularity")
+            utils.set_runner("singularity", image_map={})
 
     # invalid map
     @pytest.mark.parametrize("image_map", (set(), [], ()))

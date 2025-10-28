@@ -5,21 +5,21 @@ from niwrap import use_docker, use_local, use_singularity
 
 def set_runner(
     runner: str,
-    image_map: dict[str, str] = {},
+    image_map: dict[str, str] | None = None,
     **kwargs,
 ) -> None:
     """Set StyxRunner to use for NiWrap.
 
     Args:
         runner: Styx runner type to use (one of 'local', 'docker', 'singularity).
-        image_map: Dictionary of container paths to override.
+        image_map: Optional dictionary of container paths to override.
 
     Raises:
         TypeError: if image_map is not dictionary.
         ValueError: if singularity runner is used and image_map not provided.
         NotImplementedError: if provided runner not a valid StyxRunner.
     """
-    if not isinstance(image_map, dict):
+    if image_map is not None and not isinstance(image_map, dict):
         raise TypeError(f"Expected image_map dictionary, got {type(image_map)}")
     match runner_exec := runner.lower():
         case "local":
