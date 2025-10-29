@@ -36,12 +36,12 @@ edges:
     to: NMT2Sym
     volumes:
       250um:
-        composite: url/to/src-MEBRAINS_to_NMT2Sym_res-0p25mm_mode-image_desc-Composite.nii.gz
+        composite: /url/to/src-MEBRAINS_to_NMT2Sym_res-0p25mm_mode-image_desc-Composite.nii.gz
   - from: D99
     to: MEBRAINS
     volumes:
       400um:
-        composite: url/to/src-D99_to_MEBRAINS_res-0p40mm_mode-image_desc-Composite.nii.gz
+        composite: /url/to/src-D99_to_MEBRAINS_res-0p40mm_mode-image_desc-Composite.nii.gz
   - from: D99
     to: NMT2Sym
     volumes:
