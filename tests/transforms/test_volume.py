@@ -5,7 +5,7 @@ from pathlib import Path
 import nibabel as nib
 import pytest
 
-from neuromaps_prime.transforms import _extract_res, _vol_to_vol
+from neuromaps_prime.transforms.volume import _extract_res, _vol_to_vol
 
 # Interpolators that are currently implemented and should work
 DEVELOPED_INTERPS = [
