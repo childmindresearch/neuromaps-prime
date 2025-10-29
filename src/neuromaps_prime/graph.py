@@ -263,9 +263,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         for surface in node.surfaces:
             if (
                 surface.density == validated_params.density
-                and surface.hemisphere.lower().startswith(
-                    validated_params.hemisphere.lower()[0]
-                )
+                and surface.hemisphere.lower() == validated_params.hemisphere.lower()
                 and surface.resource_type == validated_params.resource_type
             ):
                 return surface
@@ -342,7 +340,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         for transform in edge.surface_transforms:
             if (
                 transform.density == density
-                and transform.hemisphere.lower().startswith(hemisphere.lower()[0])
+                and transform.hemisphere.lower() == hemisphere.lower()
                 and transform.resource_type == resource_type
             ):
                 return transform
