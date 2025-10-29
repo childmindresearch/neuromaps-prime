@@ -2,22 +2,22 @@ nodes:
 - MEBRAINS:
     description: MEBRAINS 1.0 macaque atlas
     volumes:
-      40mm:
+      400um:
         T1w: /url/to/src-MEBRAINS_res-0p40mm_T1w.nii.gz
 - D99:
     description: D99 macaque atlas
     volumes:
-      25mm:
+      250um:
         T1w: /url/to/src-D99_res-0p25mm_T1w.nii.gz
 - NMT2Sym:
     description: NMT2Sym macaque atlas
     volumes:
-      25mm:
+      250um:
         T1w: /url/to/src-NMT2Sym_res-0p25mm_T1w.nii.gz
 - Yerkes19:
     description: Yerkes19 macaque atlas
     volumes:
-      50mm:
+      500um:
         T1w: /url/to/src-Yerkes19_res-0p50mm_T1w.nii.gz
 
 edges:
@@ -25,60 +25,60 @@ edges:
   - from: MEBRAINS
     to: Yerkes19
     volumes:
-      2mm:
+      0um:
         composite: /path/to/src-MEBRAINS_to-Yerkes19_vox-2mm_desc-composite_xfm.nii.gz
   - from: MEBRAINS
     to: D99
     volumes:
-      2mm:
+      0um:
         composite: add from RheMAP
   - from: MEBRAINS
     to: NMT2Sym
     volumes:
-      2mm:
+      0um:
         composite: add from RheMAP
   - from: D99
     to: MEBRAINS
     volumes:
-      2mm:
+      0um:
         composite: add from RheMAP
   - from: D99
     to: NMT2Sym
     volumes:
-      25mm:
+      250um:
         composite: /url/to/src-NMT2Sym_to-D99_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
   - from: D99
     to: Yerkes19
     volumes:
-      25mm:
+      250um:
         composite: /url/to/src-Yerkes19_to-D99_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
   - from: NMT2Sym
     to: MEBRAINS
     volumes:
-      2mm:
+      0um:
         composite: add from RheMAP
   - from: NMT2Sym
     to: D99
     volumes:
-      25mm:
+      250um:
         composite: /url/to/src-D99_to-NMT2Sym_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
   - from: NMT2Sym
     to: Yerkes19
     volumes:
-      25mm:
+      250um:
         composite: /url/to/src-Yerkes19_to-NMT2Sym_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
   - from: Yerkes19
     to: MEBRAINS
     volumes:
-      2mm:
+      0um:
         composite: add from RheMAP
   - from: Yerkes19
     to: D99
     volumes:
-      25mm:
+      250um:
         composite: /url/to/src-D99_to-Yerkes19_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
   - from: Yerkes19
     to: NMT2Sym
     volumes:
-      25mm:
+      250um:
         composite: /ur/to/src-NMT2Sym_to-Yerkes19_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
