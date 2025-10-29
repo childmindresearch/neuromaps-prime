@@ -25,23 +25,23 @@ edges:
   - from: MEBRAINS
     to: Yerkes19
     volumes:
-      0um:
+      2mm:
         composite: /url/to/src-MEBRAINS_to-Yerkes19_vox-2mm_desc-composite_xfm.nii.gz
   - from: MEBRAINS
     to: D99
     volumes:
-      0um:
-        composite: /url/to/MEBRAINS_in_D99_composite.nii.gz
+      250um:
+        composite: /url/to/src-MEBRAINS_to_D99_res-0p25mm_mode-image_desc-Composite.nii.gz
   - from: MEBRAINS
     to: NMT2Sym
     volumes:
-      0um:
-        composite: url/to/MEBRAINS_in_NMTv2.0-sym_composite.nii.gz
+      250um:
+        composite: url/to/src-MEBRAINS_to_NMT2Sym_res-0p25mm_mode-image_desc-Composite.nii.gz
   - from: D99
     to: MEBRAINS
     volumes:
-      0um:
-        composite: url/to/D99_in_MEBRAINS_composite.nii.gz
+      400um:
+        composite: url/to/src-D99_to_MEBRAINS_res-0p40mm_mode-image_desc-Composite.nii.gz
   - from: D99
     to: NMT2Sym
     volumes:
@@ -55,8 +55,8 @@ edges:
   - from: NMT2Sym
     to: MEBRAINS
     volumes:
-      0um:
-        composite: /url/to/NMTv2.0-sym_in_MEBRAINS_composite.nii.gz
+      400um:
+        composite: /url/to/src-NMT2Sym_to_MEBRAINS_res-0p40mm_mode-image_desc-Composite.nii.gz
   - from: NMT2Sym
     to: D99
     volumes:
@@ -70,8 +70,8 @@ edges:
   - from: Yerkes19
     to: MEBRAINS
     volumes:
-      0um:
-        composite: /url/to/YRK_in_MEBRAINS_composite.nii.gz
+      400um:
+        composite: /url/to/src-Yerkes19_to_MEBRAINS_res-0p40mm_mode-image_desc-Composite.nii.gz
   - from: Yerkes19
     to: D99
     volumes:
