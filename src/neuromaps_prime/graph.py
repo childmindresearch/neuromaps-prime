@@ -104,7 +104,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             surfaces = self._parse_surfaces(
                 node_name, description, _node_data.get("surfaces", {})
             )
-            print(surfaces)
+
             volumes = self._parse_volumes(
                 node_name, description, _node_data.get("volumes", {})
             )
@@ -117,7 +117,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 volumes=volumes,
             )
             self.add_node(node_name, data=neuromaps_node)
-        print(neuromaps_node)
+
         surface_to_surface_transforms = edges.get("surface_to_surface", [])
         for transforms in surface_to_surface_transforms:
             source = transforms.get("from")
