@@ -132,7 +132,7 @@
             "type": "object",
             "description": "Dictionary of volume files keyed by resolution and type.",
             "patternProperties": {
-                "^[0-9]+um$": {
+                "^[0-9]+(u|m)m$": {
                     "type": "object",
                     "patternProperties": {
                         "^[A-Za-z0-9_]+$": {
