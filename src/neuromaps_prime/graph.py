@@ -22,7 +22,7 @@ see examples/example_graph_init.py for usage.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any
 
 import networkx as nx
 import yaml
@@ -101,15 +101,12 @@ class NeuromapsGraph(nx.MultiDiGraph):
             species = _node_data.get("species", "")
             description = _node_data.get("description", "")
 
-            surfaces = list(
-                self._parse_surfaces(
-                    node_name, description, _node_data.get("surfaces", {})
-                )
+            surfaces = self._parse_surfaces(
+                node_name, description, _node_data.get("surfaces", {})
             )
-            volumes = list(
-                self._parse_volumes(
-                    node_name, description, _node_data.get("volumes", {})
-                )
+            print(surfaces)
+            volumes = self._parse_volumes(
+                node_name, description, _node_data.get("volumes", {})
             )
 
             neuromaps_node = Node(
@@ -120,15 +117,15 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 volumes=volumes,
             )
             self.add_node(node_name, data=neuromaps_node)
-
+        print(neuromaps_node)
         surface_to_surface_transforms = edges.get("surface_to_surface", [])
         for transforms in surface_to_surface_transforms:
             source = transforms.get("from")
             target = transforms.get("to")
             surfaces_dict = transforms.get("surfaces", {})
 
-            surface_transforms = list(
-                self._parse_surface_to_surface_transforms(source, target, surfaces_dict)
+            surface_transforms = self._parse_surface_to_surface_transforms(
+                source, target, surfaces_dict
             )
 
             neuromaps_edge = Edge(
@@ -143,8 +140,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             target = transforms.get("to")
             volumes_dict = transforms.get("volumes", {})
 
-            volume_transforms = list(
-                self._parse_volume_to_volume_transforms(source, target, volumes_dict)
+            volume_transforms = self._parse_volume_to_volume_transforms(
+                source, target, volumes_dict
             )
 
             neuromaps_edge = Edge(
@@ -155,66 +152,86 @@ class NeuromapsGraph(nx.MultiDiGraph):
 
     def _parse_surfaces(
         self, node_name: str, description: str, surfaces_dict: dict
-    ) -> Generator[SurfaceAtlas, None, None]:
+    ) -> list[SurfaceAtlas]:
+        SurfaceAtlasList = []
         for density, surface_types in surfaces_dict.items():
             for surface_type, hemispheres in surface_types.items():
                 for hemisphere, path in hemispheres.items():
-                    # Validate and yield
-                    yield SurfaceAtlas(
-                        name=f"{node_name}_{density}_{hemisphere}_{surface_type}",
-                        description=description,
-                        file_path=Path(path),
-                        space=node_name,
-                        density=density,
-                        hemisphere=hemisphere,
-                        resource_type=surface_type,
+                    SurfaceAtlasList.append(
+                        SurfaceAtlas(
+                            name=f"{node_name}_{density}_{hemisphere}_{surface_type}",
+                            description=description,
+                            file_path=Path(path),
+                            space=node_name,
+                            density=density,
+                            hemisphere=hemisphere,
+                            resource_type=surface_type,
+                        )
                     )
+        return SurfaceAtlasList
 
     def _parse_volumes(
         self, node_name: str, description: str, volumes_dict: dict
-    ) -> Generator[VolumeAtlas, None, None]:
+    ) -> list[VolumeAtlas]:
+        VolumeAtlasList = []
         for resolution, volume_types in volumes_dict.items():
             for volume_type, path in volume_types.items():
-                yield VolumeAtlas(
-                    name=f"{node_name}_{resolution}_{volume_type}",
-                    description=description,
-                    file_path=Path(path),
-                    space=node_name,
-                    resolution=resolution,
-                    resource_type=volume_type,
+                VolumeAtlasList.append(
+                    VolumeAtlas(
+                        name=f"{node_name}_{resolution}_{volume_type}",
+                        description=description,
+                        file_path=Path(path),
+                        space=node_name,
+                        resolution=resolution,
+                        resource_type=volume_type,
+                    )
                 )
+        return VolumeAtlasList
 
     def _parse_volume_to_volume_transforms(
         self, source_name: str, target_name: str, volumes_dict: dict
-    ) -> Generator[VolumeTransform, None, None]:
+    ) -> list[VolumeTransform]:
+        VolumeTransformList = []
         for resolution, volume_types in volumes_dict.items():
             for volume_type, path in volume_types.items():
-                yield VolumeTransform(
-                    name=f"{source_name}_to_{target_name}_{resolution}_{volume_type}",
-                    description=f"Transform from {source_name} to {target_name}",
-                    file_path=Path(path),
-                    source_space=source_name,
-                    target_space=target_name,
-                    resolution=resolution,
-                    resource_type=volume_type,
-                )
-
-    def _parse_surface_to_surface_transforms(
-        self, source_name: str, target_name: str, surfaces_dict: dict
-    ) -> Generator[SurfaceTransform, None, None]:
-        for density, surface_types in surfaces_dict.items():
-            for surface_type, hemispheres in surface_types.items():
-                for hemisphere, path in hemispheres.items():
-                    yield SurfaceTransform(
-                        name=f"{source_name}_to_{target_name}_{density}_{hemisphere}_{surface_type}",
+                VolumeTransformList.append(
+                    VolumeTransform(
+                        name=f"{source_name}_to_{target_name}_{resolution}_{volume_type}",
                         description=f"Transform from {source_name} to {target_name}",
                         file_path=Path(path),
                         source_space=source_name,
                         target_space=target_name,
-                        density=density,
-                        hemisphere=hemisphere,
-                        resource_type=surface_type,
+                        resolution=resolution,
+                        resource_type=volume_type,
                     )
+                )
+        return VolumeTransformList
+
+    def _parse_surface_to_surface_transforms(
+        self, source_name: str, target_name: str, surfaces_dict: dict
+    ) -> list[SurfaceTransform]:
+        SurfaceTransformList = []
+        for density, surface_types in surfaces_dict.items():
+            for surface_type, hemispheres in surface_types.items():
+                for hemisphere, path in hemispheres.items():
+                    SurfaceTransformList.append(
+                        SurfaceTransform(
+                            name=(
+                                f"{source_name}_to_{target_name}_{density}"
+                                f"_{hemisphere}_{surface_type}"
+                            ),
+                            description=(
+                                f"Transform from {source_name} to {target_name}"
+                            ),
+                            file_path=Path(path),
+                            source_space=source_name,
+                            target_space=target_name,
+                            density=density,
+                            hemisphere=hemisphere,
+                            resource_type=surface_type,
+                        )
+                    )
+        return SurfaceTransformList
 
     ## Public Methods ##
     def fetch_surface_atlas(

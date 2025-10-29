@@ -5,6 +5,7 @@ from typing import Any, Callable
 
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 from matplotlib import cm
 from matplotlib.lines import Line2D
 
@@ -38,34 +39,37 @@ def plot_graph(
         iterations: Number of iterations for layout algorithms.
         seed: Random seed for layout algorithms.
     """
+    if graph_type not in ["surface", "volume", "combined"]:
+        raise ValueError("graph_type must be one of 'surface', 'volume', or 'combined'")
+
+    kwargs = {
+        "graph": graph,
+        "figsize": (
+            (figsize[0] * 2, figsize[1] * 2) if graph_type == "combined" else figsize
+        ),
+        "font_size": font_size,
+        "save_path": save_path,
+        "layout": layout,
+        "legend_rect": legend_rect,
+        "legend_loc": legend_loc,
+        "k": k,
+        "iterations": iterations,
+        "seed": seed,
+    }
+
     if graph_type == "combined":
-        figsize = (figsize[0] * 2, figsize[1] * 2)
-        _plot_combined_graph(
-            graph,
-            figsize,
-            font_size,
-            save_path,
-            layout,
-            legend_rect,
-            legend_loc,
-            k,
-            iterations,
-            seed,
-        )
+        _plot_combined_graph(figsize=(figsize[0] * 2, figsize[1] * 2), **kwargs)
     else:
-        _plot_single_graph(
-            graph,
-            graph_type,
-            figsize,
-            font_size,
-            save_path,
-            layout,
-            legend_rect,
-            legend_loc,
-            k,
-            iterations,
-            seed,
-        )
+        _plot_single_graph(graph_type=graph_type, figsize=figsize, **kwargs)
+
+
+def _get_species_groups(graph: nx.MultiDiGraph) -> dict[str, list[str]]:
+    """Group nodes by species."""
+    species_groups: dict[str, list[str]] = {}
+    for node, data in graph.nodes(data=True):
+        species = data["data"].species
+        species_groups.setdefault(species, []).append(node)
+    return species_groups
 
 
 def _get_optimized_layout(
@@ -78,56 +82,42 @@ def _get_optimized_layout(
     """Get optimized node positions to minimize edge crossings."""
     if layout == "hierarchical":
         # Group nodes by species for hierarchical layout
-        species_groups: dict[str, list[str]] = {}
-        for node, data in graph.nodes(data=True):
-            species = data["data"].species
-            species_groups.setdefault(species, []).append(node)
-
-        # Use graphviz dot layout if available, otherwise use multipartite
+        species_groups = _get_species_groups(graph)
         try:
-            pos = nx.nx_agraph.graphviz_layout(graph, prog="dot")
+            return nx.nx_agraph.graphviz_layout(graph, prog="dot")
         except (ImportError, FileNotFoundError):
             # Fallback to multipartite layout
-            pos = _hierarchical_multipartite_layout(graph, species_groups)
+            return _hierarchical_multipartite_layout(graph, species_groups)
 
     elif layout == "circular":
         # Circular layout with species grouping
-        pos = _species_circular_layout(graph)
+        return _species_circular_layout(graph)
 
     elif layout == "shell":
         # Shell layout with species as shells
-        species_groups = {}
-        for node, data in graph.nodes(data=True):
-            species = data["data"].species
-            species_groups.setdefault(species, []).append(node)
+        species_groups = _get_species_groups(graph)
         shells = list(species_groups.values())
-        pos = nx.shell_layout(graph, nlist=shells)
+        return nx.shell_layout(graph, nlist=shells)
 
     elif layout == "kamada_kawai":
         # Kamada-Kawai layout (good for small graphs)
-        pos = nx.kamada_kawai_layout(graph)
+        return nx.kamada_kawai_layout(graph)
 
     elif layout == "planar":
         # Planar layout (if graph is planar)
         try:
-            pos = nx.planar_layout(graph)
+            return nx.planar_layout(graph)
         except nx.NetworkXException:
             print("Graph is not planar, falling back to spring layout")
-            pos = nx.spring_layout(graph, k=k, iterations=iterations, seed=seed)
+            return nx.spring_layout(graph, k=k, iterations=iterations, seed=seed)
 
-    else:  # spring (default)
-        # Enhanced spring layout with more iterations
-        pos = nx.spring_layout(graph, k=k, iterations=iterations, seed=seed)
-
-    return pos
+    return nx.spring_layout(graph, k=k, iterations=iterations, seed=seed)
 
 
 def _hierarchical_multipartite_layout(
     graph: nx.MultiDiGraph, species_groups: dict
 ) -> dict:
     """Create a hierarchical layout based on species groups."""
-    import numpy as np
-
     pos = {}
     y_offset = 0
     species_list = sorted(species_groups.keys())
@@ -152,8 +142,6 @@ def _hierarchical_multipartite_layout(
 
 def _species_circular_layout(graph: nx.MultiDiGraph) -> dict:
     """Create a circular layout with species grouped together."""
-    import numpy as np
-
     # Group nodes by species
     species_groups: dict[str, list[str]] = {}
     for node, data in graph.nodes(data=True):
