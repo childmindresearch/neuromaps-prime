@@ -1,29 +1,30 @@
-"""Tests for surface utils module."""
+"""Tests for transforms utils module."""
 
 from pathlib import Path
 
 import pytest
-from neuromaps_nhp.transforms.surface_utils import (
+
+from neuromaps_prime.transforms.utils import (
     estimate_surface_density,
     get_vertex_count,
 )
 
-data_dir = Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share")
+DATA_DIR = Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share")
 
 
 @pytest.mark.parametrize(
     "surface_file,expected_density",
     [
         (
-            data_dir / "Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii",
+            DATA_DIR / "Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii",
             "32k",
         ),
         (
-            data_dir / "Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii",
+            DATA_DIR / "Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii",
             "10k",
         ),
         (
-            data_dir / "Outputs/D99-Yerkes19/"
+            DATA_DIR / "Outputs/D99-Yerkes19/"
             "src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii",
             "32k",
         ),
@@ -40,15 +41,15 @@ def test_estimate_surface_density(surface_file: Path, expected_density: str) -> 
     "surface_file,expected_count",
     [
         (
-            data_dir / "Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii",
+            DATA_DIR / "Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii",
             32492,
         ),
         (
-            data_dir / "Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii",
+            DATA_DIR / "Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii",
             10242,
         ),
         (
-            data_dir / "Outputs/D99-Yerkes19/"
+            DATA_DIR / "Outputs/D99-Yerkes19/"
             "src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii",
             32492,
         ),

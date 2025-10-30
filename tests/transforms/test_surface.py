@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from neuromaps_nhp.transforms.surface import surface_sphere_project_unproject
-from neuromaps_nhp.transforms.surface_utils import get_vertex_count
+from neuromaps_prime.transforms.surface import surface_sphere_project_unproject
+from neuromaps_prime.transforms.utils import get_vertex_count
 
 
 def test_surface_sphere_project_unproject(tmp_path: Path) -> None:
