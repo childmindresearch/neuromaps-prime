@@ -2,10 +2,12 @@
 
 from pathlib import Path
 
-import pytest
-
-from neuromaps_prime.transforms.surface import surface_sphere_project_unproject
-from neuromaps_prime.transforms.utils import get_vertex_count
+from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.transforms.surface import (
+    _surface_to_surface,
+    surface_sphere_project_unproject,
+)
+from neuromaps_prime.transforms.utils import estimate_surface_density, get_vertex_count
 
 
 @pytest.mark.usefixtures("require_workbench")
@@ -47,4 +49,29 @@ def test_surface_sphere_project_unproject(data_dir: Path, tmp_path: Path) -> Non
         sphere_unproject_from=sphere_unproject_from,
         sphere_out=str(sphere_out),
     )
-    assert get_vertex_count(sphere_in) == get_vertex_count(result.sphere_out)
+
+    vertices_sphere_in = get_vertex_count(sphere_in)
+    vertices_sphere_out = get_vertex_count(result.sphere_out)
+    assert vertices_sphere_in == vertices_sphere_out
+
+
+def test_surface_to_surface(tmp_path: Path) -> None:
+    """Test _surface_to_surface function."""
+    graph = NeuromapsGraph()
+
+    source_space = "S1200"
+    target_space = "D99"
+    density = "32k"
+    hemisphere = "left"
+
+    transform = _surface_to_surface(
+        graph=graph,
+        source=source_space,
+        target=target_space,
+        density=density,
+        hemisphere=hemisphere,
+        output_file_path=str(tmp_path / "output.surf.gii"),
+    )
+
+    assert transform is not None
+    assert estimate_surface_density(transform.fetch()) == density

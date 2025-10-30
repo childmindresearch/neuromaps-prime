@@ -1,4 +1,4 @@
-"""Models for resources in the neuromaps_prime surface graph."""
+"""Models for resources in the neuromaps_prime graph."""
 
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -7,7 +7,7 @@ from pydantic import BaseModel, field_validator
 
 
 class Resource(BaseModel, ABC):
-    """Base model for resources in the surface graph."""
+    """Base model for resources in the neuromaps_prime graph."""
 
     name: str
     description: str

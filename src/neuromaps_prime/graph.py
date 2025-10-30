@@ -109,7 +109,6 @@ class NeuromapsGraph(nx.MultiDiGraph):
             surfaces = self._parse_surfaces(
                 node_name, description, _node_data.get("surfaces", {})
             )
-
             volumes = self._parse_volumes(
                 node_name, description, _node_data.get("volumes", {})
             )
@@ -502,3 +501,18 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 f"Available nodes: {list(self.nodes)}"
             )
         return self.nodes[node_name]["data"]
+
+    def add_transform(
+        self,
+        source_space: str,
+        target_space: str,
+        key: str,
+        surface_transform: SurfaceTransform | None = None,
+        volume_transform: VolumeTransform | None = None,
+    ) -> None:
+        """Add a new surface transform edge to the graph."""
+        edge = Edge(
+            surface_transforms=[surface_transform] if surface_transform else [],
+            volume_transforms=[volume_transform] if volume_transform else [],
+        )
+        self.add_edge(source_space, target_space, key=key, data=edge)
