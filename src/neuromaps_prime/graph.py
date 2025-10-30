@@ -516,3 +516,73 @@ class NeuromapsGraph(nx.MultiDiGraph):
             volume_transforms=[volume_transform] if volume_transform else [],
         )
         self.add_edge(source_space, target_space, key=key, data=edge)
+
+    def search_surface_atlases(
+        self,
+        space: str,
+        density: str | None = None,
+        hemisphere: str | None = None,
+        resource_type: str | None = None,
+    ) -> list[SurfaceAtlas]:
+        """Search for surface atlases matching the given criteria.
+
+        Args:
+            space (str): The brain template space name.
+            density (str | None): The surface mesh density to match.
+            hemisphere (str | None): The hemisphere to match.
+            resource_type (str | None): The resource type to match.
+
+        Returns:
+            list[SurfaceAtlas]: A list of matching surface atlases.
+        """
+        matching_atlases = []
+        for node in self.nodes(data=True):
+            node_name, node_data = node
+            if node_name != space:
+                continue
+            node_obj: Node = node_data["data"]
+            for atlas in node_obj.surfaces:
+                if (
+                    (density is None or atlas.density == density)
+                    and (hemisphere is None or atlas.hemisphere == hemisphere)
+                    and (resource_type is None or atlas.resource_type == resource_type)
+                ):
+                    matching_atlases.append(atlas)
+        return matching_atlases
+
+    def search_surface_transforms(
+        self,
+        source_space: str,
+        target_space: str,
+        density: str | None = None,
+        hemisphere: str | None = None,
+        resource_type: str | None = None,
+    ) -> list[SurfaceTransform]:
+        """Search for surface transforms matching the given criteria.
+
+        Args:
+            source_space (str): The source brain template space name.
+            target_space (str): The target brain template space name.
+            density (str | None): The surface mesh density to match.
+            hemisphere (str | None): The hemisphere to match.
+            resource_type (str | None): The resource type to match.
+
+        Returns:
+            list[SurfaceTransform]: A list of matching surface transforms.
+        """
+        matching_transforms = []
+        for u, v, key, edge_data in self.edges(data=True, keys=True):
+            if u != source_space or v != target_space or key != "surface_to_surface":
+                continue
+            edge: Edge = edge_data["data"]
+            for transform in edge.surface_transforms:
+                if (
+                    (density is None or transform.density == density)
+                    and (hemisphere is None or transform.hemisphere == hemisphere)
+                    and (
+                        resource_type is None
+                        or transform.resource_type == resource_type
+                    )
+                ):
+                    matching_transforms.append(transform)
+        return matching_transforms
