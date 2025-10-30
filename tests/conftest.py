@@ -1,5 +1,6 @@
 """Global pytest fixtures, arguments, and options."""
 
+from pathlib import Path
 from typing import Generator
 
 import pytest
@@ -22,6 +23,12 @@ def pytest_addoption(parser: pytest.Parser):
         default=None,
         help="Optional JSON/dict string of Image overrides for Styx runner.",
     )
+    parser.addoption(
+        "--data-dir",
+        action="store",
+        default=None,
+        help="Directory where test data is located.",
+    )
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -36,6 +43,15 @@ def runner(
         data_dir=tmp_dir,
     )
     yield get_global_runner()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def data_dir(request: pytest.FixtureRequest) -> Generator[Path, None, None]:
+    """Yield data directory from pytest command-line."""
+    data_dir = Path(request.config.getoption("--data-dir")).resolve()
+    if not data_dir.exists():
+        raise FileNotFoundError(f"{data_dir} does not exist")
+    yield data_dir
 
 
 @pytest.fixture

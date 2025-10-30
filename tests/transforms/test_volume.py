@@ -26,25 +26,25 @@ class TestVolumetricTransform:
     """Unit tests for volumetric transformations using `_vol_to_vol`."""
 
     @pytest.fixture
-    def vol_paths(self) -> dict[str, Path]:
+    def vol_paths(self, data_dir: Path) -> dict[str, Path]:
         """Provide all possible source and target paths for tests."""
         return {
-            "t1w_source": Path(
-                "/Users/tamsin.rogers/Desktop/github/neuromaps/"
-                "share_with_T1w/Inputs/D99/src-D99_res-0p25mm_T1w.nii"
-            ),
-            "label_source": Path(
-                "/Users/tamsin.rogers/Desktop/github/neuromaps/"
-                "share_with_T1w/atlas/D99_atlas_v2.0.nii"
-            ),
-            "target_same": Path(
-                "/Users/tamsin.rogers/Desktop/github/neuromaps/"
-                "share_with_T1w/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm_T1w.nii"
-            ),
-            "target_diff": Path(
-                "/Users/tamsin.rogers/Desktop/github/neuromaps/"
-                "share_with_T1w/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm_T1w.nii"
-            ),
+            "t1w_source": data_dir
+            / "share"
+            / "Inputs"
+            / "D99"
+            / "src-D99_res-0p25mm_T1w.nii",
+            "label_source": data_dir / "resources" / "D99" / "D99_atlas_v2.0.nii.gz",
+            "target_same": data_dir
+            / "share"
+            / "Inputs"
+            / "NMT2Sym"
+            / "src-NMT2Sym_res-0p25mm_T1w.nii",
+            "target_diff": data_dir
+            / "share"
+            / "Inputs"
+            / "MEBRAINS"
+            / "src-MEBRAINS_res-0p40mm_T1w.nii",
         }
 
     def _extract_res(self, nii_file: Path) -> tuple[float, float, float]:

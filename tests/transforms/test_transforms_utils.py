@@ -4,59 +4,44 @@ from pathlib import Path
 
 import pytest
 
-from neuromaps_prime.transforms.utils import (
-    estimate_surface_density,
-    get_vertex_count,
-)
-
-DATA_DIR = Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share")
+from neuromaps_prime.transforms.utils import estimate_surface_density, get_vertex_count
 
 
 @pytest.mark.parametrize(
-    "surface_file,expected_density",
+    "surface_fpath,expected_density",
     [
+        ("Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii", "32k"),
+        ("Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii", "10k"),
         (
-            DATA_DIR / "Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii",
-            "32k",
-        ),
-        (
-            DATA_DIR / "Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii",
-            "10k",
-        ),
-        (
-            DATA_DIR / "Outputs/D99-Yerkes19/"
-            "src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii",
+            "Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii",
             "32k",
         ),
     ],
 )
-def test_estimate_surface_density(surface_file: Path, expected_density: str) -> None:
+def test_estimate_surface_density(
+    data_dir: Path, surface_fpath: str, expected_density: str
+) -> None:
     """Test estimate_surface_density function with various mesh densities."""
-    result = estimate_surface_density(surface_file)
+    result = estimate_surface_density(data_dir / surface_fpath)
     assert isinstance(result, str)
     assert result == expected_density, f"Expected {expected_density}, but got {result}"
 
 
 @pytest.mark.parametrize(
-    "surface_file,expected_count",
+    "surface_fpath,expected_count",
     [
+        ("Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii", 32492),
+        ("Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii", 10242),
         (
-            DATA_DIR / "Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii",
-            32492,
-        ),
-        (
-            DATA_DIR / "Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii",
-            10242,
-        ),
-        (
-            DATA_DIR / "Outputs/D99-Yerkes19/"
-            "src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii",
+            "Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii",
             32492,
         ),
     ],
 )
-def test_get_vertex_count(surface_file: Path, expected_count: int) -> None:
+def test_get_vertex_count(
+    data_dir: Path, surface_fpath: str, expected_count: int
+) -> None:
     """Test get_vertex_count function returns correct vertex count."""
-    result = get_vertex_count(surface_file)
+    result = get_vertex_count(data_dir / surface_fpath)
     assert isinstance(result, int)
     assert result == expected_count, f"Expected {expected_count}, but got {result}"
