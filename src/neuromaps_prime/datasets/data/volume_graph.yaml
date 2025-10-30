@@ -25,7 +25,7 @@ edges:
   - from: MEBRAINS
     to: Yerkes19
     volumes:
-      2mm:
+      500um:
         composite: /url/to/src-MEBRAINS_to-Yerkes19_res-0p50mm_mode-image_desc-Composite.nii.gz
   - from: MEBRAINS
     to: D99
