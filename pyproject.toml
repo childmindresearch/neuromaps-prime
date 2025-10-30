@@ -58,6 +58,7 @@ testpaths = ["tests"]
 DEP002 = ["scipy"]  # ignore defined dependency thats not used
 
 [tool.mypy]
+exclude = ['tests/']
 ignore_missing_imports = true
 
 [tool.ruff]

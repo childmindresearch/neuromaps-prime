@@ -2,10 +2,13 @@
 
 from pathlib import Path
 
+import pytest
+
 from neuromaps_prime.transforms.surface import surface_sphere_project_unproject
 from neuromaps_prime.transforms.utils import get_vertex_count
 
 
+@pytest.mark.usefixtures("require_workbench")
 def test_surface_sphere_project_unproject(tmp_path: Path) -> None:
     """Test surface_sphere_project_unproject wrapper function.
 

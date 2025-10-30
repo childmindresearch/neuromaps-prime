@@ -3,7 +3,7 @@
 from typing import Generator
 
 import pytest
-from niwrap import Runner, ants, get_global_runner
+from niwrap import Runner, ants, get_global_runner, workbench
 
 from neuromaps_prime.utils import set_runner
 
@@ -21,13 +21,6 @@ def pytest_addoption(parser: pytest.Parser):
         action="store",
         default=None,
         help="Optional JSON/dict string of Image overrides for Styx runner.",
-    )
-
-
-def pytest_configure(config: pytest.Config) -> None:
-    """Register custom marker for tests."""
-    config.addinivalue_line(
-        "markers", "requires_ants: skip test if ANTs is not available"
     )
 
 
@@ -57,4 +50,14 @@ def require_ants(runner: Runner) -> None:
         pytest.skip("ANTs not available in environment")
     except Exception:
         # Failures for other reasons are ignored
+        pass
+
+
+@pytest.fixture
+def require_workbench(runner: Runner) -> None:
+    try:
+        workbench.nifti_information(nifti_file=".", runner=runner)
+    except FileNotFoundError:
+        pytest.skip("wb_command not available in environment")
+    except Exception:
         pass
