@@ -58,9 +58,9 @@ def plot_graph(
     }
 
     if graph_type == "combined":
-        _plot_combined_graph(figsize=(figsize[0] * 2, figsize[1] * 2), **kwargs)
+        _plot_combined_graph(**kwargs)
     else:
-        _plot_single_graph(graph_type=graph_type, figsize=figsize, **kwargs)
+        _plot_single_graph(graph_type=graph_type, **kwargs)
 
 
 def _get_species_groups(graph: nx.MultiDiGraph) -> dict[str, list[str]]:
