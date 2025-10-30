@@ -1,8 +1,9 @@
 """Global pytest fixtures, arguments, and options."""
 
-from pathlib import Path
+from typing import Generator
 
 import pytest
+from niwrap import Runner, ants, get_global_runner
 
 from neuromaps_prime.utils import set_runner
 
@@ -19,19 +20,41 @@ def pytest_addoption(parser: pytest.Parser):
         "--runner-images",
         action="store",
         default=None,
-        help="Image overrides for Styx runner.",
+        help="Optional JSON/dict string of Image overrides for Styx runner.",
     )
 
 
-@pytest.fixture(scope="session")
-def runner(request: pytest.FixtureRequest, tmp_path: Path):
-    """Set runner used for the session based on parser."""
-    runner = request.config.getoption("--runner")
-    print(runner)
-    images = request.config.getoption("--runner-images")
+def pytest_configure(config: pytest.Config) -> None:
+    """Register custom marker for tests."""
+    config.addinivalue_line(
+        "markers", "requires_ants: skip test if ANTs is not available"
+    )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def runner(
+    request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory
+) -> Generator[Runner, None, None]:
+    """Globally set runner for the testing suite."""
+    tmp_dir = tmp_path_factory.mktemp("styx_tmp")
     set_runner(
-        runner=runner.lower(),
-        image_map=images,
-        data_dir=tmp_path,
+        runner=request.config.getoption("--runner").lower(),
+        image_map=request.config.getoption("--runner-images"),
+        data_dir=tmp_dir,
     )
-    yield runner
+    yield get_global_runner()
+
+
+@pytest.fixture
+def require_ants(runner: Runner) -> None:
+    try:
+        ants.ants_apply_transforms(
+            reference_image=".",
+            output=ants.ants_apply_transforms_warped_output_params("."),
+            runner=runner,
+        )
+    except FileNotFoundError:
+        pytest.skip("ANTs not available in environment")
+    except Exception:
+        # Failures for other reasons are ignored
+        pass
