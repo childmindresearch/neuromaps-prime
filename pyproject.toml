@@ -54,6 +54,9 @@ source = "vcs"
 pythonpath = ["src"]
 testpaths = ["tests"]
 
+[tool.deptry.per_rule_ignores]
+DEP002 = ["scipy"]  # ignore defined dependency thats not used
+
 [tool.mypy]
 ignore_missing_imports = true
 
