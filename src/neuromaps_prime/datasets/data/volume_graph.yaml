@@ -2,13 +2,83 @@ nodes:
 - MEBRAINS:
     description: MEBRAINS 1.0 macaque atlas
     volumes:
-      2mm:
-        T1w: /url/to/src-MEBRAINS_vox-2mm_T1w.nii.gz
+      400um:
+        T1w: /url/to/src-MEBRAINS_res-0p40mm_T1w.nii.gz
+- D99:
+    description: D99 macaque atlas
+    volumes:
+      250um:
+        T1w: /url/to/src-D99_res-0p25mm_T1w.nii.gz
+- NMT2Sym:
+    description: NMT2Sym macaque atlas
+    volumes:
+      250um:
+        T1w: /url/to/src-NMT2Sym_res-0p25mm_T1w.nii.gz
+- Yerkes19:
+    description: Yerkes19 macaque atlas
+    volumes:
+      500um:
+        T1w: /url/to/src-Yerkes19_res-0p50mm_T1w.nii.gz
 
 edges:
   volume_to_volume:
   - from: MEBRAINS
     to: Yerkes19
     volumes:
-      2mm:
-        composite: /path/to/src-MEBRAINS_to-Yerkes19_vox-2mm_desc-composite_xfm.nii.gz
+      500um:
+        composite: /url/to/src-MEBRAINS_to-Yerkes19_res-0p50mm_mode-image_desc-Composite.nii.gz
+  - from: MEBRAINS
+    to: D99
+    volumes:
+      250um:
+        composite: /url/to/src-MEBRAINS_to-D99_res-0p25mm_mode-image_desc-Composite.nii.gz
+  - from: MEBRAINS
+    to: NMT2Sym
+    volumes:
+      250um:
+        composite: /url/to/src-MEBRAINS_to-NMT2Sym_res-0p25mm_mode-image_desc-Composite.nii.gz
+  - from: D99
+    to: MEBRAINS
+    volumes:
+      400um:
+        composite: /url/to/src-D99_to-MEBRAINS_res-0p40mm_mode-image_desc-Composite.nii.gz
+  - from: D99
+    to: NMT2Sym
+    volumes:
+      250um:
+        composite: /url/to/src-NMT2Sym_to-D99_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
+  - from: D99
+    to: Yerkes19
+    volumes:
+      250um:
+        composite: /url/to/src-Yerkes19_to-D99_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
+  - from: NMT2Sym
+    to: MEBRAINS
+    volumes:
+      400um:
+        composite: /url/to/src-NMT2Sym_to-MEBRAINS_res-0p40mm_mode-image_desc-Composite.nii.gz
+  - from: NMT2Sym
+    to: D99
+    volumes:
+      250um:
+        composite: /url/to/src-D99_to-NMT2Sym_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
+  - from: NMT2Sym
+    to: Yerkes19
+    volumes:
+      250um:
+        composite: /url/to/src-Yerkes19_to-NMT2Sym_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
+  - from: Yerkes19
+    to: MEBRAINS
+    volumes:
+      400um:
+        composite: /url/to/src-Yerkes19_to-MEBRAINS_res-0p40mm_mode-image_desc-Composite.nii.gz
+  - from: Yerkes19
+    to: D99
+    volumes:
+      250um:
+        composite: /url/to/src-D99_to-Yerkes19_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
+  - from: Yerkes19
+    to: NMT2Sym
+    volumes:
+      250um:
+        composite: /ur/to/src-NMT2Sym_to-Yerkes19_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
