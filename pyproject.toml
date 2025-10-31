@@ -58,6 +58,7 @@ testpaths = ["tests"]
 DEP002 = ["scipy"]  # ignore defined dependency thats not used
 
 [tool.mypy]
+exclude = ['tests/']
 ignore_missing_imports = true
 
 [tool.ruff]
@@ -80,7 +81,8 @@ unfixable = []
 convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["ANN201", "ANN401"]
+"tests/conftest.py" = ["E402"]
+"tests/**/*.py" = ["ANN201", "ANN401", "D103"]
 
 [tool.ruff.format]
 quote-style = "double"
