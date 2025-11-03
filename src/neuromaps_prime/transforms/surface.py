@@ -184,16 +184,11 @@ def _get_hop_output_file(
     """Generate hop output file path based on parameters."""
     p = Path(output_file_path)
     parent = p.parent
-    # Remove all suffixes for the base name
-    base = p.stem  # removes only the last suffix
-    # If the file has double suffix (e.g., .func.gii), remove both
-    if p.suffix == ".gii" and p.with_suffix("").suffix:
-        base = p.with_suffix("").stem
-    # Always use .surf.gii for intermediate sphere files
-    suffix = ".surf.gii"
+    # Always use sphere.surf.gii for intermediate sphere files
+    suffix = "sphere.surf.gii"
     return str(
-        parent / f"{base}_{source}_"
-        f"to_{next_target}_den-{density}_hemi-{hemisphere}{suffix}"
+        parent / f"src-{source}_"
+        f"to-{next_target}_den-{density}_hemi-{hemisphere[0].upper()}_{suffix}"
     )
 
 
