@@ -1,4 +1,4 @@
-# neuromaps-prime
+# neuromaps-prime <img src="sticker.png" align="right" width="25%"/>
 
 [![Build](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test.yaml?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/childmindresearch/neuromaps-prime/branch/main/graph/badge.svg?token=22HWWFWPW5)](https://codecov.io/gh/childmindresearch/neuromaps-prime)
