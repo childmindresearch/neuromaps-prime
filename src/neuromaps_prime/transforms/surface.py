@@ -65,29 +65,31 @@ def surface_sphere_project_unproject(
 
 
 def metric_resample(
-    metric_in: Path,
+    input_file_path: Path,
     current_sphere: Path,
     new_sphere: Path,
-    metric_out: str,
-    method: str = "ADAP_BARY_AREA",
-    area_surfs: tuple[Path, Path] | None = None,
+    output_file_path: str,
+    **kwargs,
 ) -> workbench.MetricResampleOutputs:
     """Resample a surface metric from one sphere to another.
 
     Parameters
     ----------
-    metric_in : Path
+    input_file_path : Path
         Path to input metric file.
     current_sphere : Path
         Path to current spherical surface.
     new_sphere : Path
         Path to new spherical surface.
-    metric_out : str
+    output_file_path : str
         Path to output metric file.
-    method : str, optional
-        Resampling method. Default is 'ADAP_BARY_AREA'.
-    area_surfs : tuple[Path, Path] | None, optional
-        Tuple of area surfaces for adaptive barycentric resampling.
+    **kwargs
+        Additional keyword arguments passed to workbench.metric_resample.
+        Common options include:
+        - method : str
+            Resampling method. Default is 'ADAP_BARY_AREA'.
+        - area_surfs : tuple[Path, Path] | None
+            Tuple of area surfaces for adaptive barycentric resampling.
 
     Returns:
     -------
@@ -99,49 +101,52 @@ def metric_resample(
     FileNotFoundError
         If any input file does not exist.
     """
-    if not metric_in.exists():
-        raise FileNotFoundError(f"Input metric file not found: {metric_in}")
+    if not input_file_path.exists():
+        raise FileNotFoundError(f"Input metric file not found: {input_file_path}")
     if not current_sphere.exists():
         raise FileNotFoundError(f"Current sphere file not found: {current_sphere}")
     if not new_sphere.exists():
         raise FileNotFoundError(f"New sphere file not found: {new_sphere}")
 
     result = workbench.metric_resample(
-        metric_in=metric_in,
+        metric_in=input_file_path,
         current_sphere=current_sphere,
         new_sphere=new_sphere,
-        metric_out=metric_out,
-        method=method,
-        area_surfs=area_surfs,
+        metric_out=output_file_path,
+        **kwargs,
     )
     if not result.metric_out.exists():
-        raise FileNotFoundError(f"Metric out not found: {metric_out}")
+        raise FileNotFoundError(f"Metric out not found: {result.metric_out}")
 
     return result
 
 
 def label_resample(
-    label_in: Path,
+    input_file_path: Path,
     current_sphere: Path,
     new_sphere: Path,
-    label_out: str,
-    area_surfs: tuple[Path, Path] | None = None,
-    method: str = "ADAP_BARY_AREA",
+    output_file_path: str,
+    **kwargs,
 ) -> workbench.LabelResampleOutputs:
     """Resample a surface label from one sphere to another.
 
     Parameters
     ----------
-    label_in : Path
+    input_file_path : Path
         Path to input label file.
     current_sphere : Path
         Path to current spherical surface.
     new_sphere : Path
         Path to new spherical surface.
-    label_out : str
+    output_file_path : str
         Path to output label file.
-    method : str, optional
-        Resampling method. Default is 'ADAP_BARY_AREA'.
+    **kwargs
+        Additional keyword arguments passed to workbench.label_resample.
+        Common options include:
+        - method : str
+            Resampling method. Default is 'ADAP_BARY_AREA'.
+        - area_surfs : tuple[Path, Path] | None
+            Tuple of area surfaces for adaptive barycentric resampling.
 
     Returns:
     -------
@@ -153,20 +158,19 @@ def label_resample(
     FileNotFoundError
         If any input file does not exist.
     """
-    if not label_in.exists():
-        raise FileNotFoundError(f"Input label file not found: {label_in}")
+    if not input_file_path.exists():
+        raise FileNotFoundError(f"Input label file not found: {input_file_path}")
     if not current_sphere.exists():
         raise FileNotFoundError(f"Current sphere file not found: {current_sphere}")
     if not new_sphere.exists():
         raise FileNotFoundError(f"New sphere file not found: {new_sphere}")
 
     result = workbench.label_resample(
-        label_in=label_in,
+        label_in=input_file_path,
         current_sphere=current_sphere,
         new_sphere=new_sphere,
-        label_out=label_out,
-        area_surfs=area_surfs,
-        method=method,
+        label_out=output_file_path,
+        **kwargs,
     )
     if not result.label_out.exists():
         raise FileNotFoundError(f"Label out not found: {result.label_out}")
@@ -234,16 +238,18 @@ def _surface_to_surface(
 
     """
     validate(graph, source, target)
-    path = graph.find_path(source=source, target=target, edge_type="surface_to_surface")
+    shortest_path = graph.find_path(
+        source=source, target=target, edge_type="surface_to_surface"
+    )
     resource_type = "sphere"
 
-    if not path or len(path) < 1:
+    if not shortest_path or len(shortest_path) < 1:
         raise ValueError(f"No valid path found from {source} to {target}.")
 
-    elif len(path) == 1:
+    elif len(shortest_path) == 1:
         raise ValueError(f"Source and target spaces are the same: {source}.")
 
-    elif len(path) == 2:
+    elif len(shortest_path) == 2:
         return graph.fetch_surface_to_surface_transform(
             source=source,
             target=target,
@@ -253,15 +259,15 @@ def _surface_to_surface(
         )
 
     _transform = graph.fetch_surface_to_surface_transform(
-        source=path[0],
-        target=path[1],
+        source=shortest_path[0],
+        target=shortest_path[1],
         density=density,
         hemisphere=hemisphere,
         resource_type=resource_type,
     )
 
-    for i in range(2, len(path)):
-        next_target = path[i]
+    for i in range(2, len(shortest_path)):
+        next_target = shortest_path[i]
 
         hop_output_file = _get_hop_output_file(
             output_file_path, source, next_target, density, hemisphere
@@ -270,7 +276,7 @@ def _surface_to_surface(
         _transform = _two_hops(
             graph=graph,
             source_space=source,
-            mid_space=path[i - 1],
+            mid_space=shortest_path[i - 1],
             target_space=next_target,
             density=density,
             hemisphere=hemisphere,
@@ -310,7 +316,54 @@ def _two_hops(
     output_file_path: str,
     first_transform: SurfaceTransform | None = None,
 ) -> workbench.SurfaceSphereProjectUnprojectOutputs:
-    """Perform a two-hop surface-to-surface transformation via an intermediate space."""
+    """Perform a two-hop surface-to-surface transformation via an intermediate space.
+
+    This is a wrapper around the surface_sphere_project_unproject function with
+    default fetching of the intermediate resources.
+    If you are going from 1 -> 2 -> 3,
+    1 is the source_space, 2 is the mid_space, and 3 is the target_space.
+
+    This function then fetches
+    1 -> 2 transform (first_transform/sphere_in),
+    2 sphere atlas (sphere_project_to),
+    and 2 -> 3 transform (sphere_unproject_from),
+    and performs the projection and unprojection to get from 1 -> 3.
+
+    You can provide the first_transform (1 -> 2) to avoid fetching it again.
+    But it is optional.
+
+    Parameters
+    ----------
+    graph : NeuromapsGraph
+        The neuromaps graph containing the resources.
+    source_space : str
+        The source space name.
+    mid_space : str
+        The intermediate space name.
+    target_space : str
+        The target space name.
+    density : str
+        The density of the surfaces.
+    hemisphere : str
+        The hemisphere ('left' or 'right').
+    output_file_path : str
+        Path to the output GIFTI surface file.
+    first_transform : SurfaceTransform | None, optional
+        Pre-fetched transform from source to mid space. If None, it will be fetched.
+
+    Returns:
+    -------
+    result : workbench.SurfaceSphereProjectUnprojectOutputs
+        Object containing the path to the output spherical surface as result.sphere_out.
+
+    Raises:
+    ------
+    ValueError
+        If no surface transform is found
+        for the source to mid space or mid to target space.
+    FileNotFoundError
+        If any input file does not exist.
+    """
     if first_transform is None:
         first_transform = graph.fetch_surface_to_surface_transform(
             source=source_space,
@@ -373,6 +426,7 @@ def surface_to_surface_transformer(
     output_file_path: str,
     source_density: str | None = None,
     target_density: str | None = None,
+    area_resource: str = "midthickness",
     add_edge: bool = True,
 ) -> workbench.MetricResampleOutputs | workbench.LabelResampleOutputs | None:
     """Public interface for performing surface-to-surface transformations.
@@ -457,43 +511,41 @@ def surface_to_surface_transformer(
         space=source_space,
         hemisphere=hemisphere,
         density=source_density,
-        resource_type="midthickness",
+        resource_type=area_resource,
     )
     if current_area_atlas is None:
-        raise ValueError(f"No midthickness surface found for {source_space}")
+        raise ValueError(f"No {area_resource} surface found for {source_space}")
     current_area: Path = current_area_atlas.fetch()
 
     new_area_atlas = graph.fetch_surface_atlas(
         space=target_space,
         hemisphere=hemisphere,
         density=target_density,
-        resource_type="midthickness",
+        resource_type=area_resource,
     )
     if new_area_atlas is None:
-        raise ValueError(f"No midthickness surface found for {target_space}")
+        raise ValueError(f"No {area_resource} surface found for {target_space}")
     new_area: Path = new_area_atlas.fetch()
 
     area_surfs = workbench.metric_resample_area_surfs_params(
         current_area=current_area, new_area=new_area
     )
+
+    kwargs = {
+        "current_sphere": transform.fetch(),
+        "new_sphere": new_sphere,
+        "area_surfs": area_surfs,
+        "method": "ADAP_BARY_AREA",
+    }
+
     if transformer_type == "label":
         resampled_output = label_resample(
-            label_in=input_file,
-            current_sphere=transform.fetch(),
-            new_sphere=new_sphere,
-            label_out=output_file_path,
-            area_surfs=area_surfs,
-            method="ADAP_BARY_AREA",
+            input_file_path=input_file, output_file_path=output_file_path, **kwargs
         )
 
     elif transformer_type == "metric":
         resampled_output = metric_resample(
-            metric_in=input_file,
-            current_sphere=transform.fetch(),
-            new_sphere=new_sphere,
-            metric_out=output_file_path,
-            area_surfs=area_surfs,
-            method="ADAP_BARY_AREA",
+            input_file_path=input_file, output_file_path=output_file_path, **kwargs
         )
 
     return resampled_output

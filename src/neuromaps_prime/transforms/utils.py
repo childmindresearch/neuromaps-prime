@@ -48,15 +48,19 @@ def validate(
     target: str,
 ) -> None:
     """Validate that source and target spaces exist in the graph."""
-    if source not in graph.nodes(data=False) or target not in graph.nodes(data=False):
+    if source not in graph.nodes(data=False):
         raise ValueError(
-            f"Either source space '{source}' or "
+            f"source space '{source}' does not exist in the graph."
+            f" Available spaces: {list(graph.nodes(data=False))}"
+        )
+    elif target not in graph.nodes(data=False):
+        raise ValueError(
             f"target space '{target}' does not exist in the graph."
             f" Available spaces: {list(graph.nodes(data=False))}"
         )
 
 
-def sort_density_key(d: str) -> int:
+def _get_density_key(d: str) -> int:
     """Key function to sort density strings like '32k' numerically."""
     return int(d.rstrip("kK")) if d.lower().endswith("k") else int(d)
 
@@ -80,7 +84,7 @@ def find_common_density(
 
     if common_densities:
         # If densities are strings like "32k", sort numerically
-        highest_common_density = max(common_densities, key=sort_density_key)
+        highest_common_density = max(common_densities, key=_get_density_key)
         print(f"Highest common density: {highest_common_density}")
     else:
         print("No common density found between atlases and transforms.")
@@ -96,6 +100,6 @@ def find_highest_density(graph: NeuromapsGraph, space: str) -> str:
     if not densities:
         raise ValueError(f"No atlases found for space '{space}'.")
 
-    highest_density = max(densities, key=sort_density_key)
+    highest_density = max(densities, key=_get_density_key)
     print(f"Highest density for space '{space}': {highest_density}")
     return highest_density

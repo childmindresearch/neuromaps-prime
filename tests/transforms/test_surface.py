@@ -16,8 +16,6 @@ from neuromaps_prime.transforms.utils import (
     get_vertex_count,
 )
 
-DATA_DIR = Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share")
-
 
 @pytest.mark.usefixtures("require_workbench")
 @pytest.mark.usefixtures("require_data")
@@ -64,6 +62,7 @@ def test_surface_sphere_project_unproject(data_dir: Path, tmp_path: Path) -> Non
     assert vertices_sphere_in == vertices_sphere_out
 
 
+@pytest.mark.usefixtures("require_workbench")
 def test_surface_to_surface(tmp_path: Path) -> None:
     """Test _surface_to_surface function."""
     graph = NeuromapsGraph()
@@ -91,20 +90,23 @@ def test_surface_to_surface(tmp_path: Path) -> None:
     [
         (
             "label",
-            DATA_DIR / "Inputs/CIVETNMT/"
+            "Inputs/CIVETNMT/"
             "src-CIVETNMT_den-41k_hemi-R_desc-nomedialwall_dparc.label.gii",
         ),
         (
             "metric",
-            DATA_DIR / "Inputs/CIVETNMT/"
+            "Inputs/CIVETNMT/"
             "src-CIVETNMT_den-41k_hemi-R_desc-vaavg_midthickness.shape.gii",
         ),
     ],
 )
+@pytest.mark.usefixtures("require_workbench")
+@pytest.mark.usefixtures("require_data")
 def test_surface_to_surface_transformer(
-    tmp_path: Path, transformer_type: str, input_file: Path
+    data_dir: Path, tmp_path: Path, transformer_type: str, input_file: Path
 ) -> None:
     """Test surface_to_surface_transformer function."""
+    data_dir = data_dir / "share"
     graph = NeuromapsGraph()
 
     source_space = "CIVETNMT"
@@ -117,7 +119,7 @@ def test_surface_to_surface_transformer(
     output = surface_to_surface_transformer(
         transformer_type=transformer_type,
         graph=graph,
-        input_file=input_file,
+        input_file=data_dir / input_file,
         source_space=source_space,
         target_space=target_space,
         hemisphere=hemisphere,

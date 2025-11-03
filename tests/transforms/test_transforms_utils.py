@@ -23,6 +23,7 @@ def test_estimate_surface_density(
     data_dir: Path, surface_fpath: str, expected_density: str
 ) -> None:
     """Test estimate_surface_density function with various mesh densities."""
+    data_dir = data_dir / "share"
     result = estimate_surface_density(data_dir / surface_fpath)
     assert isinstance(result, str)
     assert result == expected_density, f"Expected {expected_density}, but got {result}"
@@ -44,6 +45,7 @@ def test_get_vertex_count(
     data_dir: Path, surface_fpath: str, expected_count: int
 ) -> None:
     """Test get_vertex_count function returns correct vertex count."""
+    data_dir = data_dir / "share"
     result = get_vertex_count(data_dir / surface_fpath)
     assert isinstance(result, int)
     assert result == expected_count, f"Expected {expected_count}, but got {result}"
