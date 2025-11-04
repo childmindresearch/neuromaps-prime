@@ -20,6 +20,7 @@ see examples/example_graph_init.py for usage.
 
 """
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -75,14 +76,18 @@ class Edge:
 class NeuromapsGraph(nx.MultiDiGraph):
     """Multi-directed graph of brain template spaces and their transformations."""
 
-    def __init__(self, yaml_file: Path | None = None) -> None:
+    def __init__(
+        self, yaml_file: Path | None = None, data_dir: Path | None = None
+    ) -> None:
         """Initialize an empty NeuromapsGraph and populate it from a YAML file."""
         super().__init__()
 
-        if yaml_file is None:
-            yaml_file = Path(__file__).parent / "datasets/data/neuromaps_graph.yaml"
-        self.yaml_path = yaml_file
-        self._build_from_yaml(yaml_file)
+        self.data_dir = data_dir or os.getenv("NEUROMAPS_DATA", None)
+        self.yaml_path = (
+            yaml_file
+            or Path(__file__).parent / "datasets" / "data" / "neuromaps_graph.yaml"
+        )
+        self._build_from_yaml(self.yaml_path)
 
     def _build_from_yaml(self, yaml_file: Path) -> None:
         """Read in the YAML file and call _build_from_dict to populate the graph."""
@@ -161,7 +166,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
                         SurfaceAtlas(
                             name=f"{node_name}_{density}_{hemisphere}_{surface_type}",
                             description=description,
-                            file_path=Path(path),
+                            file_path=Path(path)
+                            if self.data_dir is None
+                            else self.data_dir / path,
                             space=node_name,
                             density=density,
                             hemisphere=hemisphere,
@@ -180,7 +187,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
                     VolumeAtlas(
                         name=f"{node_name}_{resolution}_{volume_type}",
                         description=description,
-                        file_path=Path(path),
+                        file_path=Path(path)
+                        if self.data_dir is None
+                        else self.data_dir / path,
                         space=node_name,
                         resolution=resolution,
                         resource_type=volume_type,
@@ -198,7 +207,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
                     VolumeTransform(
                         name=f"{source_name}_to_{target_name}_{resolution}_{volume_type}",
                         description=f"Transform from {source_name} to {target_name}",
-                        file_path=Path(path),
+                        file_path=Path(path)
+                        if self.data_dir is None
+                        else self.data_dir / path,
                         source_space=source_name,
                         target_space=target_name,
                         resolution=resolution,
@@ -223,7 +234,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
                             description=(
                                 f"Transform from {source_name} to {target_name}"
                             ),
-                            file_path=Path(path),
+                            file_path=Path(path)
+                            if self.data_dir is None
+                            else self.data_dir / path,
                             source_space=source_name,
                             target_space=target_name,
                             density=density,

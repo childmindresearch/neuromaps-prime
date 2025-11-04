@@ -6,14 +6,14 @@ nodes:
     surfaces:
       41k:
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+          left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+          right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
         white:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_white.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_white.surf.gii
+          left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_white.surf.gii
+          right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_white.surf.gii
     volumes:
       2mm:
         T1w: /url/to/src-MEBRAINS_vox-2mm_T1w.nii.gz

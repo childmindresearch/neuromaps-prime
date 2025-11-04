@@ -1,8 +1,24 @@
 """Test suite for graph functionalities in neuromaps_nhp."""
 
+from pathlib import Path
+
 import pytest
 
 from neuromaps_prime.graph import NeuromapsGraph
+
+
+@pytest.mark.usefixtures("require_data")
+def test_graph_initialization_with_data_dir(data_dir: Path, tmp_path: Path) -> None:
+    """Test initializing graph with data directory."""
+    graph = NeuromapsGraph(data_dir=data_dir)
+    assert graph is not None
+    assert graph.data_dir == data_dir
+    assert len(graph.nodes) > 0
+    assert len(graph.edges) > 0
+    surf = graph.fetch_surface_atlas(
+        space="CIVETNMT", density="41k", hemisphere="left", resource_type="midthickness"
+    )
+    assert data_dir.resolve() in surf.file_path.resolve().parents
 
 
 @pytest.fixture
