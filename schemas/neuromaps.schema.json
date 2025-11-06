@@ -45,7 +45,7 @@
                         },
                         "annotations": {
                             "type": "object",
-                            "description": "Dictionary of annotation files keyed by resolution and type.",
+                            "description": "Annotation files sorted by resolution and type.",
                             "patternProperties": {
                                 "^[0-9]+(u|m)m$": {
                                     "type": "object",
