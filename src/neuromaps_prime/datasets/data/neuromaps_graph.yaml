@@ -98,10 +98,9 @@ nodes:
           left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_inflated.surf.gii
           right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
         annotations:
-          receptor maps:
-            ampa: 
-              gii: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_hemi-L_desc-ampa_annot.func.gii
-              png: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_hemi-L_desc-ampa_annot_surf.png
+          receptor-ampa: 
+            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-ampa_annot.func.gii
+            right: /url
 
 - NMT2Sym:
     species: macaque

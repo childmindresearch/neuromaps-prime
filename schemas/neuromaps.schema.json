@@ -38,30 +38,26 @@
                                         "sphere": {
                                             "$ref": "#/$defs/surfaceHemisphere"
                                         },
-                                        "inflated": {
-                                            "$ref": "#/$defs/surfaceHemisphere"
-                                        },
                                         "annotations": {
                                             "type": "object",
-                                            "description": "Annotations grouped by category and name.",
+                                            "description": "Annotations grouped by name, each with left/right hemisphere files.",
                                             "patternProperties": {
-                                                "^[A-Za-z0-9_\\- ]+$": {
+                                                "^[A-Za-z0-9_\\-]+$": {
                                                     "type": "object",
-                                                    "description": "Annotation category (e.g. receptor maps).",
-                                                    "patternProperties": {
-                                                        "^[A-Za-z0-9_\\-]+$": {
-                                                            "type": "object",
-                                                            "description": "Annotation name (e.g. ampa).",
-                                                            "patternProperties": {
-                                                                "^[A-Za-z0-9_\\-]+$": {
-                                                                    "type": "string",
-                                                                    "format": "uri-reference",
-                                                                    "description": "File reference for this annotation (e.g. gii, png)"
-                                                                }
-                                                            },
-                                                            "additionalProperties": false
+                                                    "description": "Annotation name (e.g. receptor-ampa).",
+                                                    "properties": {
+                                                        "left": {
+                                                            "type": ["string", "null"],
+                                                            "format": "uri-reference",
+                                                            "description": "File reference for left hemisphere (e.g. .func.gii)."
+                                                        },
+                                                        "right": {
+                                                            "type": ["string", "null"],
+                                                            "format": "uri-reference",
+                                                            "description": "File reference for right hemisphere (e.g. .func.gii)."
                                                         }
                                                     },
+                                                    "required": ["left", "right"],
                                                     "additionalProperties": false
                                                 }
                                             },
