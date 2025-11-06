@@ -48,8 +48,7 @@
                         }
                     },
                     "required": [
-                        "description",
-                        "annotations"
+                        "description"
                     ],
                     "additionalProperties": false
                 }
