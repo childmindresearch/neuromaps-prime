@@ -42,10 +42,14 @@
                         },
                         "volumes": {
                             "$ref": "#/$defs/volumeDict"
+                        },
+                        "annotations": {
+                            "$ref": "#/$defs/annotationDict"
                         }
                     },
                     "required": [
-                        "description"
+                        "description",
+                        "annotations"
                     ],
                     "additionalProperties": false
                 }
@@ -139,6 +143,24 @@
                             "type": "string",
                             "format": "uri-reference",
                             "description": "URI pointing to a volume file (e.g., T1w, T2w)"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "annotationDict": {
+            "type": "object",
+            "description": "Dictionary of annotation files keyed by resolution and type.",
+            "patternProperties": {
+                "^[0-9]+(u|m)m$": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^[A-Za-z0-9_]+$": {
+                            "type": "string",
+                            "format": "uri-reference",
+                            "description": "URI pointing to an annotation file (e.g., ampa, labels)"
                         }
                     },
                     "additionalProperties": false
