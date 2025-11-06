@@ -14,6 +14,10 @@
                             "type": "string",
                             "description": "Description for node"
                         },
+                        "species": {
+                            "type": "string",
+                            "description": "Species name (e.g. human, macaque)"
+                        },
                         "surfaces": {
                             "type": "object",
                             "description": "Dictionary of surface densities.",
@@ -33,6 +37,35 @@
                                         },
                                         "sphere": {
                                             "$ref": "#/$defs/surfaceHemisphere"
+                                        },
+                                        "inflated": {
+                                            "$ref": "#/$defs/surfaceHemisphere"
+                                        },
+                                        "annotations": {
+                                            "type": "object",
+                                            "description": "Annotations grouped by category and name.",
+                                            "patternProperties": {
+                                                "^[A-Za-z0-9_\\- ]+$": {
+                                                    "type": "object",
+                                                    "description": "Annotation category (e.g. receptor maps).",
+                                                    "patternProperties": {
+                                                        "^[A-Za-z0-9_\\-]+$": {
+                                                            "type": "object",
+                                                            "description": "Annotation name (e.g. ampa).",
+                                                            "patternProperties": {
+                                                                "^[A-Za-z0-9_\\-]+$": {
+                                                                    "type": "string",
+                                                                    "format": "uri-reference",
+                                                                    "description": "File reference for this annotation (e.g. gii, png)"
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "additionalProperties": false
                                         }
                                     },
                                     "additionalProperties": false

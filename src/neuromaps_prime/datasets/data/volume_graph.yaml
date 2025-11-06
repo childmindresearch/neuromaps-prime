@@ -19,9 +19,6 @@ nodes:
     volumes:
       500um:
         T1w: share/Inputs/Yerkes19/src-Yerkes19_res-0p50mm_T1w.nii.gz
-    annotations:
-      250um:
-        ampa: share/resources/Yerkes19/annotations/macaque_acq-ampa_0.25mm_n-3_1_17.func.gii
 
 edges:
   volume_to_volume:
