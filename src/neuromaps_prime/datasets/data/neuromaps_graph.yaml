@@ -307,13 +307,14 @@ edges:
   - from: MEBRAINS
     to: Yerkes19
     surfaces:
-      32k:
+      101k:
         midthickness:
-          left: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_midthickness.surf.gii
+          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_midthickness.surf.gii
+          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_sphere.surf.gii
+          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_sphere.surf.gii
+          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_sphere.surf.gii
+
   - from: NMT2Sym
     to: CIVETNMT
     surfaces:
@@ -377,13 +378,14 @@ edges:
   - from: Yerkes19
     to: MEBRAINS
     surfaces:
-      101k:
+      32k:
         midthickness:
-          left: share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_midthickness.surf.gii
+          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_midthickness.surf.gii
+          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_sphere.surf.gii
-          right: share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_sphere.surf.gii
+          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_sphere.surf.gii
+          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_sphere.surf.gii
+
   - from: Yerkes19
     to: NMT2Sym
     surfaces:
