@@ -16,9 +16,9 @@ nodes:
           right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_white.surf.gii
     volumes:
       2mm:
-        T1w: /url/to/src-MEBRAINS_vox-2mm_T1w.nii.gz
-        T2w: /url/to/src-MEBRAINS_vox-2mm_T2w.nii.gz
-        brain_mask: /url/to/src-MEBRAINS_vox-2mm_brain_mask.nii.gz
+        T1w: share/Inputs/MEBRAINS/src-MEBRAINS_vox-2mm_T1w.nii.gz
+        T2w: share/Inputs/MEBRAINS/src-MEBRAINS_vox-2mm_T2w.nii.gz
+        brain_mask: share/Inputs/MEBRAINS/src-MEBRAINS_vox-2mm_brain_mask.nii.gz
 
 - D99:
     species: macaque
@@ -26,22 +26,22 @@ nodes:
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/D99/src-D99_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/D99/src-D99_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Inputs/D99/src-D99_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Inputs/D99/src-D99_den-41k_hemi-R_midthickness.surf.gii
         pial:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/D99/src-D99_den-41k_hemi-L_pial.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/D99/src-D99_den-41k_hemi-R_pial.surf.gii
+          left: share/Inputs/D99/src-D99_den-41k_hemi-L_pial.surf.gii
+          right: share/Inputs/D99/src-D99_den-41k_hemi-R_pial.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/D99/src-D99_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/D99/src-D99_den-41k_hemi-R_sphere.surf.gii
+          left: share/Inputs/D99/src-D99_den-41k_hemi-L_sphere.surf.gii
+          right: share/Inputs/D99/src-D99_den-41k_hemi-R_sphere.surf.gii
         white:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/D99/src-D99_den-41k_hemi-L_white.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/D99/src-D99_den-41k_hemi-R_white.surf.gii
+          left: share/Inputs/D99/src-D99_den-41k_hemi-L_white.surf.gii
+          right: share/Inputs/D99/src-D99_den-41k_hemi-R_white.surf.gii
     volumes:
       2mm:
-        T1w: /url/to/src-D99_vox-2mm_T1w.nii.gz
-        T2w: /url/to/src-D99_vox-2mm_T2w.nii.gz
-        brain_mask: /url/to/src-D99_vox-2mm_brain_mask.nii.gz
+        T1w: share/Inputs/D99/src-D99_vox-2mm_T1w.nii.gz
+        T2w: share/Inputs/D99/src-D99_vox-2mm_T2w.nii.gz
+        brain_mask: share/Inputs/D99/src-D99_vox-2mm_brain_mask.nii.gz
 
 - MEBRAINS:
     species: macaque
@@ -49,17 +49,17 @@ nodes:
     surfaces:
       101k:
         pial:
-          left: /url/to/src-MEBRAINS_den-101k_hemi-L_pial.surf.gii
-          right: /url/to/src-MEBRAINS_den-101k_hemi-R_pial.surf.gii
+          left: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_pial.surf.gii
+          right: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_pial.surf.gii
         midthickness:
-          left: /url/to/src-MEBRAINS_den-101k_hemi-L_midthickness.surf.gii
-          right: /url/to/src-MEBRAINS_den-101k_hemi-R_midthickness.surf.gii
+          left: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_midthickness.surf.gii
+          right: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_midthickness.surf.gii
         white:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
+          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
+          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
         inflated:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
+          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
 
 - Yerkes19:
     species: macaque
@@ -67,36 +67,36 @@ nodes:
     surfaces:
       10k:
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_sphere.surf.gii
+          left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii
+          right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_sphere.surf.gii
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_midthickness.surf.gii
+          left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_midthickness.surf.gii
         white:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_white.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_white.surf.gii
+          left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_white.surf.gii
+          right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_white.surf.gii
         pial:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_pial.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_pial.surf.gii
+          left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_pial.surf.gii
+          right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_pial.surf.gii
         inflated:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_inflated.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_inflated.surf.gii
+          left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_inflated.surf.gii
+          right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_inflated.surf.gii
       32k:
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+          left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
+          right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_sphere.surf.gii
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
         white:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_white.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_white.surf.gii
+          left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_white.surf.gii
+          right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_white.surf.gii
         pial:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_pial.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_pial.surf.gii
+          left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_pial.surf.gii
+          right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_pial.surf.gii
         inflated:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_inflated.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
+          left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_inflated.surf.gii
+          right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
 
 - NMT2Sym:
     species: macaque
@@ -104,17 +104,17 @@ nodes:
     surfaces:
       41k:
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sphere.rsl.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sphere.rsl.gii
+          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sphere.rsl.gii
+          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sphere.rsl.gii
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_midthickness.rsl.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_midthickness.rsl.gii
+          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_midthickness.rsl.gii
+          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_midthickness.rsl.gii
         white:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
+          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
+          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
         inflated:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
+          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
 ############### Human Nodes ########################
 - S1200:
     species: human
@@ -122,39 +122,39 @@ nodes:
     surfaces:
       10k:
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-10k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-10k_hemi-R_sphere.surf.gii
+          left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_sphere.surf.gii
+          right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_sphere.surf.gii
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-10k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-10k_hemi-R_midthickness.surf.gii
+          left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_midthickness.surf.gii
         white:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-10k_hemi-L_white.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-10k_hemi-R_white.surf.gii
+          left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_white.surf.gii
+          right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_white.surf.gii
         pial:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-10k_hemi-L_pial.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-10k_hemi-R_pial.surf.gii
+          left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_pial.surf.gii
+          right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_pial.surf.gii
         inflated:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-10k_hemi-L_inflated.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-10k_hemi-R_inflated.surf.gii
+          left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_inflated.surf.gii
+          right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_inflated.surf.gii
       32k:
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-R_sphere.surf.gii
+          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_sphere.surf.gii
+          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_sphere.surf.gii
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_midthickness.surf.gii
         white:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-L_white.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-R_white.surf.gii
+          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_white.surf.gii
+          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_white.surf.gii
         pial:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-L_pial.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-R_pial.surf.gii
+          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_pial.surf.gii
+          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_pial.surf.gii
         inflated:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-L_inflated.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-R_inflated.surf.gii
+          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_inflated.surf.gii
+          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_inflated.surf.gii
         flat:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-L_flat.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/S1200/src-S1200_den-32k_hemi-R_flat.surf.gii
+          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_flat.surf.gii
+          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_flat.surf.gii
 
 - CIVET:
     species: human
@@ -162,20 +162,20 @@ nodes:
     surfaces:
       32k:
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_sphere.surf.gii
+          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_sphere.surf.gii
+          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_sphere.surf.gii
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_midthickness.surf.gii
         white:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_white.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_white.surf.gii
+          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_white.surf.gii
+          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_white.surf.gii
         pial:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_pial.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_pial.surf.gii
+          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_pial.surf.gii
+          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_pial.surf.gii
         inflated:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_inflated.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_inflated.surf.gii
+          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_inflated.surf.gii
+          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_inflated.surf.gii
 
 - fsaverage:
     species: human
@@ -183,20 +183,20 @@ nodes:
     surfaces:
       10k:
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_sphere.surf.gii
+          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_sphere.surf.gii
+          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_sphere.surf.gii
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_midthickness.surf.gii
+          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_midthickness.surf.gii
         white:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_white.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_white.surf.gii
+          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_white.surf.gii
+          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_white.surf.gii
         pial:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_pial.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_pial.surf.gii
+          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_pial.surf.gii
+          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_pial.surf.gii
         inflated:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_inflated.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_inflated.surf.gii
+          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_inflated.surf.gii
+          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_inflated.surf.gii
 
 edges:
   surface_to_surface:
@@ -206,220 +206,220 @@ edges:
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-R_sphere.surf.gii
 
   - from: CIVETNMT
     to: MEBRAINS
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
 
   - from: CIVETNMT
     to: NMT2Sym
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
 
   - from: CIVETNMT
     to: Yerkes19
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
 
   - from: D99
     to: CIVETNMT
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
 
   - from: D99
     to: MEBRAINS
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
 
   - from: D99
     to: NMT2Sym
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
 
   - from: D99
     to: Yerkes19
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
 
   - from: MEBRAINS
     to: CIVETNMT
     surfaces:
       101k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-R_sphere.surf.gii
+          left: share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-L_sphere.surf.gii
+          right: share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-R_sphere.surf.gii
 
   - from: MEBRAINS
     to: D99
     surfaces:
       101k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-R_sphere.surf.gii
+          left: share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-L_sphere.surf.gii
+          right: share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-R_sphere.surf.gii
 
   - from: MEBRAINS
     to: NMT2Sym
     surfaces:
       101k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-R_sphere.surf.gii
+          left: share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-L_sphere.surf.gii
+          right: share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-R_sphere.surf.gii
 
   - from: MEBRAINS
     to: Yerkes19
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_sphere.surf.gii
 
   - from: NMT2Sym
     to: CIVETNMT
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
 
   - from: NMT2Sym
     to: D99
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-R_sphere.surf.gii
 
   - from: NMT2Sym
     to: MEBRAINS
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
 
   - from: NMT2Sym
     to: Yerkes19
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_sphere.surf.gii
 
   - from: Yerkes19
     to: CIVETNMT
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-R_sphere.surf.gii
 
   - from: Yerkes19
     to: D99
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-R_sphere.surf.gii
 
   - from: Yerkes19
     to: MEBRAINS
     surfaces:
       101k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_sphere.surf.gii
+          left: share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_sphere.surf.gii
+          right: share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_sphere.surf.gii
 
   - from: Yerkes19
     to: NMT2Sym
     surfaces:
       41k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
 
 ################### Cross species Edges ####################
   - from: Yerkes19
@@ -427,36 +427,36 @@ edges:
     surfaces:
       10k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_sphere.surf.gii
+          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_sphere.surf.gii
+          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_sphere.surf.gii
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-R_sphere.surf.gii
 
   - from: S1200
     to: Yerkes19
     surfaces:
       10k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_sphere.surf.gii
+          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_sphere.surf.gii
+          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_sphere.surf.gii
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
 
 ###################### Human Edges #########################
   - from: CIVET
@@ -464,105 +464,105 @@ edges:
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-R_sphere.surf.gii
+          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-L_sphere.surf.gii
+          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-R_sphere.surf.gii
   - from: CIVET
     to: S1200
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-R_sphere.surf.gii
+          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-L_sphere.surf.gii
+          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-R_sphere.surf.gii
   - from: fsaverage
     to: CIVET
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-R_sphere.surf.gii
+          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-L_sphere.surf.gii
+          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-R_sphere.surf.gii
   - from: fsaverage
     to: S1200
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-R_sphere.surf.gii
+          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-L_sphere.surf.gii
+          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-R_sphere.surf.gii
 
   - from: S1200
     to: CIVET
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-R_sphere.surf.gii
+          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-L_sphere.surf.gii
+          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-R_sphere.surf.gii
 
   - from: S1200
     to: fsaverage
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-R_sphere.surf.gii
+          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-L_sphere.surf.gii
+          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-R_sphere.surf.gii
 
   volume_to_volume:
   - from: MEBRAINS
