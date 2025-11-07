@@ -100,7 +100,7 @@ nodes:
         annotations:
           receptor-ampa: 
             left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-ampa_annot.func.gii
-            right: /url
+            right: null
 
 - NMT2Sym:
     species: macaque
