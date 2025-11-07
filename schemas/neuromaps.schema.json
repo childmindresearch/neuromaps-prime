@@ -14,10 +14,6 @@
                             "type": "string",
                             "description": "Description for node"
                         },
-                        "species": {
-                            "type": "string",
-                            "description": "Species name (e.g. human, macaque)"
-                        },
                         "surfaces": {
                             "type": "object",
                             "description": "Dictionary of surface densities.",
@@ -37,31 +33,6 @@
                                         },
                                         "sphere": {
                                             "$ref": "#/$defs/surfaceHemisphere"
-                                        },
-                                        "annotations": {
-                                            "type": "object",
-                                            "description": "Annotations grouped by name, each with left/right hemisphere files.",
-                                            "patternProperties": {
-                                                "^[A-Za-z0-9_\\-]+$": {
-                                                    "type": "object",
-                                                    "description": "Annotation name (e.g. receptor-ampa).",
-                                                    "properties": {
-                                                        "left": {
-                                                            "type": ["string", "null"],
-                                                            "format": "uri-reference",
-                                                            "description": "File reference for left hemisphere (e.g. .func.gii)."
-                                                        },
-                                                        "right": {
-                                                            "type": ["string", "null"],
-                                                            "format": "uri-reference",
-                                                            "description": "File reference for right hemisphere (e.g. .func.gii)."
-                                                        }
-                                                    },
-                                                    "required": ["left", "right"],
-                                                    "additionalProperties": false
-                                                }
-                                            },
-                                            "additionalProperties": false
                                         }
                                     },
                                     "additionalProperties": false
