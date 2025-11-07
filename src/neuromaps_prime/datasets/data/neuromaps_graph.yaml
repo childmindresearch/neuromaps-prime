@@ -97,49 +97,6 @@ nodes:
         inflated:
           left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_inflated.surf.gii
           right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
-        annotations:
-          receptor-ampa: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-ampa_annot.func.gii
-            right: null
-          receptor-cgp5: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-cgp5_annot.func.gii
-            right: null
-          receptor-damp: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-damp_annot.func.gii
-            right: null
-          receptor-dpat: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-dpat_annot.func.gii
-            right: null
-          receptor-dpmg: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-dpmg_annot.func.gii
-            right: null
-          receptor-flum: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-flum_annot.func.gii
-            right: null
-          receptor-kain: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-kain_annot.func.gii
-            right: null
-          receptor-keta: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-keta_annot.func.gii
-            right: null
-          receptor-mk80: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-mk80_annot.func.gii
-            right: null
-          receptor-musc: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-musc_annot.func.gii
-            right: null
-          receptor-oxot: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-oxot_annot.func.gii
-            right: null
-          receptor-pire: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-pire_annot.func.gii
-            right: null
-          receptor-praz: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-praz_annot.func.gii
-            right: null
-          receptor-uk14: 
-            left: share/resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-uk14_annot.func.gii
-            right: null
 
 - NMT2Sym:
     species: macaque
