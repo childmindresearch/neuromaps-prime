@@ -24,6 +24,7 @@ def test_surface_sphere_project_unproject(data_dir: Path, tmp_path: Path) -> Non
     out_sphere              = Path(f"{data_dir}/out_sphere.surf.gii").resolve()
     ------------------------
     """
+    data_dir = data_dir / "share"
     graph = NeuromapsGraph(data_dir=data_dir)
     sphere_in_transform = graph.fetch_surface_to_surface_transform(
         source="S1200",
@@ -72,6 +73,7 @@ def test_surface_sphere_project_unproject(data_dir: Path, tmp_path: Path) -> Non
 @pytest.mark.usefixtures("require_data")
 def test_surface_to_surface(tmp_path: Path, data_dir: Path) -> None:
     """Test _surface_to_surface function."""
+    data_dir = data_dir / "share"
     graph = NeuromapsGraph(data_dir=data_dir)
 
     source_space = "S1200"
@@ -96,12 +98,12 @@ def test_surface_to_surface(tmp_path: Path, data_dir: Path) -> None:
     [
         (
             "label",
-            "share/Inputs/CIVETNMT/"
+            "Inputs/CIVETNMT/"
             "src-CIVETNMT_den-41k_hemi-R_desc-nomedialwall_dparc.label.gii",
         ),
         (
             "metric",
-            "share/Inputs/CIVETNMT/"
+            "Inputs/CIVETNMT/"
             "src-CIVETNMT_den-41k_hemi-R_desc-vaavg_midthickness.shape.gii",
         ),
     ],
@@ -112,6 +114,7 @@ def test_surface_to_surface_transformer(
     data_dir: Path, tmp_path: Path, transformer_type: str, input_file: Path
 ) -> None:
     """Test surface_to_surface_transformer function."""
+    data_dir = data_dir / "share"
     graph = NeuromapsGraph(data_dir=data_dir)
 
     source_space = "CIVETNMT"

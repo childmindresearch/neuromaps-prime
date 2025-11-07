@@ -5,51 +5,56 @@ nodes:
     surfaces:
       41k:
         sphere:
-          left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
-          right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+          left: Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+          right: Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
         midthickness:
-          left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
+          left: Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
+          right: Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
         white:
-          left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_white.surf.gii
-          right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_white.surf.gii
+          left: Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_white.surf.gii
+          right: Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_white.surf.gii
+
 - D99:
     species: macaque
     description: D99 Macaque Atlas
     surfaces:
       41k:
         midthickness:
-          left: share/Inputs/D99/src-D99_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/D99/src-D99_den-41k_hemi-R_midthickness.surf.gii
+          left: Inputs/D99/src-D99_den-41k_hemi-L_midthickness.surf.gii
+          right: Inputs/D99/src-D99_den-41k_hemi-R_midthickness.surf.gii
         pial:
-          left: share/Inputs/D99/src-D99_den-41k_hemi-L_pial.surf.gii
-          right: share/Inputs/D99/src-D99_den-41k_hemi-R_pial.surf.gii
+          left: Inputs/D99/src-D99_den-41k_hemi-L_pial.surf.gii
+          right: Inputs/D99/src-D99_den-41k_hemi-R_pial.surf.gii
         sphere:
-          left: share/Inputs/D99/src-D99_den-41k_hemi-L_sphere.surf.gii
-          right: share/Inputs/D99/src-D99_den-41k_hemi-R_sphere.surf.gii
+          left: Inputs/D99/src-D99_den-41k_hemi-L_sphere.surf.gii
+          right: Inputs/D99/src-D99_den-41k_hemi-R_sphere.surf.gii
         white:
-          left: share/Inputs/D99/src-D99_den-41k_hemi-L_white.surf.gii
-          right: share/Inputs/D99/src-D99_den-41k_hemi-R_white.surf.gii
+          left: Inputs/D99/src-D99_den-41k_hemi-L_white.surf.gii
+          right: Inputs/D99/src-D99_den-41k_hemi-R_white.surf.gii
     volumes:
       250um:
         T1w: share/Inputs/D99/src-D99_res-0p25mm_T1w.nii.gz
+
 - MEBRAINS:
     species: macaque
     description: MEBRAINS 1.0 Macaque Atlas
     surfaces:
       101k:
+        sphere:
+          left: Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_sphere.surf.gii
+          right: Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_sphere.surf.gii
         pial:
-          left: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_pial.surf.gii
-          right: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_pial.surf.gii
+          left: Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_pial.surf.gii
+          right: Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_pial.surf.gii
         midthickness:
-          left: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_midthickness.surf.gii
+          left: Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_midthickness.surf.gii
+          right: Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_midthickness.surf.gii
         white:
-          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
-          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
+          left: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
+          right: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
         inflated:
-          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
-          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+          left: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
+          right: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
     volumes:
       400um:
         T1w: share/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm_T1w.nii.gz
@@ -59,36 +64,36 @@ nodes:
     surfaces:
       10k:
         sphere:
-          left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii
-          right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_sphere.surf.gii
+          left: Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii
+          right: Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_sphere.surf.gii
         midthickness:
-          left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_midthickness.surf.gii
+          left: Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_midthickness.surf.gii
+          right: Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_midthickness.surf.gii
         white:
-          left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_white.surf.gii
-          right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_white.surf.gii
+          left: Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_white.surf.gii
+          right: Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_white.surf.gii
         pial:
-          left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_pial.surf.gii
-          right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_pial.surf.gii
+          left: Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_pial.surf.gii
+          right: Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_pial.surf.gii
         inflated:
-          left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_inflated.surf.gii
-          right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_inflated.surf.gii
+          left: Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_inflated.surf.gii
+          right: Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_inflated.surf.gii
       32k:
         sphere:
-          left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
-          right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+          left: Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
+          right: Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_sphere.surf.gii
         midthickness:
-          left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
+          left: Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
+          right: Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
         white:
-          left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_white.surf.gii
-          right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_white.surf.gii
+          left: Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_white.surf.gii
+          right: Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_white.surf.gii
         pial:
-          left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_pial.surf.gii
-          right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_pial.surf.gii
+          left: Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_pial.surf.gii
+          right: Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_pial.surf.gii
         inflated:
-          left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_inflated.surf.gii
-          right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
+          left: Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_inflated.surf.gii
+          right: Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
     volumes:
       500um:
         T1w: share/Inputs/Yerkes19/src-Yerkes19_res-0p50mm_T1w.nii.gz
@@ -98,17 +103,17 @@ nodes:
     surfaces:
       41k:
         sphere:
-          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sphere.rsl.gii
-          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sphere.rsl.gii
+          left: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sphere.rsl.gii
+          right: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sphere.rsl.gii
         midthickness:
-          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_midthickness.rsl.gii
-          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_midthickness.rsl.gii
+          left: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_midthickness.rsl.gii
+          right: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_midthickness.rsl.gii
         white:
-          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
-          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
+          left: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
+          right: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
         inflated:
-          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
-          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+          left: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
+          right: Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
     volumes:
       250um:
         T1w: share/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm_T1w.nii.gz
@@ -118,79 +123,81 @@ nodes:
     surfaces:
       10k:
         sphere:
-          left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_sphere.surf.gii
-          right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_sphere.surf.gii
+          left: Inputs/S1200/src-S1200_den-10k_hemi-L_sphere.surf.gii
+          right: Inputs/S1200/src-S1200_den-10k_hemi-R_sphere.surf.gii
         midthickness:
-          left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_midthickness.surf.gii
+          left: Inputs/S1200/src-S1200_den-10k_hemi-L_midthickness.surf.gii
+          right: Inputs/S1200/src-S1200_den-10k_hemi-R_midthickness.surf.gii
         white:
-          left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_white.surf.gii
-          right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_white.surf.gii
+          left: Inputs/S1200/src-S1200_den-10k_hemi-L_white.surf.gii
+          right: Inputs/S1200/src-S1200_den-10k_hemi-R_white.surf.gii
         pial:
-          left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_pial.surf.gii
-          right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_pial.surf.gii
+          left: Inputs/S1200/src-S1200_den-10k_hemi-L_pial.surf.gii
+          right: Inputs/S1200/src-S1200_den-10k_hemi-R_pial.surf.gii
         inflated:
-          left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_inflated.surf.gii
-          right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_inflated.surf.gii
+          left: Inputs/S1200/src-S1200_den-10k_hemi-L_inflated.surf.gii
+          right: Inputs/S1200/src-S1200_den-10k_hemi-R_inflated.surf.gii
       32k:
         sphere:
-          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_sphere.surf.gii
-          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_sphere.surf.gii
+          left: Inputs/S1200/src-S1200_den-32k_hemi-L_sphere.surf.gii
+          right: Inputs/S1200/src-S1200_den-32k_hemi-R_sphere.surf.gii
         midthickness:
-          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_midthickness.surf.gii
+          left: Inputs/S1200/src-S1200_den-32k_hemi-L_midthickness.surf.gii
+          right: Inputs/S1200/src-S1200_den-32k_hemi-R_midthickness.surf.gii
         white:
-          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_white.surf.gii
-          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_white.surf.gii
+          left: Inputs/S1200/src-S1200_den-32k_hemi-L_white.surf.gii
+          right: Inputs/S1200/src-S1200_den-32k_hemi-R_white.surf.gii
         pial:
-          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_pial.surf.gii
-          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_pial.surf.gii
+          left: Inputs/S1200/src-S1200_den-32k_hemi-L_pial.surf.gii
+          right: Inputs/S1200/src-S1200_den-32k_hemi-R_pial.surf.gii
         inflated:
-          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_inflated.surf.gii
-          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_inflated.surf.gii
+          left: Inputs/S1200/src-S1200_den-32k_hemi-L_inflated.surf.gii
+          right: Inputs/S1200/src-S1200_den-32k_hemi-R_inflated.surf.gii
         flat:
-          left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_flat.surf.gii
-          right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_flat.surf.gii
+          left: Inputs/S1200/src-S1200_den-32k_hemi-L_flat.surf.gii
+          right: Inputs/S1200/src-S1200_den-32k_hemi-R_flat.surf.gii
+
 - CIVET:
     species: human
     description: CIVET Human Template
     surfaces:
       32k:
         sphere:
-          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_sphere.surf.gii
-          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_sphere.surf.gii
+          left: Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_sphere.surf.gii
+          right: Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_sphere.surf.gii
         midthickness:
-          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_midthickness.surf.gii
+          left: Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_midthickness.surf.gii
+          right: Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_midthickness.surf.gii
         white:
-          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_white.surf.gii
-          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_white.surf.gii
+          left: Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_white.surf.gii
+          right: Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_white.surf.gii
         pial:
-          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_pial.surf.gii
-          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_pial.surf.gii
+          left: Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_pial.surf.gii
+          right: Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_pial.surf.gii
         inflated:
-          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_inflated.surf.gii
-          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_inflated.surf.gii
+          left: Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_inflated.surf.gii
+          right: Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_inflated.surf.gii
+
 - fsaverage:
     species: human
     description: FreeSurfer fsaverage Template
     surfaces:
       10k:
         sphere:
-          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_sphere.surf.gii
-          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_sphere.surf.gii
+          left: Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_sphere.surf.gii
+          right: Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_sphere.surf.gii
         midthickness:
-          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_midthickness.surf.gii
+          left: Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_midthickness.surf.gii
+          right: Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_midthickness.surf.gii
         white:
-          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_white.surf.gii
-          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_white.surf.gii
+          left: Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_white.surf.gii
+          right: Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_white.surf.gii
         pial:
-          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_pial.surf.gii
-          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_pial.surf.gii
+          left: Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_pial.surf.gii
+          right: Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_pial.surf.gii
         inflated:
-          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_inflated.surf.gii
-          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_inflated.surf.gii
+          left: Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_inflated.surf.gii
+          right: Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_inflated.surf.gii
 
 edges:
   surface_to_surface:
@@ -199,365 +206,366 @@ edges:
     surfaces:
       41k:
         midthickness:
-          left: share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-R_midthickness.surf.gii
+          left: Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-L_midthickness.surf.gii
+          right: Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-R_sphere.surf.gii
+          left: Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-L_sphere.surf.gii
+          right: Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-R_sphere.surf.gii
+
   - from: CIVETNMT
     to: MEBRAINS
     surfaces:
       41k:
         midthickness:
-          left: share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
+          left: Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
+          right: Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
+          left: Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
+          right: Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
+
   - from: CIVETNMT
     to: NMT2Sym
     surfaces:
       41k:
         midthickness:
-          left: share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-R_midthickness.surf.gii
+          left: Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-L_midthickness.surf.gii
+          right: Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
+          left: Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
+          right: Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
+
   - from: CIVETNMT
     to: Yerkes19
     surfaces:
       41k:
         midthickness:
-          left: share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
+          left: Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
+          right: Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
+          left: Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
+          right: Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
+
   - from: D99
     to: CIVETNMT
     surfaces:
       41k:
         midthickness:
-          left: share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
+          left: Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
+          right: Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+          left: Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+          right: Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+
   - from: D99
     to: MEBRAINS
     surfaces:
       41k:
         midthickness:
-          left: share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
+          left: Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
+          right: Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
+          left: Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
+          right: Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
+
   - from: D99
     to: NMT2Sym
     surfaces:
       41k:
         midthickness:
-          left: share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-R_midthickness.surf.gii
+          left: Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-L_midthickness.surf.gii
+          right: Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
+          left: Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
+          right: Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
+
   - from: D99
     to: Yerkes19
     surfaces:
       32k:
         midthickness:
-          left: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+
   - from: MEBRAINS
     to: CIVETNMT
     surfaces:
       101k:
         midthickness:
-          left: share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-R_midthickness.surf.gii
+          left: Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-L_midthickness.surf.gii
+          right: Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-R_sphere.surf.gii
+          left: Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-L_sphere.surf.gii
+          right: Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-R_sphere.surf.gii
+
   - from: MEBRAINS
     to: D99
     surfaces:
       101k:
         midthickness:
-          left: share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-R_midthickness.surf.gii
+          left: Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-L_midthickness.surf.gii
+          right: Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-L_sphere.surf.gii
-          right: share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-R_sphere.surf.gii
+          left: Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-L_sphere.surf.gii
+          right: Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-R_sphere.surf.gii
+
   - from: MEBRAINS
     to: NMT2Sym
     surfaces:
       101k:
         midthickness:
-          left: share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-R_midthickness.surf.gii
+          left: Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-L_midthickness.surf.gii
+          right: Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-L_sphere.surf.gii
-          right: share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-R_sphere.surf.gii
+          left: Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-L_sphere.surf.gii
+          right: Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-R_sphere.surf.gii
+
   - from: MEBRAINS
     to: Yerkes19
     surfaces:
       101k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_midthickness.surf.gii
+          left: Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_midthickness.surf.gii
+          right: Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_sphere.surf.gii
+          left: Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_sphere.surf.gii
+          right: Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_sphere.surf.gii
 
   - from: NMT2Sym
     to: CIVETNMT
     surfaces:
       41k:
         midthickness:
-          left: share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
+          left: Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
+          right: Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+          left: Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+          right: Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+
   - from: NMT2Sym
     to: D99
     surfaces:
       41k:
         midthickness:
-          left: share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-R_midthickness.surf.gii
+          left: Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-L_midthickness.surf.gii
+          right: Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-R_sphere.surf.gii
+          left: Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-L_sphere.surf.gii
+          right: Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-R_sphere.surf.gii
+
   - from: NMT2Sym
     to: MEBRAINS
     surfaces:
       41k:
         midthickness:
-          left: share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
+          left: Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-L_midthickness.surf.gii
+          right: Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
+          left: Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
+          right: Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
+
   - from: NMT2Sym
     to: Yerkes19
     surfaces:
-      32k:
+      41k:
         midthickness:
-          left: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
+          right: Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
+          right: Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
+
   - from: Yerkes19
     to: CIVETNMT
     surfaces:
       32k:
         midthickness:
-          left: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-R_sphere.surf.gii
+
   - from: Yerkes19
     to: D99
     surfaces:
       32k:
         midthickness:
-          left: share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-R_sphere.surf.gii
+
   - from: Yerkes19
     to: MEBRAINS
     surfaces:
       32k:
         midthickness:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_midthickness.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_sphere.surf.gii
-          right: /home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_sphere.surf.gii
 
   - from: Yerkes19
     to: NMT2Sym
     surfaces:
-      41k:
+      32k:
         midthickness:
-          left: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
+          left: Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
+          left: Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_sphere.surf.gii
+
+
+################### Cross species Edges ####################
   - from: Yerkes19
     to: S1200
     surfaces:
       10k:
         midthickness:
-          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_midthickness.surf.gii
+          left: Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_midthickness.surf.gii
+          right: Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_sphere.surf.gii
+          left: Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_sphere.surf.gii
+          right: Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_sphere.surf.gii
       32k:
         midthickness:
-          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-R_sphere.surf.gii
+
   - from: S1200
     to: Yerkes19
     surfaces:
       10k:
         midthickness:
-          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_midthickness.surf.gii
+          left: Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_midthickness.surf.gii
+          right: Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_sphere.surf.gii
+          left: Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_sphere.surf.gii
+          right: Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_sphere.surf.gii
       32k:
         midthickness:
-          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+
+###################### Human Edges #########################
   - from: CIVET
     to: fsaverage
     surfaces:
       32k:
         midthickness:
-          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-R_midthickness.surf.gii
+          left: Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-L_midthickness.surf.gii
+          right: Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-R_sphere.surf.gii
+          left: Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-L_sphere.surf.gii
+          right: Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-R_sphere.surf.gii
   - from: CIVET
     to: S1200
     surfaces:
       32k:
         midthickness:
-          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-R_midthickness.surf.gii
+          left: Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-L_midthickness.surf.gii
+          right: Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-R_sphere.surf.gii
+          left: Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-L_sphere.surf.gii
+          right: Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-R_sphere.surf.gii
   - from: fsaverage
     to: CIVET
     surfaces:
       32k:
         midthickness:
-          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-R_midthickness.surf.gii
+          left: Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-L_midthickness.surf.gii
+          right: Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-R_sphere.surf.gii
+          left: Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-L_sphere.surf.gii
+          right: Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-R_sphere.surf.gii
   - from: fsaverage
     to: S1200
     surfaces:
       32k:
         midthickness:
-          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-R_midthickness.surf.gii
+          left: Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-L_midthickness.surf.gii
+          right: Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-R_sphere.surf.gii
+          left: Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-L_sphere.surf.gii
+          right: Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-R_sphere.surf.gii
+
   - from: S1200
     to: CIVET
     surfaces:
       32k:
         midthickness:
-          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-R_midthickness.surf.gii
+          left: Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-L_midthickness.surf.gii
+          right: Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-R_sphere.surf.gii
+          left: Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-L_sphere.surf.gii
+          right: Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-R_sphere.surf.gii
+
   - from: S1200
     to: fsaverage
     surfaces:
       32k:
         midthickness:
-          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-R_midthickness.surf.gii
+          left: Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-L_midthickness.surf.gii
+          right: Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-R_sphere.surf.gii
+          left: Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-L_sphere.surf.gii
+          right: Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-R_sphere.surf.gii
       10k:
         midthickness:
-          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-R_midthickness.surf.gii
+          left: Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-L_midthickness.surf.gii
+          right: Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-R_sphere.surf.gii
+          left: Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-L_sphere.surf.gii
+          right: Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-R_sphere.surf.gii
 
   volume_to_volume:
-  - from: MEBRAINS
-    to: Yerkes19
-    volumes:
-      2mm:
-        composite: /path/to/src-MEBRAINS_to-Yerkes19_vox-2mm_desc-composite_xfm.nii.gz
-      1mm:
-        composite: /path/to/src-MEBRAINS_to-Yerkes19_vox-1mm_desc-composite_xfm.nii.gz
-  - from: Yerkes19
-    to: MEBRAINS
-    volumes:
-      2mm:
-        composite: /path/to/src-Yerkes19_to-MEBRAINS_vox-2mm_desc-composite_xfm.nii.gz
-      1mm:
-        composite: /path/to/src-Yerkes19_to-MEBRAINS_vox-1mm_desc-composite_xfm.nii.gz
-  - from: NMT2Sym
-    to: MEBRAINS
-    volumes:
-      1mm:
-        composite: /path/to/src-NMT2Sym_to-MEBRAINS_vox-1mm_desc-composite_xfm.nii.gz
-  - from: MEBRAINS
-    to: NMT2Sym
-    volumes:
-      1mm:
-        composite: /path/to/src-MEBRAINS_to-NMT2Sym_vox-1mm_desc-composite_xfm.nii.gz
   - from: MEBRAINS
     to: Yerkes19
     volumes:

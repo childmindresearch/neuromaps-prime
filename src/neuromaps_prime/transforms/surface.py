@@ -57,8 +57,6 @@ def surface_sphere_project_unproject(
 
 def metric_resample(
     input_file_path: Path,
-    current_sphere: Path,
-    new_sphere: Path,
     output_file_path: str,
     **kwargs,
 ) -> workbench.MetricResampleOutputs:
@@ -79,8 +77,8 @@ def metric_resample(
         Common options include:
         - method : str
             Resampling method. Default is 'ADAP_BARY_AREA'.
-        - area_surfs : tuple[Path, Path] | None
-            Tuple of area surfaces for adaptive barycentric resampling.
+        - area_surfs : workbench.metric_resample_area_surfs_params(Path, Path)
+            Area surfaces for adaptive barycentric resampling.
 
     Returns:
     -------
@@ -92,6 +90,22 @@ def metric_resample(
     FileNotFoundError
         If any input file does not exist.
     """
+    current_sphere = kwargs.get("current_sphere")
+    new_sphere = kwargs.get("new_sphere")
+    method = kwargs.get("method")
+    area_surfs = kwargs.get("area_surfs")
+
+    if current_sphere is None:
+        raise ValueError("current_sphere must be provided in kwargs.")
+    if new_sphere is None:
+        raise ValueError("new_sphere must be provided in kwargs.")
+    if method is None:
+        raise ValueError("method must be provided in kwargs.")
+    if area_surfs is None and method == "ADAP_BARY_AREA":
+        raise ValueError(
+            "area_surfs must be provided in kwargs for ADAP_BARY_AREA method."
+        )
+
     if not input_file_path.exists():
         raise FileNotFoundError(f"Input metric file not found: {input_file_path}")
     if not current_sphere.exists():
@@ -99,10 +113,13 @@ def metric_resample(
     if not new_sphere.exists():
         raise FileNotFoundError(f"New sphere file not found: {new_sphere}")
 
+    if method != "ADAP_BARY_AREA":
+        raise NotImplementedError(
+            f"Resampling method '{method}' is not implemented in this function."
+        )
+
     result = workbench.metric_resample(
         metric_in=input_file_path,
-        current_sphere=current_sphere,
-        new_sphere=new_sphere,
         metric_out=output_file_path,
         **kwargs,
     )
@@ -114,8 +131,6 @@ def metric_resample(
 
 def label_resample(
     input_file_path: Path,
-    current_sphere: Path,
-    new_sphere: Path,
     output_file_path: str,
     **kwargs,
 ) -> workbench.LabelResampleOutputs:
@@ -136,8 +151,8 @@ def label_resample(
         Common options include:
         - method : str
             Resampling method. Default is 'ADAP_BARY_AREA'.
-        - area_surfs : tuple[Path, Path] | None
-            Tuple of area surfaces for adaptive barycentric resampling.
+        - area_surfs : workbench.label_resample_area_surfs_params(Path, Path)
+            Area surfaces for adaptive barycentric resampling.
 
     Returns:
     -------
@@ -149,6 +164,22 @@ def label_resample(
     FileNotFoundError
         If any input file does not exist.
     """
+    current_sphere = kwargs.get("current_sphere")
+    new_sphere = kwargs.get("new_sphere")
+    method = kwargs.get("method")
+    area_surfs = kwargs.get("area_surfs")
+
+    if current_sphere is None:
+        raise ValueError("current_sphere must be provided in kwargs.")
+    if new_sphere is None:
+        raise ValueError("new_sphere must be provided in kwargs.")
+    if method is None:
+        raise ValueError("method must be provided in kwargs.")
+    if area_surfs is None and method == "ADAP_BARY_AREA":
+        raise ValueError(
+            "area_surfs must be provided in kwargs for ADAP_BARY_AREA method."
+        )
+
     if not input_file_path.exists():
         raise FileNotFoundError(f"Input label file not found: {input_file_path}")
     if not current_sphere.exists():
@@ -156,10 +187,13 @@ def label_resample(
     if not new_sphere.exists():
         raise FileNotFoundError(f"New sphere file not found: {new_sphere}")
 
+    if method != "ADAP_BARY_AREA":
+        raise NotImplementedError(
+            f"Resampling method '{method}' is not implemented in this function."
+        )
+
     result = workbench.label_resample(
         label_in=input_file_path,
-        current_sphere=current_sphere,
-        new_sphere=new_sphere,
         label_out=output_file_path,
         **kwargs,
     )

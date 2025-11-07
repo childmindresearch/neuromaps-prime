@@ -10,6 +10,7 @@ from neuromaps_prime.graph import NeuromapsGraph
 @pytest.mark.usefixtures("require_data")
 def test_graph_initialization_with_data_dir(data_dir: Path, tmp_path: Path) -> None:
     """Test initializing graph with data directory."""
+    data_dir = data_dir / "share"
     graph = NeuromapsGraph(data_dir=data_dir)
     assert graph is not None
     assert graph.data_dir == data_dir
@@ -18,6 +19,7 @@ def test_graph_initialization_with_data_dir(data_dir: Path, tmp_path: Path) -> N
     surf = graph.fetch_surface_atlas(
         space="CIVETNMT", density="41k", hemisphere="left", resource_type="midthickness"
     )
+    assert surf is not None
     assert data_dir.resolve() in surf.file_path.resolve().parents
 
 
