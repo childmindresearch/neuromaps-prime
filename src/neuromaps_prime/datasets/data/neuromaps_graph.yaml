@@ -1,5 +1,4 @@
 nodes:
-####################### NHP Nodes ########################
 - CIVETNMT:
     species: macaque
     description: CIVET Non-human Primate Template
@@ -14,12 +13,6 @@ nodes:
         white:
           left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_white.surf.gii
           right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_white.surf.gii
-    volumes:
-      2mm:
-        T1w: share/Inputs/MEBRAINS/src-MEBRAINS_vox-2mm_T1w.nii.gz
-        T2w: share/Inputs/MEBRAINS/src-MEBRAINS_vox-2mm_T2w.nii.gz
-        brain_mask: share/Inputs/MEBRAINS/src-MEBRAINS_vox-2mm_brain_mask.nii.gz
-
 - D99:
     species: macaque
     description: D99 Macaque Atlas
@@ -38,11 +31,8 @@ nodes:
           left: share/Inputs/D99/src-D99_den-41k_hemi-L_white.surf.gii
           right: share/Inputs/D99/src-D99_den-41k_hemi-R_white.surf.gii
     volumes:
-      2mm:
-        T1w: share/Inputs/D99/src-D99_vox-2mm_T1w.nii.gz
-        T2w: share/Inputs/D99/src-D99_vox-2mm_T2w.nii.gz
-        brain_mask: share/Inputs/D99/src-D99_vox-2mm_brain_mask.nii.gz
-
+      250um:
+        T1w: share/Inputs/D99/src-D99_res-0p25mm_T1w.nii.gz
 - MEBRAINS:
     species: macaque
     description: MEBRAINS 1.0 Macaque Atlas
@@ -60,7 +50,9 @@ nodes:
         inflated:
           left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
           right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
-
+    volumes:
+      400um:
+        T1w: share/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm_T1w.nii.gz
 - Yerkes19:
     species: macaque
     description: Yerkes19 Macaque Atlas
@@ -97,7 +89,9 @@ nodes:
         inflated:
           left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_inflated.surf.gii
           right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
-
+    volumes:
+      500um:
+        T1w: share/Inputs/Yerkes19/src-Yerkes19_res-0p50mm_T1w.nii.gz
 - NMT2Sym:
     species: macaque
     description: NMT v2 Symmetric Macaque Template
@@ -115,7 +109,9 @@ nodes:
         inflated:
           left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
           right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
-############### Human Nodes ########################
+    volumes:
+      250um:
+        T1w: share/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm_T1w.nii.gz
 - S1200:
     species: human
     description: HCP S1200 Human Atlas
@@ -155,7 +151,6 @@ nodes:
         flat:
           left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_flat.surf.gii
           right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_flat.surf.gii
-
 - CIVET:
     species: human
     description: CIVET Human Template
@@ -176,7 +171,6 @@ nodes:
         inflated:
           left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_inflated.surf.gii
           right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_inflated.surf.gii
-
 - fsaverage:
     species: human
     description: FreeSurfer fsaverage Template
@@ -200,7 +194,6 @@ nodes:
 
 edges:
   surface_to_surface:
-####################### NHP Edges ########################
   - from: CIVETNMT
     to: D99
     surfaces:
@@ -211,7 +204,6 @@ edges:
         sphere:
           left: share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-L_sphere.surf.gii
           right: share/Outputs/D99-CIVETNMT/src-CIVETNMT_to-D99_den-41k_hemi-R_sphere.surf.gii
-
   - from: CIVETNMT
     to: MEBRAINS
     surfaces:
@@ -222,7 +214,6 @@ edges:
         sphere:
           left: share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
           right: share/Outputs/MEBRAINS-CIVETNMT/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
-
   - from: CIVETNMT
     to: NMT2Sym
     surfaces:
@@ -233,7 +224,6 @@ edges:
         sphere:
           left: share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
           right: share/Outputs/NMT2Sym-CIVETNMT/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
-
   - from: CIVETNMT
     to: Yerkes19
     surfaces:
@@ -244,7 +234,6 @@ edges:
         sphere:
           left: share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
           right: share/Outputs/Yerkes19-CIVETNMT/src-CIVETNMT_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
-
   - from: D99
     to: CIVETNMT
     surfaces:
@@ -255,7 +244,6 @@ edges:
         sphere:
           left: share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
           right: share/Outputs/CIVETNMT-D99/src-D99_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
-
   - from: D99
     to: MEBRAINS
     surfaces:
@@ -266,7 +254,6 @@ edges:
         sphere:
           left: share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
           right: share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
-
   - from: D99
     to: NMT2Sym
     surfaces:
@@ -277,7 +264,6 @@ edges:
         sphere:
           left: share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
           right: share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
-
   - from: D99
     to: Yerkes19
     surfaces:
@@ -288,7 +274,6 @@ edges:
         sphere:
           left: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
           right: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
-
   - from: MEBRAINS
     to: CIVETNMT
     surfaces:
@@ -299,7 +284,6 @@ edges:
         sphere:
           left: share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-L_sphere.surf.gii
           right: share/Outputs/CIVETNMT-MEBRAINS/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-R_sphere.surf.gii
-
   - from: MEBRAINS
     to: D99
     surfaces:
@@ -310,7 +294,6 @@ edges:
         sphere:
           left: share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-L_sphere.surf.gii
           right: share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_den-101k_hemi-R_sphere.surf.gii
-
   - from: MEBRAINS
     to: NMT2Sym
     surfaces:
@@ -321,7 +304,6 @@ edges:
         sphere:
           left: share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-L_sphere.surf.gii
           right: share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-R_sphere.surf.gii
-
   - from: MEBRAINS
     to: Yerkes19
     surfaces:
@@ -332,7 +314,6 @@ edges:
         sphere:
           left: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_sphere.surf.gii
           right: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_sphere.surf.gii
-
   - from: NMT2Sym
     to: CIVETNMT
     surfaces:
@@ -343,7 +324,6 @@ edges:
         sphere:
           left: share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
           right: share/Outputs/CIVETNMT-NMT2Sym/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
-
   - from: NMT2Sym
     to: D99
     surfaces:
@@ -354,7 +334,6 @@ edges:
         sphere:
           left: share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-L_sphere.surf.gii
           right: share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_den-41k_hemi-R_sphere.surf.gii
-
   - from: NMT2Sym
     to: MEBRAINS
     surfaces:
@@ -365,7 +344,6 @@ edges:
         sphere:
           left: share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
           right: share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
-
   - from: NMT2Sym
     to: Yerkes19
     surfaces:
@@ -376,7 +354,6 @@ edges:
         sphere:
           left: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_sphere.surf.gii
           right: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_sphere.surf.gii
-
   - from: Yerkes19
     to: CIVETNMT
     surfaces:
@@ -387,7 +364,6 @@ edges:
         sphere:
           left: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-L_sphere.surf.gii
           right: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-R_sphere.surf.gii
-
   - from: Yerkes19
     to: D99
     surfaces:
@@ -398,7 +374,6 @@ edges:
         sphere:
           left: share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii
           right: share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-R_sphere.surf.gii
-
   - from: Yerkes19
     to: MEBRAINS
     surfaces:
@@ -409,7 +384,6 @@ edges:
         sphere:
           left: share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_sphere.surf.gii
           right: share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_sphere.surf.gii
-
   - from: Yerkes19
     to: NMT2Sym
     surfaces:
@@ -420,8 +394,6 @@ edges:
         sphere:
           left: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
           right: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
-
-################### Cross species Edges ####################
   - from: Yerkes19
     to: S1200
     surfaces:
@@ -439,7 +411,6 @@ edges:
         sphere:
           left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-L_sphere.surf.gii
           right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-R_sphere.surf.gii
-
   - from: S1200
     to: Yerkes19
     surfaces:
@@ -457,8 +428,6 @@ edges:
         sphere:
           left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
           right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
-
-###################### Human Edges #########################
   - from: CIVET
     to: fsaverage
     surfaces:
@@ -527,7 +496,6 @@ edges:
         sphere:
           left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-L_sphere.surf.gii
           right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-R_sphere.surf.gii
-
   - from: S1200
     to: CIVET
     surfaces:
@@ -545,7 +513,6 @@ edges:
         sphere:
           left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-L_sphere.surf.gii
           right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-R_sphere.surf.gii
-
   - from: S1200
     to: fsaverage
     surfaces:
@@ -572,7 +539,6 @@ edges:
         composite: /path/to/src-MEBRAINS_to-Yerkes19_vox-2mm_desc-composite_xfm.nii.gz
       1mm:
         composite: /path/to/src-MEBRAINS_to-Yerkes19_vox-1mm_desc-composite_xfm.nii.gz
-
   - from: Yerkes19
     to: MEBRAINS
     volumes:
@@ -590,3 +556,63 @@ edges:
     volumes:
       1mm:
         composite: /path/to/src-MEBRAINS_to-NMT2Sym_vox-1mm_desc-composite_xfm.nii.gz
+  - from: MEBRAINS
+    to: Yerkes19
+    volumes:
+      500um:
+        composite: share/Outputs/Yerkes19-MEBRAINS/src-MEBRAINS_to-Yerkes19_res-0p50mm_mode-image_desc-Composite.nii.gz
+  - from: MEBRAINS
+    to: D99
+    volumes:
+      250um:
+        composite: share/Outputs/D99-MEBRAINS/src-MEBRAINS_to-D99_res-0p25mm_mode-image_desc-Composite.nii.gz
+  - from: MEBRAINS
+    to: NMT2Sym
+    volumes:
+      250um:
+        composite: share/Outputs/NMT2Sym-MEBRAINS/src-MEBRAINS_to-NMT2Sym_res-0p25mm_mode-image_desc-Composite.nii.gz
+  - from: D99
+    to: MEBRAINS
+    volumes:
+      400um:
+        composite: share/Outputs/MEBRAINS-D99/src-D99_to-MEBRAINS_res-0p40mm_mode-image_desc-Composite.nii.gz
+  - from: D99
+    to: NMT2Sym
+    volumes:
+      250um:
+        composite: share/Outputs/D99-NMT2Sym/src-NMT2Sym_to-D99_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
+  - from: D99
+    to: Yerkes19
+    volumes:
+      250um:
+        composite: share/Outputs/D99-Yerkes19/src-Yerkes19_to-D99_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
+  - from: NMT2Sym
+    to: MEBRAINS
+    volumes:
+      400um:
+        composite: share/Outputs/MEBRAINS-NMT2Sym/src-NMT2Sym_to-MEBRAINS_res-0p40mm_mode-image_desc-Composite.nii.gz
+  - from: NMT2Sym
+    to: D99
+    volumes:
+      250um:
+        composite: share/Outputs/NMT2Sym-D99/src-D99_to-NMT2Sym_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
+  - from: NMT2Sym
+    to: Yerkes19
+    volumes:
+      250um:
+        composite: share/Outputs/NMT2Sym-Yerkes19/src-Yerkes19_to-NMT2Sym_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
+  - from: Yerkes19
+    to: MEBRAINS
+    volumes:
+      400um:
+        composite: share/Outputs/MEBRAINS-Yerkes19/src-Yerkes19_to-MEBRAINS_res-0p40mm_mode-image_desc-Composite.nii.gz
+  - from: Yerkes19
+    to: D99
+    volumes:
+      250um:
+        composite: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
+  - from: Yerkes19
+    to: NMT2Sym
+    volumes:
+      250um:
+        composite: share/Outputs/Yerkes19-NMT2Sym/src-NMT2Sym_to-Yerkes19_res-0p25mm_mode-image_desc-Composite_xfm.nii.gz
