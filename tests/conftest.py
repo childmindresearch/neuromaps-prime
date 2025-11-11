@@ -21,7 +21,7 @@ def pytest_addoption(parser: pytest.Parser):
         "--runner-images",
         action="store",
         default=None,
-        help="Optional JSON/dict string of Image overrides for Styx runner.",
+        help="Optional dict string of image overrides to use for StyxRunner.",
     )
     parser.addoption(
         "--data-dir",
@@ -39,7 +39,7 @@ def runner(
     tmp_dir = tmp_path_factory.mktemp("styx_tmp")
     set_runner(
         runner=request.config.getoption("--runner").lower(),
-        image_map=request.config.getoption("--runner-images"),
+        image_overrides=request.config.getoption("--runner-images"),
         data_dir=tmp_dir,
     )
     yield get_global_runner()

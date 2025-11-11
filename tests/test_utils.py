@@ -32,10 +32,7 @@ class TestSetRunner:
     ):
         """Test setting runner."""
         runner = get_global_runner()
-        images = (
-            {"container1": "/path/to/container"} if test_runner == "singularity" else {}
-        )
-        utils.set_runner(runner=test_runner, image_map=images)
+        utils.set_runner(runner=test_runner)
         test_runner = get_global_runner()
         assert isinstance(test_runner, expected_runner)
         set_global_runner(runner)
@@ -58,12 +55,7 @@ class TestSetRunner:
     ):
         """Test case-insensitivty of setting runner."""
         runner = get_global_runner()
-        images = (
-            {"container1": "/path/to/container"}
-            if test_runner.lower() == "singularity"
-            else {}
-        )
-        utils.set_runner(runner=test_runner, image_map=images)
+        utils.set_runner(runner=test_runner)
         test_runner = get_global_runner()
         assert isinstance(test_runner, expected_runner)
         set_global_runner(runner)
@@ -84,12 +76,7 @@ class TestSetRunner:
         """Test passing valid kwargs to set local runner."""
         runner = get_global_runner()
         data_dir = "/path/to/data/dir"
-        images = (
-            {"container1": "/path/to/container"}
-            if input_runner == "singularity"
-            else {}
-        )
-        utils.set_runner(runner=input_runner, image_map=images, data_dir=data_dir)
+        utils.set_runner(runner=input_runner, data_dir=data_dir)
         test_runner = get_global_runner()
         assert isinstance(test_runner, expected_runner)
         assert str(test_runner.data_dir) == data_dir
@@ -99,28 +86,17 @@ class TestSetRunner:
     def test_runner_invalid_kwargs(self, test_runner: str):
         """Test passing invalid kwargs to set local runner."""
         runner = get_global_runner()
-        images = (
-            {"container1": "/path/to/container"} if test_runner == "singularity" else {}
-        )
         with pytest.raises(TypeError, match="unexpected keyword argument"):
-            utils.set_runner(runner=test_runner, image_map=images, arg="val123")
-        set_global_runner(runner)
-
-    # empty map
-    def test_empty_image_map(self):
-        """Test exception raised when no container mappins for singularity runner."""
-        runner = get_global_runner()
-        with pytest.raises(ValueError, match="No container mappings"):
-            utils.set_runner("singularity", image_map={})
+            utils.set_runner(runner=test_runner, arg="val123")
         set_global_runner(runner)
 
     # invalid map
-    @pytest.mark.parametrize("image_map", (set(), [], ()))
-    def test_invalid_image_map_type(self, image_map: Any):
+    @pytest.mark.parametrize("image_overrides", (set(), [], ()))
+    def test_invalid_image_overrides_type(self, image_overrides: Any):
         """Test exception raised when map is not a dict."""
         runner = get_global_runner()
-        with pytest.raises(TypeError, match="Expected image_map dictionary"):
-            utils.set_runner(runner="local", image_map=image_map)
+        with pytest.raises(TypeError, match="Expected image_overrides dictionary"):
+            utils.set_runner(runner="local", image_overrides=image_overrides)
         set_global_runner(runner)
 
     # not implemented type
