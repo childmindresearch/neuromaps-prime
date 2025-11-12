@@ -8,7 +8,7 @@ from neuromaps_prime.plotting import plot_graph
 if __name__ == "__main__":
     # Load the Neuromaps graph
 
-    data_dir = Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep/share")
+    data_dir = Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep")
     graph = NeuromapsGraph(data_dir=data_dir)
 
     # Label resample without specifying densities (will use defaults)
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     target_space = "S1200"
     hemisphere = "right"
     input_file = data_dir / Path(
-        "Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-nomedialwall_dparc.label.gii"
+        "share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-nomedialwall_dparc.label.gii"
     )
     output_file_path = str(
         Path(__file__).parent / f"space-{target_space}_output_label.label.gii"
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     hemisphere = "right"
 
     input_file = data_dir / Path(
-        "Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-vaavg_midthickness.shape.gii"
+        "share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-vaavg_midthickness.shape.gii"
     )
     output_file_path = str(
         Path(__file__).parent / f"space-{target_space}_output_metric.shape.gii"

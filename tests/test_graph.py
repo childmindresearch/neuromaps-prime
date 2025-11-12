@@ -10,7 +10,6 @@ from neuromaps_prime.graph import NeuromapsGraph
 @pytest.mark.usefixtures("require_data")
 def test_graph_initialization_with_data_dir(data_dir: Path, tmp_path: Path) -> None:
     """Test initializing graph with data directory."""
-    data_dir = data_dir / "share"
     graph = NeuromapsGraph(data_dir=data_dir)
     assert graph is not None
     assert graph.data_dir == data_dir
