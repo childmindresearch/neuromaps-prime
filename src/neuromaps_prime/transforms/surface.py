@@ -60,7 +60,7 @@ def metric_resample(
     current_sphere: Path,
     new_sphere: Path,
     method: str,
-    area_surfs: workbench.metric_resample_area_surfs_params,
+    area_surfs: workbench.MetricResampleAreaSurfsParameters,
     output_file_path: str,
     **kwargs,
 ) -> workbench.MetricResampleOutputs:
@@ -125,7 +125,7 @@ def label_resample(
     current_sphere: Path,
     new_sphere: Path,
     method: str,
-    area_surfs: workbench.label_resample_area_surfs_params,
+    area_surfs: workbench.LabelResampleAreaSurfsParameters,
     output_file_path: str,
     **kwargs,
 ) -> workbench.LabelResampleOutputs:
