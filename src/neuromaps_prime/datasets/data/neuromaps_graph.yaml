@@ -160,44 +160,12 @@ nodes:
 - CIVET:
     species: human
     description: CIVET Human Template
-    surfaces:
-      32k:
-        sphere:
-          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_sphere.surf.gii
-          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_sphere.surf.gii
-        midthickness:
-          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_midthickness.surf.gii
-        white:
-          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_white.surf.gii
-          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_white.surf.gii
-        pial:
-          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_pial.surf.gii
-          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_pial.surf.gii
-        inflated:
-          left: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-L_inflated.surf.gii
-          right: share/Inputs/CIVETNMT_Human/src-CIVETNMT_Human_den-32k_hemi-R_inflated.surf.gii
+
 
 - fsaverage:
     species: human
     description: FreeSurfer fsaverage Template
-    surfaces:
-      10k:
-        sphere:
-          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_sphere.surf.gii
-          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_sphere.surf.gii
-        midthickness:
-          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_midthickness.surf.gii
-        white:
-          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_white.surf.gii
-          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_white.surf.gii
-        pial:
-          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_pial.surf.gii
-          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_pial.surf.gii
-        inflated:
-          left: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-L_inflated.surf.gii
-          right: share/Inputs/fsaverage/src-fsaverage_den-10k_hemi-R_inflated.surf.gii
+
 
 edges:
   surface_to_surface:
@@ -458,112 +426,6 @@ edges:
         sphere:
           left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
           right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
-
-###################### Human Edges #########################
-  - from: CIVET
-    to: fsaverage
-    surfaces:
-      32k:
-        midthickness:
-          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-32k_hemi-R_sphere.surf.gii
-      10k:
-        midthickness:
-          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/fsaverage-CIVET/src-CIVET_to-fsaverage_den-10k_hemi-R_sphere.surf.gii
-  - from: CIVET
-    to: S1200
-    surfaces:
-      32k:
-        midthickness:
-          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-32k_hemi-R_sphere.surf.gii
-      10k:
-        midthickness:
-          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-CIVET/src-CIVET_to-S1200_den-10k_hemi-R_sphere.surf.gii
-  - from: fsaverage
-    to: CIVET
-    surfaces:
-      32k:
-        midthickness:
-          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-32k_hemi-R_sphere.surf.gii
-      10k:
-        midthickness:
-          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVET-fsaverage/src-fsaverage_to-CIVET_den-10k_hemi-R_sphere.surf.gii
-  - from: fsaverage
-    to: S1200
-    surfaces:
-      32k:
-        midthickness:
-          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-32k_hemi-R_sphere.surf.gii
-      10k:
-        midthickness:
-          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-fsaverage/src-fsaverage_to-S1200_den-10k_hemi-R_sphere.surf.gii
-
-  - from: S1200
-    to: CIVET
-    surfaces:
-      32k:
-        midthickness:
-          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-32k_hemi-R_sphere.surf.gii
-      10k:
-        midthickness:
-          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/CIVET-S1200/src-S1200_to-CIVET_den-10k_hemi-R_sphere.surf.gii
-
-  - from: S1200
-    to: fsaverage
-    surfaces:
-      32k:
-        midthickness:
-          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-32k_hemi-R_sphere.surf.gii
-      10k:
-        midthickness:
-          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-R_midthickness.surf.gii
-        sphere:
-          left: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/fsaverage-S1200/src-S1200_to-fsaverage_den-10k_hemi-R_sphere.surf.gii
 
   volume_to_volume:
   - from: MEBRAINS
