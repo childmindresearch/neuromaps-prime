@@ -33,7 +33,7 @@ nodes:
           right: share/Inputs/D99/src-D99_den-41k_hemi-R_white.surf.gii
     volumes:
       250um:
-        T1w: share/Inputs/D99/src-D99_res-0p25mm_T1w.nii.gz
+        T1w: share/Inputs/D99/src-D99_res-0p25mm_T1w.nii
 
 - MEBRAINS:
     species: macaque
@@ -57,7 +57,7 @@ nodes:
           right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
     volumes:
       400um:
-        T1w: share/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm_T1w.nii.gz
+        T1w: share/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm_T1w.nii
 - Yerkes19:
     species: macaque
     description: Yerkes19 Macaque Atlas
@@ -96,7 +96,7 @@ nodes:
           right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
     volumes:
       500um:
-        T1w: share/Inputs/Yerkes19/src-Yerkes19_res-0p50mm_T1w.nii.gz
+        T1w: share/Inputs/Yerkes19/src-Yerkes19_res-0p50mm_T1w.nii
 - NMT2Sym:
     species: macaque
     description: NMT v2 Symmetric Macaque Template
@@ -116,7 +116,7 @@ nodes:
           right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
     volumes:
       250um:
-        T1w: share/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm_T1w.nii.gz
+        T1w: share/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm_T1w.nii
 - S1200:
     species: human
     description: HCP S1200 Human Atlas
@@ -251,11 +251,11 @@ edges:
     surfaces:
       32k:
         midthickness:
-          left: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
 
   - from: MEBRAINS
     to: CIVETNMT
@@ -337,13 +337,13 @@ edges:
   - from: NMT2Sym
     to: Yerkes19
     surfaces:
-      32k:
+      41k:
         midthickness:
-          left: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/Yerkes19-NMT2Sym/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/Yerkes19-NMT2Sym/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/Yerkes19-NMT2Sym/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_sphere.surf.gii
+          left: share/Outputs/Yerkes19-NMT2Sym/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
+          right: share/Outputs/Yerkes19-NMT2Sym/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
 
   - from: Yerkes19
     to: CIVETNMT
@@ -381,13 +381,13 @@ edges:
   - from: Yerkes19
     to: NMT2Sym
     surfaces:
-      41k:
+      32k:
         midthickness:
-          left: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Outputs/NMT2Sym-Yerkes19/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/NMT2Sym-Yerkes19/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_midthickness.surf.gii
         sphere:
-          left: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
-          right: share/Outputs/NMT2Sym-Yerkes19/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
+          left: share/Outputs/NMT2Sym-Yerkes19/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/NMT2Sym-Yerkes19/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_sphere.surf.gii
 
 
 ################### Cross species Edges ####################

@@ -23,11 +23,12 @@ def test_graph_initialization_with_data_dir(data_dir: Path, tmp_path: Path) -> N
 
 
 @pytest.fixture
-def graph() -> NeuromapsGraph:
+def graph(data_dir: Path) -> NeuromapsGraph:
     """Fixture to create a default NeuromapsGraph instance for testing."""
-    return NeuromapsGraph()
+    return NeuromapsGraph(data_dir=data_dir)
 
 
+@pytest.mark.usefixtures("require_data")
 def test_default_graph_initialization(graph: NeuromapsGraph) -> None:
     """Test if the graph initializes correctly."""
     assert graph is not None
@@ -35,6 +36,7 @@ def test_default_graph_initialization(graph: NeuromapsGraph) -> None:
     assert len(graph.edges) > 0, "Graph should have edges after initialization."
 
 
+@pytest.mark.usefixtures("require_data")
 def test_fetch_surface_atlas(graph: NeuromapsGraph) -> None:
     """Test fetching a surface atlas from the graph."""
     atlas = graph.fetch_surface_atlas(
@@ -43,6 +45,7 @@ def test_fetch_surface_atlas(graph: NeuromapsGraph) -> None:
     assert atlas is not None, "Failed to fetch the surface atlas."
 
 
+@pytest.mark.usefixtures("require_data")
 def test_fetch_surface_atlas_invalid_space(graph: NeuromapsGraph) -> None:
     """Test fetching a surface atlas with an invalid space."""
     with pytest.raises(ValueError):
@@ -54,6 +57,7 @@ def test_fetch_surface_atlas_invalid_space(graph: NeuromapsGraph) -> None:
         )
 
 
+@pytest.mark.usefixtures("require_data")
 def test_fetch_surface_to_surface_transform(graph: NeuromapsGraph) -> None:
     """Test fetching a surface-to-surface transformation."""
     transform = graph.fetch_surface_to_surface_transform(
@@ -68,12 +72,14 @@ def test_fetch_surface_to_surface_transform(graph: NeuromapsGraph) -> None:
     )
 
 
+@pytest.mark.usefixtures("require_data")
 def test_find_path(graph: NeuromapsGraph) -> None:
     """Test finding a path between two spaces."""
     path = graph.find_path(source="Yerkes19", target="S1200")
     assert path is not None, "Failed to find a path between the specified spaces."
 
 
+@pytest.mark.usefixtures("require_data")
 def test_get_subgraph(graph: NeuromapsGraph) -> None:
     """Test getting a subgraph for specified spaces."""
     subgraph = graph.get_subgraph(edges="surface_to_surface")
@@ -81,6 +87,7 @@ def test_get_subgraph(graph: NeuromapsGraph) -> None:
     assert len(subgraph.nodes(data=False)) == 8, "Subgraph should have 8 nodes."
 
 
+@pytest.mark.usefixtures("require_data")
 def test_get_graph_info(graph: NeuromapsGraph) -> None:
     """Test retrieving graph information."""
     info = graph.get_graph_info()
@@ -88,6 +95,7 @@ def test_get_graph_info(graph: NeuromapsGraph) -> None:
     assert info["num_nodes"] == 8, "Graph should have 8 surface nodes."
 
 
+@pytest.mark.usefixtures("require_data")
 def test_get_node_data(graph: NeuromapsGraph) -> None:
     """Test retrieving node data."""
     yerkes_data = graph.get_node_data("Yerkes19")

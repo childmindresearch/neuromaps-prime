@@ -16,9 +16,15 @@ class Resource(BaseModel, ABC):
     @abstractmethod
     def fetch(self) -> Path:
         """Fetch the resource."""
+        # later add validation if the file path is valid, exists, etc.
         pass
 
-    # later add validation if the file path is valid, exists, etc.
+    @field_validator("file_path")
+    def validate_file_path(cls, v: Path) -> Path:
+        """Validate that the file exists in the path."""
+        if not v.exists():
+            raise ValueError(f"File path does not exist: {v}")
+        return v
 
 
 class SurfaceAtlas(Resource):

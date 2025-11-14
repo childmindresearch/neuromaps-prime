@@ -25,9 +25,9 @@ if __name__ == "__main__":
         print(f"  Species: {graph.get_node_data(node).species}")
 
     # Find and print paths between two nodes for different edge types
-    print(graph.find_path("fsaverage", "MEBRAINS", edge_type="volume_to_volume"))
+    print(graph.find_path("S1200", "MEBRAINS", edge_type="volume_to_volume"))
 
-    print(graph.find_path("fsaverage", "MEBRAINS", edge_type="surface_to_surface"))
+    print(graph.find_path("S1200", "MEBRAINS", edge_type="surface_to_surface"))
 
     # Plot full graph with both surface and volume transforms combined
     plot_graph(
