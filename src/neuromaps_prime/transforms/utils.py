@@ -38,3 +38,8 @@ def get_vertex_count(surface_file: Path) -> int:
     if not isinstance(surface, nib.GiftiImage):
         raise TypeError("Input file is not a GIFTI surface file.")
     return surface.darrays[0].data.shape[0]
+
+
+def _get_density_key(d: str) -> int:
+    """Key function to sort density strings like '32k' numerically."""
+    return int(d.rstrip("kK")) if d.lower().endswith("k") else int(d)

@@ -6,12 +6,9 @@ from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.plotting import plot_graph
 
 if __name__ == "__main__":
-    # Load the graph from the YAML configuration file
-    yaml_path = Path(
-        "/home/bshrestha/projects/neuromaps_prime/src/"
-        "neuromaps_prime/datasets/data/neuromaps_graph.yaml"
-    )
-    graph = NeuromapsGraph(yaml_path)
+    # Load the default Neuromaps graph
+    data_dir = Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep")
+    graph = NeuromapsGraph(data_dir=data_dir)
 
     # Print all nodes in the graph
     print(graph.nodes(data=False))
@@ -28,9 +25,9 @@ if __name__ == "__main__":
         print(f"  Species: {graph.get_node_data(node).species}")
 
     # Find and print paths between two nodes for different edge types
-    print(graph.find_path("fsaverage", "MEBRAINS", edge_type="volume_to_volume"))
+    print(graph.find_path("S1200", "MEBRAINS", edge_type="volume_to_volume"))
 
-    print(graph.find_path("fsaverage", "MEBRAINS", edge_type="surface_to_surface"))
+    print(graph.find_path("S1200", "MEBRAINS", edge_type="surface_to_surface"))
 
     # Plot full graph with both surface and volume transforms combined
     plot_graph(

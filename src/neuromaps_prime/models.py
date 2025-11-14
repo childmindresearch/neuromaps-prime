@@ -1,4 +1,4 @@
-"""Models for resources in the neuromaps_prime surface graph."""
+"""Models for resources in the neuromaps_prime graph."""
 
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -7,7 +7,7 @@ from pydantic import BaseModel, field_validator
 
 
 class Resource(BaseModel, ABC):
-    """Base model for resources in the surface graph."""
+    """Base model for resources in the neuromaps_prime graph."""
 
     name: str
     description: str
@@ -16,9 +16,15 @@ class Resource(BaseModel, ABC):
     @abstractmethod
     def fetch(self) -> Path:
         """Fetch the resource."""
+        # later add validation if the file path is valid, exists, etc.
         pass
 
-    # later add validation if the file path is valid, exists, etc.
+    @field_validator("file_path")
+    def validate_file_path(cls, v: Path) -> Path:
+        """Validate that the file exists in the path."""
+        if not v.exists():
+            raise FileNotFoundError(f"File path does not exist: {v}")
+        return v
 
 
 class SurfaceAtlas(Resource):
