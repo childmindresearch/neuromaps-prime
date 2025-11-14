@@ -23,7 +23,7 @@ class Resource(BaseModel, ABC):
     def validate_file_path(cls, v: Path) -> Path:
         """Validate that the file exists in the path."""
         if not v.exists():
-            raise ValueError(f"File path does not exist: {v}")
+            raise FileNotFoundError(f"File path does not exist: {v}")
         return v
 
 

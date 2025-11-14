@@ -157,16 +157,6 @@ nodes:
           left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_flat.surf.gii
           right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_flat.surf.gii
 
-- CIVET:
-    species: human
-    description: CIVET Human Template
-
-
-- fsaverage:
-    species: human
-    description: FreeSurfer fsaverage Template
-
-
 edges:
   surface_to_surface:
   - from: CIVETNMT
