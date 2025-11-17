@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+from niwrap import Runner
 
 from neuromaps_prime.graph import NeuromapsGraph
 
@@ -23,9 +24,9 @@ def test_graph_initialization_with_data_dir(data_dir: Path, tmp_path: Path) -> N
 
 
 @pytest.fixture
-def graph(data_dir: Path) -> NeuromapsGraph:
+def graph(data_dir: Path, runner: Runner) -> NeuromapsGraph:
     """Fixture to create a default NeuromapsGraph instance for testing."""
-    return NeuromapsGraph(data_dir=data_dir)
+    return NeuromapsGraph(data_dir=data_dir, runner=runner)
 
 
 @pytest.mark.usefixtures("require_data")

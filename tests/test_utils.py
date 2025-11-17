@@ -6,6 +6,7 @@ import pytest
 from niwrap import (
     DockerRunner,
     LocalRunner,
+    Runner,
     SingularityRunner,
     get_global_runner,
     set_global_runner,
@@ -17,6 +18,11 @@ from neuromaps_prime import utils
 class TestSetRunner:
     """Testing of set runner utility method."""
 
+    def test_set_runner_type(self, runner: Runner):
+        """Test setting runner via Runner type."""
+        test_runner = utils.set_runner(runner=runner)
+        assert isinstance(test_runner, type(runner))
+
     @pytest.mark.parametrize(
         "test_runner, expected_runner",
         [
@@ -25,15 +31,14 @@ class TestSetRunner:
             ("singularity", SingularityRunner),
         ],
     )
-    def test_set_runner(
+    def test_set_runner_literal(
         self,
         test_runner: str,
         expected_runner: LocalRunner | DockerRunner | SingularityRunner,
     ):
-        """Test setting runner."""
+        """Test setting runner via literal strings."""
         runner = get_global_runner()
-        utils.set_runner(runner=test_runner)
-        test_runner = get_global_runner()
+        test_runner = utils.set_runner(runner=test_runner)
         assert isinstance(test_runner, expected_runner)
         set_global_runner(runner)
 
@@ -55,8 +60,7 @@ class TestSetRunner:
     ):
         """Test case-insensitivty of setting runner."""
         runner = get_global_runner()
-        utils.set_runner(runner=test_runner)
-        test_runner = get_global_runner()
+        test_runner = utils.set_runner(runner=test_runner)
         assert isinstance(test_runner, expected_runner)
         set_global_runner(runner)
 
@@ -76,8 +80,7 @@ class TestSetRunner:
         """Test passing valid kwargs to set local runner."""
         runner = get_global_runner()
         data_dir = "/path/to/data/dir"
-        utils.set_runner(runner=input_runner, data_dir=data_dir)
-        test_runner = get_global_runner()
+        test_runner = utils.set_runner(runner=input_runner, data_dir=data_dir)
         assert isinstance(test_runner, expected_runner)
         assert str(test_runner.data_dir) == data_dir
         set_global_runner(runner)
