@@ -22,6 +22,7 @@ def plot_graph(
     k: float = 3.0,
     iterations: int = 100,
     seed: int = 42,
+    colormap: str = "Set1",
 ) -> None:
     """Plot a neuromaps graph or subgraph.
 
@@ -38,6 +39,9 @@ def plot_graph(
         k: Optimal distance between nodes for spring layout.
         iterations: Number of iterations for layout algorithms.
         seed: Random seed for layout algorithms.
+        colormap: Colormap to use for node coloring based on species.
+            e.g., 'Set1', 'Set2', 'tab10', 'tab20', 'rainbow', 'Dark2', etc.
+
     """
     if graph_type not in ["surface", "volume", "combined"]:
         raise ValueError("graph_type must be one of 'surface', 'volume', or 'combined'")
@@ -55,6 +59,7 @@ def plot_graph(
         "k": k,
         "iterations": iterations,
         "seed": seed,
+        "colormap": colormap,
     }
 
     if graph_type == "combined":
@@ -191,6 +196,7 @@ def _plot_combined_graph(
     k: float,
     iterations: int,
     seed: int,
+    colormap: str,
 ) -> None:
     """Plot combined surface and volume transforms in separate subplots."""
     fig, axes = plt.subplots(1, 2, figsize=figsize)
@@ -199,7 +205,7 @@ def _plot_combined_graph(
     pos = _get_optimized_layout(graph, layout, k, iterations, seed)
 
     # Get node colors by species
-    node_colors, species_colors_map = _get_node_colors(graph)
+    node_colors, species_colors_map = _get_node_colors(graph, colormap)
 
     # Separate edges by type
     surface_edges, volume_edges = _separate_edges(graph)
@@ -258,6 +264,7 @@ def _plot_single_graph(
     k: float,
     iterations: int,
     seed: int,
+    colormap: str,
 ) -> None:
     """Plot either surface or volume transforms in a single plot."""
     fig, ax = plt.subplots(1, 1, figsize=figsize)
@@ -266,7 +273,7 @@ def _plot_single_graph(
     pos = _get_optimized_layout(graph, layout)
 
     # Get node colors by species
-    node_colors, species_colors_map = _get_node_colors(graph)
+    node_colors, species_colors_map = _get_node_colors(graph, colormap)
 
     if graph_type == "surface":
         edges = _extract_surface_edges(graph)
@@ -325,15 +332,16 @@ def _plot_single_graph(
     _save_or_show(save_path)
 
 
-def _get_node_colors(graph: nx.MultiDiGraph) -> tuple[list, dict]:
+def _get_node_colors(graph: nx.MultiDiGraph, colormap: str) -> tuple[list, dict]:
     """Get node colors based on species from Node dataclass."""
     # Extract unique species from Node objects
     species_set = {node_data["data"].species for _, node_data in graph.nodes(data=True)}
     species_list = sorted(list(species_set))
 
     # Create color mapping for each species
+    cmap = getattr(cm, colormap)
     species_colors_map = {
-        species: cm.tab20(i / max(1, len(species_list) - 1))
+        species: cmap(i / max(1, len(species_list) - 1))
         for i, species in enumerate(species_list)
     }
 
@@ -425,6 +433,13 @@ def _draw_subplot(
 
     # Draw edges
     _draw_edges(graph, pos, edges, edge_colors, ax, linestyle, arrowstyle)
+
+    # Draw edge weights
+    edge_labels = nx.get_edge_attributes(graph, "weight")
+    if edge_labels:
+        nx.draw_networkx_edge_labels(
+            graph, pos, edge_labels, font_size=font_size - 5, ax=ax
+        )
 
     ax.set_title(f"{title} ({len(edges)} edges)", fontsize=font_size + 2)
     ax.axis("off")

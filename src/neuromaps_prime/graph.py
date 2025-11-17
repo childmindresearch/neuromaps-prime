@@ -86,6 +86,9 @@ class Edge:
 class NeuromapsGraph(nx.MultiDiGraph):
     """Multi-directed graph of brain template spaces and their transformations."""
 
+    surface_to_surface_key = "surface_to_surface"
+    volume_to_volume_key = "volume_to_volume"
+
     def __init__(
         self, yaml_file: Path | None = None, data_dir: Path | None = None
     ) -> None:
@@ -132,7 +135,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             )
             self.add_node(node_name, data=neuromaps_node)
 
-        surface_to_surface_transforms = edges.get("surface_to_surface", [])
+        surface_to_surface_transforms = edges.get(self.surface_to_surface_key, [])
         for transforms in surface_to_surface_transforms:
             source = transforms.get("from")
             target = transforms.get("to")
@@ -146,9 +149,15 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 surface_transforms=surface_transforms,
                 volume_transforms=[],
             )
-            self.add_edge(source, target, key="surface_to_surface", data=neuromaps_edge)
+            self.add_edge(
+                source,
+                target,
+                key=self.surface_to_surface_key,
+                data=neuromaps_edge,
+                weight=1.0,
+            )
 
-        volume_to_volume_transforms = edges.get("volume_to_volume", [])
+        volume_to_volume_transforms = edges.get(self.volume_to_volume_key, [])
         for transforms in volume_to_volume_transforms:
             source = transforms.get("from")
             target = transforms.get("to")
@@ -162,7 +171,13 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 surface_transforms=[],
                 volume_transforms=volume_transforms,
             )
-            self.add_edge(source, target, key="volume_to_volume", data=neuromaps_edge)
+            self.add_edge(
+                source,
+                target,
+                key=self.volume_to_volume_key,
+                data=neuromaps_edge,
+                weight=1.0,
+            )
 
     def _parse_surfaces(
         self, node_name: str, description: str, surfaces_dict: dict
@@ -223,6 +238,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
                         target_space=target_name,
                         resolution=resolution,
                         resource_type=volume_type,
+                        weight=1.0,
                     )
                 )
         return VolumeTransformList
@@ -251,6 +267,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
                             density=density,
                             hemisphere=hemisphere,
                             resource_type=surface_type,
+                            weight=1.0,
                         )
                     )
         return SurfaceTransformList
@@ -314,7 +331,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         """
         self.validate(source, target)
         shortest_path = self.find_path(
-            source=source, target=target, edge_type="surface_to_surface"
+            source=source, target=target, edge_type=self.surface_to_surface_key
         )
         resource_type = "sphere"
 
@@ -367,13 +384,14 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 hemisphere=hemisphere,
                 resource_type=resource_type,
                 file_path=_transform.sphere_out,
+                weight=float(i),
             )
 
             if add_edge:
-                self.add_transform(
+                self.add_surface_transform(
                     source_space=source,
                     target_space=next_target,
-                    key="surface_to_surface",
+                    key=self.surface_to_surface_key,
                     surface_transform=transform,
                 )
 
@@ -601,6 +619,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         density: str,
         hemisphere: str,
         resource_type: str,
+        key: str = "surface_to_surface",
     ) -> SurfaceTransform | None:
         """Fetch a surface-to-surface transform resource from the graph.
 
@@ -611,19 +630,20 @@ class NeuromapsGraph(nx.MultiDiGraph):
             hemisphere (str): The hemisphere ('L', 'R', 'left', 'right').
             resource_type (str): The type of surface resource
                 (e.g., 'midthickness', 'white', 'pial').
+            key (str): The key identifying the edge type.
 
         Returns:
             SurfaceTransform | None:
                 The matching SurfaceTransform resource, or None if not found.
         """
-        if not self.has_edge(source, target, key="surface_to_surface"):
+        if not self.has_edge(source, target, key=key):
             raise ValueError(
                 f"Surface-to-surface transform from "
                 f"'{source}' to '{target}' not found in the graph.\n"
                 f"Available edges: {list(self.edges)}"
             )
 
-        edge_data = self.get_edge_data(source, target, key="surface_to_surface")
+        edge_data = self.get_edge_data(source, target, key=key)
         edge: Edge = edge_data["data"]
 
         for transform in edge.surface_transforms:
@@ -693,14 +713,13 @@ class NeuromapsGraph(nx.MultiDiGraph):
         try:
             if edge_type:
                 temp_graph = self.get_subgraph(edges=edge_type)
-
-                for u, v, key in self.edges(keys=True):
-                    if key == edge_type:
-                        temp_graph.add_edge(u, v)
-
-                path = nx.shortest_path(temp_graph, source=source, target=target)
+                path = nx.shortest_path(
+                    temp_graph, source=source, target=target, weight="weight"
+                )
             else:
-                path = nx.shortest_path(self, source=source, target=target)
+                path = nx.shortest_path(
+                    self, source=source, target=target, weight="weight"
+                )
             return path
         except nx.NetworkXNoPath:
             return []
@@ -762,20 +781,44 @@ class NeuromapsGraph(nx.MultiDiGraph):
             )
         return self.nodes[node_name]["data"]
 
-    def add_transform(
+    def add_surface_transform(
         self,
         source_space: str,
         target_space: str,
         key: str,
         surface_transform: SurfaceTransform | None = None,
-        volume_transform: VolumeTransform | None = None,
     ) -> None:
         """Add a new surface transform edge to the graph."""
         edge = Edge(
             surface_transforms=[surface_transform] if surface_transform else [],
+            volume_transforms=[],
+        )
+        weight = (
+            surface_transform.weight
+            if surface_transform
+            else ValueError("Surface transform must be provided to set weight.")
+        )
+
+        self.add_edge(source_space, target_space, key=key, data=edge, weight=weight)
+
+    def add_volume_transform(
+        self,
+        source_space: str,
+        target_space: str,
+        key: str,
+        volume_transform: VolumeTransform | None = None,
+    ) -> None:
+        """Add a new volume transform edge to the graph."""
+        edge = Edge(
+            surface_transforms=[],
             volume_transforms=[volume_transform] if volume_transform else [],
         )
-        self.add_edge(source_space, target_space, key=key, data=edge)
+        weight = (
+            volume_transform.weight
+            if volume_transform
+            else ValueError("Volume transform must be provided to set weight.")
+        )
+        self.add_edge(source_space, target_space, key=key, data=edge, weight=weight)
 
     def search_surface_atlases(
         self,

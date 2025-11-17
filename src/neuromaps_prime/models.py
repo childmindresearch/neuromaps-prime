@@ -60,6 +60,7 @@ class SurfaceTransform(Resource):
     density: str
     hemisphere: str
     resource_type: str
+    weight: float
 
     @field_validator("hemisphere")
     def validate_hemisphere(cls, v: str) -> str:
@@ -101,6 +102,7 @@ class VolumeTransform(Resource):
     target_space: str
     resolution: str
     resource_type: str
+    weight: float
 
     def fetch(self) -> Path:
         """Fetch the transform resource."""

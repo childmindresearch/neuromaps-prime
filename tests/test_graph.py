@@ -6,6 +6,8 @@ import pytest
 
 from neuromaps_prime.graph import NeuromapsGraph
 
+NUM_GRAPH_NODES = 6  # Expected number of nodes in the default graph
+
 
 @pytest.mark.usefixtures("require_data")
 def test_graph_initialization_with_data_dir(data_dir: Path, tmp_path: Path) -> None:
@@ -84,7 +86,9 @@ def test_get_subgraph(graph: NeuromapsGraph) -> None:
     """Test getting a subgraph for specified spaces."""
     subgraph = graph.get_subgraph(edges="surface_to_surface")
     assert subgraph is not None, "Failed to get the subgraph."
-    assert len(subgraph.nodes(data=False)) == 8, "Subgraph should have 8 nodes."
+    assert len(subgraph.nodes(data=False)) == NUM_GRAPH_NODES, (
+        f"Subgraph should have {NUM_GRAPH_NODES} nodes."
+    )
 
 
 @pytest.mark.usefixtures("require_data")
@@ -92,7 +96,9 @@ def test_get_graph_info(graph: NeuromapsGraph) -> None:
     """Test retrieving graph information."""
     info = graph.get_graph_info()
     assert isinstance(info, dict), "Graph info should be a dictionary."
-    assert info["num_nodes"] == 8, "Graph should have 8 surface nodes."
+    assert info["num_nodes"] == NUM_GRAPH_NODES, (
+        f"Graph should have {NUM_GRAPH_NODES} surface nodes."
+    )
 
 
 @pytest.mark.usefixtures("require_data")
@@ -101,3 +107,48 @@ def test_get_node_data(graph: NeuromapsGraph) -> None:
     yerkes_data = graph.get_node_data("Yerkes19")
     assert yerkes_data is not None, "Failed to retrieve node data."
     assert yerkes_data.name == "Yerkes19", "Node name should be 'Yerkes19'."
+
+
+@pytest.mark.usefixtures("require_data")
+def test_computed_surface_to_surface(
+    graph: NeuromapsGraph, data_dir: Path, tmp_path: Path
+) -> None:
+    """Test fetching surface-to-surface transform with computed edge key."""
+    source_space = "CIVETNMT"
+    target_space = "S1200"
+    hemisphere = "right"
+    input_file = data_dir / Path(
+        "share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-nomedialwall_dparc.label.gii"
+    )
+    output_file_path = str(tmp_path / f"space-{target_space}_output_label.label.gii")
+
+    # A dummy transform to add edge to the graph
+    _ = graph.surface_to_surface_transformer(
+        transformer_type="label",
+        input_file=input_file,
+        source_space=source_space,
+        target_space=target_space,
+        hemisphere=hemisphere,
+        output_file_path=output_file_path,
+    )
+
+    # Assert the graph has the computed edge
+    assert graph.has_edge(
+        source_space, target_space, key=graph.surface_to_surface_key
+    ), "Graph should have the computed surface_to_surface edge."
+
+    # Assert if the computed edge is used.
+    path = graph.find_path(
+        source=source_space,
+        target=target_space,
+        edge_type=graph.surface_to_surface_key,
+    )
+    assert len(path) == 2, "Shortest path should be direct and use the computed edge."
+
+    # Assert if this computed edge does not corrupt the shortest path finding.
+    source_space = "MEBRAINS"
+    shortest_path = graph.find_path(
+        source=source_space, target=target_space, edge_type=graph.surface_to_surface_key
+    )
+    assert len(shortest_path) == 3, "Shortest path length should be 3."
+    assert "CIVETNMT" not in shortest_path, "Path should not include CIVETNMT node."
