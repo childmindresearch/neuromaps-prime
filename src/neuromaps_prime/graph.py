@@ -1025,3 +1025,73 @@ class NeuromapsGraph(nx.MultiDiGraph):
             )
 
         return resampled_output
+
+    def volume_to_volume_transformer(
+        input_file: Path,
+        source_space: str,
+        target_space: str,
+        output_file_path: str,
+        resolution: str | None = None,
+        interp: str = "linear",
+    ) -> Path:
+        """
+        Perform a volume-to-volume transformation using ANTs.
+
+        Parameters
+        ----------
+        input_file : Path
+            Path to the input NIfTI volume.
+        source_space : str
+            Source brain template space name.
+        target_space : str
+            Target brain template space name.
+        output_file_path : str
+            Path to the output NIfTI file.
+        resolution : str, optional
+            Resolution of the target volume. If None, uses the highest available.
+        interp : str, optional
+            Interpolation method. Default is 'linear'.
+            Options: 'linear', 'nearestNeighbor', 'multiLabel', 'gaussian',
+            'BSpline', 'cosineWindowedSinc', 'welchWindowedSinc', 'hammingWindowedSinc',
+            'lanczosWindowedSinc'.
+
+        Returns
+        -------
+        Path
+            Path to the transformed NIfTI file.
+
+        Raises
+        ------
+        ValueError
+            If source/target spaces or interpolator are invalid.
+        FileNotFoundError
+            If input files do not exist.
+        NotImplementedError
+            If the chosen interpolator is not implemented.
+        """
+        if not input_file.exists():
+            raise FileNotFoundError(f"Input volume file not found: {input_file}")
+
+        transform = self.fetch_volume_to_volume_transform(
+            source=source_space,
+            target=target_space,
+            resolution=resolution or "native",
+            resource_type="T1w",
+        )
+        if transform is None:
+            raise ValueError(f"No volume transform found from {source_space} to {target_space}")
+
+        source_vol = input_file
+        target_vol = transform.fetch()  # The reference volume in the target space
+
+        # Use the helper from volume.py
+        from volume import _vol_to_vol
+
+        transformed_vol = _vol_to_vol(
+            source=source_vol,
+            target=target_vol,
+            out_fpath=output_file_path,
+            interp=interp,
+        )
+
+        return transformed_vol
