@@ -1,7 +1,13 @@
 """Utility functions."""
 
-from niwrap import Runner, get_global_runner, use_docker, use_local, use_singularity
-from styxdefs import set_global_runner
+from niwrap import (
+    Runner,
+    get_global_runner,
+    set_global_runner,
+    use_docker,
+    use_local,
+    use_singularity,
+)
 
 
 def set_runner(
