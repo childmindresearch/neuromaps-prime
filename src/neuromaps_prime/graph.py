@@ -23,11 +23,11 @@ see examples/example_graph_init.py for usage.
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import networkx as nx
 import yaml
-from niwrap import workbench
+from niwrap import Runner, workbench
 
 from neuromaps_prime.models import (
     SurfaceAtlas,
@@ -44,6 +44,7 @@ from neuromaps_prime.transforms.utils import (
     _get_density_key,
     estimate_surface_density,
 )
+from neuromaps_prime.utils import set_runner
 
 
 @dataclass
@@ -87,7 +88,11 @@ class NeuromapsGraph(nx.MultiDiGraph):
     """Multi-directed graph of brain template spaces and their transformations."""
 
     def __init__(
-        self, yaml_file: Path | None = None, data_dir: Path | None = None
+        self,
+        runner: Runner | Literal["local", "docker", "singularity"] = "local",
+        runner_kwargs: dict[str, Any] = {},
+        yaml_file: Path | None = None,
+        data_dir: Path | None = None,
     ) -> None:
         """Initialize an empty NeuromapsGraph and populate it from a YAML file."""
         super().__init__()
@@ -98,6 +103,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             or Path(__file__).parent / "datasets" / "data" / "neuromaps_graph.yaml"
         )
         self._build_from_yaml(self.yaml_path)
+        self.runner = set_runner(runner=runner, **runner_kwargs)
 
     def _build_from_yaml(self, yaml_file: Path) -> None:
         """Read in the YAML file and call _build_from_dict to populate the graph."""
