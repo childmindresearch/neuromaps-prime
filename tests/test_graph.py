@@ -117,7 +117,7 @@ def test_computed_surface_to_surface(
     source_space = "CIVETNMT"
     target_space = "S1200"
     hemisphere = "right"
-    input_file = data_dir / Path(
+    input_file = data_dir / (
         "share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-nomedialwall_dparc.label.gii"
     )
     output_file_path = str(tmp_path / f"space-{target_space}_output_label.label.gii")

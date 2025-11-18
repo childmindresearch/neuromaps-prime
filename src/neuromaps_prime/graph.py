@@ -388,11 +388,11 @@ class NeuromapsGraph(nx.MultiDiGraph):
             )
 
             if add_edge:
-                self.add_surface_transform(
+                self.add_transform(
                     source_space=source,
                     target_space=next_target,
                     key=self.surface_to_surface_key,
-                    surface_transform=transform,
+                    transform=transform,
                 )
 
         return transform
@@ -781,44 +781,33 @@ class NeuromapsGraph(nx.MultiDiGraph):
             )
         return self.nodes[node_name]["data"]
 
-    def add_surface_transform(
+    def add_transform(
         self,
         source_space: str,
         target_space: str,
         key: str,
-        surface_transform: SurfaceTransform | None = None,
+        transform: SurfaceTransform | VolumeTransform,
     ) -> None:
-        """Add a new surface transform edge to the graph."""
-        edge = Edge(
-            surface_transforms=[surface_transform] if surface_transform else [],
-            volume_transforms=[],
-        )
-        weight = (
-            surface_transform.weight
-            if surface_transform
-            else ValueError("Surface transform must be provided to set weight.")
-        )
+        """Add a transform as an edge in the graph."""
+        match transform_type := type(transform):
+            case SurfaceTransform():
+                edge = Edge(
+                    surface_transforms=[transform],
+                    volume_transforms=[],
+                )
+            case VolumeTransform():
+                edge = Edge(
+                    surface_transforms=[],
+                    volume_transforms=[transform],
+                )
+            case _:
+                raise TypeError(
+                    f"Unsupported transform type: {transform_type.__name__}"
+                )
 
-        self.add_edge(source_space, target_space, key=key, data=edge, weight=weight)
-
-    def add_volume_transform(
-        self,
-        source_space: str,
-        target_space: str,
-        key: str,
-        volume_transform: VolumeTransform | None = None,
-    ) -> None:
-        """Add a new volume transform edge to the graph."""
-        edge = Edge(
-            surface_transforms=[],
-            volume_transforms=[volume_transform] if volume_transform else [],
+        self.add_edge(
+            source_space, target_space, key=key, data=edge, weight=transform.weight
         )
-        weight = (
-            volume_transform.weight
-            if volume_transform
-            else ValueError("Volume transform must be provided to set weight.")
-        )
-        self.add_edge(source_space, target_space, key=key, data=edge, weight=weight)
 
     def search_surface_atlases(
         self,
