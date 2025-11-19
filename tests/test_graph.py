@@ -152,3 +152,63 @@ def test_computed_surface_to_surface(
     )
     assert len(shortest_path) == 3, "Shortest path length should be 3."
     assert "CIVETNMT" not in shortest_path, "Path should not include CIVETNMT node."
+
+
+@pytest.mark.usefixtures("require_data")
+def test_add_transform(graph: NeuromapsGraph, data_dir: Path) -> None:
+    """Test adding a new transform to the graph."""
+    source = "Yerkes19"
+    target = "S1200"
+    density = "10k"
+    hemisphere = "left"
+    resource_type = "sphere"
+
+    surface_transform = graph.fetch_surface_to_surface_transform(
+        source=source,
+        target=target,
+        density=density,
+        hemisphere=hemisphere,
+        resource_type=resource_type,
+    )
+
+    assert surface_transform is not None, "Could not fetch existing surface transform."
+
+    surface_transform.resource_type = "test_transform_resource"
+
+    graph.add_transform(
+        source_space=source,
+        target_space=target,
+        key=graph.surface_to_surface_key,
+        transform=surface_transform,
+    )
+
+    added_surface_transform = graph.fetch_surface_to_surface_transform(
+        source=source,
+        target=target,
+        density=density,
+        hemisphere=hemisphere,
+        resource_type="test_transform_resource",
+    )
+    assert added_surface_transform is not None, (
+        "Failed to fetch the newly added surface transform."
+    )
+    assert added_surface_transform.resource_type == "test_transform_resource", (
+        "Resource type of the added transform does not match."
+    )
+
+
+@pytest.mark.usefixtures("require_data")
+def test_add_transform_invalid_type(graph: NeuromapsGraph, data_dir: Path) -> None:
+    """Test adding a new transform with an invalid type."""
+    source = "Yerkes19"
+    target = "S1200"
+
+    surface_transform = "InvalidTransformType"
+
+    with pytest.raises(TypeError, match="Unsupported transform type: <class 'str'>"):
+        graph.add_transform(
+            source_space=source,
+            target_space=target,
+            key=graph.surface_to_surface_key,
+            transform=surface_transform,  # type: ignore[arg-type]
+        )

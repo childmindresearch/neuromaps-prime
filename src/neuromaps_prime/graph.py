@@ -619,7 +619,6 @@ class NeuromapsGraph(nx.MultiDiGraph):
         density: str,
         hemisphere: str,
         resource_type: str,
-        key: str = "surface_to_surface",
     ) -> SurfaceTransform | None:
         """Fetch a surface-to-surface transform resource from the graph.
 
@@ -636,14 +635,14 @@ class NeuromapsGraph(nx.MultiDiGraph):
             SurfaceTransform | None:
                 The matching SurfaceTransform resource, or None if not found.
         """
-        if not self.has_edge(source, target, key=key):
+        if not self.has_edge(source, target, key=self.surface_to_surface_key):
             raise ValueError(
                 f"Surface-to-surface transform from "
                 f"'{source}' to '{target}' not found in the graph.\n"
                 f"Available edges: {list(self.edges)}"
             )
 
-        edge_data = self.get_edge_data(source, target, key=key)
+        edge_data = self.get_edge_data(source, target, key=self.surface_to_surface_key)
         edge: Edge = edge_data["data"]
 
         for transform in edge.surface_transforms:
@@ -789,7 +788,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         transform: SurfaceTransform | VolumeTransform,
     ) -> None:
         """Add a transform as an edge in the graph."""
-        match transform_type := type(transform):
+        match transform:
             case SurfaceTransform():
                 edge = Edge(
                     surface_transforms=[transform],
@@ -801,9 +800,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
                     volume_transforms=[transform],
                 )
             case _:
-                raise TypeError(
-                    f"Unsupported transform type: {transform_type.__name__}"
-                )
+                raise TypeError(f"Unsupported transform type: {type(transform)}")
 
         self.add_edge(
             source_space, target_space, key=key, data=edge, weight=transform.weight
