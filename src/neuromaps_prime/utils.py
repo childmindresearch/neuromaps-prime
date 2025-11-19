@@ -1,13 +1,20 @@
 """Utility functions."""
 
-from niwrap import use_docker, use_local, use_singularity
+from niwrap import (
+    Runner,
+    get_global_runner,
+    set_global_runner,
+    use_docker,
+    use_local,
+    use_singularity,
+)
 
 
 def set_runner(
-    runner: str,
+    runner: Runner | str,
     image_overrides: dict[str, str] | None = None,
     **kwargs,
-) -> None:
+) -> Runner:
     """Set StyxRunner to use for NiWrap.
 
     Args:
@@ -22,20 +29,22 @@ def set_runner(
         raise TypeError(
             f"Expected image_overrides dictionary, got {type(image_overrides)}"
         )
-    match runner_exec := runner.lower():
-        case "local":
-            use_local(**kwargs)
-        case "docker":
-            use_docker(
-                docker_executable=runner_exec,
-                image_overrides=image_overrides,
-                **kwargs,
-            )
-        case "singularity":
-            use_singularity(
-                singularity_executable=runner_exec,
-                image_overrides=image_overrides,
-                **kwargs,
-            )
-        case _:
-            raise NotImplementedError(f"'{runner_exec}' runner not implemented.")
+
+    if isinstance(runner, str):
+        match runner_exec := runner.lower():
+            case "local":
+                use_local(**kwargs)
+            case "docker" | "singularity":
+                runner_fn = use_docker if runner_exec == "docker" else use_singularity
+                runner_fn(
+                    **{f"{runner_exec}_executable": runner_exec},
+                    image_overrides=image_overrides,
+                    **kwargs,
+                )
+            case _:
+                raise NotImplementedError(f"'{runner_exec}' runner not implemented.")
+    else:
+        runner.image_overrides = image_overrides
+        set_global_runner(runner)
+
+    return get_global_runner()

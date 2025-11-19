@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
-from niwrap import Runner, ants, get_global_runner, workbench
+from niwrap import Runner, ants, workbench
 
 from neuromaps_prime.utils import set_runner
 
@@ -37,12 +37,12 @@ def runner(
 ) -> Generator[Runner, None, None]:
     """Globally set runner for the testing suite."""
     tmp_dir = tmp_path_factory.mktemp("styx_tmp")
-    set_runner(
+    pytest_runner = set_runner(
         runner=request.config.getoption("--runner").lower(),
         image_overrides=request.config.getoption("--runner-images"),
         data_dir=tmp_dir,
     )
-    yield get_global_runner()
+    yield pytest_runner
 
 
 @pytest.fixture
