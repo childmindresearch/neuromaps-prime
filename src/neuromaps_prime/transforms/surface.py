@@ -1,6 +1,7 @@
 """Functions for surface transformations using niwrap."""
 
 from pathlib import Path
+from typing import Literal
 
 from niwrap import workbench
 
@@ -59,7 +60,7 @@ def metric_resample(
     input_file_path: Path,
     current_sphere: Path,
     new_sphere: Path,
-    method: str,
+    method: Literal["ADAP_BARY_AREA", "BARYCENTRIC"],
     area_surfs: workbench.MetricResampleAreaSurfsParameters,
     output_file_path: str,
     **kwargs,
@@ -124,7 +125,7 @@ def label_resample(
     input_file_path: Path,
     current_sphere: Path,
     new_sphere: Path,
-    method: str,
+    method: Literal["ADAP_BARY_AREA", "BARYCENTRIC"],
     area_surfs: workbench.LabelResampleAreaSurfsParameters,
     output_file_path: str,
     **kwargs,

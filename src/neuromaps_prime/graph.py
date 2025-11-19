@@ -186,7 +186,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             )
 
     def _parse_surfaces(
-        self, node_name: str, description: str, surfaces_dict: dict
+        self, node_name: str, description: str, surfaces_dict: dict[str, Any]
     ) -> list[SurfaceAtlas]:
         SurfaceAtlasList = []
         for density, surface_types in surfaces_dict.items():
@@ -208,7 +208,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         return SurfaceAtlasList
 
     def _parse_volumes(
-        self, node_name: str, description: str, volumes_dict: dict
+        self, node_name: str, description: str, volumes_dict: dict[str, Any]
     ) -> list[VolumeAtlas]:
         VolumeAtlasList = []
         for resolution, volume_types in volumes_dict.items():
@@ -228,7 +228,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         return VolumeAtlasList
 
     def _parse_volume_to_volume_transforms(
-        self, source_name: str, target_name: str, volumes_dict: dict
+        self, source_name: str, target_name: str, volumes_dict: dict[str, Any]
     ) -> list[VolumeTransform]:
         VolumeTransformList = []
         for resolution, volume_types in volumes_dict.items():
@@ -284,7 +284,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         source: str,
         next_target: str,
         density: str,
-        hemisphere: str,
+        hemisphere: Literal["left", "right"],
     ) -> str:
         """Generate hop output file path based on parameters."""
         p = Path(output_file_path)
@@ -293,7 +293,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         suffix = "sphere.surf.gii"
         return str(
             parent / f"src-{source}_"
-            f"to-{next_target}_den-{density}_hemi-{hemisphere[0].upper()}_{suffix}"
+            f"to-{next_target}_den-{density}_hemi-{hemisphere}_{suffix}"
         )
 
     def _surface_to_surface(
@@ -301,7 +301,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         source: str,
         target: str,
         density: str,
-        hemisphere: str,
+        hemisphere: Literal["left", "right"],
         output_file_path: str,
         add_edge: bool = True,
     ) -> SurfaceTransform | None:
@@ -315,7 +315,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             The target space name.
         density : str
             The density of the surfaces.
-        hemisphere : str
+        hemisphere : Literal["left", "right"]
             The hemisphere ('left' or 'right').
         add_edge : bool, optional
             Whether to add the resulting transform as an edge in the graph.
@@ -403,11 +403,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
 
         return transform
 
-    def validate(
-        self,
-        source: str,
-        target: str,
-    ) -> None:
+    def validate(self, source: str, target: str) -> None:
         """Validate that source and target spaces exist in the graph."""
         if source not in self.nodes(data=False):
             raise ValueError(
@@ -426,7 +422,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         mid_space: str,
         target_space: str,
         density: str,
-        hemisphere: str,
+        hemisphere: Literal["left", "right"],
         output_file_path: str,
         first_transform: SurfaceTransform | None = None,
     ) -> workbench.SurfaceSphereProjectUnprojectOutputs:
@@ -457,7 +453,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             The target space name.
         density : str
             The density of the surfaces.
-        hemisphere : str
+        hemisphere : Literal["left", "right"]
             The hemisphere ('left' or 'right').
         output_file_path : str
             Path to the output GIFTI surface file.
@@ -534,7 +530,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         self,
         space: str,
         density: str,
-        hemisphere: str,
+        hemisphere: Literal["left", "right"],
         resource_type: str,
     ) -> SurfaceAtlas | None:
         """Fetch a surface atlas resource from the graph.
@@ -542,7 +538,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         Args:
             space (str): The brain template space name.
             density (str): The surface mesh density (e.g., '32k', '41k').
-            hemisphere (str): The hemisphere ('L', 'R', 'left', 'right').
+            hemisphere (Literal['left', 'right']): The hemisphere ('left', 'right').
             resource_type (str): The type of surface resource
                 (e.g., 'midthickness', 'white', 'pial').
 
@@ -623,7 +619,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         source: str,
         target: str,
         density: str,
-        hemisphere: str,
+        hemisphere: Literal["left", "right"],
         resource_type: str,
     ) -> SurfaceTransform | None:
         """Fetch a surface-to-surface transform resource from the graph.
@@ -632,7 +628,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             source (str): The source brain template space name.
             target (str): The target brain template space name.
             density (str): The surface mesh density (e.g., '32k', '41k').
-            hemisphere (str): The hemisphere ('L', 'R', 'left', 'right').
+            hemisphere (Literal["left", "right"]): The hemisphere ('left', 'right').
             resource_type (str): The type of surface resource
                 (e.g., 'midthickness', 'white', 'pial').
             key (str): The key identifying the edge type.
@@ -816,7 +812,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         self,
         space: str,
         density: str | None = None,
-        hemisphere: str | None = None,
+        hemisphere: Literal["left", "right"] | None = None,
         resource_type: str | None = None,
     ) -> list[SurfaceAtlas]:
         """Search for surface atlases matching the given criteria.
@@ -824,7 +820,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         Args:
             space (str): The brain template space name.
             density (str | None): The surface mesh density to match.
-            hemisphere (str | None): The hemisphere to match.
+            hemisphere (Literal["left", "right"] | None): The hemisphere to match.
             resource_type (str | None): The resource type to match.
 
         Returns:
@@ -850,7 +846,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         source_space: str,
         target_space: str,
         density: str | None = None,
-        hemisphere: str | None = None,
+        hemisphere: Literal["left", "right"] | None = None,
         resource_type: str | None = None,
     ) -> list[SurfaceTransform]:
         """Search for surface transforms matching the given criteria.
@@ -859,7 +855,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             source_space (str): The source brain template space name.
             target_space (str): The target brain template space name.
             density (str | None): The surface mesh density to match.
-            hemisphere (str | None): The hemisphere to match.
+            hemisphere (Literal["left", "right"] | None): The hemisphere to match.
             resource_type (str | None): The resource type to match.
 
         Returns:
@@ -931,7 +927,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         input_file: Path,
         source_space: str,
         target_space: str,
-        hemisphere: str,
+        hemisphere: Literal["left", "right"],
         output_file_path: str,
         source_density: str | None = None,
         target_density: str | None = None,
@@ -950,7 +946,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             The source space name.
         target_space : str
             The target space name.
-        hemisphere : str
+        hemisphere : Literal["left", "right"]
             The hemisphere ('left' or 'right').
         output_file_path : str
             Path to the output GIFTI file.

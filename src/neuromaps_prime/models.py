@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, field_validator
 
@@ -32,16 +33,8 @@ class SurfaceAtlas(Resource):
 
     space: str
     density: str
-    hemisphere: str
+    hemisphere: Literal["left", "right"]
     resource_type: str
-
-    @field_validator("hemisphere")
-    def validate_hemisphere(cls, v: str) -> str:
-        """Validate hemisphere values."""
-        valid = ["left", "right"]
-        if v not in valid:
-            raise ValueError(f"Hemisphere must be one of {valid}")
-        return v
 
     def fetch(self) -> Path:
         """Fetch the surface resource."""
@@ -58,17 +51,9 @@ class SurfaceTransform(Resource):
     source_space: str
     target_space: str
     density: str
-    hemisphere: str
+    hemisphere: Literal["left", "right"]
     resource_type: str
     weight: float
-
-    @field_validator("hemisphere")
-    def validate_hemisphere(cls, v: str) -> str:
-        """Validate hemisphere values."""
-        valid = ["left", "right"]
-        if v not in valid:
-            raise ValueError(f"Hemisphere must be one of {valid}")
-        return v
 
     def fetch(self) -> Path:
         """Fetch the transform resource."""

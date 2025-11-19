@@ -41,9 +41,9 @@ jobs:
       with:
         only-dev: true
     - name: Ruff format
-      run: uv run ruff format --check
+      run: uv run ruff format --check ./src
     - name: Ruff check
-      run: uv run ruff check
+      run: uv run ruff check ./src
 
   mypy:
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
     - name: Setup venv
       uses: ./.github/actions/setup-venv
     - run: |
-        uv run mypy .
+        uv run mypy ./src
 
   deptry:
     runs-on: ubuntu-latest
