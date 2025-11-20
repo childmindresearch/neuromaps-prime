@@ -1,100 +1,185 @@
 """Tests for volumetric transformations using Neuromaps."""
 
 from pathlib import Path
+from typing import Any
+from unittest.mock import MagicMock, patch
 
-import nibabel as nib
 import pytest
 
-from neuromaps_prime.transforms.volume import _vol_to_vol
+from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.transforms.volume import (
+    _NOT_IMPLEMENTED,
+    INTERP_PARAMS,
+    vol_to_vol,
+)
 
 # Interpolators that are currently implemented and should work
-DEVELOPED_INTERPS = [
-    "linear",
-    "cosineWindowedSinc",
-    "welchWindowedSinc",
-    "hammingWindowedSinc",
-    "lanczosWindowedSinc",
-    "nearestNeighbor",
-]
+DEVELOPED_INTERPS = [k for k in INTERP_PARAMS if k not in _NOT_IMPLEMENTED]
 
-# Interpolators planned for future development (expected to raise errors)
-FUTURE_INTERPS = ["gaussian", "BSpline", "multiLabel"]
+
+class TestVolumetricTransform:
+    """Unit tests for volumetric transformations using `vol_to_vol`."""
+
+    @pytest.fixture
+    def mock_paths(self, tmp_path: Path) -> dict[str, Path]:
+        """Create mock file paths for testing."""
+        source = tmp_path / "source.nii.gz"
+        target = tmp_path / "target.nii.gz"
+        output = tmp_path / "output.nii.gz"
+
+        source.touch()
+        target.touch()
+
+        return {"source": source, "target": target, "output": output}
+
+    @pytest.fixture
+    def mock_ants_transform(self, mock_paths: dict[str, Path]):
+        """Fixture to mock ANTs transform with consistent behavior."""
+        with patch(
+            "neuromaps_prime.transforms.volume.ants.ants_apply_transforms"
+        ) as mock_ants:
+            mock_result = MagicMock()
+            mock_result.output.output_image_outfile = str(mock_paths["output"])
+
+            def create_output(*args, **kwargs) -> MagicMock:
+                mock_paths["output"].touch()
+                return mock_result
+
+            mock_ants.side_effect = create_output
+            yield mock_ants
+
+    @pytest.mark.parametrize("interp", DEVELOPED_INTERPS)
+    def test_vol_to_vol_implemented_interps(
+        self, mock_ants_transform: MagicMock, mock_paths: dict[str, Path], interp: str
+    ) -> None:
+        """Test implemented interpolators."""
+        result = vol_to_vol(
+            source=mock_paths["source"],
+            target=mock_paths["target"],
+            out_fpath=str(mock_paths["output"]),
+            interp=interp,
+        )
+
+        mock_ants_transform.assert_called_once()
+        call_kwargs = mock_ants_transform.call_args.kwargs
+        assert call_kwargs["input_image"] == mock_paths["source"]
+        assert call_kwargs["reference_image"] == mock_paths["target"]
+        assert "interpolation" in call_kwargs
+        assert "output" in call_kwargs
+        assert result == mock_paths["output"]
+        assert result.exists()
+
+    @pytest.mark.parametrize("interp", _NOT_IMPLEMENTED)
+    def test_vol_to_vol_not_implemented_interps(
+        self, mock_paths: dict[str, Path], interp: str
+    ) -> None:
+        """Test future interpolators for raising NotImplementedError."""
+        with pytest.raises(NotImplementedError, match="not yet implemented"):
+            vol_to_vol(
+                source=mock_paths["source"],
+                target=mock_paths["target"],
+                out_fpath=str(mock_paths["output"]),
+                interp=interp,
+            )
+
+    @pytest.mark.parametrize("interp", ["foo", "bar", "invalid"])
+    def test_vol_to_vol_unsupported_interps(
+        self, mock_paths: dict[str, Path], interp: str
+    ) -> None:
+        """Test unsupported interpolators for raising ValueError."""
+        with pytest.raises(ValueError, match="Unsupported interpolator"):
+            vol_to_vol(
+                source=mock_paths["source"],
+                target=mock_paths["target"],
+                out_fpath=str(mock_paths["output"]),
+                interp=interp,
+            )
+
+    @pytest.mark.parametrize(
+        "interp_params",
+        [
+            {"sigma": 1.5, "alpha": 0.7},
+            {},
+            None,
+        ],
+        ids=["with_params", "empty_dict", "none"],
+    )
+    def test_interp_params_handling(
+        self,
+        mock_ants_transform: MagicMock,
+        mock_paths: dict[str, Path],
+        interp_params: dict[str, Any] | None,
+    ):
+        """Test various interp_params inputs are handled correctly."""
+        result = vol_to_vol(
+            source=mock_paths["source"],
+            target=mock_paths["target"],
+            out_fpath=str(mock_paths["output"]),
+            interp="gaussian",
+            interp_params=interp_params,
+        )
+
+        mock_ants_transform.assert_called_once()
+        assert result.exists()
+
+    @patch("neuromaps_prime.transforms.volume._get_interp_params")
+    @patch("neuromaps_prime.transforms.volume.ants.ants_apply_transforms")
+    def test_interp_params_called_correctly(
+        self,
+        mock_ants: MagicMock,
+        mock_get_params: MagicMock,
+        mock_paths: dict[str, Path],
+    ):
+        """Test interpolation param is correctly called with args."""
+        mock_get_params.return_value = {"mocked": "params"}
+
+        mock_result = MagicMock()
+        mock_result.output.output_image_outfile = str(mock_paths["output"])
+
+        def create_output(*args, **kwargs) -> MagicMock:
+            mock_paths["output"].touch()
+            return mock_result
+
+        mock_ants.side_effect = create_output
+
+        interp_params = {"sigma": 1.5, "alpha": 0.7}
+        vol_to_vol(
+            source=mock_paths["source"],
+            target=mock_paths["target"],
+            out_fpath=str(mock_paths["output"]),
+            interp="gaussian",
+            interp_params=interp_params,
+        )
+        mock_get_params.assert_called_once_with("gaussian", interp_params)
+        call_kwargs = mock_ants.call_args.kwargs
+        assert call_kwargs["interpolation"] == mock_get_params.return_value
 
 
 @pytest.mark.usefixtures("require_ants")
-@pytest.mark.usefixtures("require_data")
-class TestVolumetricTransform:
-    """Unit tests for volumetric transformations using `_vol_to_vol`."""
+class TestVolumetricTransformIntegration:
+    """Integration tests calling ANTs and using real data."""
 
-    @pytest.fixture
-    def vol_paths(self, data_dir: Path) -> dict[str, Path]:
-        """Provide all possible source and target paths for tests."""
-        return {
-            "t1w_source": data_dir
-            / "share"
-            / "Inputs"
-            / "D99"
-            / "src-D99_res-0p25mm_T1w.nii",
-            "label_source": data_dir / "resources" / "D99" / "D99_atlas_v2.0.nii.gz",
-            "target_same": data_dir
-            / "share"
-            / "Inputs"
-            / "NMT2Sym"
-            / "src-NMT2Sym_res-0p25mm_T1w.nii",
-            "target_diff": data_dir
-            / "share"
-            / "Inputs"
-            / "MEBRAINS"
-            / "src-MEBRAINS_res-0p40mm_T1w.nii",
-        }
-
-    def _extract_res(self, nii_file: Path) -> tuple[float, float, float]:
+    @staticmethod
+    def _extract_res(nii_file: Path) -> tuple[float, float, float]:
         """Extract voxel spacing from a NIfTI file."""
+        import nibabel as nib
+
         img = nib.load(nii_file)
         return img.header.get_zooms()[:3]
 
-    @pytest.mark.parametrize("target_key", ["target_same", "target_diff"])
-    @pytest.mark.parametrize("interp", DEVELOPED_INTERPS)
-    def test_vol_to_vol_developed_interps(
-        self, tmp_path: Path, vol_paths: dict[str, Path], target_key: str, interp: str
-    ) -> None:
-        """Interpolators that are implemented and should complete successfully."""
-        target_file = vol_paths[target_key]
-        result = _vol_to_vol(
-            vol_paths["t1w_source"],
-            target_file,
-            out_fpath=str(tmp_path / "test.nii.gz"),
-            interp=interp,
+    def test_vol_to_vol_real_data(self, tmp_path: Path, graph: NeuromapsGraph) -> None:
+        """Integration test with real ANTs processing."""
+        source = graph.fetch_volume_atlas(
+            space="D99", resolution="250um", resource_type="T1w"
         )
-        assert result.exists(), f"Output file not created for {interp}"
-        assert self._extract_res(result) == self._extract_res(target_file)
+        target = graph.fetch_volume_atlas(
+            space="NMT2Sym", resolution="400um", resource_type="T1w"
+        )
+        out_file = tmp_path / "test.nii.gz"
 
-    @pytest.mark.parametrize("target_key", ["target_same", "target_diff"])
-    @pytest.mark.parametrize("interp", FUTURE_INTERPS)
-    def test_vol_to_vol_future_interps(
-        self, vol_paths: dict[str, Path], target_key: str, interp: str
-    ) -> None:
-        """Interpolators planned for future support that should raise errors."""
-        target_file = vol_paths[target_key]
-        label_file = vol_paths["label_source"] if interp == "multiLabel" else None
-        with pytest.raises(NotImplementedError, match="not yet implemented"):
-            _vol_to_vol(
-                vol_paths["t1w_source"],
-                target_file,
-                out_fpath="test.nii.gz",
-                interp=interp,
-                label=label_file,
-            )
+        result = vol_to_vol(
+            source=source, target=target, out_fpath=str(out_file), interp="linear"
+        )
 
-    @pytest.mark.parametrize("interp", ("foo", "bar"))
-    def test_vol_to_vol_unsupported_interps(
-        self, vol_paths: dict[str, Path], interp: str
-    ):
-        """Test for unsupported interpolators."""
-        with pytest.raises(ValueError, match="Unsupported"):
-            _vol_to_vol(
-                vol_paths["t1w_source"],
-                vol_paths["target_same"],
-                out_fpath="test.nii.gz",
-                interp=interp,
-            )
+        assert result.exists()
+        assert self._extract_res(result) == self._extract_res(target)
