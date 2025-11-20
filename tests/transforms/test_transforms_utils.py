@@ -1,51 +1,53 @@
 """Tests for transforms utils module."""
 
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
+import nibabel as nib
 import pytest
 
-from neuromaps_prime.transforms.utils import estimate_surface_density, get_vertex_count
+from neuromaps_prime.transforms import utils
+
+VERTEX_COUNT = 32_492
+
+
+@pytest.fixture
+def mock_gifti() -> MagicMock:
+    mock_darray = MagicMock()
+    mock_darray.data.shape = (VERTEX_COUNT,)
+    mock_img = MagicMock(spec=nib.GiftiImage)
+    mock_img.darrays = [mock_darray]
+    return mock_img
+
+
+@patch("nibabel.load")
+def test_get_vertex_count_valid(mock_load: MagicMock, mock_gifti: MagicMock):
+    mock_load.return_value = mock_gifti
+    count = utils.get_vertex_count(Path("test.surf.gii"))
+    assert isinstance(count, int) and count == VERTEX_COUNT
+
+
+@patch("nibabel.load")
+def test_get_vertex_count_invalid(mock_load: MagicMock):
+    mock_load.return_value = MagicMock()
+    with pytest.raises(TypeError):
+        utils.get_vertex_count("test.nii.gz")
+
+
+@patch("neuromaps_prime.transforms.utils.get_vertex_count")
+def test_estimate_surface_density(mock_count: MagicMock):
+    mock_count.return_value = VERTEX_COUNT
+    density = utils.estimate_surface_density(Path("test.surf.gii"))
+    assert isinstance(density, str) and density == "32k"
 
 
 @pytest.mark.parametrize(
-    "surface_fpath,expected_density",
+    "value, expected",
     [
-        ("Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii", "32k"),
-        ("Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii", "10k"),
-        (
-            "Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii",
-            "32k",
-        ),
+        ("32k", 32000),
+        (" 10k ", 10000),
+        ("128", 128),
     ],
 )
-@pytest.mark.usefixtures("require_data")
-def test_estimate_surface_density(
-    data_dir: Path, surface_fpath: str, expected_density: str
-) -> None:
-    """Test estimate_surface_density function with various mesh densities."""
-    data_dir = data_dir / "share"
-    result = estimate_surface_density(data_dir / surface_fpath)
-    assert isinstance(result, str)
-    assert result == expected_density, f"Expected {expected_density}, but got {result}"
-
-
-@pytest.mark.parametrize(
-    "surface_fpath,expected_count",
-    [
-        ("Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii", 32492),
-        ("Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii", 10242),
-        (
-            "Outputs/D99-Yerkes19/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii",
-            32492,
-        ),
-    ],
-)
-@pytest.mark.usefixtures("require_data")
-def test_get_vertex_count(
-    data_dir: Path, surface_fpath: str, expected_count: int
-) -> None:
-    """Test get_vertex_count function returns correct vertex count."""
-    data_dir = data_dir / "share"
-    result = get_vertex_count(data_dir / surface_fpath)
-    assert isinstance(result, int)
-    assert result == expected_count, f"Expected {expected_count}, but got {result}"
+def test_get_density_key(value: str, expected: int) -> None:
+    assert utils._get_density_key(value) == expected
