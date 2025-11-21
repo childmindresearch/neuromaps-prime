@@ -6,6 +6,7 @@ from typing import Generator
 import pytest
 from niwrap import Runner, ants, workbench
 
+from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.utils import set_runner
 
 
@@ -46,6 +47,12 @@ def runner(
 
 
 @pytest.fixture
+def graph(runner: Runner, require_data: Path) -> NeuromapsGraph:
+    """Create a graph fixture to use for tests."""
+    return NeuromapsGraph(runner=runner, data_dir=require_data)
+
+
+@pytest.fixture
 def require_data(request: pytest.FixtureRequest):
     data_dir_str = request.config.getoption("--data-dir")
     if data_dir_str is None:
@@ -53,6 +60,7 @@ def require_data(request: pytest.FixtureRequest):
     data_dir = Path(data_dir_str).resolve()
     if not data_dir.exists():
         pytest.skip("Data directory does not exist")
+    return data_dir
 
 
 @pytest.fixture(scope="session", autouse=True)

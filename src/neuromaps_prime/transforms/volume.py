@@ -1,11 +1,11 @@
 """Functions for volumetric transformations using niwrap."""
 
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
 from niwrap import ants
 
-INTERP_PARAMS: dict[str, Callable[[], dict]] = {
+INTERP_PARAMS: dict[str, Callable[..., dict]] = {
     "linear": ants.ants_apply_transforms_linear_params,
     "nearestNeighbor": ants.ants_apply_transforms_nearest_neighbor_params,
     "multiLabel": ants.ants_apply_transforms_multi_label_params,
@@ -16,16 +16,36 @@ INTERP_PARAMS: dict[str, Callable[[], dict]] = {
     "hammingWindowedSinc": ants.ants_apply_transforms_hamming_windowed_sinc_params,
     "lanczosWindowedSinc": ants.ants_apply_transforms_lanczos_windowed_sinc_params,
 }
+INTERP_NOPARAMS: dict[str, Callable[..., dict]] = {
+    "multiLabel": ants.ants_apply_transforms_multi_labelnoparams_params,
+}
 
-_NOT_IMPLEMENTED = {"BSpline", "gaussian", "multiLabel"}
+_NOT_IMPLEMENTED = frozenset({"BSpline"})
 
 
-def _vol_to_vol(
+def _get_interp_params(
+    interp: str, interp_params: dict[str, Any] | None = None
+) -> dict:
+    """Get the appropriate interpolation parameters object.
+
+    Args:
+        interp: Interpolation method name / key.
+        interp_params: Optional parameters to pass to the interpolation method.
+
+    Returns:
+        Configured interpolation parameters dictionary.
+    """
+    if not interp_params and interp in INTERP_NOPARAMS:
+        return INTERP_NOPARAMS[interp]()
+    return INTERP_PARAMS[interp](**(interp_params or {}))
+
+
+def vol_to_vol(
     source: Path,
     target: Path,
     out_fpath: str,
     interp: str = "linear",
-    label: Path | None = None,
+    interp_params: dict[str, Any] | None = None,
 ) -> Path:
     """Transform a volumetric image from source space to target space.
 
@@ -34,7 +54,7 @@ def _vol_to_vol(
         target: Path to the target NIfTI volume defining the reference space.
         out_fpath: Full output file path to save transformed file
         interp: Interpolation method to use.
-        label: Optional path to a label image (optional for multiLabel).
+        interp_params: Optional parameters to pass to the interpolation method.
 
     Returns:
         Path to the transformed NIfTI file written to disk.
@@ -43,17 +63,18 @@ def _vol_to_vol(
         ValueError: unsupported interpolator.
         NotImplementedError: not yet implemented interpolator.
     """
-    if interp not in INTERP_PARAMS:
-        raise ValueError(f"Unsupported interpolator '{interp}'.")
     if interp in _NOT_IMPLEMENTED:
         raise NotImplementedError(
-            f"The '{interp}' interpolation method is not yet implemented."
+            f"The '{interp}' interpolation method is not yet implemented"
         )
+    if interp not in INTERP_PARAMS:
+        raise ValueError(f"Unsupported interpolator '{interp}'.")
 
-    ants.ants_apply_transforms(
+    interpolation = _get_interp_params(interp, interp_params)
+    xfm = ants.ants_apply_transforms(
         input_image=source,
         reference_image=target,
         output=ants.ants_apply_transforms_warped_output_params(out_fpath),
-        interpolation=INTERP_PARAMS[interp](),
+        interpolation=interpolation,
     )
-    return Path(out_fpath)
+    return Path(xfm.output.output_image_outfile)
