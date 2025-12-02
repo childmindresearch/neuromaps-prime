@@ -1032,31 +1032,16 @@ class NeuromapsGraph(nx.MultiDiGraph):
             raise ValueError(f"No {area_resource} surface found for {target_space}")
         new_area: Path = new_area_atlas.fetch()
 
-        if transformer_type == "label":
-            area_surfs = workbench.label_resample_area_surfs_params(
-                current_area=current_area, new_area=new_area
-            )
-            resampled_output = label_resample(
-                input_file_path=input_file,
-                current_sphere=transform.fetch(),
-                new_sphere=new_sphere,
-                method="ADAP_BARY_AREA",
-                area_surfs=area_surfs,
-                output_file_path=output_file_path,
-            )
-
-        elif transformer_type == "metric":
-            area_surfs = workbench.metric_resample_area_surfs_params(
-                current_area=current_area, new_area=new_area
-            )
-            resampled_output = metric_resample(
-                input_file_path=input_file,
-                current_sphere=transform.fetch(),
-                new_sphere=new_sphere,
-                method="ADAP_BARY_AREA",
-                area_surfs=area_surfs,
-                output_file_path=output_file_path,
-            )
+        resample_fn = {"label": label_resample, "metric": metric_resample}
+        area_surfs = {"current-area": current_area, "new-area": new_area}
+        resampled_output = resample_fn[transformer_type](
+            input_file_path=input_file,
+            current_sphere=transform.fetch(),
+            new_sphere=new_sphere,
+            method="ADAP_BARY_AREA",
+            area_surfs=area_surfs,
+            output_file_path=output_file_path,
+        )
 
         return resampled_output
 
