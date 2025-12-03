@@ -54,6 +54,13 @@ source = "vcs"
 pythonpath = ["src"]
 testpaths = ["tests"]
 
+[tool.coverage.run]
+omit = [
+  "src/**/__init__.py",
+  "src/neuromaps_prime/_version.py",
+  "src/neuromaps_prime/plotting.py"
+]
+
 [tool.deptry.per_rule_ignores]
 DEP002 = ["scipy"]  # ignore defined dependency thats not used
 
