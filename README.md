@@ -23,12 +23,6 @@ and specialized tools for NHP-specific analyses.
 
 ## Installation
 
-<!-- Install this package via:
-
-```sh
-pip install APP_NAME
-``` -->
-
 Get the newest development version via:
 
 ```sh
