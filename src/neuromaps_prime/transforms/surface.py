@@ -61,7 +61,7 @@ def metric_resample(
     current_sphere: Path,
     new_sphere: Path,
     method: Literal["ADAP_BARY_AREA", "BARYCENTRIC"],
-    area_surfs: workbench.MetricResampleAreaSurfsParameters,
+    area_surfs: workbench.MetricResampleAreaSurfsParamsDict,
     output_file_path: str,
     **kwargs,
 ) -> workbench.MetricResampleOutputs:
@@ -77,7 +77,7 @@ def metric_resample(
         Path to new spherical surface.
     method : str
         Resampling method.
-    area_surfs : workbench.metric_resample_area_surfs_params
+    area_surfs : workbench.MetricResampleAreaSurfsParamsDict,
         Area surfaces for adaptive barycentric resampling.
     output_file_path : str
         Path to output metric file.
@@ -126,7 +126,7 @@ def label_resample(
     current_sphere: Path,
     new_sphere: Path,
     method: Literal["ADAP_BARY_AREA", "BARYCENTRIC"],
-    area_surfs: workbench.LabelResampleAreaSurfsParameters,
+    area_surfs: workbench.LabelResampleAreaSurfsParamsDict,
     output_file_path: str,
     **kwargs,
 ) -> workbench.LabelResampleOutputs:
@@ -142,7 +142,7 @@ def label_resample(
         Path to new spherical surface.
     method : str
         Resampling method.
-    area_surfs : workbench.label_resample_area_surfs_params
+    area_surfs : workbench.LabelResampleAreaSurfsParamsDict
         Area surfaces for adaptive barycentric resampling.
     output_file_path : str
         Path to output label file.

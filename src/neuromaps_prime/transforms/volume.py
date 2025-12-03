@@ -6,18 +6,18 @@ from typing import Any, Callable
 from niwrap import ants
 
 INTERP_PARAMS: dict[str, Callable[..., dict]] = {
-    "linear": ants.ants_apply_transforms_linear_params,
-    "nearestNeighbor": ants.ants_apply_transforms_nearest_neighbor_params,
-    "multiLabel": ants.ants_apply_transforms_multi_label_params,
-    "gaussian": ants.ants_apply_transforms_gaussian_params,
-    "BSpline": ants.ants_apply_transforms_bspline_params,
-    "cosineWindowedSinc": ants.ants_apply_transforms_cosine_windowed_sinc_params,
-    "welchWindowedSinc": ants.ants_apply_transforms_welch_windowed_sinc_params,
-    "hammingWindowedSinc": ants.ants_apply_transforms_hamming_windowed_sinc_params,
-    "lanczosWindowedSinc": ants.ants_apply_transforms_lanczos_windowed_sinc_params,
+    "linear": ants.ants_apply_transforms_linear,
+    "nearestNeighbor": ants.ants_apply_transforms_nearest_neighbor,
+    "multiLabel": ants.ants_apply_transforms_multi_label,
+    "gaussian": ants.ants_apply_transforms_gaussian,
+    "BSpline": ants.ants_apply_transforms_bspline,
+    "cosineWindowedSinc": ants.ants_apply_transforms_cosine_windowed_sinc,
+    "welchWindowedSinc": ants.ants_apply_transforms_welch_windowed_sinc,
+    "hammingWindowedSinc": ants.ants_apply_transforms_hamming_windowed_sinc,
+    "lanczosWindowedSinc": ants.ants_apply_transforms_lanczos_windowed_sinc,
 }
 INTERP_NOPARAMS: dict[str, Callable[..., dict]] = {
-    "multiLabel": ants.ants_apply_transforms_multi_labelnoparams_params,
+    "multiLabel": ants.ants_apply_transforms_multi_labelnoparams,
 }
 
 _NOT_IMPLEMENTED = frozenset({"BSpline"})
@@ -74,7 +74,7 @@ def vol_to_vol(
     xfm = ants.ants_apply_transforms(
         input_image=source,
         reference_image=target,
-        output=ants.ants_apply_transforms_warped_output_params(out_fpath),
+        output=ants.ants_apply_transforms_warped_output(out_fpath),
         interpolation=interpolation,
     )
     return Path(xfm.output.output_image_outfile)
