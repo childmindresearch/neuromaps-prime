@@ -1,4 +1,4 @@
-# neuromaps-prime <img src="sticker.png" align="right" width="25%"/>
+# Neuromaps-PRIME <img src="sticker.png" align="right" width="25%"/>
 
 [![Build](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test.yaml?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/childmindresearch/neuromaps-prime/branch/main/graph/badge.svg?token=22HWWFWPW5)](https://codecov.io/gh/childmindresearch/neuromaps-prime)
@@ -19,7 +19,7 @@ and specialized tools for NHP-specific analyses.
 ## Features
 
 - Robust transformation between NHP spaces (Yerkes19, NMTv2, NMTCivet, D99)
-- Cross-species transformation between NHP and human (Yerkes19, S1200)
+- Cross-species transformation between NHP and human (Yerkes19, fsLR)
 
 ## Installation
 
