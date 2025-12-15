@@ -18,7 +18,7 @@ and specialized tools for NHP-specific analyses.
 
 ## Features
 
-- Robust transformation between NHP spaces (Yerkes19, NMTv2, NMTCivet, D99)
+- Robust transformation between NHP spaces (Yerkes19, NMT2, CIVETNMT, D99, MEBRAINS)
 - Cross-species transformation between NHP and human (Yerkes19, fsLR)
 
 ## Installation
