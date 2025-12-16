@@ -40,6 +40,10 @@ from neuromaps_prime.transforms.surface import (
     metric_resample,
     surface_sphere_project_unproject,
 )
+from neuromaps_prime.transforms.volume import (
+    _vol_to_vol,
+    _get_interp_params,
+)
 from neuromaps_prime.transforms.utils import (
     _get_density_key,
     estimate_surface_density,
@@ -1056,3 +1060,30 @@ class NeuromapsGraph(nx.MultiDiGraph):
             )
 
         return resampled_output
+
+    def volume_to_volume_transformer(
+        source: Path,
+        target: Path,
+        out_fpath: str,
+        interp: str = "linear",
+        interp_params: dict[str, Any] | None = None,
+        ) -> Path:
+            """Transform a volumetric image from source space to target space.
+
+            Args:
+                source: Path to the source NIfTI volume to be transformed.
+                target: Path to the target NIfTI volume defining the reference space.
+                out_fpath: Full output file path to save transformed file
+                interp: Interpolation method to use.
+                interp_params: Optional parameters to pass to the interpolation method.
+
+            Returns:
+                Path to the transformed NIfTI file written to disk.
+
+            Raises:
+                ValueError: unsupported interpolator.
+                NotImplementedError: not yet implemented interpolator.
+            """        
+        
+        
+        
