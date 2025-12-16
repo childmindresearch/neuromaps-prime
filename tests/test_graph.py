@@ -213,3 +213,54 @@ def test_add_transform_invalid_type(graph: NeuromapsGraph, data_dir: Path) -> No
             key=graph.surface_to_surface_key,
             transform=surface_transform,  # type: ignore[arg-type]
         )
+
+@pytest.mark.usefixtures("require_data")
+def test_fetch_volume_atlas_paths(graph: NeuromapsGraph) -> None:
+    """Test that volume atlas paths exist for each node with volumes."""
+    for node_name in ["D99", "MEBRAINS", "NMT2Sym", "Yerkes19"]:
+        volumes = graph.get_node_data(node_name).volumes
+        assert volumes, f"Node {node_name} should have volume entries."
+        for res, vol_types in volumes.items():
+            for vol_type, vol_path in vol_types.items():
+                vol_path = Path(vol_path)
+                assert vol_path.exists(), f"Volume file {vol_path} for {node_name} does not exist."
+
+
+@pytest.mark.usefixtures("require_data")
+def test_fetch_volume_to_volume_transform_paths(graph: NeuromapsGraph) -> None:
+    """Test that volume-to-volume transform paths exist."""
+    edges = graph.edges.get("volume_to_volume", [])
+    assert edges, "Graph should have volume_to_volume edges."
+
+    for edge in edges:
+        source = edge["from"]
+        target = edge["to"]
+        volumes = edge.get("volumes", {})
+        assert volumes, f"Edge {source} -> {target} should have volume transforms."
+        for res, vol_dict in volumes.items():
+            for key, vol_path in vol_dict.items():
+                vol_path = Path(vol_path)
+                assert vol_path.exists(), (
+                    f"Volume transform file {vol_path} for {source} -> {target} does not exist."
+                )
+
+
+@pytest.mark.usefixtures("require_data")
+def test_volume_to_volume_transformer_execution(graph: NeuromapsGraph, tmp_path: Path) -> None:
+    """Test executing a volume-to-volume transformation from the graph."""
+    # Pick a known volume transform edge
+    edge = next(e for e in graph.edges["volume_to_volume"] if e["from"] == "MEBRAINS" and e["to"] == "Yerkes19")
+    vol_path = Path(edge["volumes"]["500um"]["composite"])
+    output_path = tmp_path / "transformed_vol.nii.gz"
+
+    transformed_vol = graph.volume_to_volume_transformer(
+        input_file=vol_path,
+        source_space="MEBRAINS",
+        target_space="Yerkes19",
+        output_file_path=str(output_path),
+        resolution="500um",
+        interp="linear",
+    )
+
+    assert transformed_vol.exists(), "Transformed volume file was not created."
+    assert transformed_vol == output_path, "Returned path does not match expected output."
