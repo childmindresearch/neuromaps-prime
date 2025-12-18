@@ -40,7 +40,7 @@ def _get_interp_params(
     return INTERP_PARAMS[interp](**(interp_params or {}))
 
 
-def vol_to_vol(
+def _vol_to_vol(
     source: Path,
     target: Path,
     out_fpath: str,

@@ -595,7 +595,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             space (str): The brain template space name.
             resolution (str): The volume resolution (e.g., '2mm', '1mm').
             resource_type (str): The type of volume resource
-                (e.g., 'T1w', 'T2w', 'brain_mask').
+                (e.g., 'T1w', 'composite').
 
         Returns:
             VolumeAtlas | None:
@@ -674,7 +674,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             target (str): The target brain template space name.
             resolution (str): The volume resolution (e.g., '2mm', '1mm').
             resource_type (str): The type of volume resource
-                (e.g., 'T1w', 'T2w', 'brain_mask').
+                (e.g., 'T1w', 'composite').
 
         Returns:
             VolumeTransform:
@@ -1062,28 +1062,81 @@ class NeuromapsGraph(nx.MultiDiGraph):
         return resampled_output
 
     def volume_to_volume_transformer(
-        source: Path,
-        target: Path,
-        out_fpath: str,
-        interp: str = "linear",
-        interp_params: dict[str, Any] | None = None,
+            self,
+            input_file: Path,
+            source_space: str,
+            target_space: str,
+            resolution: str,
+            resource_type: str,
+            output_file_path: str,
+            interp: str = "linear",
+            interp_params: dict[str, Any] | None = None,
         ) -> Path:
-            """Transform a volumetric image from source space to target space.
+            """Perform a single-hop volume-to-volume transformation.
 
-            Args:
-                source: Path to the source NIfTI volume to be transformed.
-                target: Path to the target NIfTI volume defining the reference space.
-                out_fpath: Full output file path to save transformed file
-                interp: Interpolation method to use.
-                interp_params: Optional parameters to pass to the interpolation method.
+            Parameters
+            ----------
+            input_file : Path
+                Path to the input NIfTI file in source space.
+            source_space : str
+                Source template space.
+            target_space : str
+                Target template space.
+            resolution : str
+                Volume resolution (e.g., '500um', '1mm').
+            resource_type : str
+                Volume type (e.g., 'T1w', 'composite').
+            output_file_path : str
+                Output file path.
+            interp : str, optional
+                Interpolation method.
+            interp_params : dict, optional
+                Optional interpolation parameters.
 
-            Returns:
-                Path to the transformed NIfTI file written to disk.
+            Returns
+            -------
+            Path
+                Path to the transformed volume.
 
-            Raises:
-                ValueError: unsupported interpolator.
-                NotImplementedError: not yet implemented interpolator.
-            """        
-        
-        
-        
+            Raises
+            ------
+            ValueError
+                If required resources are missing.
+            FileNotFoundError
+                If input file does not exist.
+            """
+            self.validate(source_space, target_space)
+
+            if not input_file.exists():
+                raise FileNotFoundError(f"Input file not found: {input_file}")
+
+            transform = self.fetch_volume_to_volume_transform(
+                source=source_space,
+                target=target_space,
+                resolution=resolution,
+                resource_type=resource_type,
+            )
+            if transform is None:
+                raise ValueError(
+                    f"No volume transform found from {source_space} to {target_space} "
+                    f"(res={resolution}, type={resource_type})"
+                )
+
+            target_atlas = self.fetch_volume_atlas(
+                space=target_space,
+                resolution=resolution,
+                resource_type=resource_type,
+            )
+            if target_atlas is None:
+                raise ValueError(
+                    f"No target volume atlas found for {target_space} "
+                    f"(res={resolution}, type={resource_type})"
+                )
+
+            return _vol_to_vol(
+                source=input_file,
+                target=target_atlas.fetch(),
+                out_fpath=output_file_path,
+                interp=interp,
+                interp_params=interp_params,
+            )
