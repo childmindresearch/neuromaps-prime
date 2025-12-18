@@ -88,7 +88,7 @@ class TestVolumetricTransform:
     ) -> None:
         """Test unsupported interpolators for raising ValueError."""
         with pytest.raises(ValueError, match="Unsupported interpolator"):
-            vol_to_vol(
+            _vol_to_vol(
                 source=mock_paths["source"],
                 target=mock_paths["target"],
                 out_fpath=str(mock_paths["output"]),
@@ -111,7 +111,7 @@ class TestVolumetricTransform:
         interp_params: dict[str, Any] | None,
     ):
         """Test various interp_params inputs are handled correctly."""
-        result = vol_to_vol(
+        result = _vol_to_vol(
             source=mock_paths["source"],
             target=mock_paths["target"],
             out_fpath=str(mock_paths["output"]),
@@ -143,7 +143,7 @@ class TestVolumetricTransform:
         mock_ants.side_effect = create_output
 
         interp_params = {"sigma": 1.5, "alpha": 0.7}
-        vol_to_vol(
+        _vol_to_vol(
             source=mock_paths["source"],
             target=mock_paths["target"],
             out_fpath=str(mock_paths["output"]),
@@ -177,7 +177,7 @@ class TestVolumetricTransformIntegration:
         )
         out_file = tmp_path / "test.nii.gz"
 
-        result = vol_to_vol(
+        result = _vol_to_vol(
             source=source, target=target, out_fpath=str(out_file), interp="linear"
         )
 
