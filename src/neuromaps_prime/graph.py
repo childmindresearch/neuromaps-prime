@@ -40,13 +40,12 @@ from neuromaps_prime.transforms.surface import (
     metric_resample,
     surface_sphere_project_unproject,
 )
-from neuromaps_prime.transforms.volume import (
-    _vol_to_vol,
-    _get_interp_params,
-)
 from neuromaps_prime.transforms.utils import (
     _get_density_key,
     estimate_surface_density,
+)
+from neuromaps_prime.transforms.volume import (
+    _vol_to_vol,
 )
 from neuromaps_prime.utils import set_runner
 
@@ -1093,12 +1092,12 @@ class NeuromapsGraph(nx.MultiDiGraph):
             interp_params : dict, optional
                 Optional interpolation parameters.
 
-            Returns
+            Returns:
             -------
             Path
                 Path to the transformed volume.
 
-            Raises
+            Raises:
             ------
             ValueError
                 If required resources are missing.
