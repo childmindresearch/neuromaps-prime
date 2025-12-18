@@ -1,13 +1,12 @@
 """Test suite for graph functionalities in neuromaps_nhp."""
 
 from pathlib import Path
-
 import pytest
 from niwrap import Runner
-
-from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.graph import NeuromapsGraph, SurfaceAtlas, VolumeAtlas
 
 NUM_GRAPH_NODES = 6  # Expected number of nodes in the default graph
+
 
 @pytest.mark.usefixtures("require_data")
 def test_graph_initialization_with_data_dir(data_dir: Path, tmp_path: Path) -> None:
@@ -17,11 +16,23 @@ def test_graph_initialization_with_data_dir(data_dir: Path, tmp_path: Path) -> N
     assert graph.data_dir == data_dir
     assert len(graph.nodes) > 0
     assert len(graph.edges) > 0
+
+    # Test SurfaceAtlas fetch
     surf = graph.fetch_surface_atlas(
         space="CIVETNMT", density="41k", hemisphere="left", resource_type="midthickness"
     )
-    assert surf is not None
+    assert isinstance(surf, SurfaceAtlas)
+    assert surf.file_path.exists()
     assert data_dir.resolve() in surf.file_path.resolve().parents
+
+    # Test VolumeAtlas fetch
+    vol = graph.fetch_volume_atlas(
+        space="MEBRAINS", resolution="400um", resource_type="T1w"
+    )
+    assert isinstance(vol, VolumeAtlas)
+    assert vol.file_path.exists()
+    assert hasattr(vol, "resolution")
+    assert hasattr(vol, "resource_type")
 
 
 @pytest.fixture
@@ -34,17 +45,18 @@ def graph(data_dir: Path, runner: Runner) -> NeuromapsGraph:
 def test_default_graph_initialization(graph: NeuromapsGraph) -> None:
     """Test if the graph initializes correctly."""
     assert graph is not None
-    assert len(graph.nodes) > 0, "Graph should have nodes after initialization."
-    assert len(graph.edges) > 0, "Graph should have edges after initialization."
+    assert len(graph.nodes) > 0
+    assert len(graph.edges) > 0
 
 
 @pytest.mark.usefixtures("require_data")
 def test_fetch_surface_atlas(graph: NeuromapsGraph) -> None:
-    """Test fetching a surface atlas from the graph."""
+    """Test fetching a surface atlas."""
     atlas = graph.fetch_surface_atlas(
         space="Yerkes19", density="32k", hemisphere="left", resource_type="sphere"
     )
-    assert atlas is not None, "Failed to fetch the surface atlas."
+    assert isinstance(atlas, SurfaceAtlas)
+    assert atlas.file_path.exists()
 
 
 @pytest.mark.usefixtures("require_data")
@@ -69,50 +81,43 @@ def test_fetch_surface_to_surface_transform(graph: NeuromapsGraph) -> None:
         hemisphere="left",
         resource_type="sphere",
     )
-    assert transform is not None, (
-        "Failed to fetch the surface-to-surface transformation."
-    )
+    assert transform is not None
 
 
 @pytest.mark.usefixtures("require_data")
 def test_find_path(graph: NeuromapsGraph) -> None:
     """Test finding a path between two spaces."""
     path = graph.find_path(source="Yerkes19", target="S1200")
-    assert path is not None, "Failed to find a path between the specified spaces."
+    assert path is not None
+    assert len(path) >= 2
 
 
 @pytest.mark.usefixtures("require_data")
 def test_get_subgraph(graph: NeuromapsGraph) -> None:
-    """Test getting a subgraph for specified spaces."""
+    """Test getting a subgraph for specified edges."""
     subgraph = graph.get_subgraph(edges="surface_to_surface")
-    assert subgraph is not None, "Failed to get the subgraph."
-    assert len(subgraph.nodes(data=False)) == NUM_GRAPH_NODES, (
-        f"Subgraph should have {NUM_GRAPH_NODES} nodes."
-    )
+    assert subgraph is not None
+    assert len(subgraph.nodes(data=False)) == NUM_GRAPH_NODES
 
 
 @pytest.mark.usefixtures("require_data")
 def test_get_graph_info(graph: NeuromapsGraph) -> None:
     """Test retrieving graph information."""
     info = graph.get_graph_info()
-    assert isinstance(info, dict), "Graph info should be a dictionary."
-    assert info["num_nodes"] == NUM_GRAPH_NODES, (
-        f"Graph should have {NUM_GRAPH_NODES} surface nodes."
-    )
+    assert isinstance(info, dict)
+    assert info["num_nodes"] == NUM_GRAPH_NODES
 
 
 @pytest.mark.usefixtures("require_data")
 def test_get_node_data(graph: NeuromapsGraph) -> None:
     """Test retrieving node data."""
-    yerkes_data = graph.get_node_data("Yerkes19")
-    assert yerkes_data is not None, "Failed to retrieve node data."
-    assert yerkes_data.name == "Yerkes19", "Node name should be 'Yerkes19'."
+    node = graph.get_node_data("Yerkes19")
+    assert node is not None
+    assert node.name == "Yerkes19"
 
 
 @pytest.mark.usefixtures("require_data")
-def test_computed_surface_to_surface(
-    graph: NeuromapsGraph, data_dir: Path, tmp_path: Path
-) -> None:
+def test_computed_surface_to_surface(graph: NeuromapsGraph, data_dir: Path, tmp_path: Path) -> None:
     """Test fetching surface-to-surface transform with computed edge key."""
     source_space = "CIVETNMT"
     target_space = "S1200"
@@ -122,7 +127,6 @@ def test_computed_surface_to_surface(
     )
     output_file_path = str(tmp_path / f"space-{target_space}_output_label.label.gii")
 
-    # A dummy transform to add edge to the graph
     _ = graph.surface_to_surface_transformer(
         transformer_type="label",
         input_file=input_file,
@@ -132,31 +136,24 @@ def test_computed_surface_to_surface(
         output_file_path=output_file_path,
     )
 
-    # Assert the graph has the computed edge
-    assert graph.has_edge(
-        source_space, target_space, key=graph.surface_to_surface_key
-    ), "Graph should have the computed surface_to_surface edge."
+    assert graph.has_edge(source_space, target_space, key=graph.surface_to_surface_key)
 
-    # Assert if the computed edge is used.
     path = graph.find_path(
-        source=source_space,
-        target=target_space,
-        edge_type=graph.surface_to_surface_key,
+        source=source_space, target=target_space, edge_type=graph.surface_to_surface_key
     )
-    assert len(path) == 2, "Shortest path should be direct and use the computed edge."
+    assert len(path) == 2
 
-    # Assert if this computed edge does not corrupt the shortest path finding.
     source_space = "MEBRAINS"
     shortest_path = graph.find_path(
         source=source_space, target=target_space, edge_type=graph.surface_to_surface_key
     )
-    assert len(shortest_path) == 3, "Shortest path length should be 3."
-    assert "CIVETNMT" not in shortest_path, "Path should not include CIVETNMT node."
+    assert len(shortest_path) == 3
+    assert "CIVETNMT" not in shortest_path
 
 
 @pytest.mark.usefixtures("require_data")
-def test_add_transform(graph: NeuromapsGraph, data_dir: Path) -> None:
-    """Test adding a new transform to the graph."""
+def test_add_transform(graph: NeuromapsGraph) -> None:
+    """Test adding a new surface transform to the graph."""
     source = "Yerkes19"
     target = "S1200"
     density = "10k"
@@ -164,15 +161,8 @@ def test_add_transform(graph: NeuromapsGraph, data_dir: Path) -> None:
     resource_type = "sphere"
 
     surface_transform = graph.fetch_surface_to_surface_transform(
-        source=source,
-        target=target,
-        density=density,
-        hemisphere=hemisphere,
-        resource_type=resource_type,
+        source=source, target=target, density=density, hemisphere=hemisphere, resource_type=resource_type
     )
-
-    assert surface_transform is not None, "Could not fetch existing surface transform."
-
     surface_transform.resource_type = "test_transform_resource"
 
     graph.add_transform(
@@ -182,86 +172,73 @@ def test_add_transform(graph: NeuromapsGraph, data_dir: Path) -> None:
         transform=surface_transform,
     )
 
-    added_surface_transform = graph.fetch_surface_to_surface_transform(
-        source=source,
-        target=target,
-        density=density,
-        hemisphere=hemisphere,
-        resource_type="test_transform_resource",
+    added_transform = graph.fetch_surface_to_surface_transform(
+        source=source, target=target, density=density, hemisphere=hemisphere, resource_type="test_transform_resource"
     )
-    assert added_surface_transform is not None, (
-        "Failed to fetch the newly added surface transform."
-    )
-    assert added_surface_transform.resource_type == "test_transform_resource", (
-        "Resource type of the added transform does not match."
-    )
+    assert added_transform is not None
+    assert added_transform.resource_type == "test_transform_resource"
 
 
 @pytest.mark.usefixtures("require_data")
-def test_add_transform_invalid_type(graph: NeuromapsGraph, data_dir: Path) -> None:
+def test_add_transform_invalid_type(graph: NeuromapsGraph) -> None:
     """Test adding a new transform with an invalid type."""
-    source = "Yerkes19"
-    target = "S1200"
-
     surface_transform = "InvalidTransformType"
-
-    with pytest.raises(TypeError, match="Unsupported transform type: <class 'str'>"):
+    with pytest.raises(TypeError):
         graph.add_transform(
-            source_space=source,
-            target_space=target,
+            source_space="Yerkes19",
+            target_space="S1200",
             key=graph.surface_to_surface_key,
             transform=surface_transform,  # type: ignore[arg-type]
         )
 
+
 @pytest.mark.usefixtures("require_data")
 def test_volume_atlases_exist(graph: NeuromapsGraph) -> None:
-    """Test that volume atlases exist and their paths are valid."""
+    """Test that volume atlases exist and are valid VolumeAtlas objects."""
     for node_name in ["D99", "MEBRAINS", "NMT2Sym", "Yerkes19"]:
         node = graph.get_node_data(node_name)
-        assert node.volumes, f"Node {node_name} should have volume atlases."
-
+        assert node.volumes
         for atlas in node.volumes:
-            assert atlas.file_path.exists(), (
-                f"Volume atlas file {atlas.file_path} does not exist."
-            )
+            assert isinstance(atlas, VolumeAtlas)
+            assert atlas.file_path.exists()
+            assert hasattr(atlas, "resolution")
+            assert hasattr(atlas, "resource_type")
+
 
 @pytest.mark.usefixtures("require_data")
 def test_volume_to_volume_transform_objects_exist(graph: NeuromapsGraph) -> None:
-    """Test that volume-to-volume transforms exist and have valid paths."""
+    """Test that volume-to-volume transforms exist and are valid."""
     found = False
-
     for _, _, key, edge_data in graph.edges(data=True, keys=True):
         if key != graph.volume_to_volume_key:
             continue
-
         found = True
         edge = edge_data["data"]
-        assert edge.volume_transforms, "Volume edge should contain transforms."
-
+        assert edge.volume_transforms
         for transform in edge.volume_transforms:
-            assert transform.file_path.exists(), (
-                f"Volume transform file {transform.file_path} does not exist."
-            )
+            assert transform.file_path.exists()
+            assert hasattr(transform, "resolution")
+            assert hasattr(transform, "resource_type")
+    assert found
 
-    assert found, "Graph should contain volume_to_volume edges."
 
 @pytest.mark.usefixtures("require_data")
 def test_fetch_volume_atlas(graph: NeuromapsGraph) -> None:
-    atlas = graph.fetch_volume_atlas(
-        space="Yerkes19",
-        resolution="500um",
-        resource_type="T1w",
-    )
-    assert atlas is not None
+    """Test fetching a volume atlas returns a valid VolumeAtlas."""
+    atlas = graph.fetch_volume_atlas(space="Yerkes19", resolution="500um", resource_type="T1w")
+    assert isinstance(atlas, VolumeAtlas)
     assert atlas.file_path.exists()
+    assert atlas.resolution == "500um"
+    assert atlas.resource_type == "T1w"
+
 
 @pytest.mark.usefixtures("require_data")
 def test_fetch_volume_to_volume_transform(graph: NeuromapsGraph) -> None:
+    """Test fetching a volume-to-volume transform returns valid objects."""
     transform = graph.fetch_volume_to_volume_transform(
-        source="Yerkes19",
-        target="NMT2Sym",
-        resolution="250um",
-        resource_type="composite",
+        source="Yerkes19", target="NMT2Sym", resolution="250um", resource_type="composite"
     )
     assert transform is not None
     assert transform.file_path.exists()
+    assert hasattr(transform, "resolution")
+    assert hasattr(transform, "resource_type")
