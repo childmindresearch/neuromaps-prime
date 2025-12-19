@@ -168,18 +168,28 @@ class TestVolumetricTransformIntegration:
         return img.header.get_zooms()[:3]
 
     def test_vol_to_vol_real_data(self, tmp_path: Path, graph: NeuromapsGraph) -> None:
-        """Integration test with real ANTs processing."""
-        source = graph.fetch_volume_atlas(
+        """Integration test with real ANTs processing using actual file paths."""
+
+        source_atlas = graph.fetch_volume_atlas(
             space="D99", resolution="250um", resource_type="T1w"
         )
-        target = graph.fetch_volume_atlas(
-            space="NMT2Sym", resolution="400um", resource_type="T1w"
+        target_atlas = graph.fetch_volume_atlas(
+            space="NMT2Sym", resolution="250um", resource_type="T1w"
         )
-        out_file = tmp_path / "test.nii.gz"
+
+        source_path = str(source_atlas.fetch())
+        target_path = str(target_atlas.fetch())
+
+        out_file = str(tmp_path / "test.nii.gz")
 
         result = vol_to_vol(
-            source=source, target=target, out_fpath=str(out_file), interp="linear"
+            source=source_path,
+            target=target_path,
+            out_fpath=out_file,
+            interp="linear",
         )
 
         assert result.exists()
-        assert self._extract_res(result) == self._extract_res(target)
+        assert self._extract_res(result) == self._extract_res(target_path)
+
+
