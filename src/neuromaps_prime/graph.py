@@ -45,7 +45,7 @@ from neuromaps_prime.transforms.utils import (
     estimate_surface_density,
 )
 from neuromaps_prime.transforms.volume import (
-    _vol_to_vol,
+    vol_to_vol,
 )
 from neuromaps_prime.utils import set_runner
 
@@ -1132,7 +1132,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 f"(res={resolution}, type={resource_type})"
             )
 
-        return _vol_to_vol(
+        return vol_to_vol(
             source=input_file,
             target=target_atlas.fetch(),
             out_fpath=output_file_path,
