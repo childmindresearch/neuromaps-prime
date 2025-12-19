@@ -1082,7 +1082,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         target_space : str
             Target template space.
         resolution : str
-            Volume resolution of the composite output (e.g., '500um', '1mm').
+            Volume resolution of target (reference) image (e.g., '500um', '1mm').
         resource_type : str
             Volume type (e.g., 'T1w', 'composite').
         output_file_path : str
