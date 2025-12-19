@@ -10,7 +10,7 @@ from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.transforms.volume import (
     _NOT_IMPLEMENTED,
     INTERP_PARAMS,
-    _vol_to_vol,
+    vol_to_vol,
 )
 
 # Interpolators that are currently implemented and should work
@@ -18,7 +18,7 @@ DEVELOPED_INTERPS = [k for k in INTERP_PARAMS if k not in _NOT_IMPLEMENTED]
 
 
 class TestVolumetricTransform:
-    """Unit tests for volumetric transformations using `_vol_to_vol`."""
+    """Unit tests for volumetric transformations using `vol_to_vol`."""
 
     @pytest.fixture
     def mock_paths(self, tmp_path: Path) -> dict[str, Path]:
@@ -53,7 +53,7 @@ class TestVolumetricTransform:
         self, mock_ants_transform: MagicMock, mock_paths: dict[str, Path], interp: str
     ) -> None:
         """Test implemented interpolators."""
-        result = _vol_to_vol(
+        result = vol_to_vol(
             source=mock_paths["source"],
             target=mock_paths["target"],
             out_fpath=str(mock_paths["output"]),
@@ -75,7 +75,7 @@ class TestVolumetricTransform:
     ) -> None:
         """Test future interpolators for raising NotImplementedError."""
         with pytest.raises(NotImplementedError, match="not yet implemented"):
-            _vol_to_vol(
+            vol_to_vol(
                 source=mock_paths["source"],
                 target=mock_paths["target"],
                 out_fpath=str(mock_paths["output"]),
@@ -88,7 +88,7 @@ class TestVolumetricTransform:
     ) -> None:
         """Test unsupported interpolators for raising ValueError."""
         with pytest.raises(ValueError, match="Unsupported interpolator"):
-            _vol_to_vol(
+            vol_to_vol(
                 source=mock_paths["source"],
                 target=mock_paths["target"],
                 out_fpath=str(mock_paths["output"]),
@@ -111,7 +111,7 @@ class TestVolumetricTransform:
         interp_params: dict[str, Any] | None,
     ):
         """Test various interp_params inputs are handled correctly."""
-        result = _vol_to_vol(
+        result = vol_to_vol(
             source=mock_paths["source"],
             target=mock_paths["target"],
             out_fpath=str(mock_paths["output"]),
@@ -143,7 +143,7 @@ class TestVolumetricTransform:
         mock_ants.side_effect = create_output
 
         interp_params = {"sigma": 1.5, "alpha": 0.7}
-        _vol_to_vol(
+        vol_to_vol(
             source=mock_paths["source"],
             target=mock_paths["target"],
             out_fpath=str(mock_paths["output"]),
@@ -177,7 +177,7 @@ class TestVolumetricTransformIntegration:
         )
         out_file = tmp_path / "test.nii.gz"
 
-        result = _vol_to_vol(
+        result = vol_to_vol(
             source=source, target=target, out_fpath=str(out_file), interp="linear"
         )
 
