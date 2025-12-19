@@ -944,7 +944,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         transformer_type : str
             Type of transformation: 'metric' or 'label'.
         input_file : Path
-            Path to the input GIFTI file (metric or label).
+            File in source space to transform.
         source_space : str
             The source space name.
         target_space : str
@@ -1076,13 +1076,13 @@ class NeuromapsGraph(nx.MultiDiGraph):
         Parameters
         ----------
         input_file : Path
-            Path to the input NIfTI file in source space.
+            File in source space to transform.
         source_space : str
             Source template space.
         target_space : str
             Target template space.
         resolution : str
-            Volume resolution (e.g., '500um', '1mm').
+            Volume resolution of the composite output (e.g., '500um', '1mm').
         resource_type : str
             Volume type (e.g., 'T1w', 'composite').
         output_file_path : str
