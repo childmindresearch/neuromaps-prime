@@ -228,22 +228,21 @@ def test_volume_atlases_exist(graph: NeuromapsGraph) -> None:
 @pytest.mark.usefixtures("require_data")
 def test_volume_to_volume_transform_objects_exist(graph: NeuromapsGraph) -> None:
     """Test that volume-to-volume transforms exist and have valid paths."""
-    found = False
+    volume_edges = [
+        edge_data["data"]
+        for _, _, key, edge_data in graph.edges(data=True, keys=True)
+        if key == graph.volume_to_volume_key
+    ]
 
-    for _, _, key, edge_data in graph.edges(data=True, keys=True):
-        if key != graph.volume_to_volume_key:
-            continue
+    assert volume_edges, "Graph should contain volume_to_volume edges."
 
-        found = True
-        edge = edge_data["data"]
+    for edge in volume_edges:
         assert edge.volume_transforms, "Volume edge should contain transforms."
 
         for transform in edge.volume_transforms:
             assert transform.file_path.exists(), (
                 f"Volume transform file {transform.file_path} does not exist."
             )
-
-    assert found, "Graph should contain volume_to_volume edges."
 
 @pytest.mark.usefixtures("require_data")
 def test_fetch_volume_atlas(graph: NeuromapsGraph) -> None:
