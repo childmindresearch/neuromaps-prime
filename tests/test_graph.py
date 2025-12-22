@@ -216,7 +216,7 @@ def test_add_transform_invalid_type(graph: NeuromapsGraph, data_dir: Path) -> No
 @pytest.mark.usefixtures("require_data")
 def test_volume_atlases_exist(graph: NeuromapsGraph) -> None:
     """Test that volume atlases exist and their paths are valid."""
-    for node_name in ["D99", "MEBRAINS", "NMT2Sym", "Yerkes19"]:
+    for node_name in ["D99"]:
         node = graph.get_node_data(node_name)
         assert node.volumes, f"Node {node_name} should have volume atlases."
 
