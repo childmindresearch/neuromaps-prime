@@ -1071,7 +1071,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         interp: str = "linear",
         interp_params: dict[str, Any] | None = None,
     ) -> Path:
-        """Perform a single-hop volume-to-volume transformation.
+        """Perform a volume-to-volume transformation.
 
         Parameters
         ----------
