@@ -44,6 +44,9 @@ from neuromaps_prime.transforms.utils import (
     _get_density_key,
     estimate_surface_density,
 )
+from neuromaps_prime.transforms.volume import (
+    vol_to_vol,
+)
 from neuromaps_prime.utils import set_runner
 
 
@@ -591,7 +594,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             space (str): The brain template space name.
             resolution (str): The volume resolution (e.g., '2mm', '1mm').
             resource_type (str): The type of volume resource
-                (e.g., 'T1w', 'T2w', 'brain_mask').
+                (e.g., 'T1w', 'composite').
 
         Returns:
             VolumeAtlas | None:
@@ -670,7 +673,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             target (str): The target brain template space name.
             resolution (str): The volume resolution (e.g., '2mm', '1mm').
             resource_type (str): The type of volume resource
-                (e.g., 'T1w', 'T2w', 'brain_mask').
+                (e.g., 'T1w', 'composite').
 
         Returns:
             VolumeTransform:
@@ -941,7 +944,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         transformer_type : str
             Type of transformation: 'metric' or 'label'.
         input_file : Path
-            Path to the input GIFTI file (metric or label).
+            File in source space to transform.
         source_space : str
             The source space name.
         target_space : str
@@ -1056,3 +1059,83 @@ class NeuromapsGraph(nx.MultiDiGraph):
             )
 
         return resampled_output
+
+    def volume_to_volume_transformer(
+        self,
+        input_file: Path,
+        source_space: str,
+        target_space: str,
+        resolution: str,
+        resource_type: str,
+        output_file_path: str,
+        interp: str = "linear",
+        interp_params: dict[str, Any] | None = None,
+    ) -> Path:
+        """Perform a volume-to-volume transformation.
+
+        Parameters
+        ----------
+        input_file : Path
+            File in source space to transform.
+        source_space : str
+            Source template space.
+        target_space : str
+            Target template space.
+        resolution : str
+            Volume resolution of target (reference) image (e.g., '500um', '1mm').
+        resource_type : str
+            Volume type (e.g., 'T1w', 'composite').
+        output_file_path : str
+            Output file path.
+        interp : str, optional
+            Interpolation method.
+        interp_params : dict, optional
+            Optional interpolation parameters.
+
+        Returns:
+        -------
+        Path
+            Path to the transformed volume.
+
+        Raises:
+        ------
+        ValueError
+            If required resources are missing.
+        FileNotFoundError
+            If input file does not exist.
+        """
+        self.validate(source_space, target_space)
+
+        if not input_file.exists():
+            raise FileNotFoundError(f"Input file not found: {input_file}")
+
+        transform = self.fetch_volume_to_volume_transform(
+            source=source_space,
+            target=target_space,
+            resolution=resolution,
+            resource_type=resource_type,
+        )
+        if transform is None:
+            raise ValueError(
+                f"No volume transform found from {source_space} to {target_space} "
+                f"(res={resolution}, type={resource_type})"
+            )
+
+        target_atlas = self.fetch_volume_atlas(
+            space=target_space,
+            resolution=resolution,
+            resource_type=resource_type,
+        )
+        if target_atlas is None:
+            raise ValueError(
+                f"No target volume atlas found for {target_space} "
+                f"(res={resolution}, type={resource_type})"
+            )
+
+        return vol_to_vol(
+            source=input_file,
+            target=target_atlas.fetch(),
+            out_fpath=output_file_path,
+            interp=interp,
+            interp_params=interp_params,
+        )

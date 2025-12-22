@@ -9,7 +9,6 @@ from neuromaps_prime.graph import NeuromapsGraph
 
 NUM_GRAPH_NODES = 6  # Expected number of nodes in the default graph
 
-
 @pytest.mark.usefixtures("require_data")
 def test_graph_initialization_with_data_dir(data_dir: Path, tmp_path: Path) -> None:
     """Test initializing graph with data directory."""
@@ -213,3 +212,56 @@ def test_add_transform_invalid_type(graph: NeuromapsGraph, data_dir: Path) -> No
             key=graph.surface_to_surface_key,
             transform=surface_transform,  # type: ignore[arg-type]
         )
+
+@pytest.mark.usefixtures("require_data")
+def test_volume_atlases_exist(graph: NeuromapsGraph) -> None:
+    """Test that volume atlases exist and their paths are valid."""
+    node_name = "D99"
+    node = graph.get_node_data(node_name)
+
+    assert node.volumes, f"Node {node_name} should have volume atlases."
+
+    for atlas in node.volumes:
+        assert atlas.file_path.exists(), (
+            f"Volume atlas file {atlas.file_path} does not exist."
+        )
+
+@pytest.mark.usefixtures("require_data")
+def test_volume_to_volume_transform_objects_exist(graph: NeuromapsGraph) -> None:
+    """Test that volume-to-volume transforms exist and have valid paths."""
+    volume_edges = [
+        edge_data["data"]
+        for _, _, key, edge_data in graph.edges(data=True, keys=True)
+        if key == graph.volume_to_volume_key
+    ]
+
+    assert volume_edges, "Graph should contain volume_to_volume edges."
+
+    for edge in volume_edges:
+        assert edge.volume_transforms, "Volume edge should contain transforms."
+
+        for transform in edge.volume_transforms:
+            assert transform.file_path.exists(), (
+                f"Volume transform file {transform.file_path} does not exist."
+            )
+
+@pytest.mark.usefixtures("require_data")
+def test_fetch_volume_atlas(graph: NeuromapsGraph) -> None:
+    atlas = graph.fetch_volume_atlas(
+        space="Yerkes19",
+        resolution="500um",
+        resource_type="T1w",
+    )
+    assert atlas is not None
+    assert atlas.file_path.exists()
+
+@pytest.mark.usefixtures("require_data")
+def test_fetch_volume_to_volume_transform(graph: NeuromapsGraph) -> None:
+    transform = graph.fetch_volume_to_volume_transform(
+        source="Yerkes19",
+        target="NMT2Sym",
+        resolution="250um",
+        resource_type="composite",
+    )
+    assert transform is not None
+    assert transform.file_path.exists()
