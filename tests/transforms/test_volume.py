@@ -177,10 +177,10 @@ class TestVolumetricTransformIntegration:
             space="NMT2Sym", resolution="250um", resource_type="T1w"
         )
 
-        source_path = str(source_atlas.fetch())
-        target_path = str(target_atlas.fetch())
+        source_path = source_atlas.fetch()
+        target_path = target_atlas.fetch()
 
-        out_file = str(tmp_path / "test.nii.gz")
+        out_file = tmp_path / "test.nii.gz"
 
         result = vol_to_vol(
             source=source_path,
