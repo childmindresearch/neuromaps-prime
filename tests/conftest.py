@@ -78,7 +78,7 @@ def require_ants(runner: Runner) -> None:
     try:
         ants.ants_apply_transforms(
             reference_image=".",
-            output=ants.ants_apply_transforms_warped_output_params("."),
+            output=ants.ants_apply_transforms_warped_output("."),
             runner=runner,
         )
     except FileNotFoundError:
