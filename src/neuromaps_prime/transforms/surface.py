@@ -5,61 +5,55 @@ from typing import Literal
 
 from niwrap import workbench
 
+_RESAMPLE_METHODS = frozenset({"ADAP_BARY_AREA", "BARYCENTRIC"})
+
 
 def surface_sphere_project_unproject(
-    sphere_in: Path,
-    sphere_project_to: Path,
-    sphere_unproject_from: Path,
-    sphere_out: str,
+    sphere_in: str | Path,
+    sphere_project_to: str | Path,
+    sphere_unproject_from: str | Path,
+    sphere_out: str | Path,
 ) -> workbench.SurfaceSphereProjectUnprojectOutputs:
     """Project and unproject a surface from one sphere to another.
 
-    Parameters
-    ----------
-    sphere_in : Path
-        Path to input spherical surface.
-    sphere_project_to : Path
-        Path to spherical surface to project to.
-    sphere_unproject_from : Path
-        Path to spherical surface to unproject from.
-    sphere_out : str
-        Path to output spherical surface.
+    Args:
+        sphere_in: Input spherical surface file path.
+        sphere_project_to: File path of spherical surface to project to.
+        sphere_unproject_from: File path of spherical surface to unproject from.
+        sphere_out: Path to output spherical surface.
 
     Returns:
-    -------
-    result : workbench.SurfaceSphereProjectUnprojectOutputs
         Object containing the path to the output spherical surface as result.sphere_out.
 
     Raises:
-    ------
-    FileNotFoundError
-        If any input file does not exist.
+        FileNotFoundError: If any input file does not exist.
     """
-    if not sphere_in.exists():
-        raise FileNotFoundError(f"Input sphere file not found: {sphere_in}")
-    if not sphere_project_to.exists():
-        raise FileNotFoundError(f"Sphere to project to not found: {sphere_project_to}")
-    if not sphere_unproject_from.exists():
-        raise FileNotFoundError(
-            f"Sphere to unproject from not found: {sphere_unproject_from}"
-        )
+    sphere_in, sphere_project_to, sphere_unproject_from = map(
+        Path, [sphere_in, sphere_project_to, sphere_unproject_from]
+    )
+    # Validate input files
+    for path, desc in zip(
+        [sphere_in, sphere_project_to, sphere_unproject_from],
+        ["Input sphere", "Sphere to project to", "Sphere to unproject from"],
+    ):
+        if not path.exists():
+            raise FileNotFoundError(f"{desc} not found: {path}")
 
     result = workbench.surface_sphere_project_unproject(
         sphere_in=sphere_in,
         sphere_project_to=sphere_project_to,
         sphere_unproject_from=sphere_unproject_from,
-        sphere_out=sphere_out,
+        sphere_out=str(sphere_out),
     )
     if not result.sphere_out.exists():
         raise FileNotFoundError(f"Sphere out not found: {sphere_out}")
-
     return result
 
 
 def metric_resample(
-    input_file_path: Path,
-    current_sphere: Path,
-    new_sphere: Path,
+    input_file_path: str | Path,
+    current_sphere: str | Path,
+    new_sphere: str | Path,
     method: Literal["ADAP_BARY_AREA", "BARYCENTRIC"],
     area_surfs: workbench.MetricResampleAreaSurfsParamsDict,
     output_file_path: str,
@@ -67,42 +61,33 @@ def metric_resample(
 ) -> workbench.MetricResampleOutputs:
     """Resample a surface metric from one sphere to another.
 
-    Parameters
-    ----------
-    input_file_path : Path
-        Path to input metric file.
-    current_sphere : Path
-        Path to current spherical surface.
-    new_sphere : Path
-        Path to new spherical surface.
-    method : str
-        Resampling method.
-    area_surfs : workbench.MetricResampleAreaSurfsParamsDict,
-        Area surfaces for adaptive barycentric resampling.
-    output_file_path : str
-        Path to output metric file.
-    **kwargs
-        Additional keyword arguments passed to workbench.metric_resample.
-
+    Args:
+        input_file_path: Input metric file path.
+        current_sphere: File path to current spherical surface.
+        new_sphere: File path to new spherical surface.
+        method: Resampling method.
+        area_surfs: Area surfaces to perform vertex area correction on.
+        output_file_path: Path to output metric file.
 
     Returns:
-    -------
-    result : workbench.MetricResampleOutputs
         Object containing the path to the output metric as result.metric_out.
 
     Raises:
-    ------
-    FileNotFoundError
-        If any input file does not exist.
+        FileNotFoundError: If any input file does not exist or output file not created.
+        NotImplementedError: If selected resampling method is not available.
     """
-    if not input_file_path.exists():
-        raise FileNotFoundError(f"Input metric file not found: {input_file_path}")
-    if not current_sphere.exists():
-        raise FileNotFoundError(f"Current sphere file not found: {current_sphere}")
-    if not new_sphere.exists():
-        raise FileNotFoundError(f"New sphere file not found: {new_sphere}")
+    input_file_path, current_sphere, new_sphere = map(
+        Path, [input_file_path, current_sphere, new_sphere]
+    )
+    # Validate input files
+    for path, desc in zip(
+        [input_file_path, current_sphere, new_sphere],
+        ["Input file", "Current sphere", "New sphere"],
+    ):
+        if not path.exists():
+            raise FileNotFoundError(f"{desc} not found: {path}")
 
-    if method != "ADAP_BARY_AREA":
+    if method not in _RESAMPLE_METHODS:
         raise NotImplementedError(
             f"Resampling method '{method}' is not implemented in this function."
         )
@@ -113,18 +98,17 @@ def metric_resample(
         new_sphere=new_sphere,
         method=method,
         area_surfs=area_surfs,
-        metric_out=output_file_path,
+        metric_out=str(output_file_path),
     )
     if not result.metric_out.exists():
         raise FileNotFoundError(f"Metric out not found: {result.metric_out}")
-
     return result
 
 
 def label_resample(
-    input_file_path: Path,
-    current_sphere: Path,
-    new_sphere: Path,
+    input_file_path: str | Path,
+    current_sphere: str | Path,
+    new_sphere: str | Path,
     method: Literal["ADAP_BARY_AREA", "BARYCENTRIC"],
     area_surfs: workbench.LabelResampleAreaSurfsParamsDict,
     output_file_path: str,
@@ -132,41 +116,33 @@ def label_resample(
 ) -> workbench.LabelResampleOutputs:
     """Resample a surface label from one sphere to another.
 
-    Parameters
-    ----------
-    input_file_path : Path
-        Path to input label file.
-    current_sphere : Path
-        Path to current spherical surface.
-    new_sphere : Path
-        Path to new spherical surface.
-    method : str
-        Resampling method.
-    area_surfs : workbench.LabelResampleAreaSurfsParamsDict
-        Area surfaces for adaptive barycentric resampling.
-    output_file_path : str
-        Path to output label file.
-    **kwargs
-        Additional keyword arguments passed to workbench.label_resample.
+    Args:
+        input_file_path: Input label file path.
+        current_sphere: File path to current spherical surface.
+        new_sphere: File path to new spherical surface.
+        method: Resampling method.
+        area_surfs: Area surfaces to perform vertex area correction on.
+        output_file_path: Path to output label file.
 
     Returns:
-    -------
-    result : workbench.LabelResampleOutputs
         Object containing the path to the output label as result.label_out.
 
     Raises:
-    ------
-    FileNotFoundError
-        If any input file does not exist.
+        FileNotFoundError: If any input file does not exist or output file not created.
+        NotImplementedError: If selected resampling method is not available.
     """
-    if not input_file_path.exists():
-        raise FileNotFoundError(f"Input label file not found: {input_file_path}")
-    if not current_sphere.exists():
-        raise FileNotFoundError(f"Current sphere file not found: {current_sphere}")
-    if not new_sphere.exists():
-        raise FileNotFoundError(f"New sphere file not found: {new_sphere}")
+    input_file_path, current_sphere, new_sphere = map(
+        Path, [input_file_path, current_sphere, new_sphere]
+    )
+    # Validate input files
+    for path, desc in zip(
+        [input_file_path, current_sphere, new_sphere],
+        ["Input file", "Current sphere", "New sphere"],
+    ):
+        if not path.exists():
+            raise FileNotFoundError(f"{desc} not found: {path}")
 
-    if method != "ADAP_BARY_AREA":
+    if method not in _RESAMPLE_METHODS:
         raise NotImplementedError(
             f"Resampling method '{method}' is not implemented in this function."
         )
@@ -177,9 +153,8 @@ def label_resample(
         new_sphere=new_sphere,
         method=method,
         area_surfs=area_surfs,
-        label_out=output_file_path,
+        label_out=str(output_file_path),
     )
     if not result.label_out.exists():
         raise FileNotFoundError(f"Label out not found: {result.label_out}")
-
     return result
