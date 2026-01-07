@@ -21,7 +21,6 @@ see examples/example_graph_init.py for usage.
 """
 
 import os
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
@@ -30,6 +29,8 @@ import yaml
 from niwrap import Runner, workbench
 
 from neuromaps_prime.models import (
+    Edge,
+    Node,
     SurfaceAtlas,
     SurfaceTransform,
     VolumeAtlas,
@@ -48,43 +49,6 @@ from neuromaps_prime.transforms.volume import (
     vol_to_vol,
 )
 from neuromaps_prime.utils import set_runner
-
-
-@dataclass
-class Node:
-    """Class representing a node in the surface graph."""
-
-    name: str
-    species: str
-    description: str
-    surfaces: list[SurfaceAtlas]
-    volumes: list[VolumeAtlas]
-
-    def __repr__(self) -> str:
-        """Custom string representation for debugging."""
-        surface_str = "\n".join(f"{s.name}" for s in self.surfaces)
-        volume_str = "\n".join(f"{v.name}" for v in self.volumes)
-        return (
-            f"\nNode :\n"
-            f"name={self.name},\n"
-            f"species={self.species},\n"
-            f"surfaces=[{surface_str}],\n"
-            f"volumes=[{volume_str}]"
-        )
-
-
-@dataclass
-class Edge:
-    """Class representing an edge in the surface graph."""
-
-    surface_transforms: list[SurfaceTransform]
-    volume_transforms: list[VolumeTransform]
-
-    def __repr__(self) -> str:
-        """Custom string representation for debugging."""
-        surface_str = "\n".join(f"{s.name}" for s in self.surface_transforms)
-        volume_str = "\n".join(f"{v.name}" for v in self.volume_transforms)
-        return f"\nEdge : \nsurfaces=[{surface_str}], \nvolumes=[{volume_str}])"
 
 
 class NeuromapsGraph(nx.MultiDiGraph):
