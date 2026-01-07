@@ -32,7 +32,7 @@ if __name__ == "__main__":
     )
 
     if label_output is not None:
-        print(f"Transformed label saved at: {label_output.label_out}")
+        print(f"Transformed label saved at: {label_output}")
     else:
         print("Label surface-to-surface transformation failed.")
 
@@ -88,6 +88,6 @@ if __name__ == "__main__":
     )
 
     if metric_output is not None:
-        print(f"Transformed metric saved at: {metric_output.metric_out}")
+        print(f"Transformed metric saved at: {metric_output}")
     else:
         print("Metric surface-to-surface transformation failed.")
