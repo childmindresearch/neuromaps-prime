@@ -1,9 +1,10 @@
 """Global pytest fixtures, arguments, and options."""
 
 from pathlib import Path
-from typing import Generator
+from typing import Any, Generator
 
 import pytest
+import yaml
 from niwrap import Runner, ants, workbench
 
 from neuromaps_prime.graph import NeuromapsGraph
@@ -47,9 +48,68 @@ def runner(
 
 
 @pytest.fixture
-def graph(runner: Runner, require_data: Path) -> NeuromapsGraph:
+def graph(
+    runner: Runner, tmp_path: Path, require_data: Path | None = None
+) -> NeuromapsGraph:
     """Create a graph fixture to use for tests."""
-    return NeuromapsGraph(runner=runner, data_dir=require_data)
+    if require_data is not None:
+        return NeuromapsGraph(runner=runner, data_dir=require_data)
+
+    graph = NeuromapsGraph(_testing=True)
+    data = yaml.safe_load(graph.yaml_path.read_text())
+
+    def mk(path: Path) -> str:
+        path.touch()
+        return str(path)
+
+    def rewrite_node_files(name: str, node: dict[str, Any]) -> None:
+        # Surfaces
+        surfaces = node.get("surfaces", {})
+        for density, types in surfaces.items():
+            for surf_type, hemis in types.items():
+                for hemi in list(hemis):
+                    hemis[hemi] = mk(
+                        tmp_path / f"{name}_{density}_{hemi}_{surf_type}.surf.gii"
+                    )
+        # Volumes
+        volumes = node.get("volumes", {})
+        for res, types in volumes.items():
+            for vol_type in list(types):
+                types[vol_type] = mk(tmp_path / f"{name}_{res}_{vol_type}.nii.gz")
+
+    def rewrite_edge_files(edge: dict[str, Any]) -> None:
+        src = edge["from"]
+        dst = edge["to"]
+
+        # Surfaces
+        surfaces = edge.get("surfaces", {})
+        for density, types in surfaces.items():
+            for surf_type, hemis in types.items():
+                for hemi in list(hemis):
+                    hemis[hemi] = mk(
+                        tmp_path
+                        / f"{src}_to_{dst}_{density}_{hemi}_{surf_type}.surf.gii"
+                    )
+        # Volumes
+        volumes = edge.get("volumes", {})
+        for res, types in volumes.items():
+            for vol_type in list(types):
+                types[vol_type] = mk(
+                    tmp_path / f"{src}_to_{dst}_{res}_{vol_type}.nii.gz"
+                )
+
+    # Rewrite node file paths
+    for node_block in data.get("nodes", {}):
+        for node_name, node in node_block.items():
+            rewrite_node_files(node_name, node)
+
+    # Rewrite transform file paths
+    for edge_list in data.get("edges", {}).values():
+        for edge in edge_list:
+            rewrite_edge_files(edge)
+
+    graph._build_from_dict(data)
+    return graph
 
 
 @pytest.fixture

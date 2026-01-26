@@ -1,26 +1,14 @@
 """Module for managing brain template surface spaces and their transformations.
 
-The graph structure includes nodes representing brain template spaces
-and edges representing transformations between these spaces.
+Graph structure:
+  - Nodes: Brain template spaces
+  - Edges: Transformations between spaces
 
-nodes:
-    - name: Name of the brain template space (e.g., 'fsaverage', 'MEBRAINS')
-    - species: Species associated with the brain template space (e.g., 'human')
-    - description: Description of the brain template space
-    - surfaces: List of surface atlas resources available in this space
-    - volumes: List of volume atlas resources available in this space
-
-edges:
-    - surface_to_surface: Transformations between surface spaces
-    - volume_to_volume: Transformations between volume spaces
-
-see examples/example_graph_init.py for usage.
-
-## Make this more detailed later. ##
-
+See examples/example_graph_init.py for usage.
 """
 
 import os
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
 
@@ -63,188 +51,187 @@ class NeuromapsGraph(nx.MultiDiGraph):
         runner_kwargs: dict[str, Any] = {},
         yaml_file: Path | None = None,
         data_dir: Path | None = None,
+        _testing: bool = False,
     ) -> None:
-        """Initialize an empty NeuromapsGraph and populate it from a YAML file."""
+        """Initialize and populate NeuromapsGraph."""
         super().__init__()
 
+        # Init graph
         self.data_dir = data_dir or os.getenv("NEUROMAPS_DATA", None)
         self.yaml_path = (
             yaml_file
             or Path(__file__).parent / "datasets" / "data" / "neuromaps_graph.yaml"
         )
-        self._build_from_yaml(self.yaml_path)
         self.runner = set_runner(runner=runner, **runner_kwargs)
 
+        # Build graph with internal cache
+        self._surface_atlas_cache: dict[tuple[str, ...], SurfaceAtlas] = {}
+        self._surface_transform_cache: dict[tuple[str, ...], SurfaceTransform] = {}
+        self._volume_atlas_cache: dict[tuple[str, ...], VolumeAtlas] = {}
+        self._volume_transform_cache: dict[tuple[str, ...], VolumeTransform] = {}
+
+        # Flag to indicate testing
+        if not _testing:
+            self._build_from_yaml(self.yaml_path)
+
+    # GRAPH BUILDING
     def _build_from_yaml(self, yaml_file: Path) -> None:
-        """Read in the YAML file and call _build_from_dict to populate the graph."""
+        """Populate graph from YAML file."""
         with open(yaml_file, "r") as file:
             data = yaml.safe_load(file)
-
         self._build_from_dict(data)
 
     def _build_from_dict(self, data: dict[str, Any]) -> None:
-        """Build the graph from a dictionary."""
-        nodes = data.get("nodes", {})
-        edges = data.get("edges", {})
-
-        for node in nodes:
-            ((node_name, _node_data),) = node.items()
-            species = _node_data.get("species", "")
-            description = _node_data.get("description", "")
-
-            surfaces = self._parse_surfaces(
-                node_name, description, _node_data.get("surfaces", {})
-            )
-            volumes = self._parse_volumes(
-                node_name, description, _node_data.get("volumes", {})
-            )
-
-            neuromaps_node = Node(
+        """Populate graph from dictionary."""
+        # Nodes
+        for node in data.get("nodes", {}):
+            ((node_name, node_data),) = node.items()
+            node_obj = Node(
                 name=node_name,
-                species=species,
-                description=description,
-                surfaces=surfaces,
-                volumes=volumes,
+                species=node_data.get("species", ""),
+                description=(desc := node_data.get("description", "")),
+                surfaces=(
+                    surfaces := self._parse_surfaces(
+                        node_name, desc, node_data.get("surfaces", {})
+                    )
+                ),
+                volumes=(
+                    volumes := self._parse_volumes(
+                        node_name, desc, node_data.get("volumes", {})
+                    )
+                ),
             )
-            self.add_node(node_name, data=neuromaps_node)
+            self.add_node(node_name, data=node_obj)
+            # Update atlas caches
+            for surf_atlas in surfaces:
+                self._surface_atlas_cache[
+                    (
+                        node_name,
+                        surf_atlas.density,
+                        surf_atlas.hemisphere.lower(),
+                        surf_atlas.resource_type,
+                    )
+                ] = surf_atlas
+            for vol_atlas in volumes:
+                self._volume_atlas_cache[
+                    (node_name, vol_atlas.resolution, vol_atlas.resource_type)
+                ] = vol_atlas
 
-        surface_to_surface_transforms = edges.get(self.surface_to_surface_key, [])
-        for transforms in surface_to_surface_transforms:
-            source = transforms.get("from")
-            target = transforms.get("to")
-            surfaces_dict = transforms.get("surfaces", {})
+        # Edges
+        for key, edge_list in (
+            (
+                self.surface_to_surface_key,
+                data.get("edges", {}).get(self.surface_to_surface_key, []),
+            ),
+            (
+                self.volume_to_volume_key,
+                data.get("edges", {}).get(self.volume_to_volume_key, []),
+            ),
+        ):
+            for edge_data in edge_list:
+                source, target = edge_data.get("from"), edge_data.get("to")
+                if key == self.surface_to_surface_key:
+                    surf_transforms = self._parse_surface_to_surface_transforms(
+                        source, target, edge_data.get("surfaces", {})
+                    )
+                    edge_obj = Edge(surface_transforms=surf_transforms)
+                    for surf_xfm in surf_transforms:
+                        self._surface_transform_cache[
+                            (
+                                source,
+                                target,
+                                surf_xfm.density,
+                                surf_xfm.hemisphere.lower(),
+                                surf_xfm.resource_type,
+                            )
+                        ] = surf_xfm
+                else:
+                    vol_transforms = self._parse_volume_to_volume_transforms(
+                        source, target, edge_data.get("volumes", {})
+                    )
+                    edge_obj = Edge(volume_transforms=vol_transforms)
+                    for vol_xfm in vol_transforms:
+                        self._volume_transform_cache[
+                            (source, target, vol_xfm.resolution, vol_xfm.resource_type)
+                        ] = vol_xfm
+                self.add_edge(source, target, key=key, data=edge_obj, weight=1.0)
 
-            surface_transforms = self._parse_surface_to_surface_transforms(
-                source, target, surfaces_dict
-            )
-
-            neuromaps_edge = Edge(
-                surface_transforms=surface_transforms,
-                volume_transforms=[],
-            )
-            self.add_edge(
-                source,
-                target,
-                key=self.surface_to_surface_key,
-                data=neuromaps_edge,
-                weight=1.0,
-            )
-
-        volume_to_volume_transforms = edges.get(self.volume_to_volume_key, [])
-        for transforms in volume_to_volume_transforms:
-            source = transforms.get("from")
-            target = transforms.get("to")
-            volumes_dict = transforms.get("volumes", {})
-
-            volume_transforms = self._parse_volume_to_volume_transforms(
-                source, target, volumes_dict
-            )
-
-            neuromaps_edge = Edge(
-                surface_transforms=[],
-                volume_transforms=volume_transforms,
-            )
-            self.add_edge(
-                source,
-                target,
-                key=self.volume_to_volume_key,
-                data=neuromaps_edge,
-                weight=1.0,
-            )
-
+    # PARSER HELPERS
     def _parse_surfaces(
         self, node_name: str, description: str, surfaces_dict: dict[str, Any]
     ) -> list[SurfaceAtlas]:
-        SurfaceAtlasList = []
-        for density, surface_types in surfaces_dict.items():
-            for surface_type, hemispheres in surface_types.items():
-                for hemisphere, path in hemispheres.items():
-                    SurfaceAtlasList.append(
-                        SurfaceAtlas(
-                            name=f"{node_name}_{density}_{hemisphere}_{surface_type}",
-                            description=description,
-                            file_path=Path(path)
-                            if self.data_dir is None
-                            else self.data_dir / path,
-                            space=node_name,
-                            density=density,
-                            hemisphere=hemisphere,
-                            resource_type=surface_type,
-                        )
-                    )
-        return SurfaceAtlasList
+        """Parse surface atlas dictionary into SurfaceAtlas objects."""
+        return [
+            SurfaceAtlas(
+                name=f"{node_name}_{density}_{hemi}_{surf_type}",
+                description=description,
+                file_path=(self.data_dir / path) if self.data_dir else Path(path),
+                space=node_name,
+                density=density,
+                hemisphere=hemi,
+                resource_type=surf_type,
+            )
+            for density, types in surfaces_dict.items()
+            for surf_type, hemispheres in types.items()
+            for hemi, path in hemispheres.items()
+        ]
 
     def _parse_volumes(
         self, node_name: str, description: str, volumes_dict: dict[str, Any]
     ) -> list[VolumeAtlas]:
-        VolumeAtlasList = []
-        for resolution, volume_types in volumes_dict.items():
-            for volume_type, path in volume_types.items():
-                VolumeAtlasList.append(
-                    VolumeAtlas(
-                        name=f"{node_name}_{resolution}_{volume_type}",
-                        description=description,
-                        file_path=Path(path)
-                        if self.data_dir is None
-                        else self.data_dir / path,
-                        space=node_name,
-                        resolution=resolution,
-                        resource_type=volume_type,
-                    )
-                )
-        return VolumeAtlasList
+        """Parse volume atlas dictionary into VolumeAtlas objects."""
+        return [
+            VolumeAtlas(
+                name=f"{node_name}_{res}_{vol_type}",
+                description=description,
+                file_path=(self.data_dir / path) if self.data_dir else Path(path),
+                space=node_name,
+                resolution=res,
+                resource_type=vol_type,
+            )
+            for res, types in volumes_dict.items()
+            for vol_type, path in types.items()
+        ]
 
     def _parse_volume_to_volume_transforms(
         self, source_name: str, target_name: str, volumes_dict: dict[str, Any]
     ) -> list[VolumeTransform]:
-        VolumeTransformList = []
-        for resolution, volume_types in volumes_dict.items():
-            for volume_type, path in volume_types.items():
-                VolumeTransformList.append(
-                    VolumeTransform(
-                        name=f"{source_name}_to_{target_name}_{resolution}_{volume_type}",
-                        description=f"Transform from {source_name} to {target_name}",
-                        file_path=Path(path)
-                        if self.data_dir is None
-                        else self.data_dir / path,
-                        source_space=source_name,
-                        target_space=target_name,
-                        resolution=resolution,
-                        resource_type=volume_type,
-                        weight=1.0,
-                    )
-                )
-        return VolumeTransformList
+        """Parse volume-to-volume dictionary into VolumeTransform objects."""
+        return [
+            VolumeTransform(
+                name=f"{source_name}_to_{target_name}_{res}_{vol_type}",
+                description=f"vol2vol transform from {source_name} to {target_name}",
+                file_path=(self.data_dir / path) if self.data_dir else Path(path),
+                source_space=source_name,
+                target_space=target_name,
+                resolution=res,
+                resource_type=vol_type,
+            )
+            for res, types in volumes_dict.items()
+            for vol_type, path in types.items()
+        ]
 
     def _parse_surface_to_surface_transforms(
         self, source_name: str, target_name: str, surfaces_dict: dict
     ) -> list[SurfaceTransform]:
-        SurfaceTransformList = []
-        for density, surface_types in surfaces_dict.items():
-            for surface_type, hemispheres in surface_types.items():
-                for hemisphere, path in hemispheres.items():
-                    SurfaceTransformList.append(
-                        SurfaceTransform(
-                            name=(
-                                f"{source_name}_to_{target_name}_{density}"
-                                f"_{hemisphere}_{surface_type}"
-                            ),
-                            description=(
-                                f"Transform from {source_name} to {target_name}"
-                            ),
-                            file_path=Path(path)
-                            if self.data_dir is None
-                            else self.data_dir / path,
-                            source_space=source_name,
-                            target_space=target_name,
-                            density=density,
-                            hemisphere=hemisphere,
-                            resource_type=surface_type,
-                            weight=1.0,
-                        )
-                    )
-        return SurfaceTransformList
+        """Parse surface-to-surface dictionary into SurfaceTransform objects."""
+        return [
+            SurfaceTransform(
+                name=f"{source_name}_to_{target_name}_{density}_{hemi}_{surf_type}",
+                description=f"surf2surf transform from {source_name} to {target_name}",
+                file_path=(self.data_dir / path) if self.data_dir else Path(path),
+                source_space=source_name,
+                target_space=target_name,
+                density=density,
+                hemisphere=hemi,
+                resource_type=surf_type,
+            )
+            for density, types in surfaces_dict.items()
+            for surf_type, hemispheres in types.items()
+            for hemi, path in hemispheres.items()
+        ]
 
+    # TRANSFORM UTILITIES
     def _get_hop_output_file(
         self,
         output_file_path: str,
@@ -254,14 +241,12 @@ class NeuromapsGraph(nx.MultiDiGraph):
         hemisphere: Literal["left", "right"],
     ) -> str:
         """Generate hop output file path based on parameters."""
-        p = Path(output_file_path)
-        parent = p.parent
-        # Always use sphere.surf.gii for intermediate sphere files
-        suffix = "sphere.surf.gii"
-        return str(
-            parent / f"src-{source}_"
-            f"to-{next_target}_den-{density}_hemi-{hemisphere}_{suffix}"
+        parent = Path(output_file_path).parent
+        fname = (
+            f"src-{source}_"
+            f"to-{next_target}_den-{density}_hemi-{hemisphere}_sphere.surf.gii"
         )
+        return f"{parent}/{fname}"
 
     def _surface_to_surface(
         self,
@@ -274,114 +259,165 @@ class NeuromapsGraph(nx.MultiDiGraph):
     ) -> SurfaceTransform | None:
         """Perform a surface-to-surface transformation from source to target space.
 
-        Parameters
-        ----------
-        source : str
-            The source space name.
-        target : str
-            The target space name.
-        density : str
-            The density of the surfaces.
-        hemisphere : Literal["left", "right"]
-            The hemisphere ('left' or 'right').
-        add_edge : bool, optional
-            Whether to add the resulting transform as an edge in the graph.
-            Default is True.
+        Args:
+            source: The source space name.
+            target: The target space name.
+            density: The density of the surfaces.
+            hemisphere: The hemisphere ('left' or 'right').
+            output_file_path: Path to save the resulting transform.
+            add_edge: Flag to add resulting transform to graph (default: True).
 
         Returns:
-        -------
-        transform : SurfaceTransform
             The resulting surface-to-surface transform resource.
 
         Raises:
         ------
-        ValueError
-            If no valid path is found or if source and target are the same.
-            If hemisphere value is invalid.
-        FileNotFoundError
-            If any input file does not exist.
-
+        ValueError: If no valid path found, hemisphere is invalid, or source and target
+            are the same.
         """
+        if source == target:
+            raise ValueError(f"Source and target spaces are the same: {source}")
         self.validate(source, target)
-        shortest_path = self.find_path(
+
+        s_path = self.find_path(
             source=source, target=target, edge_type=self.surface_to_surface_key
         )
-        resource_type = "sphere"
-
-        if not shortest_path or len(shortest_path) < 1:
-            raise ValueError(f"No valid path found from {source} to {target}.")
-
-        elif len(shortest_path) == 1:
-            raise ValueError(f"Source and target spaces are the same: {source}.")
-
-        elif len(shortest_path) == 2:
+        if len(s_path) < 2:
+            raise ValueError(f"No valid path from {source} to {target}")
+        # Single hop
+        if len(s_path) == 2:
             return self.fetch_surface_to_surface_transform(
                 source=source,
                 target=target,
                 density=density,
                 hemisphere=hemisphere,
-                resource_type=resource_type,
+                resource_type="sphere",
             )
-
-        _transform = self.fetch_surface_to_surface_transform(
-            source=shortest_path[0],
-            target=shortest_path[1],
+        # Multi-hop
+        return self._compose_multihop_surface_transform(
+            paths=s_path,
+            source=source,
             density=density,
             hemisphere=hemisphere,
-            resource_type=resource_type,
+            output_file_path=output_file_path,
+            add_edge=add_edge,
         )
 
-        for i in range(2, len(shortest_path)):
-            next_target = shortest_path[i]
+    def _compose_multihop_surface_transform(
+        self,
+        paths: list[str],
+        source: str,
+        density: str,
+        hemisphere: Literal["left", "right"],
+        output_file_path: str,
+        add_edge: bool,
+    ) -> SurfaceTransform:
+        """Compose multiple surface transforms along a path.
 
-            hop_output_file = self._get_hop_output_file(
-                output_file_path, source, next_target, density, hemisphere
-            )
+        Args:
+            paths: List of space names from source to target.
+            source: Original source space (for naming).
+            target: Final target space (for naming).
+            density: Surface density.
+            hemisphere: Hemisphere identifier.
+            output_file_path: Base path for output files.
+            add_edge: Whether to add composed transforms to graph.
 
-            _transform = self._two_hops(
-                source_space=source,
-                mid_space=shortest_path[i - 1],
-                target_space=next_target,
+        Returns:
+            Final composed transform from source to target.
+
+        Raises:
+            ValueError: If any intermediate transform cannot be fetched.
+        """
+        current_transform = self.fetch_surface_to_surface_transform(
+            source=paths[0],
+            target=paths[1],
+            density=density,
+            hemisphere=hemisphere,
+            resource_type="sphere",
+        )
+        if current_transform is None:
+            raise ValueError(f"No transform found from {paths[0]} -> {paths[1]}")
+
+        for hop_idx, next_space in enumerate(paths[2:], start=2):  # type: ignore[call-overload]
+            current_transform = self._compose_next_hop(
+                paths=paths,
+                hop_idx=hop_idx,
+                next_space=next_space,
+                current_transform=current_transform,
+                source=source,
                 density=density,
                 hemisphere=hemisphere,
-                output_file_path=hop_output_file,
-                first_transform=_transform,
+                output_file_path=output_file_path,
+                add_edge=add_edge,
             )
 
-            transform = SurfaceTransform(
-                name=f"{source}_to_{next_target}_{density}_{hemisphere}_{resource_type}",
-                description=f"Surface Transform from {source} to {next_target}",
+        return current_transform
+
+    def _compose_next_hop(
+        self,
+        paths: list[str],
+        hop_idx: int,
+        next_space: str,
+        current_transform: SurfaceTransform,
+        source: str,
+        density: str,
+        hemisphere: Literal["left", "right"],
+        output_file_path: str,
+        add_edge: bool,
+    ) -> SurfaceTransform:
+        """Compose current transform with next hop in path.
+
+        Args:
+            paths: Full transformation path.
+            hop_idx: Current hop index (2-based).
+            next_space: Next target space.
+            current_transform: Transform accumulated so far.
+            source: Original source space.
+            density: Surface density.
+            hemisphere: Hemisphere identifier.
+            output_file_path: Base output path.
+            add_edge: Whether to add transform to graph.
+
+        Returns:
+            New composed transform.
+        """
+        hop_output = self._get_hop_output_file(
+            output_file_path=str(output_file_path),
+            source=source,
+            next_target=next_space,
+            density=density,
+            hemisphere=hemisphere,
+        )
+        composed_path = self._two_hops(
+            source_space=paths[hop_idx - 2],
+            mid_space=paths[hop_idx - 1],
+            target_space=next_space,
+            density=density,
+            hemisphere=hemisphere,
+            output_file_path=hop_output,
+            first_transform=current_transform,
+        )
+        new_transform = SurfaceTransform(
+            name=f"{source}_to_{next_space}_{density}_{hemisphere}_sphere",
+            description=f"Surface Transform from {source} to {next_space}",
+            source_space=source,
+            target_space=next_space,
+            density=density,
+            hemisphere=hemisphere,
+            resource_type="sphere",
+            file_path=composed_path,
+            weight=float(hop_idx),
+        )
+        if add_edge:
+            self.add_transform(
                 source_space=source,
-                target_space=next_target,
-                density=density,
-                hemisphere=hemisphere,
-                resource_type=resource_type,
-                file_path=_transform.sphere_out,
-                weight=float(i),
+                target_space=next_space,
+                key=self.surface_to_surface_key,
+                transform=new_transform,
             )
 
-            if add_edge:
-                self.add_transform(
-                    source_space=source,
-                    target_space=next_target,
-                    key=self.surface_to_surface_key,
-                    transform=transform,
-                )
-
-        return transform
-
-    def validate(self, source: str, target: str) -> None:
-        """Validate that source and target spaces exist in the graph."""
-        if source not in self.nodes(data=False):
-            raise ValueError(
-                f"source space '{source}' does not exist in the graph."
-                f" Available spaces: {list(self.nodes(data=False))}"
-            )
-        elif target not in self.nodes(data=False):
-            raise ValueError(
-                f"target space '{target}' does not exist in the graph."
-                f" Available spaces: {list(self.nodes(data=False))}"
-            )
+        return new_transform
 
     def _two_hops(
         self,
@@ -392,72 +428,42 @@ class NeuromapsGraph(nx.MultiDiGraph):
         hemisphere: Literal["left", "right"],
         output_file_path: str,
         first_transform: SurfaceTransform | None = None,
-    ) -> workbench.SurfaceSphereProjectUnprojectOutputs:
-        """Perform a two-hop surface-to-surface transformation.
+    ) -> Path:
+        """Perform a two-hop surface-to-surface transformation via intermediate space.
 
-        via an intermediate space
-        This is a wrapper around the surface_sphere_project_unproject function with
-        default fetching of the intermediate resources.
-        If you are going from 1 -> 2 -> 3,
-        1 is the source_space, 2 is the mid_space, and 3 is the target_space.
-
-        This function then fetches
-        1 -> 2 transform (first_transform/sphere_in),
-        2 sphere atlas (sphere_project_to),
-        and 2 -> 3 transform (sphere_unproject_from),
-        and performs the projection and unprojection to get from 1 -> 3.
-
-        You can provide the first_transform (1 -> 2) to avoid fetching it again.
-        But it is optional.
-
-        Parameters
-        ----------
-        source_space : str
-            The source space name.
-        mid_space : str
-            The intermediate space name.
-        target_space : str
-            The target space name.
-        density : str
-            The density of the surfaces.
-        hemisphere : Literal["left", "right"]
-            The hemisphere ('left' or 'right').
-        output_file_path : str
-            Path to the output GIFTI surface file.
-        first_transform : SurfaceTransform | None, optional
-            Pre-fetched transform from source to mid space. If None, it will be fetched.
+        Args:
+            source_space: The source space name.
+            mid_space: The intermediate space name.
+            target_space: The target space name.
+            density: The density of the surfaces.
+            hemisphere: The hemisphere ('left' or 'right').
+            output_file_path: Path to the output GIFTI surface file.
+            first_transform: Pre-fetched transform from source to mid space. If None,
+                it will be fetched
 
         Returns:
-        -------
-        result : workbench.SurfaceSphereProjectUnprojectOutputs
             Object containing the path to the output spherical surface as
             result.sphere_out.
 
         Raises:
-        ------
-        ValueError
-            If no surface transform is found
-            for the source to mid space or mid to target space.
-        FileNotFoundError
-            If any input file does not exist.
+            ValueError: If no surface transform is found for the source to mid space
+                or mid to target space.
+            FileNotFoundError: If any input file does not exist.
         """
+        first_transform = first_transform or self.fetch_surface_to_surface_transform(
+            source=source_space,
+            target=mid_space,
+            density=density,
+            hemisphere=hemisphere,
+            resource_type="sphere",
+        )
         if first_transform is None:
-            first_transform = self.fetch_surface_to_surface_transform(
-                source=source_space,
-                target=mid_space,
-                density=density,
-                hemisphere=hemisphere,
-                resource_type="sphere",
+            raise ValueError(
+                f"No surface transform found from {source_space} to {mid_space}"
             )
-            if first_transform is None:
-                raise ValueError(
-                    f"No surface transform found from {source_space} to {mid_space}"
-                )
-
         sphere_in = first_transform.fetch()
 
         highest_common_density = self.find_common_density(mid_space, target_space)
-
         surface_atlas = self.fetch_surface_atlas(
             space=mid_space,
             hemisphere=hemisphere,
@@ -466,7 +472,6 @@ class NeuromapsGraph(nx.MultiDiGraph):
         )
         if surface_atlas is None:
             raise ValueError(f"No surface atlas found for {mid_space}")
-
         sphere_project_to = surface_atlas.fetch()
 
         unproject_transform = self.fetch_surface_to_surface_transform(
@@ -480,19 +485,16 @@ class NeuromapsGraph(nx.MultiDiGraph):
             raise ValueError(
                 f"No surface transform found from {mid_space} to {target_space}"
             )
-
         sphere_unproject_from = unproject_transform.fetch()
 
-        resulting_transform = surface_sphere_project_unproject(
+        return surface_sphere_project_unproject(
             sphere_in=sphere_in,
             sphere_project_to=sphere_project_to,
             sphere_unproject_from=sphere_unproject_from,
             sphere_out=output_file_path,
-        )
+        ).sphere_out
 
-        return resulting_transform
-
-    ## Public Methods ##
+    # RESOURCE FETCHING
     def fetch_surface_atlas(
         self,
         space: str,
@@ -503,83 +505,32 @@ class NeuromapsGraph(nx.MultiDiGraph):
         """Fetch a surface atlas resource from the graph.
 
         Args:
-            space (str): The brain template space name.
-            density (str): The surface mesh density (e.g., '32k', '41k').
-            hemisphere (Literal['left', 'right']): The hemisphere ('left', 'right').
-            resource_type (str): The type of surface resource
-                (e.g., 'midthickness', 'white', 'pial').
+            space: The brain template space name.
+            density: The surface mesh density (e.g., '32k', '41k').
+            hemisphere: The hemisphere ('left', 'right').
+            resource_type: The type of surface resource (e.g., 'midthickness', 'white').
 
         Returns:
-            SurfaceAtlas | None:
-                The matching SurfaceAtlas resource, or None if not found.
+            The matching SurfaceAtlas resource, or None if not found.
         """
-        # Validate input parameters using the model
-        try:
-            # Create a temporary model to validate the input parameters
-            validated_params = SurfaceAtlas(
-                name="",
-                description="",
-                file_path=Path(""),
-                space=space,
-                density=density,
-                hemisphere=hemisphere,
-                resource_type=resource_type,
-            )
-        except Exception as e:
-            raise ValueError(f"Invalid parameters: {e}")
-
-        if space not in self.nodes:
-            raise ValueError(
-                f"Space '{space}' not found in the graph.\n"
-                f"Available spaces: {list(self.nodes)}"
-            )
-
-        node: Node = self.nodes[space]["data"]
-
-        for surface in node.surfaces:
-            if (
-                surface.density == validated_params.density
-                and surface.hemisphere.lower() == validated_params.hemisphere.lower()
-                and surface.resource_type == validated_params.resource_type
-            ):
-                return surface
-
-        return None
+        return self._surface_atlas_cache.get(
+            (space, density, hemisphere.lower(), resource_type)
+        )
 
     def fetch_volume_atlas(
-        self,
-        space: str,
-        resolution: str,
-        resource_type: str,
+        self, space: str, resolution: str, resource_type: str
     ) -> VolumeAtlas | None:
         """Fetch a volume atlas resource from the graph.
 
         Args:
-            space (str): The brain template space name.
-            resolution (str): The volume resolution (e.g., '2mm', '1mm').
-            resource_type (str): The type of volume resource
-                (e.g., 'T1w', 'composite').
+            space: The brain template space name.
+            resolution: The volume resolution (e.g., '2mm', '1mm').
+            resource_type: The type of volume resourcen(e.g., 'T1w', 'T2w').
 
         Returns:
-            VolumeAtlas | None:
-                The matching VolumeAtlas resource, or None if not found.
+            The matching VolumeAtlas resource, or None if not found.
         """
-        if space not in self.nodes:
-            raise ValueError(
-                f"Space '{space}' not found in the graph.\n"
-                f"Available spaces: {list(self.nodes)}"
-            )
-
-        node: Node = self.nodes[space]["data"]
-
-        for volume in node.volumes:
-            if (
-                volume.resolution == resolution
-                and volume.resource_type == resource_type
-            ):
-                return volume
-
-        return None
+        return self._volume_atlas_cache.get((space, resolution, resource_type))
 
     def fetch_surface_to_surface_transform(
         self,
@@ -592,74 +543,52 @@ class NeuromapsGraph(nx.MultiDiGraph):
         """Fetch a surface-to-surface transform resource from the graph.
 
         Args:
-            source (str): The source brain template space name.
-            target (str): The target brain template space name.
-            density (str): The surface mesh density (e.g., '32k', '41k').
-            hemisphere (Literal["left", "right"]): The hemisphere ('left', 'right').
-            resource_type (str): The type of surface resource
-                (e.g., 'midthickness', 'white', 'pial').
-            key (str): The key identifying the edge type.
+            source: The source brain template space name.
+            target: The target brain template space name.
+            density: The surface mesh density (e.g., '32k', '41k').
+            hemisphere: The hemisphere ('left', 'right').
+            resource_type: The type of surface resource (e.g., 'midthickness', 'white').
+            key: The key identifying the edge type.
 
         Returns:
             SurfaceTransform | None:
                 The matching SurfaceTransform resource, or None if not found.
         """
-        if not self.has_edge(source, target, key=self.surface_to_surface_key):
-            raise ValueError(
-                f"Surface-to-surface transform from "
-                f"'{source}' to '{target}' not found in the graph.\n"
-                f"Available edges: {list(self.edges)}"
-            )
-
-        edge_data = self.get_edge_data(source, target, key=self.surface_to_surface_key)
-        edge: Edge = edge_data["data"]
-
-        for transform in edge.surface_transforms:
-            if (
-                transform.density == density
-                and transform.hemisphere.lower() == hemisphere.lower()
-                and transform.resource_type == resource_type
-            ):
-                return transform
-        return None
+        return self._surface_transform_cache.get(
+            (source, target, density, hemisphere.lower(), resource_type)
+        )
 
     def fetch_volume_to_volume_transform(
-        self,
-        source: str,
-        target: str,
-        resolution: str,
-        resource_type: str,
+        self, source: str, target: str, resolution: str, resource_type: str
     ) -> VolumeTransform | None:
         """Fetch a volume-to-volume transform resource from the graph.
 
         Args:
-            source (str): The source brain template space name.
-            target (str): The target brain template space name.
-            resolution (str): The volume resolution (e.g., '2mm', '1mm').
-            resource_type (str): The type of volume resource
-                (e.g., 'T1w', 'composite').
+            source: The source brain template space name.
+            target: The target brain template space name.
+            resolution: The volume resolution (e.g., '2mm', '1mm').
+            resource_type: The type of volume resource (e.g., 'T1w', 'T2w').
 
         Returns:
-            VolumeTransform:
-                The matching VolumeTransform resource, or None if not found.
+            The matching VolumeTransform resource, or None if not found.
         """
-        if not self.has_edge(source, target, key="volume_to_volume"):
+        return self._volume_transform_cache.get(
+            (source, target, resolution, resource_type)
+        )
+
+    # NODE UTILITIES
+    def validate(self, source: str, target: str) -> None:
+        """Validate that source and target spaces exist in the graph."""
+        if source not in self.nodes(data=False):
             raise ValueError(
-                f"Volume-to-volume transform from "
-                f"'{source}' to '{target}' not found in the graph.\n"
-                f"Available edges: {list(self.edges)}"
+                f"source space '{source}' does not exist in the graph."
+                f" Available spaces: {list(self.nodes(data=False))}"
             )
-
-        edge_data = self.get_edge_data(source, target, key="volume_to_volume")
-        edge: Edge = edge_data["data"]
-
-        for transform in edge.volume_transforms:
-            if (
-                transform.resolution == resolution
-                and transform.resource_type == resource_type
-            ):
-                return transform
-        return None
+        if target not in self.nodes(data=False):
+            raise ValueError(
+                f"target space '{target}' does not exist in the graph."
+                f" Available spaces: {list(self.nodes(data=False))}"
+            )
 
     def find_path(
         self, source: str, target: str, edge_type: str | None = None
@@ -667,63 +596,50 @@ class NeuromapsGraph(nx.MultiDiGraph):
         """Find a path between two brain template spaces in the graph.
 
         Args:
-            source (str): The source brain template space name.
-            target (str): The target brain template space name.
-            edge_type (str): Type of edges to use
-                ('surface_to_surface', 'volume_to_volume').
+            source: The source brain template space name.
+            target: The target brain template space name.
+            edge_type: Type of edges to use ('surface_to_surface', 'volume_to_volume').
 
         Returns:
-            List[str]:
-                A list of space names representing the path from source to target.
-
-                Returns empty list if no path exists.
+            A list of space names representing the path from source to target.
         """
         try:
-            if edge_type:
-                temp_graph = self.get_subgraph(edges=edge_type)
-                path = nx.shortest_path(
-                    temp_graph, source=source, target=target, weight="weight"
-                )
-            else:
-                path = nx.shortest_path(
-                    self, source=source, target=target, weight="weight"
-                )
-            return path
+            graph = self.get_subgraph(edges=edge_type) if edge_type else self
+            return nx.shortest_path(
+                graph, source=source, target=target, weight="weight"
+            )
         except nx.NetworkXNoPath:
             return []
 
-    # Get a subgraph containing all nodes but only the specified edges keys
+    @lru_cache
     def get_subgraph(self, edges: str) -> nx.MultiDiGraph:
         """Get a subgraph containing all nodes but only the specified edges keys.
 
         Args:
-            edges (str): Type of edges to include
-                ('surface_to_surface', 'volume_to_volume')
+            edges: Type of edges to include ('surface_to_surface', 'volume_to_volume').
 
         Returns:
-            nx.MultiDiGraph: The resulting subgraph.
+            The resulting subgraph.
         """
         subgraph = nx.MultiDiGraph()
         subgraph.add_nodes_from(self.nodes(data=True))
-
-        for u, v, key in self.edges(keys=True):
+        for u, v, key, edge_data in self.edges(data=True, keys=True):
             if key == edges:
-                edge_data = self.get_edge_data(u, v, key=key)
                 subgraph.add_edge(u, v, key=key, **edge_data)
-
         return subgraph
 
     def get_graph_info(self) -> dict[str, Any]:
-        """Get a summary of the graph structure."""
-        info = {
+        """Get a summary of the graph structure.
+
+        Returns:
+            A dictionary summary of the graph structure.
+        """
+        nodes_data = [self.get_node_data(n) for n in self.nodes]
+        return {
             "num_nodes": self.number_of_nodes(),
             "num_edges": self.number_of_edges(),
-            "num_surfaces": sum(
-                len(self.get_node_data(node).surfaces) for node in self.nodes
-            ),
-            "num_volumes": sum(
-                len(self.get_node_data(node).volumes) for node in self.nodes
-            ),
+            "num_surfaces": sum(len(n.surfaces) for n in nodes_data),
+            "num_volumes": sum(len(n.volumes) for n in nodes_data),
             "num_surface_to_surface_transforms": sum(
                 1 for _, _, k in self.edges(keys=True) if k == "surface_to_surface"
             ),
@@ -731,23 +647,25 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 1 for _, _, k in self.edges(keys=True) if k == "volume_to_volume"
             ),
         }
-        return info
 
     def get_node_data(self, node_name: str) -> Node:
         """Get the Node data for a given node name.
 
         Args:
-            node_name (str): The name of the node.
+            node_name: The name of the node.
 
         Returns:
-            Node: The Node data object.
+            The Node data object.
+
+        Raises:
+            ValueError: if node not found in graph.
         """
-        if node_name not in self.nodes:
+        try:
+            return self.nodes[node_name]["data"]
+        except KeyError:
             raise ValueError(
-                f"Node '{node_name}' not found in the graph.\n"
-                f"Available nodes: {list(self.nodes)}"
+                f"Node '{node_name}' not found.\nAvailable nodes: {list(self.nodes)}"
             )
-        return self.nodes[node_name]["data"]
 
     def add_transform(
         self,
@@ -763,11 +681,28 @@ class NeuromapsGraph(nx.MultiDiGraph):
                     surface_transforms=[transform],
                     volume_transforms=[],
                 )
+                self._surface_transform_cache[
+                    (
+                        source_space,
+                        target_space,
+                        transform.density,
+                        transform.hemisphere.lower(),
+                        transform.resource_type,
+                    )
+                ] = transform
             case VolumeTransform():
                 edge = Edge(
                     surface_transforms=[],
                     volume_transforms=[transform],
                 )
+                self._volume_transform_cache[
+                    (
+                        source_space,
+                        target_space,
+                        transform.resolution,
+                        transform.resource_type,
+                    )
+                ] = transform
             case _:
                 raise TypeError(f"Unsupported transform type: {type(transform)}")
 
@@ -785,28 +720,24 @@ class NeuromapsGraph(nx.MultiDiGraph):
         """Search for surface atlases matching the given criteria.
 
         Args:
-            space (str): The brain template space name.
-            density (str | None): The surface mesh density to match.
-            hemisphere (Literal["left", "right"] | None): The hemisphere to match.
-            resource_type (str | None): The resource type to match.
+            space: The brain template space name.
+            density: The surface mesh density to match.
+            hemisphere: The hemisphere to match.
+            resource_type: The resource type to match.
 
         Returns:
-            list[SurfaceAtlas]: A list of matching surface atlases.
+            A list of matching surface atlases.
         """
-        matching_atlases = []
-        for node in self.nodes(data=True):
-            node_name, node_data = node
-            if node_name != space:
-                continue
-            node_obj: Node = node_data["data"]
-            for atlas in node_obj.surfaces:
-                if (
-                    (density is None or atlas.density == density)
-                    and (hemisphere is None or atlas.hemisphere == hemisphere)
-                    and (resource_type is None or atlas.resource_type == resource_type)
-                ):
-                    matching_atlases.append(atlas)
-        return matching_atlases
+        node = self.nodes.get(space)
+        if not node:
+            return []
+        return [
+            atlas
+            for atlas in node["data"].surfaces
+            if (density is None or atlas.density == density)
+            and (hemisphere is None or atlas.hemisphere.lower() == hemisphere.lower())
+            and (resource_type is None or atlas.resource_type == resource_type)
+        ]
 
     def search_surface_transforms(
         self,
@@ -819,14 +750,14 @@ class NeuromapsGraph(nx.MultiDiGraph):
         """Search for surface transforms matching the given criteria.
 
         Args:
-            source_space (str): The source brain template space name.
-            target_space (str): The target brain template space name.
-            density (str | None): The surface mesh density to match.
-            hemisphere (Literal["left", "right"] | None): The hemisphere to match.
-            resource_type (str | None): The resource type to match.
+            source_space: The source brain template space name.
+            target_space: The target brain template space name.
+            density: The surface mesh density to match.
+            hemisphere: The hemisphere to match.
+            resource_type: The resource type to match.
 
         Returns:
-            list[SurfaceTransform]: A list of matching surface transforms.
+            A list of matching surface transforms.
         """
         matching_transforms = []
         for u, v, key, edge_data in self.edges(data=True, keys=True):
@@ -836,7 +767,10 @@ class NeuromapsGraph(nx.MultiDiGraph):
             for transform in edge.surface_transforms:
                 if (
                     (density is None or transform.density == density)
-                    and (hemisphere is None or transform.hemisphere == hemisphere)
+                    and (
+                        hemisphere is None
+                        or transform.hemisphere.lower() == hemisphere.lower()
+                    )
                     and (
                         resource_type is None
                         or transform.resource_type == resource_type
@@ -848,33 +782,28 @@ class NeuromapsGraph(nx.MultiDiGraph):
     def find_common_density(self, mid_space: str, target_space: str) -> str:
         """Find a common density between source and source-to-target transformations.
 
-        This function is really needed to check if the surface_sphere_project_unproject
-        function can be performed between two transformations via an intermediate space.
-        If you are going from space A to space C via space B,
-        you need to find the highest common density between the
-        space B atlases and B->C transforms. If not the transformation is not possible.
+        Args:
+            mid_space: Intermediate space to transform between
+            target_space: Final space to transform to
+
+        Returns:
+            The maximum density found between the mid and target spaces.
+
+        Raises:
+            ValueError: If no common density found.
         """
         atlases = self.search_surface_atlases(space=mid_space)
-        print(f"Resources found for transformation: {atlases}")
-
         transforms = self.search_surface_transforms(
             source_space=mid_space, target_space=target_space
         )
-        print(f"Transforms found for transformation: {transforms}")
-
-        # Find highest common density between list of atlases and transforms
-        atlas_densities = {atlas.density for atlas in atlases}
-        transform_densities = {transform.density for transform in transforms}
-        common_densities = atlas_densities & transform_densities
-
-        if common_densities:
-            # If densities are strings like "32k", sort numerically
-            highest_common_density = max(common_densities, key=_get_density_key)
-            print(f"Highest common density: {highest_common_density}")
-        else:
-            print("No common density found between atlases and transforms.")
-
-        return highest_common_density
+        common_densities = {atlas.density for atlas in atlases} & {
+            transform.density for transform in transforms
+        }
+        if not common_densities:
+            raise ValueError(
+                f"No common density found between {mid_space} and {target_space}"
+            )
+        return max(common_densities, key=_get_density_key)
 
     def find_highest_density(self, space: str) -> str:
         """Find the highest density available for a given space in the graph."""
@@ -885,12 +814,11 @@ class NeuromapsGraph(nx.MultiDiGraph):
             raise ValueError(f"No atlases found for space '{space}'.")
 
         highest_density = max(densities, key=_get_density_key)
-        print(f"Highest density for space '{space}': {highest_density}")
         return highest_density
 
     def surface_to_surface_transformer(
         self,
-        transformer_type: str,
+        transformer_type: Literal["metric", "label"],
         input_file: Path,
         source_space: str,
         target_space: str,
@@ -900,56 +828,34 @@ class NeuromapsGraph(nx.MultiDiGraph):
         target_density: str | None = None,
         area_resource: str = "midthickness",
         add_edge: bool = True,
-    ) -> workbench.MetricResampleOutputs | workbench.LabelResampleOutputs | None:
-        """Public interface for performing surface-to-surface transformations.
+    ) -> Path | None:
+        """Perform a surface-to-surface transformation (metric or label) with caching.
 
-        Parameters
-        ----------
-        transformer_type : str
-            Type of transformation: 'metric' or 'label'.
-        input_file : Path
-            File in source space to transform.
-        source_space : str
-            The source space name.
-        target_space : str
-            The target space name.
-        hemisphere : Literal["left", "right"]
-            The hemisphere ('left' or 'right').
-        output_file_path : str
-            Path to the output GIFTI file.
-        source_density : str, optional
-            Density of the source surface.
-            If None, it will be estimated from the input file.
-        target_density : str, optional
-            Density of the target surface.
-            If None, the highest available density will be used.
-        add_edge : bool, optional
-            Whether to add the resulting transform as an edge in the graph.
-            Default is True.
+        Args:
+            transformer_type: 'metric' or 'label'.
+            input_file: Input GIFTI file (metric or label).
+            source_space: Source brain template space.
+            target_space: Target brain template space.
+            hemisphere: Hemisphere ('left' or 'right').
+            output_file_path: Output GIFTI file path.
+            source_density: Source surface density. If None, estimated from input.
+            target_density: Target surface density. If None, highest available used.
+            area_resource: Surface type for area-based resampling.
+            add_edge: Whether to add the resulting transform as an edge in the graph.
 
         Returns:
-        -------
-        result : workbench.MetricResampleOutputs | workbench.LabelResampleOutputs | None
-            The resulting resampled metric or label output.
+            Resampled metric or label output, or None if transformation fails.
 
         Raises:
-        ------
-        ValueError
-            If transformer_type is invalid.
-            If the input file is not found.
-            If the source surface is not found.
-        FileNotFoundError
-            If any input file does not exist.
-            If the output file cannot be created.
-
+            ValueError: Invalid transformer type or missing surface resources.
+            FileNotFoundError: If input or output files cannot be accessed.
         """
-        if transformer_type not in ["metric", "label"]:
+        if transformer_type not in ("metric", "label"):
             raise ValueError(
                 f"Invalid transformer_type: {transformer_type}. "
                 "Must be 'metric' or 'label'."
             )
-        if source_density is None:
-            source_density = estimate_surface_density(input_file)
+        source_density = source_density or estimate_surface_density(input_file)
 
         transform = self._surface_to_surface(
             source=source_space,
@@ -959,13 +865,10 @@ class NeuromapsGraph(nx.MultiDiGraph):
             output_file_path=output_file_path,
             add_edge=add_edge,
         )
-
         if transform is None:
             return None
 
-        if target_density is None:
-            target_density = self.find_highest_density(space=target_space)
-
+        target_density = target_density or self.find_highest_density(space=target_space)
         new_sphere_atlas = self.fetch_surface_atlas(
             space=target_space,
             hemisphere=hemisphere,
@@ -1006,8 +909,11 @@ class NeuromapsGraph(nx.MultiDiGraph):
             area_surfs=area_surfs,
             output_file_path=output_file_path,
         )
-
-        return resampled_output
+        return (
+            resampled_output.label_out
+            if isinstance(resampled_output, workbench.LabelResampleOutputs)
+            else resampled_output.metric_out
+        )
 
     def volume_to_volume_transformer(
         self,
@@ -1022,36 +928,22 @@ class NeuromapsGraph(nx.MultiDiGraph):
     ) -> Path:
         """Perform a volume-to-volume transformation.
 
-        Parameters
-        ----------
-        input_file : Path
-            File in source space to transform.
-        source_space : str
-            Source template space.
-        target_space : str
-            Target template space.
-        resolution : str
-            Volume resolution of target (reference) image (e.g., '500um', '1mm').
-        resource_type : str
-            Volume type (e.g., 'T1w', 'composite').
-        output_file_path : str
-            Output file path.
-        interp : str, optional
-            Interpolation method.
-        interp_params : dict, optional
-            Optional interpolation parameters.
+        Args:
+            input_file: File in source space to transform.
+            source_space: Source template space.
+            target_space: Target template space.
+            resolution: Volume resolution of target (reference) image (e.g., '500um').
+            resource_type: Volume type (e.g., 'T1w', 'composite').
+            output_file_path: Output file path.
+            interp: Interpolation method.
+            interp_params: Optional interpolation parameters.
 
         Returns:
-        -------
-        Path
             Path to the transformed volume.
 
         Raises:
-        ------
-        ValueError
-            If required resources are missing.
-        FileNotFoundError
-            If input file does not exist.
+            ValueError: If required resources are missing.
+            FileNotFoundError: If input file does not exist.
         """
         self.validate(source_space, target_space)
 
