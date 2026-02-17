@@ -282,10 +282,9 @@ class TestSurfaceToSurfaceTransformPrivate:
         mock_graph._get_hop_output_file.assert_called_once()
         mock_graph._two_hops.assert_called_once()
         mock_graph.add_transform.assert_called_once()
-        add_xfm_call = mock_graph.add_transform.call_args[1]
-        assert add_xfm_call["source_space"] == "A"
-        assert add_xfm_call["target_space"] == "C"
         assert isinstance(result, models.SurfaceTransform)
+        assert result.source_space == "A"
+        assert result.target_space == "C"
         assert result.file_path == composed_path
         assert result.weight == 2.0
 

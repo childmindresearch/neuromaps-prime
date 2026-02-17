@@ -100,7 +100,7 @@ nodes:
             file_path=test_surf,
             description="Test surface transform",
         )
-        graph.add_transform(source, target, graph.surface_to_surface_key, sf)
+        graph.add_transform(sf, graph.surface_to_surface_key)
         fetched = graph.fetch_surface_to_surface_transform(
             source, target, "32k", "left", "midthickness"
         )
@@ -131,14 +131,14 @@ nodes:
             file_path=test_vol,
             description="Test volume transform",
         )
-        graph.add_transform(source, target, graph.volume_to_volume_key, vf)
+        graph.add_transform(vf, graph.volume_to_volume_key)
         fetched = graph.fetch_volume_to_volume_transform(source, target, "1mm", "T1w")
         assert fetched is vf
 
     def test_add_invalid_trasnform(self, graph: NeuromapsGraph) -> None:
         """Test adding invalid transform type raises error."""
         with pytest.raises(TypeError, match="Unsupported transform type"):
-            graph.add_transform("source", "target", key="key", transform="invalid")  # type: ignore[arg-type]
+            graph.add_transform("invalid", key="key")  # type: ignore[arg-type]
 
     def test_fetch_volume_atlas(self, graph: NeuromapsGraph) -> None:
         """Test fetching volume atlas."""
