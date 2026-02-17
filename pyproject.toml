@@ -4,7 +4,7 @@ description = "A toolbox for projecting, resampling, and comparing NHP brain map
 license = {file = "LICENSE"}
 readme = "README.md"
 dynamic = ["version"]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 keywords = ["network neuroscience", "connectomics"]
 authors = [{name = "CMI DAIR", email = "dair@childmind.org"}]
 classifiers = [
@@ -14,14 +14,14 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only"
 ]
 dependencies = [
-  "niwrap>=0.8.0",
+  "niwrap>=0.8.10",
   "nibabel>=5.2.1",
   "pyyaml>=6.0.2",
-  "networkx>=3.4.2",
+  "networkx>=3.6.1",
   "matplotlib>=3.10.7",
-  "numpy>=2.2.6",
+  "numpy>=2.4.2",
   "pydantic>=2.12.3",
-  "scipy>=1.15.3"
+  "scipy>=1.17.0"
 ]
 
 [dependency-groups]
