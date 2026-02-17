@@ -135,7 +135,7 @@ nodes:
         fetched = graph.fetch_volume_to_volume_transform(source, target, "1mm", "T1w")
         assert fetched is vf
 
-    def test_add_invalid_trasnform(self, graph: NeuromapsGraph) -> None:
+    def test_add_invalid_transform(self, graph: NeuromapsGraph) -> None:
         """Test adding invalid transform type raises error."""
         with pytest.raises(TypeError, match="Unsupported transform type"):
             graph.add_transform("invalid", key="key")  # type: ignore[arg-type]
