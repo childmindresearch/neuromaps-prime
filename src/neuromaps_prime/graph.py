@@ -410,12 +410,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             weight=float(hop_idx),
         )
         if add_edge:
-            self.add_transform(
-                source_space=source,
-                target_space=next_space,
-                key=self.surface_to_surface_key,
-                transform=new_transform,
-            )
+            self.add_transform(transform=new_transform, key=self.surface_to_surface_key)
 
         return new_transform
 
@@ -669,10 +664,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
 
     def add_transform(
         self,
-        source_space: str,
-        target_space: str,
-        key: str,
         transform: SurfaceTransform | VolumeTransform,
+        key: str,
     ) -> None:
         """Add a transform as an edge in the graph."""
         match transform:
@@ -683,8 +676,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 )
                 self._surface_transform_cache[
                     (
-                        source_space,
-                        target_space,
+                        transform.source_space,
+                        transform.target_space,
                         transform.density,
                         transform.hemisphere.lower(),
                         transform.resource_type,
@@ -697,17 +690,20 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 )
                 self._volume_transform_cache[
                     (
-                        source_space,
-                        target_space,
+                        transform.source_space,
+                        transform.target_space,
                         transform.resolution,
                         transform.resource_type,
                     )
                 ] = transform
             case _:
                 raise TypeError(f"Unsupported transform type: {type(transform)}")
-
         self.add_edge(
-            source_space, target_space, key=key, data=edge, weight=transform.weight
+            transform.source_space,
+            transform.target_space,
+            key=key,
+            data=edge,
+            weight=transform.weight,
         )
 
     def search_surface_atlases(
