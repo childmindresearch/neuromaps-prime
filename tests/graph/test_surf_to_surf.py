@@ -172,7 +172,7 @@ class TestSurfaceToSurfaceTransformPrivate:
         with pytest.raises(ValueError, match="No valid path"):
             mock_graph._surface_to_surface(
                 source="NMT2Sym",
-                target="S1200",
+                target="fsLR",
                 density="32k",
                 hemisphere="left",
                 output_file_path="no_path",
@@ -181,13 +181,13 @@ class TestSurfaceToSurfaceTransformPrivate:
     def test_single_hop(self, mock_graph: NeuromapsGraph) -> None:
         """Test single-hop surface transformation."""
         mock_result = MagicMock(spec=models.SurfaceTransform)
-        mock_graph.find_path = MagicMock(return_value=["Yerkes19", "S1200"])
+        mock_graph.find_path = MagicMock(return_value=["Yerkes19", "fsLR"])
         mock_graph.fetch_surface_to_surface_transform = MagicMock(
             return_value=mock_result
         )
         out = mock_graph._surface_to_surface(
             source="Yerkes19",
-            target="S1200",
+            target="fsLR",
             density="32k",
             hemisphere="right",
             output_file_path="single_hop",
@@ -198,13 +198,13 @@ class TestSurfaceToSurfaceTransformPrivate:
     def test_multi_hop(self, mock_graph: NeuromapsGraph) -> None:
         """Test multi-hop path surface transformation."""
         mock_result = MagicMock(spec=models.SurfaceTransform)
-        mock_graph.find_path = MagicMock(return_value=["CIVETNMT", "Yerkes19", "S1200"])
+        mock_graph.find_path = MagicMock(return_value=["CIVETNMT", "Yerkes19", "fsLR"])
         mock_graph._compose_multihop_surface_transform = MagicMock(
             return_value=mock_result
         )
         out = mock_graph._surface_to_surface(
             source="CIVETNMT",
-            target="S1200",
+            target="fsLR",
             density="32k",
             hemisphere="right",
             output_file_path="multi_hop",

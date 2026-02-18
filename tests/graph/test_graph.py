@@ -237,12 +237,12 @@ class TestGraphIntegration:
             transformer_type=transformer_type,
             input_file=graph.data_dir / input_file,
             source_space="CIVETNMT",
-            target_space="S1200",
+            target_space="fsLR",
             hemisphere="right",
             output_file_path=str(tmp_path / f"test_{transformer_type}.func.gii"),
         )
         assert output is not None
-        target_density = graph.find_highest_density(space="S1200")
+        target_density = graph.find_highest_density(space="fsLR")
         if transformer_type == "metric":
             assert estimate_surface_density(output) == target_density
         elif transformer_type == "label":
@@ -254,7 +254,7 @@ class TestGraphIntegration:
     ) -> None:
         """Test fetching surface-to-surface transform with computed edge key."""
         source_space = "CIVETNMT"
-        target_space = "S1200"
+        target_space = "fsLR"
         input_file = graph.data_dir / (
             "share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-nomedialwall_dparc.label.gii"
         )
@@ -309,7 +309,7 @@ class TestGraphIntegration:
             source_space="Yerkes19",
             target_space="NMT2Sym",
             resolution="250um",
-            resource_type="composite",
+            resource_type="T1w",
             output_file_path=str(tmp_path / "test_output.nii"),
         )
         assert output.exists()
