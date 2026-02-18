@@ -247,3 +247,8 @@ class TestVolumeToSurfaceProjection:
         mock_wb_project.assert_called_once()
         assert result == mock_paths["output"]
         assert result.exists()
+
+
+@pytest.mark.skip(reason="No volumetric data to project.")
+class TestVolumeToSurfaceProjectionIntegration:
+    """Integration tests for volume to surface projection."""
