@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Any, Callable
 
-from niwrap import ants
+from niwrap import ants, workbench
 
 INTERP_PARAMS: dict[str, Callable[..., dict]] = {
     "linear": ants.ants_apply_transforms_linear,
@@ -77,4 +77,31 @@ def vol_to_vol(
         output=ants.ants_apply_transforms_warped_output(out_fpath),
         interpolation=interpolation,
     )
-    return Path(xfm.output.output_image_outfile)
+    return xfm.output.output_image_outfile
+
+
+def surface_project(
+    volume: Path,
+    surface: Path,
+    ribbon_surfs: workbench.VolumeToSurfaceMappingRibbonConstrainedParamsDict,
+    out_fpath: str,
+) -> Path:
+    """Project a volumetric image to a surface from source space to target space.
+
+    Args:
+        volume: Path to the source NIfTI annotation to be projected.
+        surface: Path to the target surface to project to.
+        ribbon_surfs: Ribbon surfaces to constrain projections to.
+        out_fpath: Full output file path to projected annotation.
+
+    Returns:
+        Path to the projected surface annotation file written to disk.
+    """
+    projected_vol = workbench.volume_to_surface_mapping(
+        volume=volume,
+        surface=surface,
+        ribbon_constrained=ribbon_surfs,
+        metric_out=out_fpath,
+    )
+
+    return projected_vol.metric_out
