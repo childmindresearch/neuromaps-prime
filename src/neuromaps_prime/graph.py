@@ -8,7 +8,6 @@ See examples/example_graph_init.py for usage.
 """
 
 import os
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
 
@@ -410,6 +409,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             file_path=composed_path,
             weight=float(hop_idx),
         )
+        print("HOP:")
+        print(hop_idx)
         if add_edge:
             self.add_transform(transform=new_transform, key=self.surface_to_surface_key)
 
@@ -607,7 +608,6 @@ class NeuromapsGraph(nx.MultiDiGraph):
         except nx.NetworkXNoPath:
             return []
 
-    @lru_cache
     def get_subgraph(self, edges: str) -> nx.MultiDiGraph:
         """Get a subgraph containing all nodes but only the specified edges keys.
 
@@ -951,7 +951,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             source=source_space,
             target=target_space,
             resolution=resolution,
-            resource_type=resource_type,
+            resource_type="composite",
         )
         if transform is None:
             raise ValueError(

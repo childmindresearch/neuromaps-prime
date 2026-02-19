@@ -390,4 +390,4 @@ class TestSurfaceToSurfaceTransformPrivate:
             density="32k",
             hemisphere="left",
         )
-        assert output == str(tmp_path / "src-A_to-B_den-32k_hemi-left_sphere.surf.gii")
+        assert output == str(tmp_path / "src-A_to-B_den-32k_hemi-L_sphere.surf.gii")
