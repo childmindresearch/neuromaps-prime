@@ -106,8 +106,8 @@ nodes:
           left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sphere.rsl.gii
           right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sphere.rsl.gii
         midthickness:
-          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_midthickness.surf.gii
-          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_midthickness.surf.gii
+          left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_midthickness.rsl.gii
+          right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_midthickness.rsl.gii
         white:
           left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
           right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
