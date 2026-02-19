@@ -244,7 +244,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         parent = Path(output_file_path).parent
         fname = (
             f"src-{source}_"
-            f"to-{next_target}_den-{density}_hemi-{hemisphere}_sphere.surf.gii"
+            f"to-{next_target}_den-{density}_hemi-{hemisphere[0].upper()}_sphere.surf.gii"
         )
         return f"{parent}/{fname}"
 
@@ -389,6 +389,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             density=density,
             hemisphere=hemisphere,
         )
+        print(hop_output)
         composed_path = self._two_hops(
             source_space=paths[hop_idx - 2],
             mid_space=paths[hop_idx - 1],
