@@ -29,13 +29,8 @@ from neuromaps_prime.transforms.surface import (
     metric_resample,
     surface_sphere_project_unproject,
 )
-from neuromaps_prime.transforms.utils import (
-    _get_density_key,
-    estimate_surface_density,
-)
-from neuromaps_prime.transforms.volume import (
-    vol_to_vol,
-)
+from neuromaps_prime.transforms.utils import _get_density_key, estimate_surface_density
+from neuromaps_prime.transforms.volume import surface_project, vol_to_vol
 from neuromaps_prime.utils import set_runner
 
 
@@ -520,7 +515,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         Args:
             space: The brain template space name.
             resolution: The volume resolution (e.g., '2mm', '1mm').
-            resource_type: The type of volume resourcen(e.g., 'T1w', 'T2w').
+            resource_type: The type of volume resource (e.g., 'T1w', 'T2w').
 
         Returns:
             The matching VolumeAtlas resource, or None if not found.
@@ -975,4 +970,94 @@ class NeuromapsGraph(nx.MultiDiGraph):
             out_fpath=output_file_path,
             interp=interp,
             interp_params=interp_params,
+        )
+
+    def volume_to_surface_transformer(
+        self,
+        transformer_type: Literal["metric", "label"],
+        input_file: Path,
+        source_space: str,
+        target_space: str,
+        hemisphere: Literal["left", "right"],
+        output_file_path: str,
+        source_density: str | None = None,
+        target_density: str | None = None,
+        area_resource: str = "midthickness",
+        add_edge: bool = True,
+    ) -> Path | None:
+        """Perform a surface-to-surface transformation (metric or label) with caching.
+
+        Two stage transformation:
+          1. Project volume-to-surface
+          2. Surface-to-surface transformation
+
+        Args:
+            transformer_type: 'metric' or 'label'.
+            input_file: Input GIFTI file (metric or label).
+            source_space: Source brain template space.
+            target_space: Target brain template space.
+            hemisphere: Hemisphere ('left' or 'right').
+            output_file_path: Output GIFTI file path.
+            source_density: Source surface density. If None, highest available used
+            target_density: Target surface density. If None, highest available used.
+            area_resource: Surface type for area-based resampling.
+            add_edge: Whether to add the resulting transform as an edge in the graph.
+
+        Returns:
+            Resampled metric or label output, or None if transformation fails.
+
+        Raises:
+            ValueError: Invalid transformer type or missing surface resources.
+            FileNotFoundError: If input or output files cannot be accessed.
+        """
+        self.validate(source_space, target_space)
+
+        if not input_file.exists():
+            raise FileNotFoundError(f"Input file not found: {input_file}")
+
+        # fetch source atlas to project (remember if none used, use highest density)
+        source_density = source_density or self.find_highest_density(space=source_space)
+        source_surface_atlas = self.fetch_surface_atlas(
+            space=source_space,
+            density=source_density,
+            hemisphere=hemisphere,
+            resource_type=area_resource,
+        )
+        if source_surface_atlas is None:
+            raise ValueError(f"No {area_resource} surface found for {source_space}")
+        source_surface = source_surface_atlas.fetch()
+
+        ribbon = {}
+        for surf_type in ("white", "pial"):
+            ribbon[surf_type] = self.fetch_surface_atlas(
+                space=source_space,
+                density=source_density,
+                hemisphere=hemisphere,
+                resource_type=surf_type,
+            )
+            if ribbon[surf_type] is None:
+                raise ValueError(f"No {surf_type} surface found for {source_space}")
+        ribbon_surfs = workbench.volume_to_surface_mapping_ribbon_constrained(
+            inner_surf=ribbon["white"].fetch(),  # type: ignore[union-attr]
+            outer_surf=ribbon["pial"].fetch(),  # type: ignore[union-attr]
+        )
+        ext = "func" if transformer_type == "metric" else "label"
+        projected_vol_surface = surface_project(
+            volume=input_file,
+            surface=source_surface,
+            ribbon_surfs=ribbon_surfs,
+            out_fpath=f"src-{source_space}_den-{source_density}_hemi-{hemisphere}_desc-volume_annot.{ext}.gii",
+        )
+
+        return self.surface_to_surface_transformer(
+            transformer_type=transformer_type,
+            input_file=projected_vol_surface,
+            source_space=source_space,
+            target_space=target_space,
+            hemisphere=hemisphere,
+            output_file_path=output_file_path,
+            source_density=source_density,
+            target_density=target_density,
+            area_resource=area_resource,
+            add_edge=add_edge,
         )
