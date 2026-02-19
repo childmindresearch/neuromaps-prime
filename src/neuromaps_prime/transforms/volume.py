@@ -77,7 +77,7 @@ def vol_to_vol(
         output=ants.ants_apply_transforms_warped_output(out_fpath),
         interpolation=interpolation,
     )
-    return xfm.output.output_image_outfile
+    return Path(xfm.output.output_image_outfile)
 
 
 def surface_project(
@@ -104,4 +104,4 @@ def surface_project(
         metric_out=out_fpath,
     )
 
-    return projected_vol.metric_out
+    return Path(projected_vol.metric_out)

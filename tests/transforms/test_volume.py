@@ -224,10 +224,10 @@ class TestVolumeToSurfaceProjection:
             "neuromaps_prime.transforms.volume.workbench.volume_to_surface_mapping"
         ) as mock_wb:
             mock_result = MagicMock()
-            mock_result.metric_out = str(mock_paths["output"])
+            mock_result.metric_out = mock_paths["output"]
 
             def create_output(*args, **kwargs) -> MagicMock:
-                mock_paths["output"].touch()
+                Path(mock_paths["output"]).touch()
                 return mock_result
 
             mock_wb.side_effect = create_output
@@ -239,13 +239,13 @@ class TestVolumeToSurfaceProjection:
         """Test volume-to-surface projection."""
         result = surface_project(
             volume=mock_paths["volume"],
-            surface=mock_paths["target"],
+            surface=mock_paths["surface"],
             ribbon_surfs=mock_paths["ribbon_surfs"],
             out_fpath=mock_paths["output"],
         )
 
         mock_wb_project.assert_called_once()
-        assert result == mock_paths["output"]
+        assert str(result) == mock_paths["output"]
         assert result.exists()
 
 
