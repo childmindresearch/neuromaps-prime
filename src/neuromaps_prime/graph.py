@@ -28,7 +28,12 @@ from neuromaps_prime.transforms.surface import (
     metric_resample,
     surface_sphere_project_unproject,
 )
-from neuromaps_prime.transforms.utils import _get_density_key, estimate_surface_density
+from neuromaps_prime.transforms.utils import (
+    _get_density_key,
+    estimate_surface_density,
+    validate_surface_file,
+    validate_volume_file,
+)
 from neuromaps_prime.transforms.volume import surface_project, vol_to_vol
 from neuromaps_prime.utils import set_runner
 
@@ -839,6 +844,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             ValueError: Invalid transformer type or missing surface resources.
             FileNotFoundError: If input or output files cannot be accessed.
         """
+        validate_surface_file(input_file)
         if transformer_type not in ("metric", "label"):
             raise ValueError(
                 f"Invalid transformer_type: {transformer_type}. "
@@ -935,9 +941,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             FileNotFoundError: If input file does not exist.
         """
         self.validate(source_space, target_space)
-
-        if not input_file.exists():
-            raise FileNotFoundError(f"Input file not found: {input_file}")
+        validate_volume_file(input_file)
 
         transform = self.fetch_volume_to_volume_transform(
             source=source_space,
@@ -1009,9 +1013,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             FileNotFoundError: If input or output files cannot be accessed.
         """
         self.validate(source_space, target_space)
-
-        if not input_file.exists():
-            raise FileNotFoundError(f"Input file not found: {input_file}")
+        validate_volume_file(input_file)
 
         # fetch source atlas to project (remember if none used, use highest density)
         source_density = source_density or self.find_highest_density(space=source_space)

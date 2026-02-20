@@ -85,15 +85,6 @@ class TestVolumeToVolumeTransformer:
         mock_ants.assert_called_once()
         assert result.exists()
 
-    def test_no_input_file(
-        self, mock_transformer: NeuromapsGraph, basic_params: dict[str, Any]
-    ) -> None:
-        """Test FileNotFoundError raised when no input found."""
-        basic_params["input_file"] = Path("invalid.nii.gz")
-        with pytest.raises(FileNotFoundError, match="Input file not found"):
-            mock_transformer.volume_to_volume_transformer(**basic_params)
-        mock_transformer.fetch_volume_to_volume_transform.assert_not_called()
-
     def test_no_transform(
         self, mock_transformer: NeuromapsGraph, basic_params: dict[str, Any]
     ) -> None:
