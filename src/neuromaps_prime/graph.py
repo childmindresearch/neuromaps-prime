@@ -243,7 +243,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         parent = Path(output_file_path).parent
         fname = (
             f"src-{source}_"
-            f"to-{next_target}_den-{density}_hemi-{hemisphere}_sphere.surf.gii"
+            f"to-{next_target}_den-{density}_hemi-{hemisphere[0].upper()}_sphere.surf.gii"
         )
         return f"{parent}/{fname}"
 
