@@ -72,14 +72,14 @@ class NeuromapsGraph(nx.MultiDiGraph):
         self._cache = GraphCache()
 
         # Stateless helper layer — all share the same cache
-        self._fetchers = GraphFetchers(cache=self._cache)
-        self._utils = GraphUtils(graph=self, fetchers=self._fetchers)
-        self._surface_ops = SurfaceTransformOps(
+        self.fetchers = GraphFetchers(cache=self._cache)
+        self.utils = GraphUtils(graph=self, fetchers=self._fetchers)
+        self.surface_ops = SurfaceTransformOps(
             cache=self._cache,
             fetchers=self._fetchers,
             utils=self._utils,
         )
-        self._volume_ops = VolumeTransformOps(
+        self.volume_ops = VolumeTransformOps(
             cache=self._cache,
             fetchers=self._fetchers,
             utils=self._utils,
@@ -160,7 +160,6 @@ class NeuromapsGraph(nx.MultiDiGraph):
         return self._utils.find_path(source, target, edge_type)
 
     # Resource fetching
-
     def fetch_surface_atlas(
         self,
         space: str,
