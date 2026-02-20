@@ -48,3 +48,42 @@ def _get_density_key(density: str) -> int:
     if density.endswith("k"):
         return int(density.rstrip("k")) * 1000
     return int(density)
+
+
+def validate_volume_file(file_path: str | Path) -> bool:
+    """Validate that the file passed exists and is a volume.
+
+    A crude check based on file extension - checks the file ends with .nii or .nii.gz
+
+    Args:
+        filepath: Path to volume file
+
+    Returns:
+        Boolean indicating the file exists and is a volume.
+    """
+    if not Path(file_path).exists():
+        raise FileNotFoundError(f"{file_path} does not exist.")
+
+    if not str(file_path).endswith((".nii", ".nii.gz")):
+        raise ValueError("Expected volume nifti.")
+
+    return True
+
+
+def validate_surface_file(file_path: str | Path) -> bool:
+    """Validate that the file passed exists and is a surface.
+
+    A crude check based on file extension - checks the file ends with .gii
+
+    Args:
+        filepath: Path to surface file
+
+    Returns:
+        Boolean indicating the file exists and is a surface.
+    """
+    if not Path(file_path).exists():
+        raise FileNotFoundError(f"{file_path} does not exist.")
+
+    if not str(file_path).endswith(".gii"):
+        raise ValueError("Expected surface file.")
+    return True

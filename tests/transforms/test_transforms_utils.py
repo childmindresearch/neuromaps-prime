@@ -51,3 +51,50 @@ def test_estimate_surface_density(mock_count: MagicMock):
 )
 def test_get_density_key(value: str, expected: int) -> None:
     assert utils._get_density_key(value) == expected
+
+
+class TestValidateVolume:
+    """Testing suite for volume validation."""
+
+    @pytest.mark.parametrize("ext", [".nii", ".nii.gz"])
+    def test_valid_volume(self, tmp_path: Path, ext: str) -> None:
+        """Test able to validate volume files."""
+        file_path = tmp_path / f"test{ext}"
+        file_path.touch()
+        res = utils.validate_volume_file(file_path)
+        assert res is True
+
+    def test_file_not_exist(self) -> None:
+        """Raise FileNotFoundError if file doesn't exist."""
+        with pytest.raises(FileNotFoundError, match="does not exist"):
+            utils.validate_volume_file("invalid_file.nii")
+
+    def test_incorrect_ext(self, tmp_path: Path) -> None:
+        """Raise ValueError if file has wrong extension."""
+        file_path = tmp_path / "file.invalid_ext"
+        file_path.touch()
+        with pytest.raises(ValueError, match="Expected volume nifti"):
+            utils.validate_volume_file(file_path)
+
+
+class TestValidateSurface:
+    """Testing suite for surface validation."""
+
+    def test_valid_volume(self, tmp_path: Path) -> None:
+        """Test able to validate volume files."""
+        file_path = tmp_path / "test.surf.gii"
+        file_path.touch()
+        res = utils.validate_surface_file(file_path)
+        assert res is True
+
+    def test_file_not_exist(self) -> None:
+        """Raise FileNotFoundError if file doesn't exist."""
+        with pytest.raises(FileNotFoundError, match="does not exist"):
+            utils.validate_surface_file("invalid_file.surf.gii")
+
+    def test_incorrect_ext(self, tmp_path: Path) -> None:
+        """Raise ValueError if file has wrong extension."""
+        file_path = tmp_path / "file.invalid_ext"
+        file_path.touch()
+        with pytest.raises(ValueError, match="Expected surface"):
+            utils.validate_surface_file(file_path)
