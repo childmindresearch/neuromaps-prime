@@ -8,7 +8,6 @@ See examples/example_graph_init.py for usage.
 """
 
 import os
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
 
@@ -239,7 +238,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         parent = Path(output_file_path).parent
         fname = (
             f"src-{source}_"
-            f"to-{next_target}_den-{density}_hemi-{hemisphere}_sphere.surf.gii"
+            f"to-{next_target}_den-{density}_hemi-{hemisphere[0].upper()}_sphere.surf.gii"
         )
         return f"{parent}/{fname}"
 
@@ -601,7 +600,6 @@ class NeuromapsGraph(nx.MultiDiGraph):
         except nx.NetworkXNoPath:
             return []
 
-    @lru_cache
     def get_subgraph(self, edges: str) -> nx.MultiDiGraph:
         """Get a subgraph containing all nodes but only the specified edges keys.
 
@@ -945,7 +943,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             source=source_space,
             target=target_space,
             resolution=resolution,
-            resource_type=resource_type,
+            resource_type="composite",
         )
         if transform is None:
             raise ValueError(

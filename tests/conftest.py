@@ -49,11 +49,12 @@ def runner(
 
 @pytest.fixture
 def graph(
-    runner: Runner, tmp_path: Path, require_data: Path | None = None
+    runner: Runner, tmp_path: Path, request: pytest.FixtureRequest
 ) -> NeuromapsGraph:
     """Create a graph fixture to use for tests."""
-    if require_data is not None:
-        return NeuromapsGraph(runner=runner, data_dir=require_data)
+    data_dir = request.config.getoption("--data-dir")
+    if data_dir is not None:
+        return NeuromapsGraph(runner=runner, data_dir=Path(data_dir).resolve())
 
     graph = NeuromapsGraph(_testing=True)
     data = yaml.safe_load(graph.yaml_path.read_text())
@@ -110,27 +111,6 @@ def graph(
 
     graph._build_from_dict(data)
     return graph
-
-
-@pytest.fixture
-def require_data(request: pytest.FixtureRequest):
-    data_dir_str = request.config.getoption("--data-dir")
-    if data_dir_str is None:
-        pytest.skip("Data directory not provided")
-    data_dir = Path(data_dir_str).resolve()
-    if not data_dir.exists():
-        pytest.skip("Data directory does not exist")
-    return data_dir
-
-
-@pytest.fixture(scope="session", autouse=True)
-def data_dir(request: pytest.FixtureRequest) -> Generator[Path | None, None, None]:
-    """Yield data directory from pytest command-line."""
-    data_dir = request.config.getoption("--data-dir")
-    if data_dir is not None:
-        yield Path(data_dir).resolve()
-    else:
-        yield None
 
 
 @pytest.fixture
