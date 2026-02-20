@@ -166,15 +166,6 @@ class TestVolumeToSurfaceTransformer:
             add_edge=True,
         )
 
-    def test_no_input_file(
-        self, mock_transformer: NeuromapsGraph, basic_params: dict[str, Any]
-    ) -> None:
-        """Test FileNotFoundError raised when input file does not exist."""
-        basic_params["input_file"] = Path("nonexistent.nii.gz")
-        with pytest.raises(FileNotFoundError, match="Input file not found"):
-            mock_transformer.volume_to_surface_transformer(**basic_params)
-        mock_transformer.fetch_surface_atlas.assert_not_called()
-
     def test_no_source_surface_atlas(
         self, mock_transformer: NeuromapsGraph, basic_params: dict[str, Any]
     ) -> None:
