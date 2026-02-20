@@ -18,7 +18,7 @@ import yaml
 from pydantic import BaseModel, Field
 
 from neuromaps_prime.graph.methods.cache import GraphCache
-from neuromaps_prime.models import (
+from neuromaps_prime.graph.models import (
     Edge,
     Node,
     SurfaceAtlas,

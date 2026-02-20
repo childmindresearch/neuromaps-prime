@@ -15,9 +15,10 @@ from pydantic import BaseModel
 
 from neuromaps_prime.graph.methods.cache import GraphCache
 from neuromaps_prime.graph.methods.fetchers import GraphFetchers
+from neuromaps_prime.graph.models import SurfaceAtlas
 from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
 from neuromaps_prime.graph.utils import GraphUtils
-from neuromaps_prime.models import SurfaceAtlas
+from neuromaps_prime.transforms.utils import validate_volume_file
 from neuromaps_prime.transforms.volume import surface_project, vol_to_vol
 
 
@@ -79,9 +80,7 @@ class VolumeTransformOps(BaseModel):
             ValueError: If required transform or reference atlas is missing.
         """
         self.utils.validate_spaces(source_space, target_space)
-
-        if not input_file.exists():
-            raise FileNotFoundError(f"Input file not found: {input_file}")
+        validate_volume_file(input_file)
 
         transform = self.fetchers.fetch_volume_transform(
             source=source_space,
@@ -165,9 +164,7 @@ class VolumeTransformOps(BaseModel):
             )
 
         self.utils.validate_spaces(source_space, target_space)
-
-        if not input_file.exists():
-            raise FileNotFoundError(f"Input file not found: {input_file}")
+        validate_volume_file(input_file)
 
         source_density = source_density or self.utils.find_highest_density(
             space=source_space
@@ -276,7 +273,7 @@ class VolumeTransformOps(BaseModel):
             resource_type: Surface resource type.
 
         Returns:
-            The matching :class:`~neuromaps_prime.models.SurfaceAtlas`.
+            The matching :class:`~neuromaps_prime.graph.models.SurfaceAtlas`.
 
         Raises:
             ValueError: If no matching atlas is found.

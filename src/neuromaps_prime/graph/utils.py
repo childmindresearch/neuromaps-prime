@@ -155,7 +155,7 @@ class GraphUtils(BaseModel):
     # Introspection
 
     def get_node_data(self, node_name: str) -> Any:  # noqa: ANN401
-        """Return the :class:`~neuromaps_prime.models.Node` stored on *node_name*.
+        """Return the :class:`~neuromaps_prime.graph.models.Node` stored on *node_name*.
 
         Args:
             node_name: Name of the node to retrieve.

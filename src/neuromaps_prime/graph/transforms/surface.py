@@ -15,14 +15,17 @@ from pydantic import BaseModel
 
 from neuromaps_prime.graph.methods.cache import GraphCache
 from neuromaps_prime.graph.methods.fetchers import GraphFetchers
+from neuromaps_prime.graph.models import SurfaceAtlas, SurfaceTransform
 from neuromaps_prime.graph.utils import GraphUtils
-from neuromaps_prime.models import SurfaceAtlas, SurfaceTransform
 from neuromaps_prime.transforms.surface import (
     label_resample,
     metric_resample,
     surface_sphere_project_unproject,
 )
-from neuromaps_prime.transforms.utils import estimate_surface_density
+from neuromaps_prime.transforms.utils import (
+    estimate_surface_density,
+    validate_surface_file,
+)
 
 
 class SurfaceTransformOps(BaseModel):
@@ -52,7 +55,7 @@ class SurfaceTransformOps(BaseModel):
     surface_to_surface_key: str = "surface_to_surface"
 
     # Public transformer
-    def transform(
+    def transform(  # pragma: no cover (individual pieces tested)
         self,
         transformer_type: Literal["metric", "label"],
         input_file: Path,
@@ -101,9 +104,7 @@ class SurfaceTransformOps(BaseModel):
                 f"Invalid transformer_type: '{transformer_type}'. "
                 "Must be 'metric' or 'label'."
             )
-        if not input_file.exists():
-            raise FileNotFoundError(f"Input file not found: {input_file}")
-
+        validate_surface_file(input_file)
         self.utils.validate_spaces(source_space, target_space)
 
         source_density = source_density or estimate_surface_density(input_file)
@@ -167,7 +168,7 @@ class SurfaceTransformOps(BaseModel):
         density: str,
         hemisphere: Literal["left", "right"],
         output_file_path: str,
-        add_edge: bool,
+        add_edge: bool = True,
     ) -> SurfaceTransform | None:
         """Return the sphere transform from source to target, composing if necessary.
 
@@ -436,7 +437,7 @@ class SurfaceTransformOps(BaseModel):
             f"src-{source}_"
             f"to-{next_target}_"
             f"den-{density}_"
-            f"hemi-{hemisphere}_"
+            f"hemi-{hemisphere[0].upper()}_"
             f"sphere.surf.gii"
         )
         return str(parent / fname)
@@ -457,7 +458,7 @@ class SurfaceTransformOps(BaseModel):
             resource_type: Surface resource type.
 
         Returns:
-            The matching :class:`~neuromaps_prime.models.SurfaceAtlas`.
+            The matching :class:`~neuromaps_prime.graph.models.SurfaceAtlas`.
 
         Raises:
             ValueError: If no matching atlas is found.

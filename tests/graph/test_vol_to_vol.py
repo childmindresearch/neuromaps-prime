@@ -6,8 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from neuromaps_prime import models
-from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.graph import NeuromapsGraph, models
 
 
 class TestVolumeToVolumeTransformer:
@@ -15,10 +14,14 @@ class TestVolumeToVolumeTransformer:
 
     @pytest.fixture
     def mock_transformer(self, graph: NeuromapsGraph) -> NeuromapsGraph:
-        """Create mock transformer with necessary methods."""
-        graph.validate = MagicMock()
-        graph.fetch_volume_to_volume_transform = MagicMock()
-        graph.fetch_volume_atlas = MagicMock()
+        """Create mock transformer with volume_ops internals replaced.
+
+        Replaces volume_ops.utils and volume_ops.fetchers with MagicMocks so
+        internal calls are interceptable without hitting Pydantic's __setattr__
+        validation.
+        """
+        graph.volume_ops.utils = MagicMock()
+        graph.volume_ops.fetchers = MagicMock()
         return graph
 
     @pytest.fixture
@@ -53,7 +56,7 @@ class TestVolumeToVolumeTransformer:
             "output_file_path": str(tmp_path / "output.nii.gz"),
         }
 
-    @patch("neuromaps_prime.transforms.volume.vol_to_vol")
+    @patch("neuromaps_prime.graph.transforms.volume.vol_to_vol")
     def test_volume_transformation_success(
         self,
         mock_vol_to_vol: MagicMock,
@@ -63,38 +66,35 @@ class TestVolumeToVolumeTransformer:
         basic_params: dict[str, Any],
     ) -> None:
         """Test successful volume transformation."""
-        # Setup
-        mock_transformer.fetch_volume_to_volume_transform.return_value = (
+        expected_output = Path(basic_params["output_file_path"])
+        mock_transformer.volume_ops.fetchers.fetch_volume_transform.return_value = (
             mock_volume_transform
         )
-        mock_transformer.fetch_volume_atlas.return_value = mock_volume_atlas
-        mock_vol_to_vol.return_value = Path(basic_params["output_file_path"])
+        mock_transformer.volume_ops.fetchers.fetch_volume_atlas.return_value = (
+            mock_volume_atlas
+        )
+        mock_vol_to_vol.return_value = expected_output
 
-        with patch("niwrap.ants.ants_apply_transforms") as mock_ants:
-            mock_output = MagicMock()
-            mock_output.output = MagicMock()
-            mock_output.output.output_image_outfile = Path(
-                basic_params["output_file_path"]
-            )
-            mock_output.output.output_image_outfile.touch()
-            mock_ants.return_value = mock_output
-            result = mock_transformer.volume_to_volume_transformer(**basic_params)
-        mock_transformer.validate.assert_called_once()
-        mock_transformer.fetch_volume_to_volume_transform.assert_called_once()
-        mock_transformer.fetch_volume_atlas.assert_called_once()
-        mock_ants.assert_called_once()
-        assert result.exists()
+        result = mock_transformer.volume_to_volume_transformer(**basic_params)
+
+        mock_transformer.volume_ops.utils.validate_spaces.assert_called_once_with(
+            basic_params["source_space"], basic_params["target_space"]
+        )
+        mock_transformer.volume_ops.fetchers.fetch_volume_transform.assert_called_once()
+        mock_transformer.volume_ops.fetchers.fetch_volume_atlas.assert_called_once()
+        mock_vol_to_vol.assert_called_once()
+        assert result == expected_output
 
     def test_no_transform(
         self, mock_transformer: NeuromapsGraph, basic_params: dict[str, Any]
     ) -> None:
         """Test error raised if no transform found."""
-        mock_transformer.fetch_volume_to_volume_transform.return_value = None
+        mock_transformer.volume_ops.fetchers.fetch_volume_transform.return_value = None
 
         with pytest.raises(ValueError, match="No volume transform found"):
             mock_transformer.volume_to_volume_transformer(**basic_params)
-        mock_transformer.fetch_volume_to_volume_transform.assert_called_once()
-        mock_transformer.fetch_volume_atlas.assert_not_called()
+        mock_transformer.volume_ops.fetchers.fetch_volume_transform.assert_called_once()
+        mock_transformer.volume_ops.fetchers.fetch_volume_atlas.assert_not_called()
 
     def test_no_target_atlas(
         self,
@@ -103,11 +103,11 @@ class TestVolumeToVolumeTransformer:
         basic_params: dict[str, Any],
     ) -> None:
         """Test error raised if no target volume found."""
-        mock_transformer.fetch_volume_to_volume_transform.return_value = (
+        mock_transformer.volume_ops.fetchers.fetch_volume_transform.return_value = (
             mock_volume_transform
         )
-        mock_transformer.fetch_volume_atlas.return_value = None
+        mock_transformer.volume_ops.fetchers.fetch_volume_atlas.return_value = None
 
-        with pytest.raises(ValueError, match="No target volume atlas found"):
+        with pytest.raises(ValueError, match="No volume atlas found"):
             mock_transformer.volume_to_volume_transformer(**basic_params)
-        mock_transformer.fetch_volume_atlas.assert_called_once()
+        mock_transformer.volume_ops.fetchers.fetch_volume_atlas.assert_called_once()

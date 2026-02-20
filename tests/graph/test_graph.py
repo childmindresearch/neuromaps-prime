@@ -7,8 +7,7 @@ from unittest.mock import patch
 import networkx as nx
 import pytest
 
-from neuromaps_prime import models
-from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.graph import NeuromapsGraph, models
 from neuromaps_prime.transforms.utils import estimate_surface_density
 
 
@@ -42,7 +41,7 @@ nodes:
     def test_graph_build(self, graph: NeuromapsGraph) -> None:
         """Test graph initialization."""
         assert graph is not None
-        info = graph.get_graph_info()
+        info = graph.utils.get_graph_info()
         assert info["num_nodes"] > 0
         assert info["num_edges"] >= 0
         assert info["num_surfaces"] > 0
@@ -63,16 +62,16 @@ nodes:
     def test_validate(self, graph: NeuromapsGraph) -> None:
         """Test validation method with proper raises."""
         nodes = list(graph.nodes)
-        graph.validate(*nodes[:2])
-        with pytest.raises(ValueError, match="source space"):
-            graph.validate("fake_source", nodes[1])
-        with pytest.raises(ValueError, match="target space"):
-            graph.validate(nodes[0], "fake_target")
+        graph.utils.validate_spaces(*nodes[:2])
+        with pytest.raises(ValueError, match="Source space"):
+            graph.utils.validate_spaces("fake_source", nodes[1])
+        with pytest.raises(ValueError, match="Target space"):
+            graph.utils.validate_spaces(nodes[0], "fake_target")
 
     def test_find_path(self, graph: NeuromapsGraph) -> None:
         """Test finding of shortest path."""
         nodes = list(graph.nodes)
-        path = graph.find_path(*nodes[:2])
+        path = graph.utils.find_path(*nodes[:2])
         assert isinstance(path, list)
 
     def test_no_valid_path(self, graph: NeuromapsGraph) -> None:
@@ -183,15 +182,25 @@ nodes:
 
     def test_no_densities(self, graph: NeuromapsGraph) -> None:
         """Test error raised if no densities found."""
-        with pytest.raises(ValueError, match="No atlases found"):
+        with pytest.raises(ValueError, match="No surface atlases found"):
             graph.find_highest_density("alien")
 
     @pytest.mark.parametrize("edges", ("surface_to_surface", "volume_to_volume"))
     def test_get_subgraph(self, graph: NeuromapsGraph, edges: str) -> None:
         """Test getting subgraph."""
-        subgraph = graph.get_subgraph(edges=edges)
+        subgraph = graph.utils.get_subgraph(edge_type=edges)
         assert isinstance(subgraph, nx.MultiDiGraph)
         assert set(subgraph.nodes) == set(graph.nodes)
+
+    def test_clear_evicts_all_cache_tables(
+        self, tmp_path: Path, graph: NeuromapsGraph
+    ) -> None:
+        """Test cache entries are cleared cache table."""
+        assert len(graph._cache.surface_atlas) > 0
+        assert len(graph._cache.surface_transform) > 0
+        graph._cache.clear()
+        assert len(graph._cache.surface_atlas) == 0
+        assert len(graph._cache.surface_transform) == 0
 
 
 class TestGraphIntegration:
@@ -200,9 +209,6 @@ class TestGraphIntegration:
     def test_graph_initialization_with_data_dir(self, graph: NeuromapsGraph) -> None:
         """Test initializing graph with data directory."""
         assert graph is not None
-        info = graph.get_graph_info()
-        assert info["num_nodes"] > 0
-        assert info["num_edges"] >= 0
         for node_name in graph.nodes:
             node_data = graph.get_node_data(node_name)
             assert isinstance(node_data.surfaces, list)

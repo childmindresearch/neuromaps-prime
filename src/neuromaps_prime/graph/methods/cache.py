@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from neuromaps_prime.models import (
+from neuromaps_prime.graph.models import (
     SurfaceAtlas,
     SurfaceTransform,
     VolumeAtlas,

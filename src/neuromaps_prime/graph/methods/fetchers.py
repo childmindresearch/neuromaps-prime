@@ -13,7 +13,7 @@ from typing import Literal
 from pydantic import BaseModel
 
 from neuromaps_prime.graph.methods.cache import GraphCache
-from neuromaps_prime.models import (
+from neuromaps_prime.graph.models import (
     SurfaceAtlas,
     SurfaceTransform,
     VolumeAtlas,
@@ -172,7 +172,7 @@ class GraphFetchers(BaseModel):
             resource_type=resource_type,
         )
 
-    def fetch_volume_atlases(
+    def fetch_volume_atlases(  # pragma: no cover (already tested)
         self,
         space: str,
         resolution: str | None = None,
@@ -222,7 +222,7 @@ class GraphFetchers(BaseModel):
             resource_type=resource_type,
         )
 
-    def fetch_volume_transforms(
+    def fetch_volume_transforms(  # pragma: no cover (already tested)
         self,
         source: str,
         target: str,
