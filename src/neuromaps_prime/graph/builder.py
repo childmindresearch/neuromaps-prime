@@ -1,0 +1,251 @@
+"""Graph builder for NeuromapsGraph.
+
+Responsible for parsing YAML/dict data into typed model objects and
+populating both the NetworkX graph structure and the GraphCache.
+
+Intentionally stateless beyond the dependencies injected at construction:
+  - data_dir:  optional root path prepended to all relative file paths
+  - cache:     GraphCache instance to populate during build
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any, cast
+
+import networkx as nx
+import yaml
+from pydantic import BaseModel, Field
+
+from neuromaps_prime.graph.cache import GraphCache
+from neuromaps_prime.graph.models import (
+    Edge,
+    Node,
+    SurfaceAtlas,
+    SurfaceTransform,
+    VolumeAtlas,
+    VolumeTransform,
+)
+
+
+class GraphBuilder(BaseModel):
+    """Parses YAML/dict definitions and populates a graph and its cache.
+
+    Attributes:
+    ----------
+    cache:
+        The :class:`GraphCache` instance that will be populated during build.
+    data_dir:
+        Optional root directory prepended to all relative file paths found in
+        the YAML. When ``None``, paths are used as-is.
+    """
+
+    model_config = {"arbitrary_types_allowed": True}
+
+    cache: GraphCache
+    data_dir: Path | None = Field(default=None)
+
+    # ------------------------------------------------------------------ #
+    # Public entry points                                                  #
+    # ------------------------------------------------------------------ #
+
+    def build_from_yaml(self, graph: nx.MultiDiGraph, yaml_file: Path) -> None:
+        """Populate graph and cache from a YAML file.
+
+        Args:
+            graph: The NetworkX graph to populate with nodes and edges.
+            yaml_file: Path to the YAML definition file.
+        """
+        with open(yaml_file, "r") as fh:
+            data = yaml.safe_load(fh)
+        self.build_from_dict(graph, data)
+
+    def build_from_dict(self, graph: nx.MultiDiGraph, data: dict[str, Any]) -> None:
+        """Populate graph and cache from a dictionary.
+
+        Args:
+            graph: The NetworkX graph to populate with nodes and edges.
+            data: Parsed graph definition (mirrors the YAML schema).
+        """
+        self._build_nodes(graph, data.get("nodes", []))
+        self._build_edges(graph, data.get("edges", {}))
+
+    # ------------------------------------------------------------------ #
+    # Node building                                                        #
+    # ------------------------------------------------------------------ #
+
+    def _build_nodes(
+        self, graph: nx.MultiDiGraph, nodes_list: list[dict[str, Any]]
+    ) -> None:
+        """Parse all node entries and add them to graph and cache."""
+        for node_entry in nodes_list:
+            ((node_name, node_data),) = node_entry.items()
+            description = node_data.get("description", "")
+
+            surfaces = cast(
+                list[SurfaceAtlas],
+                self._parse_surface_resources(
+                    SurfaceAtlas,
+                    dict(space=node_name, description=description),
+                    node_data.get("surfaces", {}),
+                ),
+            )
+            volumes = cast(
+                list[VolumeAtlas],
+                self._parse_volume_resources(
+                    VolumeAtlas,
+                    dict(space=node_name, description=description),
+                    node_data.get("volumes", {}),
+                ),
+            )
+            node_obj = Node(
+                name=node_name,
+                species=node_data.get("species", ""),
+                description=description,
+                surfaces=surfaces,
+                volumes=volumes,
+            )
+            graph.add_node(node_name, data=node_obj)
+            self.cache.add_surface_atlases(surfaces)
+            self.cache.add_volume_atlases(volumes)
+
+    # ------------------------------------------------------------------ #
+    # Edge building                                                        #
+    # ------------------------------------------------------------------ #
+
+    def _build_edges(self, graph: nx.MultiDiGraph, edges_dict: dict[str, Any]) -> None:
+        """Parse all edge entries and add them to graph and cache."""
+        for edge_data in edges_dict.get("surface_to_surface", []):
+            self._build_surface_edge(graph, edge_data)
+        for edge_data in edges_dict.get("volume_to_volume", []):
+            self._build_volume_edge(graph, edge_data)
+
+    def _build_surface_edge(
+        self, graph: nx.MultiDiGraph, edge_data: dict[str, Any]
+    ) -> None:
+        """Parse a single surface-to-surface edge definition."""
+        source, target = edge_data["from"], edge_data["to"]
+        transforms = cast(
+            list[SurfaceTransform],
+            self._parse_surface_resources(
+                SurfaceTransform,
+                dict(
+                    source_space=source,
+                    target_space=target,
+                    description=f"surf2surf transform from {source} to {target}",
+                ),
+                edge_data.get("surfaces", {}),
+            ),
+        )
+        graph.add_edge(
+            source,
+            target,
+            key="surface_to_surface",
+            data=Edge(surface_transforms=transforms),
+            weight=1.0,
+        )
+        self.cache.add_surface_transforms(transforms)
+
+    def _build_volume_edge(
+        self, graph: nx.MultiDiGraph, edge_data: dict[str, Any]
+    ) -> None:
+        """Parse a single volume-to-volume edge definition."""
+        source, target = edge_data["from"], edge_data["to"]
+        transforms = cast(
+            list[VolumeTransform],
+            self._parse_volume_resources(
+                VolumeTransform,
+                dict(
+                    source_space=source,
+                    target_space=target,
+                    description=f"vol2vol transform from {source} to {target}",
+                ),
+                edge_data.get("volumes", {}),
+            ),
+        )
+        graph.add_edge(
+            source,
+            target,
+            key="volume_to_volume",
+            data=Edge(volume_transforms=transforms),
+            weight=1.0,
+        )
+        self.cache.add_volume_transforms(transforms)
+
+    # ------------------------------------------------------------------ #
+    # Generic resource parsers                                             #
+    # ------------------------------------------------------------------ #
+
+    def _resolve_path(self, path: str) -> Path:
+        """Prepend data_dir to path when set, otherwise return as-is."""
+        return (self.data_dir / path) if self.data_dir else Path(path)
+
+    def _parse_surface_resources(
+        self,
+        cls: type[SurfaceAtlas] | type[SurfaceTransform],
+        fixed_fields: dict[str, Any],
+        surfaces_dict: dict[str, Any],
+    ) -> list[SurfaceAtlas] | list[SurfaceTransform]:
+        """Parse surface resource entries from a nested density/type/hemi dict.
+
+        Args:
+            cls: The model class to instantiate (SurfaceAtlas or SurfaceTransform).
+            fixed_fields: Fields shared by every entry (e.g. space, description).
+            surfaces_dict: Nested dict keyed by density → resource_type → hemisphere.
+
+        Returns:
+            List of instantiated surface resource objects.
+        """
+        prefix = fixed_fields.get("space") or (
+            f"{fixed_fields['source_space']}_to_{fixed_fields['target_space']}"
+        )
+        result = [
+            cls(
+                name=f"{prefix}_{density}_{hemi}_{surf_type}",
+                file_path=self._resolve_path(path),
+                density=density,
+                hemisphere=hemi,
+                resource_type=surf_type,
+                **fixed_fields,
+            )
+            for density, types in surfaces_dict.items()
+            for surf_type, hemispheres in types.items()
+            for hemi, path in hemispheres.items()
+        ]
+        if cls is SurfaceAtlas:
+            return cast(list[SurfaceAtlas], result)
+        return cast(list[SurfaceTransform], result)
+
+    def _parse_volume_resources(
+        self,
+        cls: type[VolumeAtlas] | type[VolumeTransform],
+        fixed_fields: dict[str, Any],
+        volumes_dict: dict[str, Any],
+    ) -> list[VolumeAtlas] | list[VolumeTransform]:
+        """Parse volume resource entries from a nested resolution/type dict.
+
+        Args:
+            cls: The model class to instantiate (VolumeAtlas or VolumeTransform).
+            fixed_fields: Fields shared by every entry (e.g. space, description).
+            volumes_dict: Nested dict keyed by resolution → resource_type.
+
+        Returns:
+            List of instantiated volume resource objects.
+        """
+        prefix = fixed_fields.get("space") or (
+            f"{fixed_fields['source_space']}_to_{fixed_fields['target_space']}"
+        )
+        result = [
+            cls(
+                name=f"{prefix}_{res}_{vol_type}",
+                file_path=self._resolve_path(path),
+                resolution=res,
+                resource_type=vol_type,
+                **fixed_fields,
+            )
+            for res, types in volumes_dict.items()
+            for vol_type, path in types.items()
+        ]
+        if cls is VolumeAtlas:
+            return cast(list[VolumeAtlas], result)
+        return cast(list[VolumeTransform], result)

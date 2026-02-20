@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 
-from neuromaps_prime import graph
+from neuromaps_prime.graph import models
 
 
 @pytest.fixture
@@ -22,7 +22,7 @@ class TestResources:
         "model_cls, extra_kwargs",
         [
             (
-                graph.SurfaceAtlas,
+                models.SurfaceAtlas,
                 dict(
                     space="Yerkes19",
                     density="32k",
@@ -31,7 +31,7 @@ class TestResources:
                 ),
             ),
             (
-                graph.VolumeAtlas,
+                models.VolumeAtlas,
                 dict(
                     space="Yerkes19",
                     resolution="2mm",
@@ -39,7 +39,7 @@ class TestResources:
                 ),
             ),
             (
-                graph.SurfaceTransform,
+                models.SurfaceTransform,
                 dict(
                     source_space="Yerkes19",
                     target_space="CIVETNMT",
@@ -49,7 +49,7 @@ class TestResources:
                 ),
             ),
             (
-                graph.VolumeTransform,
+                models.VolumeTransform,
                 dict(
                     source_space="Yerkes19",
                     target_space="CIVETNMT",
@@ -76,10 +76,10 @@ class TestResources:
     def test_missing_file(self):
         """Test missing file raises error."""
         with pytest.raises(FileNotFoundError, match="File path does not exist"):
-            graph.SurfaceAtlas(
+            models.SurfaceAtlas(
                 name="invalid",
                 description="missing",
-                file_path="some_random_path",
+                file_path="some_random_path",  # type: ignore
                 space="Yerkes19",
                 density="32k",
                 hemisphere="left",
@@ -92,7 +92,7 @@ class TestNode:
 
     def test_init(self, tmp_file: Path):
         """Test initialization of a node."""
-        surf = graph.SurfaceAtlas(
+        surf = models.SurfaceAtlas(
             name="TestSurface",
             description="Test surface",
             file_path=tmp_file,
@@ -101,7 +101,7 @@ class TestNode:
             hemisphere="left",
             resource_type="SurfaceAtlas",
         )
-        node = graph.Node(
+        node = models.Node(
             name="TestNode",
             species="Test",
             description="A test node",
@@ -120,7 +120,7 @@ class TestEdge:
 
     def test_init(self, tmp_file: Path):
         """Test initialization of an edge."""
-        surf_edge = graph.SurfaceTransform(
+        surf_edge = models.SurfaceTransform(
             name="SurfaceTransform",
             description="surface edge",
             file_path=tmp_file,
@@ -130,7 +130,7 @@ class TestEdge:
             hemisphere="left",
             resource_type="surface_transform",
         )
-        edge = graph.Edge(surface_transforms=[surf_edge])
+        edge = models.Edge(surface_transforms=[surf_edge])
 
         assert len(edge.surface_transforms) == 1
         assert len(edge.volume_transforms) == 0
