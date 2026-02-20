@@ -185,11 +185,10 @@ class TestVolumetricTransformIntegration:
         result = vol_to_vol(
             source=source_path,
             target=target_path,
-            out_fpath=out_file,
+            out_fpath=str(out_file),
             interp="linear",
         )
 
         assert result.exists()
         assert self._extract_res(result) == self._extract_res(target_path)
-
 
