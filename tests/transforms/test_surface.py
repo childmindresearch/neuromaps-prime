@@ -244,7 +244,7 @@ class TestSurfaceTransformIntegration:
     ) -> None:
         """Integration test of surface_sphere_project_unproject."""
         sphere_in = graph.fetch_surface_to_surface_transform(
-            source="S1200",
+            source="fsLR",
             target="Yerkes19",
             density="32k",
             hemisphere="left",
@@ -274,7 +274,7 @@ class TestSurfaceTransformIntegration:
             sphere_unproject_from=sphere_unproject_from.fetch(),
             sphere_out=str(sphere_out),
         )
-        assert utils.get_vertex_count(sphere_in) == utils.get_vertex_count(  # type: ignore[arg-type]
+        assert utils.get_vertex_count(Path(sphere_in.fetch())) == utils.get_vertex_count(  # type: ignore[arg-type]
             result.sphere_out
         )
 

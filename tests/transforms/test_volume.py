@@ -185,7 +185,7 @@ class TestVolumetricTransformIntegration:
         result = vol_to_vol(
             source=source_path,
             target=target_path,
-            out_fpath=out_file,
+            out_fpath=str(out_file),
             interp="linear",
         )
 
