@@ -14,11 +14,16 @@ class TestVolumeToSurfaceTransformer:
 
     @pytest.fixture
     def mock_transformer(self, graph: NeuromapsGraph) -> NeuromapsGraph:
-        """Create a mock transformer instance with necessary methods."""
-        graph.validate = MagicMock()
-        graph.find_highest_density = MagicMock(return_value="32k")
-        graph.fetch_surface_atlas = MagicMock()
-        graph.surface_to_surface_transformer = MagicMock()
+        """Create a mock transformer with volume_ops internals replaced.
+
+        Replaces volume_ops.utils, volume_ops.fetchers, and volume_ops.surface_ops
+        with MagicMocks so internal calls are interceptable without hitting
+        Pydantic's __setattr__ validation.
+        """
+        graph.volume_ops.utils = MagicMock()
+        graph.volume_ops.fetchers = MagicMock()
+        graph.volume_ops.surface_ops = MagicMock()
+        graph.volume_ops.utils.find_highest_density.return_value = "32k"
         return graph
 
     @pytest.fixture
@@ -52,9 +57,9 @@ class TestVolumeToSurfaceTransformer:
         return fetch_surface_atlas_side_effect
 
     @patch(
-        "neuromaps_prime.graph.workbench.volume_to_surface_mapping_ribbon_constrained"
+        "neuromaps_prime.graph.transforms.volume.workbench.volume_to_surface_mapping_ribbon_constrained"
     )
-    @patch("neuromaps_prime.graph.surface_project")
+    @patch("neuromaps_prime.graph.transforms.volume.surface_project")
     @pytest.mark.parametrize("transformer_type", ["metric", "label"])
     def test_volume_to_surface_success(
         self,
@@ -71,31 +76,31 @@ class TestVolumeToSurfaceTransformer:
         projected_file.touch()
         expected_output = Path(basic_params["output_file_path"])
 
-        mock_transformer.fetch_surface_atlas.side_effect = self.make_atlas_side_effect(
-            tmp_path
+        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.side_effect = (
+            self.make_atlas_side_effect(tmp_path)
         )
         mock_ribbon.return_value = MagicMock()
         mock_surface_project.return_value = projected_file
-        mock_transformer.surface_to_surface_transformer.return_value = expected_output
+        mock_transformer.volume_ops.surface_ops.transform.return_value = expected_output
 
         result = mock_transformer.volume_to_surface_transformer(**basic_params)
 
-        mock_transformer.validate.assert_called_once_with(
+        mock_transformer.volume_ops.utils.validate_spaces.assert_called_once_with(
             basic_params["source_space"], basic_params["target_space"]
         )
-        assert mock_transformer.fetch_surface_atlas.call_count == 3
+        assert mock_transformer.volume_ops.fetchers.fetch_surface_atlas.call_count == 3
         mock_ribbon.assert_called_once_with(
             inner_surf=tmp_path / "white.surf.gii",
             outer_surf=tmp_path / "pial.surf.gii",
         )
         mock_surface_project.assert_called_once()
-        mock_transformer.surface_to_surface_transformer.assert_called_once()
+        mock_transformer.volume_ops.surface_ops.transform.assert_called_once()
         assert result == expected_output
 
     @patch(
-        "neuromaps_prime.graph.workbench.volume_to_surface_mapping_ribbon_constrained"
+        "neuromaps_prime.graph.transforms.volume.workbench.volume_to_surface_mapping_ribbon_constrained"
     )
-    @patch("neuromaps_prime.graph.surface_project")
+    @patch("neuromaps_prime.graph.transforms.volume.surface_project")
     @pytest.mark.parametrize(
         "transformer_type,expected_ext", [("metric", "func"), ("label", "label")]
     )
@@ -114,12 +119,12 @@ class TestVolumeToSurfaceTransformer:
         projected_file = tmp_path / f"projected.{expected_ext}.gii"
         projected_file.touch()
 
-        mock_transformer.fetch_surface_atlas.side_effect = self.make_atlas_side_effect(
-            tmp_path
+        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.side_effect = (
+            self.make_atlas_side_effect(tmp_path)
         )
         mock_ribbon.return_value = MagicMock()
         mock_surface_project.return_value = projected_file
-        mock_transformer.surface_to_surface_transformer.return_value = projected_file
+        mock_transformer.volume_ops.surface_ops.transform.return_value = projected_file
 
         mock_transformer.volume_to_surface_transformer(**basic_params)
 
@@ -127,9 +132,9 @@ class TestVolumeToSurfaceTransformer:
         assert f".{expected_ext}.gii" in kwargs["out_fpath"]
 
     @patch(
-        "neuromaps_prime.graph.workbench.volume_to_surface_mapping_ribbon_constrained"
+        "neuromaps_prime.graph.transforms.volume.workbench.volume_to_surface_mapping_ribbon_constrained"
     )
-    @patch("neuromaps_prime.graph.surface_project")
+    @patch("neuromaps_prime.graph.transforms.volume.surface_project")
     def test_surface_to_surface_called_with_correct_args(
         self,
         mock_surface_project: MagicMock,
@@ -138,22 +143,22 @@ class TestVolumeToSurfaceTransformer:
         basic_params: dict[str, Any],
         tmp_path: Path,
     ) -> None:
-        """Testtransformer is called with correct forwarded args."""
+        """Test surface_ops.transform is called with correct forwarded args."""
         projected_file = tmp_path / "projected.func.gii"
         projected_file.touch()
 
-        mock_transformer.fetch_surface_atlas.side_effect = self.make_atlas_side_effect(
-            tmp_path
+        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.side_effect = (
+            self.make_atlas_side_effect(tmp_path)
         )
         mock_ribbon.return_value = MagicMock()
         mock_surface_project.return_value = projected_file
-        mock_transformer.surface_to_surface_transformer.return_value = Path(
+        mock_transformer.volume_ops.surface_ops.transform.return_value = Path(
             basic_params["output_file_path"]
         )
 
         mock_transformer.volume_to_surface_transformer(**basic_params)
 
-        mock_transformer.surface_to_surface_transformer.assert_called_once_with(
+        mock_transformer.volume_ops.surface_ops.transform.assert_called_once_with(
             transformer_type=basic_params["transformer_type"],
             input_file=projected_file,
             source_space=basic_params["source_space"],
@@ -170,10 +175,12 @@ class TestVolumeToSurfaceTransformer:
         self, mock_transformer: NeuromapsGraph, basic_params: dict[str, Any]
     ) -> None:
         """Test ValueError raised when source midthickness surface atlas not found."""
-        mock_transformer.fetch_surface_atlas.return_value = None
-        with pytest.raises(ValueError, match="No midthickness surface found for"):
+        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.return_value = None
+        with pytest.raises(
+            ValueError, match="No 'midthickness' surface atlas found for space"
+        ):
             mock_transformer.volume_to_surface_transformer(**basic_params)
-        mock_transformer.fetch_surface_atlas.assert_called_once()
+        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.assert_called_once()
 
     @pytest.mark.parametrize(
         "failing_call, missing_surface",
@@ -210,7 +217,24 @@ class TestVolumeToSurfaceTransformer:
                 )
             )
 
-        mock_transformer.fetch_surface_atlas.side_effect = side_effect_with_failure
-        with pytest.raises(ValueError, match=f"No {missing_surface} surface found for"):
+        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.side_effect = (
+            side_effect_with_failure
+        )
+        with pytest.raises(
+            ValueError, match=f"No '{missing_surface}' surface atlas found for space"
+        ):
             mock_transformer.volume_to_surface_transformer(**basic_params)
-        assert mock_transformer.fetch_surface_atlas.call_count == failing_call
+        assert (
+            mock_transformer.volume_ops.fetchers.fetch_surface_atlas.call_count
+            == failing_call
+        )
+
+    def test_invalid_transformer_type(
+        self,
+        graph: NeuromapsGraph,
+        basic_params: dict[str, Any],
+    ) -> None:
+        """Test error raised if invalid type."""
+        basic_params["transformer_type"] = "invalid"
+        with pytest.raises(ValueError, match="Invalid transformer_type"):
+            graph.volume_ops.transform_volume_to_surface(**basic_params)

@@ -109,7 +109,7 @@ def graph(
         for edge in edge_list:
             rewrite_edge_files(edge)
 
-    graph._build_from_dict(data)
+    graph._builder.build_from_dict(graph=graph, data=data)
     return graph
 
 
