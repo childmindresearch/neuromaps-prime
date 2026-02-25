@@ -125,6 +125,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
             TypeError: If atlas is not SurfaceAtlas or VolumeAtlas.
             ValueError: If atlas space is not present in the graph.
         """
+        if not isinstance(atlas, (SurfaceAtlas, VolumeAtlas)):
+            raise TypeError(f"Unsupported atlas type: {type(atlas)}")
+
         node_name = atlas.space
         if node_name not in self.nodes:
             raise ValueError(
@@ -139,11 +142,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
             case VolumeAtlas():
                 node_data.volumes.append(atlas)
                 self._cache.add_volume_atlas(atlas)
-            case _:
-                raise TypeError(f"Unsupported atlas type: {type(atlas)}")
 
     # ------------------------------------------------------------------ #
-    # Validation                                                         #
+    # Validation                                                           #
     # ------------------------------------------------------------------ #
     def validate_spaces(self, source: str, target: str) -> None:
         """Assert that both source and target exist as nodes in the graph.

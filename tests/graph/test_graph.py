@@ -140,6 +140,66 @@ nodes:
         with pytest.raises(TypeError, match="Unsupported transform type"):
             graph.add_transform("invalid", key="key")  # type: ignore[arg-type]
 
+    def test_add_missing_atlas_space(self, graph: NeuromapsGraph) -> None:
+        """Test adding atlas with an invalid space."""
+        atlas = models.SurfaceAtlas(
+            name="Test",
+            description="Test",
+            file_path=Path("."),
+            space="invalid",
+            density="10k",
+            hemisphere="left",
+            resource_type="test",
+        )
+        with pytest.raises(ValueError, match="not found"):
+            graph.add_atlas(atlas)
+
+    def test_add_invalid_atlas_type(self, graph: NeuromapsGraph) -> None:
+        """Test adding invalid atlas raises error."""
+        with pytest.raises(TypeError, match="Unsupported atlas type"):
+            graph.add_atlas("invalid")  # type: ignore [arg-type]
+
+    def test_add_surface_atlas(self, graph: NeuromapsGraph) -> None:
+        """Test adding surface atlas."""
+        atlas = models.SurfaceAtlas(
+            name="Test",
+            description="Test",
+            file_path=Path("."),
+            space="Yerkes19",
+            density="10k",
+            hemisphere="left",
+            resource_type="test",
+        )
+        graph.add_atlas(atlas)
+        assert atlas in graph.nodes["Yerkes19"]["data"].surfaces
+        assert atlas not in graph.nodes["Yerkes19"]["data"].volumes
+        assert (
+            graph._cache.get_surface_atlas(
+                atlas.space, atlas.density, atlas.hemisphere, atlas.resource_type
+            )
+            == atlas
+        )
+
+    def test_add_volume_atlas(self, graph: NeuromapsGraph) -> None:
+        """Test adding volume atlas."""
+        atlas = models.VolumeAtlas(
+            name="Test",
+            description="Test",
+            file_path=Path("."),
+            space="Yerkes19",
+            resolution="1mm",
+            resource_type="test",
+        )
+        graph.add_atlas(atlas)
+        assert atlas not in graph.nodes["Yerkes19"]["data"].surfaces
+        assert atlas in graph.nodes["Yerkes19"]["data"].volumes
+        assert (
+            graph._cache.get_volume_atlas(
+                atlas.space, atlas.resolution, atlas.resource_type
+            )
+            == atlas
+        )
+
     def test_fetch_volume_atlas(self, graph: NeuromapsGraph) -> None:
         """Test fetching volume atlas."""
         atlas = graph.fetch_volume_atlas(
