@@ -20,8 +20,6 @@ INTERP_NOPARAMS: dict[str, Callable[..., dict]] = {
     "multiLabel": ants.ants_apply_transforms_multi_labelnoparams,
 }
 
-_NOT_IMPLEMENTED = frozenset({"BSpline"})
-
 
 def _get_interp_params(
     interp: str, interp_params: dict[str, Any] | None = None
@@ -61,12 +59,7 @@ def vol_to_vol(
 
     Raises:
         ValueError: unsupported interpolator.
-        NotImplementedError: not yet implemented interpolator.
     """
-    if interp in _NOT_IMPLEMENTED:
-        raise NotImplementedError(
-            f"The '{interp}' interpolation method is not yet implemented"
-        )
     if interp not in INTERP_PARAMS:
         raise ValueError(f"Unsupported interpolator '{interp}'.")
 
