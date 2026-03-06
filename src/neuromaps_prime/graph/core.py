@@ -10,6 +10,7 @@ Graph structure:
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from typing import Any, Literal
@@ -62,6 +63,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         super().__init__()
 
         self.runner = set_runner(runner=runner, **runner_kwargs)
+        self.logger = logging.getLogger(self.runner.logger_name)
         self.data_dir = data_dir or os.getenv("NEUROMAPS_DATA", None)
         self.yaml_path = (
             yaml_file
