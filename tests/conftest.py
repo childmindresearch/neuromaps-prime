@@ -68,36 +68,57 @@ def graph(
         surfaces = node.get("surfaces", {})
         for density, types in surfaces.items():
             for surf_type, hemis in types.items():
-                for hemi in list(hemis):
-                    hemis[hemi] = mk(
-                        tmp_path / f"{name}_{density}_{hemi}_{surf_type}.surf.gii"
-                    )
+                if surf_type == "annotation":
+                    for label, hemi_paths in hemis.items():
+                        for hemi in list(hemi_paths):
+                            if hemi in ("notes", "references"):
+                                continue
+                            hemi_paths[hemi] = mk(
+                                tmp_path / f"{name}_{density}_{hemi}_{label}.func.gii"
+                            )
+                else:
+                    for hemi in list(hemis):
+                        hemis[hemi] = mk(
+                            tmp_path / f"{name}_{density}_{hemi}_{surf_type}.surf.gii"
+                        )
         # Volumes
         volumes = node.get("volumes", {})
         for res, types in volumes.items():
-            for vol_type in list(types):
-                types[vol_type] = mk(tmp_path / f"{name}_{res}_{vol_type}.nii.gz")
+            for vol_type in types:
+                if vol_type == "annotation":
+                    for label in types[vol_type]:
+                        types[vol_type][label]["uri"] = mk(
+                            tmp_path / f"{name}_{res}_{label}.nii.gz"
+                        )
+                else:
+                    types[vol_type] = mk(tmp_path / f"{name}_{res}_{vol_type}.nii.gz")
 
     def rewrite_edge_files(edge: dict[str, Any]) -> None:
         src = edge["from"]
         dst = edge["to"]
 
-        # Surfaces
+        # Surfaces: provider → density → surf_type → hemi → path
         surfaces = edge.get("surfaces", {})
-        for density, types in surfaces.items():
-            for surf_type, hemis in types.items():
-                for hemi in list(hemis):
-                    hemis[hemi] = mk(
-                        tmp_path
-                        / f"{src}_to_{dst}_{density}_{hemi}_{surf_type}.surf.gii"
-                    )
-        # Volumes
+        for provider, density_dict in surfaces.items():
+            for density, types in density_dict.items():
+                if density == "references":
+                    continue
+                for surf_type, hemis in types.items():
+                    for hemi in list(hemis):
+                        hemis[hemi] = mk(
+                            tmp_path
+                            / f"{src}_to_{dst}_{provider}_{density}_{hemi}_{surf_type}.surf.gii"  # noqa: E501 - filename
+                        )
+        # Volumes: provider → resolution → vol_type → path
         volumes = edge.get("volumes", {})
-        for res, types in volumes.items():
-            for vol_type in list(types):
-                types[vol_type] = mk(
-                    tmp_path / f"{src}_to_{dst}_{res}_{vol_type}.nii.gz"
-                )
+        for provider, res_dict in volumes.items():
+            for res, types in res_dict.items():
+                if res == "references":
+                    continue
+                for vol_type in list(types):
+                    types[vol_type] = mk(
+                        tmp_path / f"{src}_to_{dst}_{provider}_{res}_{vol_type}.nii.gz"
+                    )
 
     # Rewrite node file paths
     for node_block in data.get("nodes", {}):

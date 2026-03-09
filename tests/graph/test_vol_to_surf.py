@@ -169,6 +169,7 @@ class TestVolumeToSurfaceTransformer:
             target_density=basic_params["target_density"],
             area_resource="midthickness",
             add_edge=True,
+            provider=None,
         )
 
     def test_no_source_surface_atlas(

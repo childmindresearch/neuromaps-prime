@@ -23,8 +23,10 @@ from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.graph.models import (
     Edge,
     Node,
+    SurfaceAnnotation,
     SurfaceAtlas,
     SurfaceTransform,
+    VolumeAnnotation,
     VolumeAtlas,
     VolumeTransform,
 )
@@ -235,6 +237,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         density: str,
         hemisphere: Literal["left", "right"],
         resource_type: str,
+        provider: str | None = None,
     ) -> SurfaceTransform | None:
         """Fetch a surface-to-surface transform resource.
 
@@ -244,6 +247,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             density: Surface mesh density.
             hemisphere: ``'left'`` or ``'right'``.
             resource_type: Surface type (e.g. ``'sphere'``).
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
 
         Returns:
             The matching :class:`~neuromaps_prime.graph.models.SurfaceTransform`, or
@@ -255,10 +260,16 @@ class NeuromapsGraph(nx.MultiDiGraph):
             density=density,
             hemisphere=hemisphere,
             resource_type=resource_type,
+            provider=provider,
         )
 
     def fetch_volume_to_volume_transform(
-        self, source: str, target: str, resolution: str, resource_type: str
+        self,
+        source: str,
+        target: str,
+        resolution: str,
+        resource_type: str,
+        provider: str | None = None,
     ) -> VolumeTransform | None:
         """Fetch a volume-to-volume transform resource.
 
@@ -267,6 +278,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             target: Target space name.
             resolution: Volume resolution.
             resource_type: Volume type.
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
 
         Returns:
             The matching :class:`~neuromaps_prime.graph.models.VolumeTransform`, or
@@ -277,6 +290,44 @@ class NeuromapsGraph(nx.MultiDiGraph):
             target=target,
             resolution=resolution,
             resource_type=resource_type,
+            provider=provider,
+        )
+
+    def fetch_surface_annotation(
+        self, space: str, label: str, density: str, hemisphere: Literal["left", "right"]
+    ) -> SurfaceAnnotation | None:
+        """Fetch a surface atlas resource.
+
+        Args:
+            space: Brain template space name.
+            label: Annotation label.
+            density: Surface mesh density (e.g. ``'32k'``).
+            hemisphere: ``'left'`` or ``'right'``.
+
+        Returns:
+            The matching :class:`~neuromaps_prime.graph.models.SurfaceAnnotation`, or
+            ``None`` if not found.
+        """
+        return self._cache.get_surface_annotation(
+            space=space, label=label, density=density, hemisphere=hemisphere
+        )
+
+    def fetch_volume_annotation(
+        self, space: str, label: str, resolution: str
+    ) -> VolumeAnnotation | None:
+        """Fetch a volume atlas resource.
+
+        Args:
+            space: Brain template space name.
+            label: Annotation label.
+            resolution: Volume resolution (e.g. ``'1mm'``).
+
+        Returns:
+            The matching :class:`~neuromaps_prime.graph.models.VolumeAtlas`, or
+            ``None`` if not found.
+        """
+        return self._cache.get_volume_annotation(
+            space=space, label=label, resolution=resolution
         )
 
     # ------------------------------------------------------------------ #
@@ -335,6 +386,54 @@ class NeuromapsGraph(nx.MultiDiGraph):
             target=target_space,
             density=density,
             hemisphere=hemisphere,
+            resource_type=resource_type,
+        )
+
+    def search_volume_atlases(
+        self,
+        space: str,
+        resolution: str | None = None,
+        resource_type: str | None = None,
+    ) -> list[VolumeAtlas]:
+        """Search volume atlases for a space with optional filters.
+
+        Args:
+            space: Brain template space name.
+            resolution: Optional resolution filter.
+            hemisphere: Optional hemisphere filter.
+            resource_type: Optional resource type filter.
+
+        Returns:
+            List of matching :class:`~neuromaps_prime.graph.models.VolumeAtlas`
+            entries.
+        """
+        return self._cache.get_volume_atlases(
+            space=space, resolution=resolution, resource_type=resource_type
+        )
+
+    def search_volume_transforms(
+        self,
+        source_space: str,
+        target_space: str,
+        resolution: str | None = None,
+        resource_type: str | None = None,
+    ) -> list[VolumeTransform]:
+        """Search volume transforms between two spaces with optional filters.
+
+        Args:
+            source_space: Source space name.
+            target_space: Target space name.
+            resolution: Optional resolution filter.
+            resource_type: Optional resource type filter.
+
+        Returns:
+            List of matching :class:`~neuromaps_prime.graph.models.VolumeTransform`
+            entries.
+        """
+        return self._cache.get_volume_transforms(
+            source=source_space,
+            target=target_space,
+            resolution=resolution,
             resource_type=resource_type,
         )
 
@@ -405,6 +504,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         target_density: str | None = None,
         area_resource: str = "midthickness",
         add_edge: bool = True,
+        provider: str | None = None,
     ) -> Path | None:
         """Resample a metric or label GIFTI from source_space to target_space.
 
@@ -422,6 +522,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             area_resource: Surface type for area correction
                 (default ``'midthickness'``).
             add_edge: Whether to register composed transforms.
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
 
         Returns:
             Path to the resampled output, or ``None`` if the transform could
@@ -438,6 +540,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             target_density=target_density,
             area_resource=area_resource,
             add_edge=add_edge,
+            provider=provider,
         )
 
     def volume_to_volume_transformer(
@@ -450,6 +553,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         output_file_path: str,
         interp: str = "linear",
         interp_params: dict[str, Any] | None = None,
+        provider: str | None = None,
     ) -> Path:
         """Warp a volume image from source_space to target_space.
 
@@ -462,6 +566,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             output_file_path: Path for the warped output volume.
             interp: Interpolation method.
             interp_params: Optional interpolation parameters.
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
 
         Returns:
             Path to the warped output volume.
@@ -475,6 +581,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             output_file_path=output_file_path,
             interp=interp,
             interp_params=interp_params,
+            provider=provider,
         )
 
     def volume_to_surface_transformer(
@@ -489,6 +596,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         target_density: str | None = None,
         area_resource: str = "midthickness",
         add_edge: bool = True,
+        provider: str | None = None,
     ) -> Path | None:
         """Project a volume to surface then resample to target_space.
 
@@ -506,6 +614,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             area_resource: Surface type for area correction
                 (default ``'midthickness'``).
             add_edge: Whether to register composed transforms.
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
 
         Returns:
             Path to the resampled output, or ``None`` if the transform could
@@ -522,4 +632,5 @@ class NeuromapsGraph(nx.MultiDiGraph):
             target_density=target_density,
             area_resource=area_resource,
             add_edge=add_edge,
+            provider=provider,
         )

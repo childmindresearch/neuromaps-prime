@@ -56,6 +56,7 @@ class VolumeTransformOps(BaseModel):
         output_file_path: str,
         interp: str = "linear",
         interp_params: dict[str, Any] | None = None,
+        provider: str | None = None,
     ) -> Path:
         """Warp a volume image from source_space to target_space.
 
@@ -68,6 +69,8 @@ class VolumeTransformOps(BaseModel):
             output_file_path: Path for the warped output volume.
             interp: Interpolation method passed to the warp tool.
             interp_params: Optional additional interpolation parameters.
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
 
         Returns:
             Path to the warped output volume.
@@ -84,6 +87,7 @@ class VolumeTransformOps(BaseModel):
             target=target_space,
             resolution=resolution,
             resource_type=resource_type,
+            provider=provider,
         )
         if transform is None:
             raise ValueError(
@@ -124,6 +128,7 @@ class VolumeTransformOps(BaseModel):
         target_density: str | None = None,
         area_resource: str = "midthickness",
         add_edge: bool = True,
+        provider: str | None = None,
     ) -> Path | None:
         """Project a volume into surface space then resample to target_space.
 
@@ -188,6 +193,7 @@ class VolumeTransformOps(BaseModel):
             target_density=target_density,
             area_resource=area_resource,
             add_edge=add_edge,
+            provider=provider,
         )
 
     # ------------------------------------------------------------------ #
