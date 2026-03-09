@@ -61,6 +61,7 @@ class SurfaceTransform(Resource):
     density: str
     hemisphere: Literal["left", "right"]
     resource_type: str
+    provider: str
     weight: float = 1.0
 
 
@@ -79,6 +80,7 @@ class VolumeTransform(Resource):
     target_space: str
     resolution: str
     resource_type: str
+    provider: str
     weight: float = 1.0
 
 

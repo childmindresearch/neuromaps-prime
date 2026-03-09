@@ -82,22 +82,24 @@ def graph(
         src = edge["from"]
         dst = edge["to"]
 
-        # Surfaces
+        # Surfaces: provider → density → surf_type → hemi → path
         surfaces = edge.get("surfaces", {})
-        for density, types in surfaces.items():
-            for surf_type, hemis in types.items():
-                for hemi in list(hemis):
-                    hemis[hemi] = mk(
-                        tmp_path
-                        / f"{src}_to_{dst}_{density}_{hemi}_{surf_type}.surf.gii"
-                    )
-        # Volumes
+        for provider, density_dict in surfaces.items():
+            for density, types in density_dict.items():
+                for surf_type, hemis in types.items():
+                    for hemi in list(hemis):
+                        hemis[hemi] = mk(
+                            tmp_path
+                            / f"{src}_to_{dst}_{provider}_{density}_{hemi}_{surf_type}.surf.gii"  # noqa: E501 - filename
+                        )
+        # Volumes: provider → resolution → vol_type → path
         volumes = edge.get("volumes", {})
-        for res, types in volumes.items():
-            for vol_type in list(types):
-                types[vol_type] = mk(
-                    tmp_path / f"{src}_to_{dst}_{res}_{vol_type}.nii.gz"
-                )
+        for provider, res_dict in volumes.items():
+            for res, types in res_dict.items():
+                for vol_type in list(types):
+                    types[vol_type] = mk(
+                        tmp_path / f"{src}_to_{dst}_{provider}_{res}_{vol_type}.nii.gz"
+                    )
 
     # Rewrite node file paths
     for node_block in data.get("nodes", {}):
