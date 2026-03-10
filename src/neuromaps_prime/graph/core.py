@@ -115,10 +115,37 @@ class NeuromapsGraph(nx.MultiDiGraph):
             weight=transform.weight,
         )
 
+    def add_atlas(self, atlas: SurfaceAtlas | VolumeAtlas) -> None:
+        """Register an atlas to a graph node and a cache entry.
+
+        Args:
+            atlas: SurfaceAtlas or VolumeAtlas to add to existing node.
+
+        Raises:
+            TypeError: If atlas is not SurfaceAtlas or VolumeAtlas.
+            ValueError: If atlas space is not present in the graph.
+        """
+        if not isinstance(atlas, (SurfaceAtlas, VolumeAtlas)):
+            raise TypeError(f"Unsupported atlas type: {type(atlas)}")
+
+        node_name = atlas.space
+        if node_name not in self.nodes:
+            raise ValueError(
+                f"Node '{node_name}' not found. Available nodes: {sorted(self.nodes)}"
+            )
+
+        node_data = self.nodes[node_name]["data"]
+        match atlas:
+            case SurfaceAtlas():
+                node_data.surfaces.append(atlas)
+                self._cache.add_surface_atlas(atlas)
+            case VolumeAtlas():
+                node_data.volumes.append(atlas)
+                self._cache.add_volume_atlas(atlas)
+
     # ------------------------------------------------------------------ #
     # Validation                                                           #
     # ------------------------------------------------------------------ #
-
     def validate_spaces(self, source: str, target: str) -> None:
         """Assert that both source and target exist as nodes in the graph.
 
