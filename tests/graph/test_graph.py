@@ -1,13 +1,14 @@
 """Tests associated for broader graph functionality."""
 
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 from unittest.mock import patch
 
 import networkx as nx
 import pytest
 
 from neuromaps_prime.graph import NeuromapsGraph, models
+from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.transforms.utils import estimate_surface_density
 
 
@@ -261,6 +262,7 @@ class TestGraphIntegration:
         """Test fetching surface-to-surface transform with computed edge key."""
         source_space = "CIVETNMT"
         target_space = "fsLR"
+        assert graph.data_dir is not None
         input_file = graph.data_dir / (
             "share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-nomedialwall_dparc.label.gii"
         )
@@ -319,3 +321,298 @@ class TestGraphIntegration:
             output_file_path=str(tmp_path / "test_output.nii"),
         )
         assert output.exists()
+
+
+class TestGraphCacheRequireSurface:
+    """Tests for GraphCache.require_surface_atlas."""
+
+    def test_require_surface_atlas_hit(self, graph: NeuromapsGraph) -> None:
+        """Test require_surface_atlas returns the atlas when found."""
+        atlases = graph._cache.get_surface_atlases(space="Yerkes19")
+        assert atlases, "Expected at least one Yerkes19 atlas in the test graph"
+        a = atlases[0]
+        result = graph._cache.require_surface_atlas(
+            space=a.space,
+            density=a.density,
+            hemisphere=a.hemisphere,
+            resource_type=a.resource_type,
+        )
+        assert result is a
+
+    def test_require_surface_atlas_miss(self, graph: NeuromapsGraph) -> None:
+        """Test require_surface_atlas raises ValueError when not found."""
+        with pytest.raises(ValueError, match="No 'sphere' surface atlas found"):
+            graph._cache.require_surface_atlas(
+                space="nonexistent",
+                density="32k",
+                hemisphere="left",
+                resource_type="sphere",
+            )
+
+
+# ---------------------------------------------------------------------------
+# Helpers shared by TestGraphCacheVolume
+# ---------------------------------------------------------------------------
+
+
+def _make_volume_transform(
+    f: Path,
+    source: str,
+    target: str,
+    resolution: str,
+    resource_type: str,
+    weight: float = 1.0,
+) -> models.VolumeTransform:
+    return models.VolumeTransform(
+        name=f"{source}_to_{target}_{resolution}_{resource_type}",
+        description=f"Transform from {source} to {target}",
+        file_path=f,
+        source_space=source,
+        target_space=target,
+        resolution=resolution,
+        resource_type=resource_type,
+        weight=weight,
+    )
+
+
+def _make_volume_atlas(
+    f: Path,
+    space: str,
+    resolution: str,
+    resource_type: str,
+) -> models.VolumeAtlas:
+    return models.VolumeAtlas(
+        name=f"{space}_{resolution}_{resource_type}",
+        description=f"Atlas for {space}",
+        file_path=f,
+        space=space,
+        resolution=resolution,
+        resource_type=resource_type,
+    )
+
+
+class TestGraphCacheVolume:
+    """Unit tests for GraphCache volume transform and atlas lookup methods.
+
+    Each test runs twice via the ``scenario`` fixture — once for
+    VolumeTransform (keyed by source+target+resolution+resource_type) and
+    once for VolumeAtlas (keyed by space+resolution+resource_type).
+    """
+
+    @pytest.fixture(params=["transform", "atlas"])
+    def scenario(
+        self, request: pytest.FixtureRequest, tmp_path: Path
+    ) -> dict[str, Any]:
+        """Scenario-specific helpers and caches for both volume resource types.
+
+        Returns a dict with:
+            empty_cache      - fresh GraphCache
+            populated_cache  - GraphCache with 4 entries across 2 logical groups
+            get_single       - fn(cache, *key) -> model | None
+            get_plural       - fn(cache, *group_key, **filters) -> list
+            add_single       - fn(cache, entry)
+            add_bulk         - fn(cache, entries)
+            make_entry       - fn(file, *key) -> model
+            make_alt_entry   - fn(file, *key) -> distinct model with same key
+            exact_key        - tuple for the canonical A/1mm/T1w entry
+            wrong_keys       - list of tuples that should all miss
+            group_key        - primary key used in plural queries
+            unrelated_check  - fn(result) -> bool; True if from the unrelated group
+            plural_empty_call - fn(cache) -> list; plural call on an empty cache
+        """
+        f = tmp_path / "file.nii.gz"
+        f.touch()
+
+        if request.param == "transform":
+            populated = GraphCache()
+            populated.add_volume_transforms(
+                [
+                    _make_volume_transform(f, "A", "B", "1mm", "T1w"),
+                    _make_volume_transform(f, "A", "B", "1mm", "T2w"),
+                    _make_volume_transform(f, "A", "B", "2mm", "T1w"),
+                    _make_volume_transform(f, "C", "D", "1mm", "T1w"),
+                ]
+            )
+            alt_f = tmp_path / "alt.nii.gz"
+            alt_f.touch()
+            return dict(
+                empty_cache=GraphCache(),
+                populated_cache=populated,
+                get_single=lambda c, *k: c.get_volume_transform(*k),
+                get_plural=lambda c, *a, **kw: c.get_volume_transforms(*a, **kw),
+                add_single=lambda c, e: c.add_volume_transform(e),
+                add_bulk=lambda c, es: c.add_volume_transforms(es),
+                make_entry=lambda file, *k: _make_volume_transform(file, *k),
+                make_alt_entry=lambda file, *k: _make_volume_transform(
+                    alt_f, *k, weight=9.0
+                ),
+                exact_key=("A", "B", "1mm", "T1w"),
+                wrong_keys=[
+                    ("X", "B", "1mm", "T1w"),
+                    ("A", "X", "1mm", "T1w"),
+                    ("A", "B", "2mm", "T1w"),
+                    ("A", "B", "1mm", "T2w"),
+                ],
+                group_key=("A", "B"),
+                unrelated_check=lambda t: t.source_space == "C",
+                plural_empty_call=lambda c: c.get_volume_transforms("A", "B"),
+            )
+        else:  # atlas
+            populated = GraphCache()
+            populated.add_volume_atlases(
+                [
+                    _make_volume_atlas(f, "A", "1mm", "T1w"),
+                    _make_volume_atlas(f, "A", "1mm", "T2w"),
+                    _make_volume_atlas(f, "A", "2mm", "T1w"),
+                    _make_volume_atlas(f, "B", "1mm", "T1w"),
+                ]
+            )
+            alt_f = tmp_path / "alt.nii.gz"
+            alt_f.touch()
+            return dict(
+                empty_cache=GraphCache(),
+                populated_cache=populated,
+                get_single=lambda c, *k: c.get_volume_atlas(*k),
+                get_plural=lambda c, *a, **kw: c.get_volume_atlases(*a, **kw),
+                add_single=lambda c, e: c.add_volume_atlas(e),
+                add_bulk=lambda c, es: c.add_volume_atlases(es),
+                make_entry=lambda file, *k: _make_volume_atlas(file, *k),
+                make_alt_entry=lambda file, *k: _make_volume_atlas(alt_f, *k),
+                exact_key=("A", "1mm", "T1w"),
+                wrong_keys=[
+                    ("X", "1mm", "T1w"),
+                    ("A", "2mm", "T1w"),
+                    ("A", "1mm", "T2w"),
+                ],
+                group_key=("A",),
+                unrelated_check=lambda a: a.space == "B",
+                plural_empty_call=lambda c: c.get_volume_atlases("A"),
+            )
+
+    # ------------------------------------------------------------------ #
+    # get_volume_{transform,atlas} — singular                             #
+    # ------------------------------------------------------------------ #
+
+    def test_hit(self, scenario: dict, tmp_path: Path) -> None:
+        """Returns the entry when an exact match exists."""
+        f = tmp_path / "hit.nii.gz"
+        f.touch()
+        entry = scenario["make_entry"](f, *scenario["exact_key"])
+        scenario["add_single"](scenario["empty_cache"], entry)
+        assert (
+            scenario["get_single"](scenario["empty_cache"], *scenario["exact_key"])
+            is entry
+        )
+
+    def test_miss_empty(self, scenario: dict) -> None:
+        """Returns None on an empty cache."""
+        assert (
+            scenario["get_single"](scenario["empty_cache"], *scenario["exact_key"])
+            is None
+        )
+
+    def test_miss_wrong_key(self, scenario: dict, tmp_path: Path) -> None:
+        """Returns None when any single key component does not match."""
+        f = tmp_path / "miss.nii.gz"
+        f.touch()
+        entry = scenario["make_entry"](f, *scenario["exact_key"])
+        scenario["add_single"](scenario["empty_cache"], entry)
+        for wrong_key in scenario["wrong_keys"]:
+            assert (
+                scenario["get_single"](scenario["empty_cache"], *wrong_key) is None
+            ), f"Expected None for key {wrong_key}"
+
+    def test_overwrite(self, scenario: dict, tmp_path: Path) -> None:
+        """Later insertion overwrites an earlier entry with the same key."""
+        f = tmp_path / "ow.nii.gz"
+        f.touch()
+        entry1 = scenario["make_entry"](f, *scenario["exact_key"])
+        entry2 = scenario["make_alt_entry"](f, *scenario["exact_key"])
+        scenario["add_single"](scenario["empty_cache"], entry1)
+        scenario["add_single"](scenario["empty_cache"], entry2)
+        assert (
+            scenario["get_single"](scenario["empty_cache"], *scenario["exact_key"])
+            is entry2
+        )
+
+    def test_distinct_keys_coexist(self, scenario: dict, tmp_path: Path) -> None:
+        """Two entries with different resolutions are independently retrievable."""
+        f = tmp_path / "dk.nii.gz"
+        f.touch()
+        key_1mm = scenario["exact_key"]
+        # Swap the second-to-last element (resolution) from "1mm" to "2mm"
+        key_2mm = (*key_1mm[:-2], "2mm", key_1mm[-1])
+        entry_1mm = scenario["make_entry"](f, *key_1mm)
+        entry_2mm = scenario["make_entry"](f, *key_2mm)
+        scenario["add_bulk"](scenario["empty_cache"], [entry_1mm, entry_2mm])
+        assert scenario["get_single"](scenario["empty_cache"], *key_1mm) is entry_1mm
+        assert scenario["get_single"](scenario["empty_cache"], *key_2mm) is entry_2mm
+
+    # ------------------------------------------------------------------ #
+    # get_volume_{transforms,atlases} — plural                            #
+    # ------------------------------------------------------------------ #
+
+    def test_no_filters_returns_all(self, scenario: dict) -> None:
+        """Omitting all optional filters returns every entry for that group."""
+        results = scenario["get_plural"](
+            scenario["populated_cache"], *scenario["group_key"]
+        )
+        assert len(results) == 3
+
+    def test_filter_resolution(self, scenario: dict) -> None:
+        """'resolution' filter narrows results correctly."""
+        results = scenario["get_plural"](
+            scenario["populated_cache"], *scenario["group_key"], resolution="1mm"
+        )
+        assert len(results) == 2
+        assert all(r.resolution == "1mm" for r in results)
+
+    def test_filter_resource_type(self, scenario: dict) -> None:
+        """resource_type filter narrows results correctly."""
+        results = scenario["get_plural"](
+            scenario["populated_cache"], *scenario["group_key"], resource_type="T1w"
+        )
+        assert len(results) == 2
+        assert all(r.resource_type == "T1w" for r in results)
+
+    def test_filter_both(self, scenario: dict) -> None:
+        """Combining resolution and resource_type filters yields one exact match."""
+        results = scenario["get_plural"](
+            scenario["populated_cache"],
+            *scenario["group_key"],
+            resolution="1mm",
+            resource_type="T1w",
+        )
+        assert len(results) == 1
+        assert results[0].resolution == "1mm"
+        assert results[0].resource_type == "T1w"
+
+    def test_unrelated_group_excluded(self, scenario: dict) -> None:
+        """Entries from the unrelated group are not returned."""
+        results = scenario["get_plural"](
+            scenario["populated_cache"], *scenario["group_key"]
+        )
+        assert not any(scenario["unrelated_check"](r) for r in results)
+
+    def test_empty_cache_returns_empty(self, scenario: dict) -> None:
+        """Empty cache returns an empty list regardless of arguments."""
+        assert scenario["plural_empty_call"](scenario["empty_cache"]) == []
+
+    def test_wrong_primary_key_returns_empty(self, scenario: dict) -> None:
+        """Non-existent primary key returns an empty list."""
+        wrong = ("X", "B") if len(scenario["group_key"]) == 2 else ("X",)
+        assert scenario["get_plural"](scenario["populated_cache"], *wrong) == []
+
+    @pytest.mark.parametrize(
+        "kwargs",
+        [{"resolution": "500um"}, {"resource_type": "composite"}],
+        ids=["no_resolution_match", "no_resource_type_match"],
+    )
+    def test_filter_no_match(self, scenario: dict, kwargs: dict) -> None:
+        """A filter that matches nothing returns an empty list."""
+        assert (
+            scenario["get_plural"](
+                scenario["populated_cache"], *scenario["group_key"], **kwargs
+            )
+            == []
+        )

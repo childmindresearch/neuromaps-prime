@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from neuromaps_prime.graph import NeuromapsGraph, models
-from neuromaps_prime.graph.methods.cache import GraphCache
+from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
 
 
@@ -60,12 +60,11 @@ class TestSurfaceToSurfaceTransformer:
         """Test successful metric/label transformation delegates to surface ops."""
         mock_estimate_density.return_value = "32k"
         mock_output = Path(basic_params["output_file_path"])
-        mock_transformer.surface_ops.transform.return_value = mock_output  # type: ignore
+        mock_transformer.surface_ops.transform.return_value = mock_output
         result = mock_transformer.surface_to_surface_transformer(
-            transformer_type=transformer_type,  # type: ignore
-            **basic_params,
+            transformer_type=transformer_type, **basic_params
         )
-        mock_transformer.surface_ops.transform.assert_called_once_with(  # type: ignore
+        mock_transformer.surface_ops.transform.assert_called_once_with(
             transformer_type=transformer_type,
             **basic_params,
             area_resource="midthickness",
@@ -74,15 +73,12 @@ class TestSurfaceToSurfaceTransformer:
         assert result == mock_output
 
     def test_invalid_transformer_type(
-        self,
-        graph: NeuromapsGraph,
-        basic_params: dict[str, Any],
+        self, graph: NeuromapsGraph, basic_params: dict[str, Any]
     ) -> None:
         """Test error raised if invalid type."""
         with pytest.raises(ValueError, match="Invalid transformer_type"):
             graph.surface_to_surface_transformer(
-                transformer_type="invalid",  # type: ignore
-                **basic_params,
+                transformer_type="invalid", **basic_params
             )
 
     @patch("neuromaps_prime.transforms.utils.estimate_surface_density")
@@ -94,12 +90,12 @@ class TestSurfaceToSurfaceTransformer:
     ) -> None:
         """Test None returned if transform not found."""
         mock_estimate_density.return_value = "32k"
-        mock_transformer.surface_ops.transform.return_value = None  # type: ignore
+        mock_transformer.surface_ops.transform.return_value = None
         out = mock_transformer.surface_to_surface_transformer(
             transformer_type="metric", **basic_params
         )
         assert out is None
-        mock_transformer.fetch_surface_atlas.assert_not_called()  # type: ignore
+        mock_transformer.fetch_surface_atlas.assert_not_called()
 
     @patch("neuromaps_prime.transforms.utils.estimate_surface_density")
     def test_fetch_surface_atlas_errors(
@@ -110,8 +106,7 @@ class TestSurfaceToSurfaceTransformer:
     ):
         """Test that ValueError is raised when a required surface atlas is missing."""
         mock_estimate_density.return_value = "32k"
-        # Restore real surface_ops so _require_surface_atlas actually runs
-        mock_transformer.surface_ops = MagicMock()  # type: ignore
+        mock_transformer.surface_ops = MagicMock()
         mock_transformer.surface_ops.transform.side_effect = ValueError(
             "No 'midthickness' surface atlas found for space 'Yerkes19' "
             "(density='32k', hemisphere='left')"
@@ -129,12 +124,11 @@ class TestSurfaceToSurfaceTransformPrivate:
     def mock_graph(self, graph: NeuromapsGraph) -> NeuromapsGraph:
         """Mock graph collaborators accessed by SurfaceTransformOps.
 
-        Replaces surface_ops.cache, surface_ops.fetchers, and surface_ops.utils
-        with MagicMocks so that internal calls on those objects are interceptable
-        without hitting Pydantic's __setattr__ validation.
+        Replaces surface_ops.cache and surface_ops.utils with MagicMocks so
+        that internal calls on those objects are interceptable without hitting
+        Pydantic's __setattr__ validation.
         """
         graph.surface_ops.cache = MagicMock()
-        graph.surface_ops.fetchers = MagicMock()
         graph.surface_ops.utils = MagicMock()
         graph.surface_ops.surface_to_surface_key = "surface_to_surface"
         return graph
@@ -170,7 +164,7 @@ class TestSurfaceToSurfaceTransformPrivate:
         mock_graph.surface_ops.utils.find_path = MagicMock(
             return_value=["Yerkes19", "fsLR"]
         )
-        mock_graph.surface_ops.fetchers.fetch_surface_transform = MagicMock(
+        mock_graph.surface_ops.cache.get_surface_transform = MagicMock(
             return_value=mock_result
         )
         out = mock_graph.surface_ops._resolve_sphere_transform(
@@ -181,7 +175,7 @@ class TestSurfaceToSurfaceTransformPrivate:
             output_file_path="single_hop",
             add_edge=False,
         )
-        mock_graph.surface_ops.fetchers.fetch_surface_transform.assert_called_once()
+        mock_graph.surface_ops.cache.get_surface_transform.assert_called_once()
         assert out is mock_result
 
     def test_multi_hop(self, mock_graph: NeuromapsGraph) -> None:
@@ -209,7 +203,7 @@ class TestSurfaceToSurfaceTransformPrivate:
         first_xfm = MagicMock(spec=models.SurfaceTransform)
         hop2_xfm = MagicMock(spec=models.SurfaceTransform)
         hop3_xfm = MagicMock(spec=models.SurfaceTransform)
-        mock_graph.surface_ops.fetchers.fetch_surface_transform = MagicMock(
+        mock_graph.surface_ops.cache.get_surface_transform = MagicMock(
             return_value=first_xfm
         )
         mock_graph.surface_ops._compose_next_hop = MagicMock(
@@ -224,7 +218,7 @@ class TestSurfaceToSurfaceTransformPrivate:
             add_edge=True,
         )
 
-        mock_graph.surface_ops.fetchers.fetch_surface_transform.assert_called_once()
+        mock_graph.surface_ops.cache.get_surface_transform.assert_called_once()
         assert mock_graph.surface_ops._compose_next_hop.call_count == 2
 
         first_call = mock_graph.surface_ops._compose_next_hop.call_args_list[0][1]
@@ -241,7 +235,7 @@ class TestSurfaceToSurfaceTransformPrivate:
 
     def test_compose_multihop_no_initial_xfm(self, mock_graph: NeuromapsGraph) -> None:
         """Test error raised when no initial transformation found."""
-        mock_graph.surface_ops.fetchers.fetch_surface_transform = MagicMock(
+        mock_graph.surface_ops.cache.get_surface_transform = MagicMock(
             return_value=None
         )
         with pytest.raises(ValueError, match="No surface transform found from"):
@@ -252,7 +246,7 @@ class TestSurfaceToSurfaceTransformPrivate:
                 output_file_path="output.surf.gii",
                 add_edge=True,
             )
-        mock_graph.surface_ops.fetchers.fetch_surface_transform.assert_called()
+        mock_graph.surface_ops.cache.get_surface_transform.assert_called()
 
     def test_compose_next_hop(self, mock_graph: NeuromapsGraph, tmp_path: Path) -> None:
         """Test basic composition of next hop."""
@@ -301,10 +295,10 @@ class TestSurfaceToSurfaceTransformPrivate:
         output_path.touch()
 
         mock_graph.surface_ops.utils.find_common_density = MagicMock(return_value="32k")
-        mock_graph.surface_ops.fetchers.fetch_surface_atlas = MagicMock(
+        mock_graph.surface_ops.cache.get_surface_atlas = MagicMock(
             return_value=mid_atlas
         )
-        mock_graph.surface_ops.fetchers.fetch_surface_transform = MagicMock(
+        mock_graph.surface_ops.cache.get_surface_transform = MagicMock(
             return_value=target_xfm
         )
 
@@ -324,12 +318,12 @@ class TestSurfaceToSurfaceTransformPrivate:
 
         assert result == output_path
         mock_graph.surface_ops.utils.find_common_density.assert_called_once()
-        mock_graph.surface_ops.fetchers.fetch_surface_atlas.assert_called_once()
+        mock_graph.surface_ops.cache.get_surface_atlas.assert_called_once()
         mock_project.assert_called_once()
 
     def test_two_hops_no_first_transform(self, mock_graph: NeuromapsGraph) -> None:
         """Test error raised when no first transform."""
-        mock_graph.surface_ops.fetchers.fetch_surface_transform = MagicMock(
+        mock_graph.surface_ops.cache.get_surface_transform = MagicMock(
             return_value=None
         )
         with pytest.raises(ValueError, match="No surface transform found from"):
@@ -350,9 +344,7 @@ class TestSurfaceToSurfaceTransformPrivate:
         first_transform = MagicMock(spec=models.SurfaceTransform)
         first_transform.fetch.return_value = tmp_path / "sphere_in.surf.gii"
         mock_graph.surface_ops.utils.find_common_density = MagicMock(return_value="41k")
-        mock_graph.surface_ops.fetchers.fetch_surface_atlas = MagicMock(
-            return_value=None
-        )
+        mock_graph.surface_ops.cache.get_surface_atlas = MagicMock(return_value=None)
         with pytest.raises(ValueError, match="No sphere atlas found for"):
             mock_graph.surface_ops._two_hops(
                 source_space="A",
@@ -374,10 +366,10 @@ class TestSurfaceToSurfaceTransformPrivate:
         mid_atlas.fetch.return_value = tmp_path / "sphere_project.surf.gii"
 
         mock_graph.surface_ops.utils.find_common_density = MagicMock(return_value="41k")
-        mock_graph.surface_ops.fetchers.fetch_surface_atlas = MagicMock(
+        mock_graph.surface_ops.cache.get_surface_atlas = MagicMock(
             return_value=mid_atlas
         )
-        mock_graph.surface_ops.fetchers.fetch_surface_transform = MagicMock(
+        mock_graph.surface_ops.cache.get_surface_transform = MagicMock(
             return_value=None
         )
         with pytest.raises(ValueError, match="No surface transform found from"):
@@ -401,24 +393,3 @@ class TestSurfaceToSurfaceTransformPrivate:
             hemisphere="left",
         )
         assert output == str(tmp_path / "src-A_to-B_den-32k_hemi-L_sphere.surf.gii")
-
-    def test_require_surface_atlas_hit(self, mock_graph: NeuromapsGraph) -> None:
-        """Test _require_surface_atlas returns the atlas when found."""
-        mock_atlas = MagicMock(spec=models.SurfaceAtlas)
-        mock_graph.surface_ops.fetchers.fetch_surface_atlas = MagicMock(
-            return_value=mock_atlas
-        )
-        result = mock_graph.surface_ops._require_surface_atlas(
-            space="fsLR", density="32k", hemisphere="left", resource_type="sphere"
-        )
-        assert result is mock_atlas
-
-    def test_require_surface_atlas_miss(self, mock_graph: NeuromapsGraph) -> None:
-        """Test _require_surface_atlas raises ValueError if not not found."""
-        mock_graph.surface_ops.fetchers.fetch_surface_atlas = MagicMock(
-            return_value=None
-        )
-        with pytest.raises(ValueError, match="No 'sphere' surface atlas found"):
-            mock_graph.surface_ops._require_surface_atlas(
-                space="fsLR", density="32k", hemisphere="left", resource_type="sphere"
-            )

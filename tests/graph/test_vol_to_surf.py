@@ -16,12 +16,12 @@ class TestVolumeToSurfaceTransformer:
     def mock_transformer(self, graph: NeuromapsGraph) -> NeuromapsGraph:
         """Create a mock transformer with volume_ops internals replaced.
 
-        Replaces volume_ops.utils, volume_ops.fetchers, and volume_ops.surface_ops
+        Replaces volume_ops.utils, volume_ops.cache, and volume_ops.surface_ops
         with MagicMocks so internal calls are interceptable without hitting
         Pydantic's __setattr__ validation.
         """
         graph.volume_ops.utils = MagicMock()
-        graph.volume_ops.fetchers = MagicMock()
+        graph.volume_ops.cache = MagicMock()
         graph.volume_ops.surface_ops = MagicMock()
         graph.volume_ops.utils.find_highest_density.return_value = "32k"
         return graph
@@ -76,7 +76,7 @@ class TestVolumeToSurfaceTransformer:
         projected_file.touch()
         expected_output = Path(basic_params["output_file_path"])
 
-        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.side_effect = (
+        mock_transformer.volume_ops.cache.require_surface_atlas.side_effect = (
             self.make_atlas_side_effect(tmp_path)
         )
         mock_ribbon.return_value = MagicMock()
@@ -88,7 +88,7 @@ class TestVolumeToSurfaceTransformer:
         mock_transformer.volume_ops.utils.validate_spaces.assert_called_once_with(
             basic_params["source_space"], basic_params["target_space"]
         )
-        assert mock_transformer.volume_ops.fetchers.fetch_surface_atlas.call_count == 3
+        assert mock_transformer.volume_ops.cache.require_surface_atlas.call_count == 3
         mock_ribbon.assert_called_once_with(
             inner_surf=tmp_path / "white.surf.gii",
             outer_surf=tmp_path / "pial.surf.gii",
@@ -119,7 +119,7 @@ class TestVolumeToSurfaceTransformer:
         projected_file = tmp_path / f"projected.{expected_ext}.gii"
         projected_file.touch()
 
-        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.side_effect = (
+        mock_transformer.volume_ops.cache.require_surface_atlas.side_effect = (
             self.make_atlas_side_effect(tmp_path)
         )
         mock_ribbon.return_value = MagicMock()
@@ -147,7 +147,7 @@ class TestVolumeToSurfaceTransformer:
         projected_file = tmp_path / "projected.func.gii"
         projected_file.touch()
 
-        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.side_effect = (
+        mock_transformer.volume_ops.cache.require_surface_atlas.side_effect = (
             self.make_atlas_side_effect(tmp_path)
         )
         mock_ribbon.return_value = MagicMock()
@@ -175,12 +175,18 @@ class TestVolumeToSurfaceTransformer:
         self, mock_transformer: NeuromapsGraph, basic_params: dict[str, Any]
     ) -> None:
         """Test ValueError raised when source midthickness surface atlas not found."""
-        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.return_value = None
+        mock_transformer.volume_ops.cache.require_surface_atlas.side_effect = (
+            ValueError(
+                "No 'midthickness' surface atlas found for space "
+                f"'{basic_params['source_space']}' "
+                f"(density='32k', hemisphere='{basic_params['hemisphere']}')"
+            )
+        )
         with pytest.raises(
             ValueError, match="No 'midthickness' surface atlas found for space"
         ):
             mock_transformer.volume_to_surface_transformer(**basic_params)
-        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.assert_called_once()
+        mock_transformer.volume_ops.cache.require_surface_atlas.assert_called_once()
 
     @pytest.mark.parametrize(
         "failing_call, missing_surface",
@@ -203,21 +209,22 @@ class TestVolumeToSurfaceTransformer:
 
         def side_effect_with_failure(
             space: str, density: str, hemisphere: str, resource_type: str
-        ) -> MagicMock | None:
+        ) -> MagicMock:
             nonlocal call_count
             call_count += 1
-            return (
-                None
-                if call_count == failing_call
-                else base_side_effect(
-                    space=space,
-                    density=density,
-                    hemisphere=hemisphere,
-                    resource_type=resource_type,
+            if call_count == failing_call:
+                raise ValueError(
+                    f"No '{missing_surface}' surface atlas found for space '{space}' "
+                    f"(density='{density}', hemisphere='{hemisphere}')"
                 )
+            return base_side_effect(
+                space=space,
+                density=density,
+                hemisphere=hemisphere,
+                resource_type=resource_type,
             )
 
-        mock_transformer.volume_ops.fetchers.fetch_surface_atlas.side_effect = (
+        mock_transformer.volume_ops.cache.require_surface_atlas.side_effect = (
             side_effect_with_failure
         )
         with pytest.raises(
@@ -225,7 +232,7 @@ class TestVolumeToSurfaceTransformer:
         ):
             mock_transformer.volume_to_surface_transformer(**basic_params)
         assert (
-            mock_transformer.volume_ops.fetchers.fetch_surface_atlas.call_count
+            mock_transformer.volume_ops.cache.require_surface_atlas.call_count
             == failing_call
         )
 
