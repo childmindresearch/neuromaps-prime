@@ -1,8 +1,7 @@
 """Volume-to-volume and volume-to-surface transformation operations.
 
 Handles direct volume warping and the two-stage volume→surface→surface
-pipeline. All graph queries go through GraphUtils and GraphFetchers rather
-than touching the cache or NetworkX graph directly.
+pipeline. All resource lookups go through GraphCache directly.
 """
 
 from __future__ import annotations
@@ -13,9 +12,7 @@ from typing import Any, Literal
 from niwrap import workbench
 from pydantic import BaseModel
 
-from neuromaps_prime.graph.methods.cache import GraphCache
-from neuromaps_prime.graph.methods.fetchers import GraphFetchers
-from neuromaps_prime.graph.models import SurfaceAtlas
+from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
 from neuromaps_prime.graph.utils import GraphUtils
 from neuromaps_prime.transforms.utils import validate_volume_file
@@ -28,9 +25,7 @@ class VolumeTransformOps(BaseModel):
     Attributes:
     ----------
     cache:
-        The :class:`GraphCache` instance — used indirectly via fetchers.
-    fetchers:
-        The :class:`GraphFetchers` instance for resource lookups.
+        The :class:`GraphCache` instance used for all resource lookups.
     utils:
         The :class:`GraphUtils` instance for validation and density helpers.
     surface_ops:
@@ -43,12 +38,14 @@ class VolumeTransformOps(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
     cache: GraphCache
-    fetchers: GraphFetchers
     utils: GraphUtils
     surface_ops: SurfaceTransformOps
     volume_to_volume_key: str = "volume_to_volume"
 
-    # Volume-to-volume
+    # ------------------------------------------------------------------ #
+    # Volume-to-volume                                                     #
+    # ------------------------------------------------------------------ #
+
     def transform_volume(
         self,
         input_file: Path,
@@ -82,7 +79,7 @@ class VolumeTransformOps(BaseModel):
         self.utils.validate_spaces(source_space, target_space)
         validate_volume_file(input_file)
 
-        transform = self.fetchers.fetch_volume_transform(
+        transform = self.cache.get_volume_transform(
             source=source_space,
             target=target_space,
             resolution=resolution,
@@ -94,10 +91,8 @@ class VolumeTransformOps(BaseModel):
                 f"(resolution='{resolution}', resource_type='{resource_type}')"
             )
 
-        target_atlas = self.fetchers.fetch_volume_atlas(
-            space=target_space,
-            resolution=resolution,
-            resource_type=resource_type,
+        target_atlas = self.cache.get_volume_atlas(
+            space=target_space, resolution=resolution, resource_type=resource_type
         )
         if target_atlas is None:
             raise ValueError(
@@ -113,7 +108,10 @@ class VolumeTransformOps(BaseModel):
             interp_params=interp_params,
         )
 
-    # Volume-to-surface
+    # ------------------------------------------------------------------ #
+    # Volume-to-surface                                                    #
+    # ------------------------------------------------------------------ #
+
     def transform_volume_to_surface(
         self,
         transformer_type: Literal["metric", "label"],
@@ -192,7 +190,10 @@ class VolumeTransformOps(BaseModel):
             add_edge=add_edge,
         )
 
-    # Private helpers
+    # ------------------------------------------------------------------ #
+    # Private helpers                                                      #
+    # ------------------------------------------------------------------ #
+
     def _project_volume_to_surface(
         self,
         transformer_type: Literal["metric", "label"],
@@ -203,10 +204,6 @@ class VolumeTransformOps(BaseModel):
         area_resource: str,
     ) -> Path:
         """Ribbon-constrained projection of input_file onto the surface.
-
-        Fetches the midthickness (or area_resource), white, and pial
-        surfaces for the source space, builds ribbon constraints, then
-        calls :func:`surface_project`.
 
         Args:
             transformer_type: ``'metric'`` or ``'label'`` — determines the
@@ -223,25 +220,25 @@ class VolumeTransformOps(BaseModel):
         Raises:
             ValueError: If any required surface atlas is missing.
         """
-        source_surface = self._require_surface_atlas(
+        source_surface = self.cache.require_surface_atlas(
             space=source_space,
             density=source_density,
             hemisphere=hemisphere,
             resource_type=area_resource,
         ).fetch()
 
-        ribbon = {}
-        for surf_type in ("white", "pial"):
-            ribbon[surf_type] = self._require_surface_atlas(
+        ribbon = {
+            surf_type: self.cache.require_surface_atlas(
                 space=source_space,
                 density=source_density,
                 hemisphere=hemisphere,
                 resource_type=surf_type,
             ).fetch()
+            for surf_type in ("white", "pial")
+        }
 
         ribbon_surfs = workbench.volume_to_surface_mapping_ribbon_constrained(
-            inner_surf=ribbon["white"],
-            outer_surf=ribbon["pial"],
+            inner_surf=ribbon["white"], outer_surf=ribbon["pial"]
         )
         ext = "func" if transformer_type == "metric" else "label"
         out_fpath = (
@@ -256,37 +253,3 @@ class VolumeTransformOps(BaseModel):
             ribbon_surfs=ribbon_surfs,
             out_fpath=out_fpath,
         )
-
-    def _require_surface_atlas(
-        self,
-        space: str,
-        density: str,
-        hemisphere: Literal["left", "right"],
-        resource_type: str,
-    ) -> SurfaceAtlas:
-        """Fetch a surface atlas or raise a descriptive ``ValueError``.
-
-        Args:
-            space: Brain template space name.
-            density: Surface mesh density.
-            hemisphere: ``'left'`` or ``'right'``.
-            resource_type: Surface resource type.
-
-        Returns:
-            The matching :class:`~neuromaps_prime.graph.models.SurfaceAtlas`.
-
-        Raises:
-            ValueError: If no matching atlas is found.
-        """
-        atlas = self.fetchers.fetch_surface_atlas(
-            space=space,
-            density=density,
-            hemisphere=hemisphere,
-            resource_type=resource_type,
-        )
-        if atlas is None:
-            raise ValueError(
-                f"No '{resource_type}' surface atlas found for space '{space}' "
-                f"(density='{density}', hemisphere='{hemisphere}')"
-            )
-        return atlas

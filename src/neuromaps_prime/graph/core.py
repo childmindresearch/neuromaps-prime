@@ -1,7 +1,7 @@
 """Core NeuromapsGraph class.
 
-Thin orchestrator that wires together GraphCache, GraphBuilder, GraphFetchers,
-GraphUtils, SurfaceTransformOps, and VolumeTransformOps into the public API.
+Thin orchestrator that wires together GraphCache, GraphBuilder, GraphUtils,
+SurfaceTransformOps, and VolumeTransformOps into the public API.
 
 Graph structure:
   - Nodes: Brain template spaces
@@ -19,8 +19,7 @@ import networkx as nx
 from niwrap import Runner
 
 from neuromaps_prime.graph.builder import GraphBuilder
-from neuromaps_prime.graph.methods.cache import GraphCache
-from neuromaps_prime.graph.methods.fetchers import GraphFetchers
+from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.graph.models import (
     Edge,
     Node,
@@ -64,38 +63,31 @@ class NeuromapsGraph(nx.MultiDiGraph):
 
         self.runner = set_runner(runner=runner, **runner_kwargs)
         self.logger = logging.getLogger(self.runner.logger_name)
-        self.data_dir = data_dir or os.getenv("NEUROMAPS_DATA", None)
+        self.data_dir: Path | None = (
+            Path(data_dir)
+            if data_dir
+            else (Path(d) if (d := os.getenv("NEUROMAPS_DATA")) else None)
+        )
         self.yaml_path = (
             yaml_file
             or Path(__file__).parents[1] / "datasets" / "data" / "neuromaps_graph.yaml"
         )
 
-        # Shared cache — single source of truth for all resource lookups
         self._cache = GraphCache()
-
-        # Stateless helper layer — all share the same cache
-        self.fetchers = GraphFetchers(cache=self._cache)
-        self.utils = GraphUtils(graph=self, fetchers=self.fetchers)
-        self.surface_ops = SurfaceTransformOps(
-            cache=self._cache,
-            fetchers=self.fetchers,
-            utils=self.utils,
-        )
+        self.utils = GraphUtils(graph=self, cache=self._cache)
+        self.surface_ops = SurfaceTransformOps(cache=self._cache, utils=self.utils)
         self.volume_ops = VolumeTransformOps(
-            cache=self._cache,
-            fetchers=self.fetchers,
-            utils=self.utils,
-            surface_ops=self.surface_ops,
+            cache=self._cache, utils=self.utils, surface_ops=self.surface_ops
         )
-        self._builder = GraphBuilder(
-            cache=self._cache,
-            data_dir=Path(self.data_dir) if self.data_dir else None,
-        )
+        self._builder = GraphBuilder(cache=self._cache, data_dir=self.data_dir)
 
         if not _testing:
             self._builder.build_from_yaml(self, self.yaml_path)
 
-    # Graph mutation
+    # ------------------------------------------------------------------ #
+    # Graph mutation                                                       #
+    # ------------------------------------------------------------------ #
+
     def add_transform(
         self, transform: SurfaceTransform | VolumeTransform, key: str
     ) -> None:
@@ -127,7 +119,10 @@ class NeuromapsGraph(nx.MultiDiGraph):
             weight=transform.weight,
         )
 
-    # Validation
+    # ------------------------------------------------------------------ #
+    # Validation                                                           #
+    # ------------------------------------------------------------------ #
+
     def validate_spaces(self, source: str, target: str) -> None:
         """Assert that both source and target exist as nodes in the graph.
 
@@ -138,15 +133,14 @@ class NeuromapsGraph(nx.MultiDiGraph):
         Raises:
             ValueError: If either space is absent from the graph.
         """
-        self.utils.validate_spaces(source, target)  # pragma: no cover (validate tested)
+        self.utils.validate_spaces(source, target)  # pragma: no cover
 
-    # Path finding
+    # ------------------------------------------------------------------ #
+    # Path finding                                                         #
+    # ------------------------------------------------------------------ #
 
     def find_path(
-        self,
-        source: str,
-        target: str,
-        edge_type: str | None = None,
+        self, source: str, target: str, edge_type: str | None = None
     ) -> list[str]:
         """Find the shortest weighted path between two spaces.
 
@@ -161,7 +155,10 @@ class NeuromapsGraph(nx.MultiDiGraph):
         """
         return self.utils.find_path(source, target, edge_type)
 
-    # Resource fetching
+    # ------------------------------------------------------------------ #
+    # Resource fetching                                                    #
+    # ------------------------------------------------------------------ #
+
     def fetch_surface_atlas(
         self,
         space: str,
@@ -181,7 +178,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             The matching :class:`~neuromaps_prime.graph.models.SurfaceAtlas`, or
             ``None`` if not found.
         """
-        return self.fetchers.fetch_surface_atlas(
+        return self._cache.get_surface_atlas(
             space=space,
             density=density,
             hemisphere=hemisphere,
@@ -189,10 +186,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         )
 
     def fetch_volume_atlas(
-        self,
-        space: str,
-        resolution: str,
-        resource_type: str,
+        self, space: str, resolution: str, resource_type: str
     ) -> VolumeAtlas | None:
         """Fetch a volume atlas resource.
 
@@ -205,7 +199,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             The matching :class:`~neuromaps_prime.graph.models.VolumeAtlas`, or
             ``None`` if not found.
         """
-        return self.fetchers.fetch_volume_atlas(
+        return self._cache.get_volume_atlas(
             space=space,
             resolution=resolution,
             resource_type=resource_type,
@@ -232,7 +226,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             The matching :class:`~neuromaps_prime.graph.models.SurfaceTransform`, or
             ``None`` if not found.
         """
-        return self.fetchers.fetch_surface_transform(
+        return self._cache.get_surface_transform(
             source=source,
             target=target,
             density=density,
@@ -241,11 +235,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         )
 
     def fetch_volume_to_volume_transform(
-        self,
-        source: str,
-        target: str,
-        resolution: str,
-        resource_type: str,
+        self, source: str, target: str, resolution: str, resource_type: str
     ) -> VolumeTransform | None:
         """Fetch a volume-to-volume transform resource.
 
@@ -259,14 +249,17 @@ class NeuromapsGraph(nx.MultiDiGraph):
             The matching :class:`~neuromaps_prime.graph.models.VolumeTransform`, or
             ``None`` if not found.
         """
-        return self.fetchers.fetch_volume_transform(
+        return self._cache.get_volume_transform(
             source=source,
             target=target,
             resolution=resolution,
             resource_type=resource_type,
         )
 
-    # Search
+    # ------------------------------------------------------------------ #
+    # Search                                                               #
+    # ------------------------------------------------------------------ #
+
     def search_surface_atlases(
         self,
         space: str,
@@ -286,7 +279,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             List of matching :class:`~neuromaps_prime.graph.models.SurfaceAtlas`
             entries.
         """
-        return self.fetchers.fetch_surface_atlases(
+        return self._cache.get_surface_atlases(
             space=space,
             density=density,
             hemisphere=hemisphere,
@@ -314,7 +307,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             List of matching :class:`~neuromaps_prime.graph.models.SurfaceTransform`
             entries.
         """
-        return self.fetchers.fetch_surface_transforms(
+        return self._cache.get_surface_transforms(
             source=source_space,
             target=target_space,
             density=density,
@@ -322,7 +315,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
             resource_type=resource_type,
         )
 
-    # Density helpers
+    # ------------------------------------------------------------------ #
+    # Density helpers                                                      #
+    # ------------------------------------------------------------------ #
 
     def find_common_density(self, mid_space: str, target_space: str) -> str:
         """Find the highest density shared between mid_space and target_space.
@@ -353,7 +348,10 @@ class NeuromapsGraph(nx.MultiDiGraph):
         """
         return self.utils.find_highest_density(space)
 
-    # Node introspection
+    # ------------------------------------------------------------------ #
+    # Node introspection                                                   #
+    # ------------------------------------------------------------------ #
+
     def get_node_data(self, node_name: str) -> Node:
         """Return the :class:`~neuromaps_prime.graph.models.Node` for node_name.
 
@@ -368,7 +366,10 @@ class NeuromapsGraph(nx.MultiDiGraph):
         """
         return self.utils.get_node_data(node_name)
 
-    # Transformers
+    # ------------------------------------------------------------------ #
+    # Transformers                                                         #
+    # ------------------------------------------------------------------ #
+
     def surface_to_surface_transformer(
         self,
         transformer_type: Literal["metric", "label"],

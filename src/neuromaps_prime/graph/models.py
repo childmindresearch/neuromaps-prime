@@ -1,36 +1,22 @@
 """Models for resources in the neuromaps_prime graph."""
 
-from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
 
-class Resource(BaseModel, ABC):  # pragma: no cover
+class Resource(BaseModel):
     """Base model for resources in the neuromaps_prime graph."""
 
     name: str
     description: str
     file_path: Path
 
-    @abstractmethod
-    def fetch(self) -> Path:
-        """Fetch the resource.
-
-        Returns:
-            Path to the resources file.
-
-        Raises:
-            FileNotFoundError: If the file does not exist.
-        """
-        # later add validation if the file path is valid, exists, etc.
-        pass
-
     @field_validator("file_path")
     @classmethod
     def validate_file_path(cls, v: Path) -> Path:
-        """Validate that the file exists in the path.
+        """Validate that the file exists at the given path.
 
         Args:
             v: The file path to validate.
@@ -45,9 +31,17 @@ class Resource(BaseModel, ABC):  # pragma: no cover
             raise FileNotFoundError(f"File path does not exist: {v}")
         return v
 
+    def fetch(self) -> Path:
+        """Return the path to this resource's file.
+
+        Returns:
+            Path to the resource file.
+        """
+        return self.file_path
+
     def __repr__(self) -> str:
         """Custom string representation for debugging."""
-        return self.name
+        return self.name  # pragma: nocover
 
 
 class SurfaceAtlas(Resource):
@@ -57,10 +51,6 @@ class SurfaceAtlas(Resource):
     density: str
     hemisphere: Literal["left", "right"]
     resource_type: str
-
-    def fetch(self) -> Path:
-        """Fetch the surface resource."""
-        return self.file_path
 
 
 class SurfaceTransform(Resource):
@@ -73,10 +63,6 @@ class SurfaceTransform(Resource):
     resource_type: str
     weight: float = 1.0
 
-    def fetch(self) -> Path:
-        """Fetch the transform resource."""
-        return self.file_path
-
 
 class VolumeAtlas(Resource):
     """Model for volume atlas resources."""
@@ -84,10 +70,6 @@ class VolumeAtlas(Resource):
     space: str
     resolution: str
     resource_type: str
-
-    def fetch(self) -> Path:
-        """Fetch the volume resource."""
-        return self.file_path
 
 
 class VolumeTransform(Resource):
@@ -98,10 +80,6 @@ class VolumeTransform(Resource):
     resolution: str
     resource_type: str
     weight: float = 1.0
-
-    def fetch(self) -> Path:
-        """Fetch the transform resource."""
-        return self.file_path
 
 
 class Node(BaseModel):

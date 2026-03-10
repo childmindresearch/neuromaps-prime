@@ -1,8 +1,7 @@
 """Surface-to-surface transformation operations for NeuromapsGraph.
 
 Handles single-hop, multi-hop, and resampling (metric/label) surface
-transformations. All graph queries go through GraphUtils and GraphFetchers
-rather than touching the cache or NetworkX graph directly.
+transformations. All resource lookups go through GraphCache directly.
 """
 
 from __future__ import annotations
@@ -13,9 +12,8 @@ from typing import Literal
 from niwrap import workbench
 from pydantic import BaseModel
 
-from neuromaps_prime.graph.methods.cache import GraphCache
-from neuromaps_prime.graph.methods.fetchers import GraphFetchers
-from neuromaps_prime.graph.models import SurfaceAtlas, SurfaceTransform
+from neuromaps_prime.graph.cache import GraphCache
+from neuromaps_prime.graph.models import SurfaceTransform
 from neuromaps_prime.graph.utils import GraphUtils
 from neuromaps_prime.transforms.surface import (
     label_resample,
@@ -38,9 +36,8 @@ class SurfaceTransformOps(BaseModel):
     Attributes:
     ----------
     cache:
-        The :class:`GraphCache` instance — receives newly composed transforms.
-    fetchers:
-        The :class:`GraphFetchers` instance for resource lookups.
+        The :class:`GraphCache` instance — used for all resource lookups and
+        receives newly composed transforms.
     utils:
         The :class:`GraphUtils` instance for path-finding and density helpers.
     surface_to_surface_key:
@@ -50,11 +47,13 @@ class SurfaceTransformOps(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
     cache: GraphCache
-    fetchers: GraphFetchers
     utils: GraphUtils
     surface_to_surface_key: str = "surface_to_surface"
 
-    # Public transformer
+    # ------------------------------------------------------------------ #
+    # Public transformer                                                   #
+    # ------------------------------------------------------------------ #
+
     def transform(  # pragma: no cover (individual pieces tested)
         self,
         transformer_type: Literal["metric", "label"],
@@ -124,21 +123,21 @@ class SurfaceTransformOps(BaseModel):
             space=target_space
         )
 
-        new_sphere = self._require_surface_atlas(
+        new_sphere = self.cache.require_surface_atlas(
             space=target_space,
             density=target_density,
             hemisphere=hemisphere,
             resource_type="sphere",
         ).fetch()
 
-        current_area = self._require_surface_atlas(
+        current_area = self.cache.require_surface_atlas(
             space=source_space,
             density=source_density,
             hemisphere=hemisphere,
             resource_type=area_resource,
         ).fetch()
 
-        new_area = self._require_surface_atlas(
+        new_area = self.cache.require_surface_atlas(
             space=target_space,
             density=target_density,
             hemisphere=hemisphere,
@@ -160,7 +159,10 @@ class SurfaceTransformOps(BaseModel):
             else result.metric_out
         )
 
-    # Sphere transform resolution
+    # ------------------------------------------------------------------ #
+    # Sphere transform resolution                                          #
+    # ------------------------------------------------------------------ #
+
     def _resolve_sphere_transform(
         self,
         source: str,
@@ -170,7 +172,7 @@ class SurfaceTransformOps(BaseModel):
         output_file_path: str,
         add_edge: bool = True,
     ) -> SurfaceTransform | None:
-        """Return the sphere transform from source to target, composing if necessary.
+        """Return the sphere transform from source to target, composing if needed.
 
         Args:
             source: Source space name.
@@ -195,9 +197,8 @@ class SurfaceTransformOps(BaseModel):
         if len(path) < 2:
             raise ValueError(f"No valid surface path from '{source}' to '{target}'")
 
-        # Single hop — fetch directly from cache
         if len(path) == 2:
-            return self.fetchers.fetch_surface_transform(
+            return self.cache.get_surface_transform(
                 source=source,
                 target=target,
                 density=density,
@@ -205,7 +206,6 @@ class SurfaceTransformOps(BaseModel):
                 resource_type="sphere",
             )
 
-        # Multi-hop — compose along the path
         return self._compose_multihop(
             path=path,
             density=density,
@@ -214,7 +214,10 @@ class SurfaceTransformOps(BaseModel):
             add_edge=add_edge,
         )
 
-    # Multi-hop composition
+    # ------------------------------------------------------------------ #
+    # Multi-hop composition                                                #
+    # ------------------------------------------------------------------ #
+
     def _compose_multihop(
         self,
         path: list[str],
@@ -224,9 +227,6 @@ class SurfaceTransformOps(BaseModel):
         add_edge: bool,
     ) -> SurfaceTransform:
         """Compose sphere transforms along a multi-hop path.
-
-        Iterates from the first hop onwards, calling :meth:`_compose_next_hop`
-        at each step to project-unproject through each intermediate space.
 
         Args:
             path: Ordered list of space names from source to target.
@@ -242,8 +242,7 @@ class SurfaceTransformOps(BaseModel):
         Raises:
             ValueError: If any intermediate transform is missing.
         """
-        source = path[0]
-        current_transform = self.fetchers.fetch_surface_transform(
+        current_transform = self.cache.get_surface_transform(
             source=path[0],
             target=path[1],
             density=density,
@@ -261,7 +260,7 @@ class SurfaceTransformOps(BaseModel):
                 hop_idx=hop_idx,
                 next_space=next_space,
                 current_transform=current_transform,
-                source=source,
+                source=path[0],
                 density=density,
                 hemisphere=hemisphere,
                 output_file_path=output_file_path,
@@ -283,10 +282,6 @@ class SurfaceTransformOps(BaseModel):
         add_edge: bool,
     ) -> SurfaceTransform:
         """Extend current_transform by one hop towards next_space.
-
-        Calls :meth:`_two_hops` to perform the project-unproject step, then
-        wraps the result in a new :class:`SurfaceTransform` and optionally
-        registers it.
 
         Args:
             path: Full transformation path.
@@ -362,8 +357,7 @@ class SurfaceTransformOps(BaseModel):
         Raises:
             ValueError: If any required transform or atlas is missing.
         """
-        # Source → mid sphere
-        first_transform = first_transform or self.fetchers.fetch_surface_transform(
+        first_transform = first_transform or self.cache.get_surface_transform(
             source=source_space,
             target=mid_space,
             density=density,
@@ -376,9 +370,8 @@ class SurfaceTransformOps(BaseModel):
             )
         sphere_in = first_transform.fetch()
 
-        # Mid space reference sphere at best common density
         common_density = self.utils.find_common_density(mid_space, target_space)
-        mid_atlas = self.fetchers.fetch_surface_atlas(
+        mid_atlas = self.cache.get_surface_atlas(
             space=mid_space,
             density=common_density,
             hemisphere=hemisphere,
@@ -390,8 +383,7 @@ class SurfaceTransformOps(BaseModel):
             )
         sphere_project_to = mid_atlas.fetch()
 
-        # Mid → target unproject sphere
-        unproject_transform = self.fetchers.fetch_surface_transform(
+        unproject_transform = self.cache.get_surface_transform(
             source=mid_space,
             target=target_space,
             density=common_density,
@@ -411,7 +403,10 @@ class SurfaceTransformOps(BaseModel):
             sphere_out=output_file_path,
         ).sphere_out
 
-    # Private helpers
+    # ------------------------------------------------------------------ #
+    # Private helpers                                                      #
+    # ------------------------------------------------------------------ #
+
     def _hop_output_path(
         self,
         output_file_path: str,
@@ -441,37 +436,3 @@ class SurfaceTransformOps(BaseModel):
             f"sphere.surf.gii"
         )
         return str(parent / fname)
-
-    def _require_surface_atlas(
-        self,
-        space: str,
-        density: str,
-        hemisphere: Literal["left", "right"],
-        resource_type: str,
-    ) -> SurfaceAtlas:
-        """Fetch a surface atlas or raise a descriptive ``ValueError``.
-
-        Args:
-            space: Brain template space name.
-            density: Surface mesh density.
-            hemisphere: ``'left'`` or ``'right'``.
-            resource_type: Surface resource type.
-
-        Returns:
-            The matching :class:`~neuromaps_prime.graph.models.SurfaceAtlas`.
-
-        Raises:
-            ValueError: If no matching atlas is found.
-        """
-        atlas = self.fetchers.fetch_surface_atlas(
-            space=space,
-            density=density,
-            hemisphere=hemisphere,
-            resource_type=resource_type,
-        )
-        if atlas is None:
-            raise ValueError(
-                f"No '{resource_type}' surface atlas found for space '{space}' "
-                f"(density='{density}', hemisphere='{hemisphere}')"
-            )
-        return atlas

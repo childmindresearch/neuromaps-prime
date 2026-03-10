@@ -1,20 +1,17 @@
 """Graph utility operations for NeuromapsGraph.
 
 Provides graph traversal, validation, density resolution, and introspection
-utilities that operate on the NetworkX graph structure. All methods that need
-to query resources do so via GraphFetchers rather than touching the cache
-directly.
+utilities that operate on the NetworkX graph structure.
 """
 
 from __future__ import annotations
 
-from functools import lru_cache
 from typing import Any
 
 import networkx as nx
 from pydantic import BaseModel
 
-from neuromaps_prime.graph.methods.fetchers import GraphFetchers
+from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.transforms.utils import _get_density_key
 
 
@@ -25,16 +22,18 @@ class GraphUtils(BaseModel):
     ----------
     graph:
         The underlying NetworkX :class:`~networkx.MultiDiGraph`.
-    fetchers:
-        The :class:`GraphFetchers` instance used for resource lookups.
+    cache:
+        The :class:`GraphCache` instance used for resource lookups.
     """
 
     model_config = {"arbitrary_types_allowed": True}
 
     graph: nx.MultiDiGraph
-    fetchers: GraphFetchers
+    cache: GraphCache
 
-    # Validation
+    # ------------------------------------------------------------------ #
+    # Validation                                                           #
+    # ------------------------------------------------------------------ #
 
     def validate_spaces(self, source: str, target: str) -> None:
         """Assert that both *source* and *target* exist as nodes in the graph.
@@ -58,12 +57,12 @@ class GraphUtils(BaseModel):
                 f" Available spaces: {sorted(nodes)}"
             )
 
-    # Path finding
+    # ------------------------------------------------------------------ #
+    # Path finding                                                         #
+    # ------------------------------------------------------------------ #
+
     def find_path(
-        self,
-        source: str,
-        target: str,
-        edge_type: str | None = None,
+        self, source: str, target: str, edge_type: str | None = None
     ) -> list[str]:
         """Find the shortest weighted path between two spaces.
 
@@ -96,16 +95,14 @@ class GraphUtils(BaseModel):
             A new :class:`~networkx.MultiDiGraph` containing only the
             requested edges.
         """
-        # lru_cache cannot be applied directly to methods on a Pydantic model,
-        # so we delegate to a module-level cached helper.
         return _cached_subgraph(self.graph, edge_type)
 
-    # Density helpers
+    # ------------------------------------------------------------------ #
+    # Density helpers                                                      #
+    # ------------------------------------------------------------------ #
+
     def find_common_density(self, mid_space: str, target_space: str) -> str:
         """Find the highest density shared by *mid_space* atlases and transforms.
-
-        Used during multi-hop surface composition to select the best
-        intermediate resolution.
 
         Args:
             mid_space: Intermediate space name.
@@ -118,11 +115,11 @@ class GraphUtils(BaseModel):
             ValueError: If no common density exists.
         """
         atlas_densities = {
-            a.density for a in self.fetchers.fetch_surface_atlases(space=mid_space)
+            a.density for a in self.cache.get_surface_atlases(space=mid_space)
         }
         transform_densities = {
             t.density
-            for t in self.fetchers.fetch_surface_transforms(
+            for t in self.cache.get_surface_transforms(
                 source=mid_space, target=target_space
             )
         }
@@ -145,14 +142,14 @@ class GraphUtils(BaseModel):
         Raises:
             ValueError: If no surface atlases are registered for *space*.
         """
-        densities = {
-            a.density for a in self.fetchers.fetch_surface_atlases(space=space)
-        }
+        densities = {a.density for a in self.cache.get_surface_atlases(space=space)}
         if not densities:
             raise ValueError(f"No surface atlases found for space '{space}'.")
         return max(densities, key=_get_density_key)
 
-    # Introspection
+    # ------------------------------------------------------------------ #
+    # Introspection                                                        #
+    # ------------------------------------------------------------------ #
 
     def get_node_data(self, node_name: str) -> Any:  # noqa: ANN401
         """Return the :class:`~neuromaps_prime.graph.models.Node` stored on *node_name*.
@@ -198,13 +195,8 @@ class GraphUtils(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-@lru_cache(maxsize=None)
 def _cached_subgraph(graph: nx.MultiDiGraph, edge_type: str) -> nx.MultiDiGraph:
     """Build and cache a subgraph filtered to *edge_type* edges.
-
-    Separated from the class so that :func:`functools.lru_cache` can be
-    applied — Pydantic model methods are not directly cacheable because
-    ``self`` is not hashable.
 
     Args:
         graph: The full graph to filter.

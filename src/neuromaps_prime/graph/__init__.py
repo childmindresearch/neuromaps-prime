@@ -21,10 +21,10 @@ Typical usage::
     )
 """
 
+from neuromaps_prime.graph import models
 from neuromaps_prime.graph.builder import GraphBuilder
+from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.graph.core import NeuromapsGraph
-from neuromaps_prime.graph.methods.cache import GraphCache
-from neuromaps_prime.graph.methods.fetchers import GraphFetchers
 from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
 from neuromaps_prime.graph.transforms.volume import VolumeTransformOps
 from neuromaps_prime.graph.utils import GraphUtils
@@ -33,8 +33,8 @@ __all__ = [
     "NeuromapsGraph",
     "GraphCache",
     "GraphBuilder",
-    "GraphFetchers",
     "GraphUtils",
     "SurfaceTransformOps",
     "VolumeTransformOps",
+    "models",
 ]
