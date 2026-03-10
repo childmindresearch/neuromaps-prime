@@ -31,6 +31,7 @@ from neuromaps_prime.graph.models import (
 from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
 from neuromaps_prime.graph.transforms.volume import VolumeTransformOps
 from neuromaps_prime.graph.utils import GraphUtils
+from neuromaps_prime.resources import NEUROMAPSPRIME_GRAPH
 from neuromaps_prime.utils import set_runner
 
 
@@ -63,15 +64,10 @@ class NeuromapsGraph(nx.MultiDiGraph):
 
         self.runner = set_runner(runner=runner, **runner_kwargs)
         self.logger = logging.getLogger(self.runner.logger_name)
-        self.data_dir: Path | None = (
-            Path(data_dir)
-            if data_dir
-            else (Path(d) if (d := os.getenv("NEUROMAPS_DATA")) else None)
+        self.data_dir = next(
+            (Path(d) for d in (data_dir, os.getenv("NEUROMAPS_DATA")) if d), None
         )
-        self.yaml_path = (
-            yaml_file
-            or Path(__file__).parents[1] / "datasets" / "data" / "neuromaps_graph.yaml"
-        )
+        self.yaml_path = yaml_file or NEUROMAPSPRIME_GRAPH.yaml
 
         self._cache = GraphCache()
         self.utils = GraphUtils(graph=self, cache=self._cache)
