@@ -196,22 +196,35 @@ class GraphBuilder(BaseModel):
         Returns:
             List of instantiated surface resource objects.
         """
+        is_transform = cls is SurfaceTransform
         prefix = fixed_fields.get("space") or (
             f"{fixed_fields['source_space']}_to_{fixed_fields['target_space']}"
         )
-        result = [
-            cls(
-                name=f"{prefix}_{density}_{hemi}_{surf_type}",
-                file_path=self._resolve_path(path),
-                density=density,
-                hemisphere=hemi,
-                resource_type=surf_type,
-                **fixed_fields,
-            )
-            for density, types in surfaces_dict.items()
-            for surf_type, hemispheres in types.items()
-            for hemi, path in hemispheres.items()
-        ]
+
+        result = []
+        for outer_key, outer_val in surfaces_dict.items():
+            if is_transform:
+                provider = outer_key
+                density_dict = outer_val
+            else:
+                provider = ""
+                density_dict = {outer_key: outer_val}
+
+            for density, types in density_dict.items():
+                for surf_type, hemispheres in types.items():
+                    for hemi, path in hemispheres.items():
+                        extra = {"provider": provider} if is_transform else {}
+                        result.append(
+                            cls(
+                                name=f"{prefix}_{density}_{hemi}_{surf_type}",
+                                file_path=self._resolve_path(path),
+                                density=density,
+                                hemisphere=hemi,
+                                resource_type=surf_type,
+                                **fixed_fields,  # type: ignore[arg-type]
+                                **extra,  # type: ignore[arg-type]
+                            )
+                        )
         if cls is SurfaceAtlas:
             return cast(list[SurfaceAtlas], result)
         return cast(list[SurfaceTransform], result)
@@ -222,30 +235,49 @@ class GraphBuilder(BaseModel):
         fixed_fields: dict[str, Any],
         volumes_dict: dict[str, Any],
     ) -> list[VolumeAtlas] | list[VolumeTransform]:
-        """Parse volume resource entries from a nested resolution/type dict.
+        """Parse volume resource entries from a nested dict.
+
+        Supports both the legacy format (resolution → resource_type) used for
+        node atlases, and the provider-prefixed format
+        (provider → resolution → resource_type) used for edge transforms.
 
         Args:
             cls: The model class to instantiate (VolumeAtlas or VolumeTransform).
             fixed_fields: Fields shared by every entry (e.g. space, description).
-            volumes_dict: Nested dict keyed by resolution → resource_type.
+            volumes_dict: Nested dict, either ``{resolution: {type: path}}``
+                or ``{provider: {resolution: {type: path}}}``.
 
         Returns:
             List of instantiated volume resource objects.
         """
+        is_transform = cls is VolumeTransform
         prefix = fixed_fields.get("space") or (
             f"{fixed_fields['source_space']}_to_{fixed_fields['target_space']}"
         )
-        result = [
-            cls(
-                name=f"{prefix}_{res}_{vol_type}",
-                file_path=self._resolve_path(path),
-                resolution=res,
-                resource_type=vol_type,
-                **fixed_fields,
-            )
-            for res, types in volumes_dict.items()
-            for vol_type, path in types.items()
-        ]
+
+        result: list[Any] = []
+        for outer_key, outer_val in volumes_dict.items():
+            if is_transform:
+                provider = outer_key
+                resolution_dict = outer_val
+            else:
+                provider = ""
+                resolution_dict = {outer_key: outer_val}
+
+            for res, types in resolution_dict.items():
+                for vol_type, path in types.items():
+                    extra = {"provider": provider} if is_transform else {}
+                    result.append(
+                        cls(
+                            name=f"{prefix}_{res}_{vol_type}",
+                            file_path=self._resolve_path(path),
+                            resolution=res,
+                            resource_type=vol_type,
+                            **fixed_fields,  # type: ignore[arg-type]
+                            **extra,  # type: ignore[arg-type]
+                        )
+                    )
+
         if cls is VolumeAtlas:
             return cast(list[VolumeAtlas], result)
         return cast(list[VolumeTransform], result)

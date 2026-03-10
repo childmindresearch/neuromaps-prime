@@ -46,6 +46,7 @@ class TestResources:
                     density="32k",
                     hemisphere="right",
                     resource_type="surface_transform",
+                    provider="test",
                 ),
             ),
             (
@@ -55,6 +56,7 @@ class TestResources:
                     target_space="CIVETNMT",
                     resolution="2mm",
                     resource_type="volume_transform",
+                    provider="test",
                     weight=3.0,
                 ),
             ),
@@ -129,6 +131,7 @@ class TestEdge:
             density="32k",
             hemisphere="left",
             resource_type="surface_transform",
+            provider="test",
         )
         edge = models.Edge(surface_transforms=[surf_edge])
 

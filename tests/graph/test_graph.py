@@ -1,5 +1,6 @@
 """Tests associated for broader graph functionality."""
 
+import logging
 from pathlib import Path
 from typing import Any, Literal
 from unittest.mock import patch
@@ -9,6 +10,7 @@ import pytest
 
 from neuromaps_prime.graph import NeuromapsGraph, models
 from neuromaps_prime.graph.cache import GraphCache
+from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
 from neuromaps_prime.transforms.utils import estimate_surface_density
 
 
@@ -98,6 +100,7 @@ nodes:
             hemisphere="left",
             resource_type="midthickness",
             file_path=test_surf,
+            provider="test",
             description="Test surface transform",
         )
         graph.add_transform(sf, graph.surface_to_surface_key)
@@ -129,6 +132,7 @@ nodes:
             resolution="1mm",
             resource_type="T1w",
             file_path=test_vol,
+            provider="test",
             description="Test volume transform",
         )
         graph.add_transform(vf, graph.volume_to_volume_key)
@@ -351,6 +355,390 @@ class TestGraphCacheRequireSurface:
 
 
 # ---------------------------------------------------------------------------
+# Helpers shared by TestGraphCacheSurface
+# ---------------------------------------------------------------------------
+
+
+def _make_surface_transform(
+    f: Path,
+    source: str,
+    target: str,
+    density: str,
+    hemisphere: str,
+    resource_type: str,
+    weight: float = 1.0,
+    provider: str = "ProviderA",
+) -> models.SurfaceTransform:
+    return models.SurfaceTransform(
+        name=f"{source}_to_{target}_{density}_{hemisphere}_{resource_type}",
+        description=f"Transform from {source} to {target}",
+        file_path=f,
+        source_space=source,
+        target_space=target,
+        density=density,
+        hemisphere=hemisphere,
+        resource_type=resource_type,
+        weight=weight,
+        provider=provider,
+    )
+
+
+class TestGraphCacheSurface:
+    """Unit tests for GraphCache.get_surface_transform covering all branches.
+
+    Branches under test:
+      1. Exact provider match  (provider given, key exists)
+      2. Provider miss → fallback  (provider given, key absent, other provider present)
+      3. No provider → fallback  (provider=None, at least one entry present)
+      4. Full miss  (no matching entry at all regardless of provider)
+    """
+
+    @pytest.fixture
+    def f(self, tmp_path: Path) -> Path:
+        """Generate sphere fixture."""
+        p = tmp_path / "sphere.surf.gii"
+        p.touch()
+        return p
+
+    @pytest.fixture
+    def alt_f(self, tmp_path: Path) -> Path:
+        """Generate alt sphere fixture."""
+        p = tmp_path / "alt_sphere.surf.gii"
+        p.touch()
+        return p
+
+    # ------------------------------------------------------------------ #
+    # Branch 1: exact provider hit                                        #
+    # ------------------------------------------------------------------ #
+
+    def test_exact_provider_hit(self, f: Path) -> None:
+        """Returns the entry when provider is given and matches exactly."""
+        cache = GraphCache()
+        t = _make_surface_transform(
+            f, "A", "B", "32k", "left", "sphere", provider="RheMap"
+        )
+        cache.add_surface_transform(t)
+        result = cache.get_surface_transform(
+            "A", "B", "32k", "left", "sphere", provider="RheMap"
+        )
+        assert result is t
+
+    def test_exact_provider_hit_selects_correct_among_multiple(
+        self, f: Path, alt_f: Path
+    ) -> None:
+        """When multiple providers exist, the requested one is returned."""
+        cache = GraphCache()
+        t_a = _make_surface_transform(
+            f, "A", "B", "32k", "left", "sphere", provider="ProviderA"
+        )
+        t_b = _make_surface_transform(
+            alt_f, "A", "B", "32k", "left", "sphere", provider="ProviderB"
+        )
+        cache.add_surface_transform(t_a)
+        cache.add_surface_transform(t_b)
+        assert (
+            cache.get_surface_transform(
+                "A", "B", "32k", "left", "sphere", provider="ProviderA"
+            )
+            is t_a
+        )
+        assert (
+            cache.get_surface_transform(
+                "A", "B", "32k", "left", "sphere", provider="ProviderB"
+            )
+            is t_b
+        )
+
+    # ------------------------------------------------------------------ #
+    # Branch 2: provider given but not found → fallback                  #
+    # ------------------------------------------------------------------ #
+
+    def test_provider_miss_falls_back_to_first(self, f: Path) -> None:
+        """When the requested provider is absent, returns the first registered match."""
+        cache = GraphCache()
+        t = _make_surface_transform(
+            f, "A", "B", "32k", "left", "sphere", provider="ProviderA"
+        )
+        cache.add_surface_transform(t)
+        result = cache.get_surface_transform(
+            "A", "B", "32k", "left", "sphere", provider="NoSuchProvider"
+        )
+        assert result is t
+
+    def test_provider_miss_with_no_entries_returns_none(self, f: Path) -> None:
+        """When the requested provider is absent with no fallback, returns None."""
+        cache = GraphCache()
+        result = cache.get_surface_transform(
+            "A", "B", "32k", "left", "sphere", provider="RheMap"
+        )
+        assert result is None
+
+    # ------------------------------------------------------------------ #
+    # Branch 3: no provider → fallback to first                          #
+    # ------------------------------------------------------------------ #
+
+    def test_no_provider_returns_first_registered(self, f: Path, alt_f: Path) -> None:
+        """With provider=None, returns the first registered matching entry."""
+        cache = GraphCache()
+        t_first = _make_surface_transform(
+            f, "A", "B", "32k", "left", "sphere", provider="ProviderA"
+        )
+        t_second = _make_surface_transform(
+            alt_f, "A", "B", "32k", "left", "sphere", provider="ProviderB"
+        )
+        cache.add_surface_transform(t_first)
+        cache.add_surface_transform(t_second)
+        result = cache.get_surface_transform("A", "B", "32k", "left", "sphere")
+        assert result is not None
+        assert result.provider in ("ProviderA", "ProviderB")
+
+    def test_no_provider_single_entry(self, f: Path) -> None:
+        """With provider=None and a single entry, that entry is returned."""
+        cache = GraphCache()
+        t = _make_surface_transform(
+            f, "A", "B", "32k", "right", "sphere", provider="RheMap"
+        )
+        cache.add_surface_transform(t)
+        result = cache.get_surface_transform("A", "B", "32k", "right", "sphere")
+        assert result is t
+
+    # ------------------------------------------------------------------ #
+    # Branch 4: full miss                                                 #
+    # ------------------------------------------------------------------ #
+
+    def test_miss_empty_cache(self) -> None:
+        """Returns None on a completely empty cache."""
+        cache = GraphCache()
+        assert cache.get_surface_transform("A", "B", "32k", "left", "sphere") is None
+
+    @pytest.mark.parametrize(
+        "bad_key",
+        [
+            ("X", "B", "32k", "left", "sphere"),  # wrong source
+            ("A", "X", "32k", "left", "sphere"),  # wrong target
+            ("A", "B", "164k", "left", "sphere"),  # wrong density
+            ("A", "B", "32k", "right", "sphere"),  # wrong hemisphere
+            ("A", "B", "32k", "left", "midthickness"),  # wrong resource_type
+        ],
+        ids=[
+            "wrong_source",
+            "wrong_target",
+            "wrong_density",
+            "wrong_hemisphere",
+            "wrong_resource_type",
+        ],
+    )
+    def test_miss_wrong_key_component(self, f: Path, bad_key: tuple) -> None:
+        """Returns None when any single key component does not match."""
+        cache = GraphCache()
+        cache.add_surface_transform(
+            _make_surface_transform(f, "A", "B", "32k", "left", "sphere")
+        )
+        assert cache.get_surface_transform(*bad_key) is None
+
+    # ------------------------------------------------------------------ #
+    # Hemisphere case-insensitivity                                       #
+    # ------------------------------------------------------------------ #
+
+    def test_hemisphere_case_insensitive(self, f: Path) -> None:
+        """Hemisphere lookup is case-insensitive (stored as lowercase)."""
+        cache = GraphCache()
+        t = _make_surface_transform(f, "A", "B", "32k", "left", "sphere")
+        cache.add_surface_transform(t)
+        assert cache.get_surface_transform("A", "B", "32k", "left", "sphere") is t
+
+
+# ---------------------------------------------------------------------------
+# Multi-hop provider warning tests
+# ---------------------------------------------------------------------------
+
+
+class TestMultiHopProviderWarning:
+    """Tests that a warning is emitted when a provider falls back during multi-hop.
+
+    Uses SurfaceTransformOps._two_hops directly so we can exercise the warning
+    logic without needing real neuroimaging files or a full graph.
+    """
+
+    @pytest.fixture
+    def cache_and_ops(
+        self, tmp_path: Path
+    ) -> tuple[GraphCache, SurfaceTransformOps, Path]:
+        """Build a minimal cache and SurfaceTransformOps wired to it."""
+        import networkx as nx
+
+        from neuromaps_prime.graph.utils import GraphUtils
+
+        cache = GraphCache()
+        graph = nx.MultiDiGraph()
+        graph.add_nodes_from(["A", "B", "C"])
+        utils = GraphUtils(graph=graph, cache=cache)
+        ops = SurfaceTransformOps(cache=cache, utils=utils)
+        return cache, ops, tmp_path
+
+    def _add_transforms(
+        self, cache: GraphCache, tmp_path: Path, providers: dict
+    ) -> None:
+        """Register sphere transforms keyed by (src, tgt) → provider."""
+        for (src, tgt), provider in providers.items():
+            f = tmp_path / f"{src}_to_{tgt}_{provider}.surf.gii"
+            f.touch()
+            cache.add_surface_transform(
+                _make_surface_transform(
+                    f, src, tgt, "32k", "left", "sphere", provider=provider
+                )
+            )
+
+    def _add_atlas(self, cache: GraphCache, tmp_path: Path, space: str) -> None:
+        """Register a sphere atlas for mid-space so find_common_density resolves.
+
+        find_common_density intersects the mid-space atlas densities with the
+        mid→target transform densities, so both must be present at "32k".
+        """
+        from neuromaps_prime.graph import models
+
+        f = tmp_path / f"{space}_sphere.surf.gii"
+        f.touch()
+        cache.add_surface_atlas(
+            models.SurfaceAtlas(
+                name=f"{space}_32k_left_sphere",
+                description="",
+                file_path=f,
+                space=space,
+                density="32k",
+                hemisphere="left",
+                resource_type="sphere",
+            )
+        )
+
+    def test_no_warning_when_all_hops_match_provider(
+        self,
+        cache_and_ops: tuple[GraphCache, SurfaceTransformOps, Path],
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """No warning is emitted when every hop is served by the requested provider."""
+        cache, ops, tmp_path = cache_and_ops
+        self._add_transforms(
+            cache, tmp_path, {("A", "B"): "RheMap", ("B", "C"): "RheMap"}
+        )
+        self._add_atlas(cache, tmp_path, "B")
+
+        first = cache.get_surface_transform(
+            "A", "B", "32k", "left", "sphere", provider="RheMap"
+        )
+        with caplog.at_level(
+            logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
+        ):
+            with pytest.raises(FileNotFoundError):  # wb_command not available in CI
+                ops._two_hops(
+                    source_space="A",
+                    mid_space="B",
+                    target_space="C",
+                    density="32k",
+                    hemisphere="left",
+                    output_file_path=str(tmp_path / "out.surf.gii"),
+                    first_transform=first,
+                    provider="RheMap",
+                )
+
+        assert not any("falling back" in r.message for r in caplog.records)
+
+    def test_warning_on_first_hop_fallback(
+        self,
+        cache_and_ops: tuple[GraphCache, SurfaceTransformOps, Path],
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """Warning fires when the first hop's provider doesn't match the request."""
+        cache, ops, tmp_path = cache_and_ops
+        # A→B only has CIVET; B→C has RheMap — request RheMap throughout
+        self._add_transforms(
+            cache, tmp_path, {("A", "B"): "CIVET", ("B", "C"): "RheMap"}
+        )
+        self._add_atlas(cache, tmp_path, "B")
+
+        with caplog.at_level(
+            logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
+        ):
+            with pytest.raises(FileNotFoundError):  # wb_command not available in CI
+                ops._two_hops(
+                    source_space="A",
+                    mid_space="B",
+                    target_space="C",
+                    density="32k",
+                    hemisphere="left",
+                    output_file_path=str(tmp_path / "out.surf.gii"),
+                    first_transform=None,
+                    provider="RheMap",
+                )
+
+        messages = [r.message for r in caplog.records]
+        assert any("A" in m and "B" in m and "falling back" in m for m in messages)
+
+    def test_warning_on_second_hop_fallback(
+        self,
+        cache_and_ops: tuple[GraphCache, SurfaceTransformOps, Path],
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """Warning fires when the second hop's provider doesn't match the request."""
+        cache, ops, tmp_path = cache_and_ops
+        # A→B has RheMap; B→C only has CIVET — request RheMap throughout
+        self._add_transforms(
+            cache, tmp_path, {("A", "B"): "RheMap", ("B", "C"): "CIVET"}
+        )
+        self._add_atlas(cache, tmp_path, "B")
+
+        first = cache.get_surface_transform(
+            "A", "B", "32k", "left", "sphere", provider="RheMap"
+        )
+        with caplog.at_level(
+            logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
+        ):
+            with pytest.raises(FileNotFoundError):  # wb_command not available in CI
+                ops._two_hops(
+                    source_space="A",
+                    mid_space="B",
+                    target_space="C",
+                    density="32k",
+                    hemisphere="left",
+                    output_file_path=str(tmp_path / "out.surf.gii"),
+                    first_transform=first,
+                    provider="RheMap",
+                )
+
+        messages = [r.message for r in caplog.records]
+        assert any("B" in m and "C" in m and "falling back" in m for m in messages)
+
+    def test_no_warning_when_provider_is_none(
+        self,
+        cache_and_ops: tuple[GraphCache, SurfaceTransformOps, Path],
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """No warning is emitted when provider=None (fallback is intended behaviour)."""
+        cache, ops, tmp_path = cache_and_ops
+        self._add_transforms(
+            cache, tmp_path, {("A", "B"): "CIVET", ("B", "C"): "RheMap"}
+        )
+        self._add_atlas(cache, tmp_path, "B")
+
+        with caplog.at_level(
+            logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
+        ):
+            with pytest.raises(FileNotFoundError):  # wb_command not available in CI
+                ops._two_hops(
+                    source_space="A",
+                    mid_space="B",
+                    target_space="C",
+                    density="32k",
+                    hemisphere="left",
+                    output_file_path=str(tmp_path / "out.surf.gii"),
+                    first_transform=None,
+                    provider=None,
+                )
+
+        assert not any("falling back" in r.message for r in caplog.records)
+
+
+# ---------------------------------------------------------------------------
 # Helpers shared by TestGraphCacheVolume
 # ---------------------------------------------------------------------------
 
@@ -361,6 +749,7 @@ def _make_volume_transform(
     target: str,
     resolution: str,
     resource_type: str,
+    provider: str = "test",
     weight: float = 1.0,
 ) -> models.VolumeTransform:
     return models.VolumeTransform(
@@ -371,6 +760,7 @@ def _make_volume_transform(
         target_space=target,
         resolution=resolution,
         resource_type=resource_type,
+        provider=provider,
         weight=weight,
     )
 
@@ -427,10 +817,10 @@ class TestGraphCacheVolume:
             populated = GraphCache()
             populated.add_volume_transforms(
                 [
-                    _make_volume_transform(f, "A", "B", "1mm", "T1w"),
-                    _make_volume_transform(f, "A", "B", "1mm", "T2w"),
-                    _make_volume_transform(f, "A", "B", "2mm", "T1w"),
-                    _make_volume_transform(f, "C", "D", "1mm", "T1w"),
+                    _make_volume_transform(f, "A", "B", "1mm", "T1w", provider="test"),
+                    _make_volume_transform(f, "A", "B", "1mm", "T2w", provider="test"),
+                    _make_volume_transform(f, "A", "B", "2mm", "T1w", provider="test"),
+                    _make_volume_transform(f, "C", "D", "1mm", "T1w", provider="test"),
                 ]
             )
             alt_f = tmp_path / "alt.nii.gz"
@@ -438,13 +828,15 @@ class TestGraphCacheVolume:
             return dict(
                 empty_cache=GraphCache(),
                 populated_cache=populated,
-                get_single=lambda c, *k: c.get_volume_transform(*k),
+                get_single=lambda c, *k: c.get_volume_transform(*k, provider="test"),
                 get_plural=lambda c, *a, **kw: c.get_volume_transforms(*a, **kw),
                 add_single=lambda c, e: c.add_volume_transform(e),
                 add_bulk=lambda c, es: c.add_volume_transforms(es),
-                make_entry=lambda file, *k: _make_volume_transform(file, *k),
+                make_entry=lambda file, *k: _make_volume_transform(
+                    file, *k, provider="test"
+                ),
                 make_alt_entry=lambda file, *k: _make_volume_transform(
-                    alt_f, *k, weight=9.0
+                    alt_f, *k, weight=9.0, provider="test"
                 ),
                 exact_key=("A", "B", "1mm", "T1w"),
                 wrong_keys=[

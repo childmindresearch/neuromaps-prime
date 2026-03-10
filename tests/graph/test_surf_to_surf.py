@@ -69,6 +69,7 @@ class TestSurfaceToSurfaceTransformer:
             **basic_params,
             area_resource="midthickness",
             add_edge=True,
+            provider=None,
         )
         assert result == mock_output
 

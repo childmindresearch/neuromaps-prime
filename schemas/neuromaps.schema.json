@@ -69,17 +69,23 @@
                             "surfaces": {
                                 "type": "object",
                                 "patternProperties": {
-                                    "^[0-9]+k?$": {
+                                    "^[A-Za-z0-9_]+$": {
                                         "type": "object",
-                                        "properties": {
-                                            "sphere": {
-                                                "$ref": "#/$defs/surfaceHemisphere"
+                                        "patternProperties": {
+                                            "^[0-9]+k?$": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "sphere": {
+                                                        "$ref": "#/$defs/surfaceHemisphere"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "sphere"
+                                                ],
+                                                "additionalProperties": true
                                             }
                                         },
-                                        "required": [
-                                            "sphere"
-                                        ],
-                                        "additionalProperties": true
+                                        "additionalProperties": false
                                     }
                                 },
                                 "additionalProperties": false
@@ -107,7 +113,13 @@
                                 "description": "Target node."
                             },
                             "volumes": {
-                                "$ref": "#/$defs/volumeDict"
+                                "type": "object",
+                                "description": "Transform source.",
+                                "patternProperties": {
+                                    "^[A-Za-z0-9_]+$": {
+                                        "$ref": "#/$defs/volumeDict"
+                                    }
+                                }
                             }
                         },
                         "required": [

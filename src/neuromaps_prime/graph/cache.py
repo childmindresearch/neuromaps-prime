@@ -19,9 +19,9 @@ from neuromaps_prime.graph.models import (
 
 # Key type aliases
 SurfaceAtlasKey = tuple[str, str, str, str]
-SurfaceTransformKey = tuple[str, str, str, str, str]
+SurfaceTransformKey = tuple[str, str, str, str, str, str]
 VolumeAtlasKey = tuple[str, str, str]
-VolumeTransformKey = tuple[str, str, str, str]
+VolumeTransformKey = tuple[str, str, str, str, str]
 
 
 class GraphCache(BaseModel):
@@ -38,13 +38,13 @@ class GraphCache(BaseModel):
         Maps ``(space, density, hemisphere, resource_type)`` to a
         :class:`SurfaceAtlas`.
     surface_transform:
-        Maps ``(source, target, density, hemisphere, resource_type)`` to a
+        Maps ``(source, target, density, hemisphere, resource_type, provider)`` to a
         :class:`SurfaceTransform`.
     volume_atlas:
         Maps ``(space, resolution, resource_type)`` to a
         :class:`VolumeAtlas`.
     volume_transform:
-        Maps ``(source, target, resolution, resource_type)`` to a
+        Maps ``(source, target, resolution, resource_type, provider)`` to a
         :class:`VolumeTransform`.
     """
 
@@ -150,6 +150,7 @@ class GraphCache(BaseModel):
                 transform.density,
                 transform.hemisphere.lower(),
                 transform.resource_type,
+                transform.provider,
             )
         ] = transform
 
@@ -160,11 +161,30 @@ class GraphCache(BaseModel):
         density: str,
         hemisphere: Literal["left", "right"],
         resource_type: str,
+        provider: str | None = None,
     ) -> SurfaceTransform | None:
-        """Return the matching :class:`SurfaceTransform`, or ``None``."""
-        return self.surface_transform.get(
-            (source, target, density, hemisphere.lower(), resource_type)
-        )
+        """Return the matching :class:`SurfaceTransform`, or ``None``.
+
+        If *provider* is ``None`` or not found, falls back to the first
+        registered transform matching the other fields.
+        """
+        if provider is not None:
+            result = self.surface_transform.get(
+                (source, target, density, hemisphere.lower(), resource_type, provider)
+            )
+            if result is not None:
+                return result
+        # Fallback: first match ignoring provider
+        for (src, tgt, d, h, rt, _), transform in self.surface_transform.items():
+            if (
+                src == source
+                and tgt == target
+                and d == density
+                and h == hemisphere.lower()
+                and rt == resource_type
+            ):
+                return transform
+        return None
 
     def get_surface_transforms(
         self,
@@ -173,6 +193,7 @@ class GraphCache(BaseModel):
         density: str | None = None,
         hemisphere: Literal["left", "right"] | None = None,
         resource_type: str | None = None,
+        provider: str | None = None,
     ) -> list[SurfaceTransform]:
         """Return all surface transforms between two spaces with optional filters.
 
@@ -182,18 +203,20 @@ class GraphCache(BaseModel):
             density: Optional density filter.
             hemisphere: Optional hemisphere filter.
             resource_type: Optional resource type filter.
+            provider: Optional provider filter.
 
         Returns:
             All matching :class:`SurfaceTransform` entries (may be empty).
         """
         return [
             transform
-            for (src, tgt, d, h, rt), transform in self.surface_transform.items()
+            for (src, tgt, d, h, rt, prov), transform in self.surface_transform.items()
             if src == source
             and tgt == target
             and (density is None or d == density)
             and (hemisphere is None or h == hemisphere.lower())
             and (resource_type is None or rt == resource_type)
+            and (provider is None or prov == provider)
         ]
 
     # ------------------------------------------------------------------ #
@@ -246,14 +269,39 @@ class GraphCache(BaseModel):
                 transform.target_space,
                 transform.resolution,
                 transform.resource_type,
+                transform.provider,
             )
         ] = transform
 
     def get_volume_transform(
-        self, source: str, target: str, resolution: str, resource_type: str
+        self,
+        source: str,
+        target: str,
+        resolution: str,
+        resource_type: str,
+        provider: str | None,
     ) -> VolumeTransform | None:
-        """Return the matching :class:`VolumeTransform`, or ``None``."""
-        return self.volume_transform.get((source, target, resolution, resource_type))
+        """Return the matching :class:`VolumeTransform`, or ``None``.
+
+        If *provider* is ``None`` or not found, falls back to the first
+        registered transform matching the other fields.
+        """
+        if provider is not None:
+            result = self.volume_transform.get(
+                (source, target, resolution, resource_type, provider)
+            )
+            if result is not None:
+                return result
+        # Fallback: first match ignoring provider
+        for (src, tgt, res, rt, _), transform in self.volume_transform.items():
+            if (
+                src == source
+                and tgt == target
+                and res == resolution
+                and rt == resource_type
+            ):
+                return transform
+        return None
 
     def get_volume_transforms(
         self,
@@ -261,6 +309,7 @@ class GraphCache(BaseModel):
         target: str,
         resolution: str | None = None,
         resource_type: str | None = None,
+        provider: str | None = None,
     ) -> list[VolumeTransform]:
         """Return all volume transforms between two spaces with optional filters.
 
@@ -269,17 +318,19 @@ class GraphCache(BaseModel):
             target: Target brain template space name.
             resolution: Optional resolution filter.
             resource_type: Optional resource type filter.
+            provider: Optional provider filter.
 
         Returns:
             All matching :class:`VolumeTransform` entries (may be empty).
         """
         return [
             transform
-            for (src, tgt, res, rt), transform in self.volume_transform.items()
+            for (src, tgt, res, rt, prov), transform in self.volume_transform.items()
             if src == source
             and tgt == target
             and (resolution is None or res == resolution)
             and (resource_type is None or rt == resource_type)
+            and (provider is None or prov == provider)
         ]
 
     # ------------------------------------------------------------------ #
