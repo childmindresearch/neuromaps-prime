@@ -27,3 +27,8 @@ Get the newest development version via:
 ```sh
 pip install git+https://github.com/childmindresearch/neuromaps-prime
 ```
+
+
+## 🔧 Recent Fixes
+
+- Fixed issue #100: Task: Split YAML into multiple, smaller YAMLs
