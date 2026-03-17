@@ -6,11 +6,12 @@ transformations. All resource lookups go through GraphCache directly.
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
-from niwrap import workbench
-from pydantic import BaseModel
+from niwrap import get_global_runner, workbench
+from pydantic import BaseModel, PrivateAttr
 
 from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.graph.models import SurfaceTransform
@@ -49,6 +50,14 @@ class SurfaceTransformOps(BaseModel):
     cache: GraphCache
     utils: GraphUtils
     surface_to_surface_key: str = "surface_to_surface"
+    _logger: logging.Logger = PrivateAttr()
+
+    def model_post_init(self, __context: Any) -> None:  # noqa: ANN401
+        """Post initialization steps.
+
+        Lazily grab logger from Graph initialization.
+        """
+        self._logger = logging.getLogger(get_global_runner().logger_name)
 
     # ------------------------------------------------------------------ #
     # Public transformer                                                   #
@@ -66,6 +75,7 @@ class SurfaceTransformOps(BaseModel):
         target_density: str | None = None,
         area_resource: str = "midthickness",
         add_edge: bool = True,
+        provider: str | None = None,
     ) -> Path | None:
         """Resample a metric or label GIFTI from source_space to target_space.
 
@@ -115,6 +125,7 @@ class SurfaceTransformOps(BaseModel):
             hemisphere=hemisphere,
             output_file_path=output_file_path,
             add_edge=add_edge,
+            provider=provider,
         )
         if sphere_transform is None:
             return None
@@ -171,6 +182,7 @@ class SurfaceTransformOps(BaseModel):
         hemisphere: Literal["left", "right"],
         output_file_path: str,
         add_edge: bool = True,
+        provider: str | None = None,
     ) -> SurfaceTransform | None:
         """Return the sphere transform from source to target, composing if needed.
 
@@ -181,6 +193,8 @@ class SurfaceTransformOps(BaseModel):
             hemisphere: ``'left'`` or ``'right'``.
             output_file_path: Base path used for intermediate output files.
             add_edge: Whether to register composed transforms.
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
 
         Returns:
             Resolved :class:`SurfaceTransform`, or ``None`` if no path exists.
@@ -204,6 +218,7 @@ class SurfaceTransformOps(BaseModel):
                 density=density,
                 hemisphere=hemisphere,
                 resource_type="sphere",
+                provider=provider,
             )
 
         return self._compose_multihop(
@@ -212,6 +227,7 @@ class SurfaceTransformOps(BaseModel):
             hemisphere=hemisphere,
             output_file_path=output_file_path,
             add_edge=add_edge,
+            provider=provider,
         )
 
     # ------------------------------------------------------------------ #
@@ -225,6 +241,7 @@ class SurfaceTransformOps(BaseModel):
         hemisphere: Literal["left", "right"],
         output_file_path: str,
         add_edge: bool,
+        provider: str | None = None,
     ) -> SurfaceTransform:
         """Compose sphere transforms along a multi-hop path.
 
@@ -234,6 +251,7 @@ class SurfaceTransformOps(BaseModel):
             hemisphere: ``'left'`` or ``'right'``.
             output_file_path: Base path for intermediate output files.
             add_edge: Whether to register composed transforms.
+            provider: Optional provider name for the first hop lookup.
 
         Returns:
             The final composed :class:`SurfaceTransform` from path[0] to
@@ -248,6 +266,7 @@ class SurfaceTransformOps(BaseModel):
             density=density,
             hemisphere=hemisphere,
             resource_type="sphere",
+            provider=provider,
         )
         if current_transform is None:
             raise ValueError(
@@ -265,6 +284,7 @@ class SurfaceTransformOps(BaseModel):
                 hemisphere=hemisphere,
                 output_file_path=output_file_path,
                 add_edge=add_edge,
+                provider=provider,
             )
 
         return current_transform
@@ -280,6 +300,7 @@ class SurfaceTransformOps(BaseModel):
         hemisphere: Literal["left", "right"],
         output_file_path: str,
         add_edge: bool,
+        provider: str | None = None,
     ) -> SurfaceTransform:
         """Extend current_transform by one hop towards next_space.
 
@@ -293,6 +314,7 @@ class SurfaceTransformOps(BaseModel):
             hemisphere: ``'left'`` or ``'right'``.
             output_file_path: Base path for output files.
             add_edge: Whether to register the new transform.
+            provider: Optional provider name for intermediate lookups.
 
         Returns:
             New :class:`SurfaceTransform` from source to next_space.
@@ -312,6 +334,7 @@ class SurfaceTransformOps(BaseModel):
             hemisphere=hemisphere,
             output_file_path=hop_output,
             first_transform=current_transform,
+            provider=provider,
         )
         new_transform = SurfaceTransform(
             name=f"{source}_to_{next_space}_{density}_{hemisphere}_sphere",
@@ -323,6 +346,7 @@ class SurfaceTransformOps(BaseModel):
             resource_type="sphere",
             file_path=composed_path,
             weight=float(hop_idx),
+            provider=provider or "",
         )
         if add_edge:
             self.cache.add_surface_transform(new_transform)
@@ -338,6 +362,7 @@ class SurfaceTransformOps(BaseModel):
         hemisphere: Literal["left", "right"],
         output_file_path: str,
         first_transform: SurfaceTransform | None = None,
+        provider: str | None = None,
     ) -> Path:
         """Compose two sphere transforms via project-unproject through mid_space.
 
@@ -363,10 +388,17 @@ class SurfaceTransformOps(BaseModel):
             density=density,
             hemisphere=hemisphere,
             resource_type="sphere",
+            provider=provider,
         )
         if first_transform is None:
             raise ValueError(
-                f"No surface transform found from '{source_space}' to '{mid_space}'"
+                f"No surface transform found from {source_space!r} to {mid_space!r}"
+            )
+        if provider is not None and first_transform.provider != provider:
+            self._logger.warning(
+                f"Provider {provider!r} not found for hop {source_space!r} to "
+                f"{mid_space!r}; falling back to {first_transform.provider!r}. The "
+                "composed transform will use mixed providers.",
             )
         sphere_in = first_transform.fetch()
 
@@ -389,10 +421,17 @@ class SurfaceTransformOps(BaseModel):
             density=common_density,
             hemisphere=hemisphere,
             resource_type="sphere",
+            provider=provider,
         )
         if unproject_transform is None:
             raise ValueError(
-                f"No surface transform found from '{mid_space}' to '{target_space}'"
+                f"No surface transform found from {mid_space!r} to {target_space!r}"
+            )
+        if provider is not None and unproject_transform.provider != provider:
+            self._logger.warning(
+                f"Provider {provider!r} not found for hop {mid_space!r} to "
+                f"{target_space!r}; falling back to {unproject_transform.provider!r}. "
+                "The composed transform will use mixed providers.",
             )
         sphere_unproject_from = unproject_transform.fetch()
 

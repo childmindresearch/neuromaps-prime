@@ -21,8 +21,10 @@ from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.graph.models import (
     Edge,
     Node,
+    SurfaceAnnotation,
     SurfaceAtlas,
     SurfaceTransform,
+    VolumeAnnotation,
     VolumeAtlas,
     VolumeTransform,
 )
@@ -82,32 +84,31 @@ class GraphBuilder(BaseModel):
             ((node_name, node_data),) = node_entry.items()
             description = node_data.get("description", "")
 
-            surfaces = cast(
-                list[SurfaceAtlas],
-                self._parse_surface_resources(
-                    SurfaceAtlas,
-                    dict(space=node_name, description=description),
-                    node_data.get("surfaces", {}),
-                ),
+            surfaces, surface_annotations = self._parse_surface_resources(
+                SurfaceAtlas,
+                dict(space=node_name, description=description),
+                node_data.get("surfaces", {}),
             )
-            volumes = cast(
-                list[VolumeAtlas],
-                self._parse_volume_resources(
-                    VolumeAtlas,
-                    dict(space=node_name, description=description),
-                    node_data.get("volumes", {}),
-                ),
+            volumes, volume_annotations = self._parse_volume_resources(
+                VolumeAtlas,
+                dict(space=node_name, description=description),
+                node_data.get("volumes", {}),
             )
+
             node_obj = Node(
                 name=node_name,
                 species=node_data.get("species", ""),
                 description=description,
-                surfaces=surfaces,
-                volumes=volumes,
+                surfaces=cast(list[SurfaceAtlas], surfaces),
+                volumes=cast(list[VolumeAtlas], volumes),
+                surface_annotations=surface_annotations,
+                volume_annotations=volume_annotations,
             )
             graph.add_node(node_name, data=node_obj)
-            self.cache.add_surface_atlases(surfaces)
-            self.cache.add_volume_atlases(volumes)
+            self.cache.add_surface_atlases(cast(list[SurfaceAtlas], surfaces))
+            self.cache.add_surface_annotations(surface_annotations)
+            self.cache.add_volume_atlases(cast(list[VolumeAtlas], volumes))
+            self.cache.add_volume_annotations(volume_annotations)
 
     # ------------------------------------------------------------------ #
     # Edge building                                                        #
@@ -125,52 +126,46 @@ class GraphBuilder(BaseModel):
     ) -> None:
         """Parse a single surface-to-surface edge definition."""
         source, target = edge_data["from"], edge_data["to"]
-        transforms = cast(
-            list[SurfaceTransform],
-            self._parse_surface_resources(
-                SurfaceTransform,
-                dict(
-                    source_space=source,
-                    target_space=target,
-                    description=f"surf2surf transform from {source} to {target}",
-                ),
-                edge_data.get("surfaces", {}),
+        transforms, _ = self._parse_surface_resources(
+            SurfaceTransform,
+            dict(
+                source_space=source,
+                target_space=target,
+                description=f"surf2surf transform from {source} to {target}",
             ),
+            edge_data.get("surfaces", {}),
         )
         graph.add_edge(
             source,
             target,
             key="surface_to_surface",
-            data=Edge(surface_transforms=transforms),
+            data=Edge(surface_transforms=cast(list[SurfaceTransform], transforms)),
             weight=1.0,
         )
-        self.cache.add_surface_transforms(transforms)
+        self.cache.add_surface_transforms(cast(list[SurfaceTransform], transforms))
 
     def _build_volume_edge(
         self, graph: nx.MultiDiGraph, edge_data: dict[str, Any]
     ) -> None:
         """Parse a single volume-to-volume edge definition."""
         source, target = edge_data["from"], edge_data["to"]
-        transforms = cast(
-            list[VolumeTransform],
-            self._parse_volume_resources(
-                VolumeTransform,
-                dict(
-                    source_space=source,
-                    target_space=target,
-                    description=f"vol2vol transform from {source} to {target}",
-                ),
-                edge_data.get("volumes", {}),
+        transforms, _ = self._parse_volume_resources(
+            VolumeTransform,
+            dict(
+                source_space=source,
+                target_space=target,
+                description=f"vol2vol transform from {source} to {target}",
             ),
+            edge_data.get("volumes", {}),
         )
         graph.add_edge(
             source,
             target,
             key="volume_to_volume",
-            data=Edge(volume_transforms=transforms),
+            data=Edge(volume_transforms=cast(list[VolumeTransform], transforms)),
             weight=1.0,
         )
-        self.cache.add_volume_transforms(transforms)
+        self.cache.add_volume_transforms(cast(list[VolumeTransform], transforms))
 
     # ------------------------------------------------------------------ #
     # Generic resource parsers                                             #
@@ -185,67 +180,137 @@ class GraphBuilder(BaseModel):
         cls: type[SurfaceAtlas] | type[SurfaceTransform],
         fixed_fields: dict[str, Any],
         surfaces_dict: dict[str, Any],
-    ) -> list[SurfaceAtlas] | list[SurfaceTransform]:
+    ) -> tuple[list[SurfaceAtlas] | list[SurfaceTransform], list[SurfaceAnnotation]]:
         """Parse surface resource entries from a nested density/type/hemi dict.
 
         Args:
             cls: The model class to instantiate (SurfaceAtlas or SurfaceTransform).
             fixed_fields: Fields shared by every entry (e.g. space, description).
-            surfaces_dict: Nested dict keyed by density → resource_type → hemisphere.
+            surfaces_dict: Nested dict keyed by density → resource_type → hemisphere
+                for atlases, or provider → density → resource_type → hemisphere
+                for transforms.
 
         Returns:
-            List of instantiated surface resource objects.
+            Tuple of (resources, annotations) where resources are typed to cls
+            and annotations are any surface annotation entries found inline.
         """
+        is_transform = cls is SurfaceTransform
         prefix = fixed_fields.get("space") or (
             f"{fixed_fields['source_space']}_to_{fixed_fields['target_space']}"
         )
-        result = [
-            cls(
-                name=f"{prefix}_{density}_{hemi}_{surf_type}",
-                file_path=self._resolve_path(path),
-                density=density,
-                hemisphere=hemi,
-                resource_type=surf_type,
-                **fixed_fields,
-            )
-            for density, types in surfaces_dict.items()
-            for surf_type, hemispheres in types.items()
-            for hemi, path in hemispheres.items()
-        ]
+        space = fixed_fields.get("space", prefix)
+
+        result: list[Any] = []
+        annotations: list[SurfaceAnnotation] = []
+
+        for outer_key, outer_val in surfaces_dict.items():
+            if is_transform:
+                provider = outer_key
+                density_dict = outer_val
+            else:
+                provider = ""
+                density_dict = {outer_key: outer_val}
+
+            for density, types in density_dict.items():
+                for surf_type, hemispheres in types.items():
+                    if surf_type == "annotation":
+                        for label, hemi_paths in hemispheres.items():
+                            for hemi, path in hemi_paths.items():
+                                annotations.append(
+                                    SurfaceAnnotation(
+                                        name=f"{prefix}_{density}_{hemi}_{label}",
+                                        space=space,
+                                        label=label,
+                                        density=density,
+                                        hemisphere=hemi,
+                                        file_path=self._resolve_path(path),
+                                    )
+                                )
+                        continue
+
+                    extra = {"provider": provider} if is_transform else {}
+                    for hemi, path in hemispheres.items():
+                        result.append(
+                            cls(
+                                name=f"{prefix}_{density}_{hemi}_{surf_type}",
+                                file_path=self._resolve_path(path),
+                                density=density,
+                                hemisphere=hemi,
+                                resource_type=surf_type,
+                                **fixed_fields,  # type: ignore[arg-type]
+                                **extra,  # type: ignore[arg-type]
+                            )
+                        )
+
         if cls is SurfaceAtlas:
-            return cast(list[SurfaceAtlas], result)
-        return cast(list[SurfaceTransform], result)
+            return cast(list[SurfaceAtlas], result), annotations
+        return cast(list[SurfaceTransform], result), annotations
 
     def _parse_volume_resources(
         self,
         cls: type[VolumeAtlas] | type[VolumeTransform],
         fixed_fields: dict[str, Any],
         volumes_dict: dict[str, Any],
-    ) -> list[VolumeAtlas] | list[VolumeTransform]:
-        """Parse volume resource entries from a nested resolution/type dict.
+    ) -> tuple[list[VolumeAtlas] | list[VolumeTransform], list[VolumeAnnotation]]:
+        """Parse volume resource entries from a nested dict.
+
+        Supports both the atlas format (resolution → resource_type → path) and
+        the transform format (provider → resolution → resource_type → path).
 
         Args:
             cls: The model class to instantiate (VolumeAtlas or VolumeTransform).
             fixed_fields: Fields shared by every entry (e.g. space, description).
-            volumes_dict: Nested dict keyed by resolution → resource_type.
+            volumes_dict: Nested dict, either ``{resolution: {type: path}}``
+                or ``{provider: {resolution: {type: path}}}``.
 
         Returns:
-            List of instantiated volume resource objects.
+            Tuple of (resources, annotations) where resources are typed to cls
+            and annotations are any volume annotation entries found inline.
         """
+        is_transform = cls is VolumeTransform
         prefix = fixed_fields.get("space") or (
             f"{fixed_fields['source_space']}_to_{fixed_fields['target_space']}"
         )
-        result = [
-            cls(
-                name=f"{prefix}_{res}_{vol_type}",
-                file_path=self._resolve_path(path),
-                resolution=res,
-                resource_type=vol_type,
-                **fixed_fields,
-            )
-            for res, types in volumes_dict.items()
-            for vol_type, path in types.items()
-        ]
+        space = fixed_fields.get("space", prefix)
+
+        result: list[Any] = []
+        annotations: list[VolumeAnnotation] = []
+
+        for outer_key, outer_val in volumes_dict.items():
+            if is_transform:
+                provider = outer_key
+                resolution_dict = outer_val
+            else:
+                provider = ""
+                resolution_dict = {outer_key: outer_val}
+
+            for res, types in resolution_dict.items():
+                for vol_type, path in types.items():
+                    if vol_type == "annotation":
+                        for label, label_path in path.items():
+                            annotations.append(
+                                VolumeAnnotation(
+                                    name=f"{prefix}_{res}_{label}",
+                                    space=space,
+                                    label=label,
+                                    resolution=res,
+                                    file_path=self._resolve_path(label_path),
+                                )
+                            )
+                        continue
+
+                    extra = {"provider": provider} if is_transform else {}
+                    result.append(
+                        cls(
+                            name=f"{prefix}_{res}_{vol_type}",
+                            file_path=self._resolve_path(path),
+                            resolution=res,
+                            resource_type=vol_type,
+                            **fixed_fields,  # type: ignore[arg-type]
+                            **extra,  # type: ignore[arg-type]
+                        )
+                    )
+
         if cls is VolumeAtlas:
-            return cast(list[VolumeAtlas], result)
-        return cast(list[VolumeTransform], result)
+            return cast(list[VolumeAtlas], result), annotations
+        return cast(list[VolumeTransform], result), annotations

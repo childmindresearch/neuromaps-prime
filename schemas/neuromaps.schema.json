@@ -5,52 +5,69 @@
     "properties": {
         "nodes": {
             "type": "array",
-            "patternProperties": {
-                "^[A-Za-z0-9_]+$": {
-                    "type": "object",
-                    "description": "Template name for a node (e.g. Yerkes19, MEBRAINS)",
-                    "properties": {
-                        "description": {
-                            "type": "string",
-                            "description": "Description for node"
-                        },
-                        "surfaces": {
-                            "type": "object",
-                            "description": "Dictionary of surface densities.",
-                            "patternProperties": {
-                                "^[0-9]+k?$": {
-                                    "type": "object",
-                                    "description": "Surface density key (number, optionally ending with 'k').",
-                                    "properties": {
-                                        "pial": {
-                                            "$ref": "#/$defs/surfaceHemisphere"
-                                        },
-                                        "midthickness": {
-                                            "$ref": "#/$defs/surfaceHemisphere"
-                                        },
-                                        "white": {
-                                            "$ref": "#/$defs/surfaceHemisphere"
-                                        },
-                                        "sphere": {
-                                            "$ref": "#/$defs/surfaceHemisphere"
-                                        }
-                                    },
-                                    "additionalProperties": false
-                                }
+            "items": {
+                "type": "object",
+                "patternProperties": {
+                    "^[A-Za-z0-9_]+$": {
+                        "type": "object",
+                        "properties": {
+                            "species": {
+                                "type": "string"
                             },
-                            "additionalProperties": false
+                            "description": {
+                                "type": "string"
+                            },
+                            "surfaces": {
+                                "type": "object",
+                                "patternProperties": {
+                                    "^[0-9]+k?$": {
+                                        "type": "object",
+                                        "properties": {
+                                            "pial": {
+                                                "$ref": "#/$defs/surfaceHemisphere"
+                                            },
+                                            "midthickness": {
+                                                "$ref": "#/$defs/surfaceHemisphere"
+                                            },
+                                            "white": {
+                                                "$ref": "#/$defs/surfaceHemisphere"
+                                            },
+                                            "sphere": {
+                                                "$ref": "#/$defs/surfaceHemisphere"
+                                            },
+                                            "inflated": {
+                                                "$ref": "#/$defs/surfaceHemisphere"
+                                            },
+                                            "flat": {
+                                                "$ref": "#/$defs/surfaceHemisphere"
+                                            },
+                                            "annotation": {
+                                                "type": "object",
+                                                "patternProperties": {
+                                                    "^[A-Za-z0-9_]+$": {
+                                                        "$ref": "#/$defs/surfaceHemisphere"
+                                                    }
+                                                },
+                                                "additionalProperties": false
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "volumes": {
+                                "$ref": "#/$defs/volumeDict"
+                            }
                         },
-                        "volumes": {
-                            "$ref": "#/$defs/volumeDict"
-                        }
-                    },
-                    "required": [
-                        "description"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "additionalProperties": false
+                        "required": [
+                            "description"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "additionalProperties": false
+            }
         },
         "edges": {
             "type": "object",
@@ -69,17 +86,23 @@
                             "surfaces": {
                                 "type": "object",
                                 "patternProperties": {
-                                    "^[0-9]+k?$": {
+                                    "^[A-Za-z0-9_]+$": {
                                         "type": "object",
-                                        "properties": {
-                                            "sphere": {
-                                                "$ref": "#/$defs/surfaceHemisphere"
+                                        "patternProperties": {
+                                            "^[0-9]+k?$": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "sphere": {
+                                                        "$ref": "#/$defs/surfaceHemisphere"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "sphere"
+                                                ],
+                                                "additionalProperties": true
                                             }
                                         },
-                                        "required": [
-                                            "sphere"
-                                        ],
-                                        "additionalProperties": true
+                                        "additionalProperties": false
                                     }
                                 },
                                 "additionalProperties": false
@@ -107,7 +130,13 @@
                                 "description": "Target node."
                             },
                             "volumes": {
-                                "$ref": "#/$defs/volumeDict"
+                                "type": "object",
+                                "description": "Transform source.",
+                                "patternProperties": {
+                                    "^[A-Za-z0-9_]+$": {
+                                        "$ref": "#/$defs/volumeDict"
+                                    }
+                                }
                             }
                         },
                         "required": [
@@ -134,6 +163,18 @@
             "patternProperties": {
                 "^[0-9]+(u|m)m$": {
                     "type": "object",
+                    "properties": {
+                        "annotation": {
+                            "patternProperties": {
+                                "^[A-Za-z0-9_]+$": {
+                                    "type": "string",
+                                    "format": "uri-reference",
+                                    "description": "URI pointing to an annotation volume file"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
                     "patternProperties": {
                         "^[A-Za-z0-9_]+$": {
                             "type": "string",
@@ -151,20 +192,22 @@
             "description": "Represents the surface files for both hemispheres of a brain template.",
             "properties": {
                 "left": {
-                    "type": "string",
+                    "type": [
+                        "string",
+                        null
+                    ],
                     "format": "uri-reference",
                     "description": "Surface file for left hemisphere."
                 },
                 "right": {
-                    "type": "string",
+                    "type": [
+                        "string",
+                        null
+                    ],
                     "format": "uri-reference",
                     "description": "Surface file for right hemisphere."
                 }
             },
-            "required": [
-                "left",
-                "right"
-            ],
             "additionalProperties": false
         }
     }
