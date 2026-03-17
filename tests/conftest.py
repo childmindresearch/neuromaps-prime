@@ -68,15 +68,28 @@ def graph(
         surfaces = node.get("surfaces", {})
         for density, types in surfaces.items():
             for surf_type, hemis in types.items():
-                for hemi in list(hemis):
-                    hemis[hemi] = mk(
-                        tmp_path / f"{name}_{density}_{hemi}_{surf_type}.surf.gii"
-                    )
+                if surf_type == "annotation":
+                    for label, hemi_paths in hemis.items():
+                        for hemi in list(hemi_paths):
+                            hemi_paths[hemi] = mk(
+                                tmp_path / f"{name}_{density}_{hemi}_{label}.func.gii"
+                            )
+                else:
+                    for hemi in list(hemis):
+                        hemis[hemi] = mk(
+                            tmp_path / f"{name}_{density}_{hemi}_{surf_type}.surf.gii"
+                        )
         # Volumes
         volumes = node.get("volumes", {})
         for res, types in volumes.items():
             for vol_type in list(types):
-                types[vol_type] = mk(tmp_path / f"{name}_{res}_{vol_type}.nii.gz")
+                if vol_type == "annotation":
+                    for label in list(types[vol_type]):
+                        types[vol_type][label] = mk(
+                            tmp_path / f"{name}_{res}_{label}.nii.gz"
+                        )
+                else:
+                    types[vol_type] = mk(tmp_path / f"{name}_{res}_{vol_type}.nii.gz")
 
     def rewrite_edge_files(edge: dict[str, Any]) -> None:
         src = edge["from"]

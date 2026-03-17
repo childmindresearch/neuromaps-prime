@@ -10,7 +10,7 @@ class Resource(BaseModel):
     """Base model for resources in the neuromaps_prime graph."""
 
     name: str
-    description: str
+    description: str | None
     file_path: Path
 
     @field_validator("file_path")
@@ -65,6 +65,16 @@ class SurfaceTransform(Resource):
     weight: float = 1.0
 
 
+class SurfaceAnnotation(Resource):
+    """Model for surface annotation."""
+
+    description: str | None = None
+    space: str
+    label: str
+    density: str
+    hemisphere: Literal["left", "right"]
+
+
 class VolumeAtlas(Resource):
     """Model for volume atlas resources."""
 
@@ -84,6 +94,15 @@ class VolumeTransform(Resource):
     weight: float = 1.0
 
 
+class VolumeAnnotation(Resource):
+    """Model for volume annotation resources."""
+
+    description: str | None = None
+    space: str
+    label: str
+    resolution: str
+
+
 class Node(BaseModel):
     """Node representation in transformation graph."""
 
@@ -92,11 +111,15 @@ class Node(BaseModel):
     description: str
     surfaces: list[SurfaceAtlas] = Field(default_factory=list)
     volumes: list[VolumeAtlas] = Field(default_factory=list)
+    surface_annotations: list[SurfaceAnnotation] = Field(default_factory=list)
+    volume_annotations: list[VolumeAnnotation] = Field(default_factory=list)
 
     def __repr__(self) -> str:
         """String representation."""
         surface_str = "\n".join(s.name for s in self.surfaces)
         volume_str = "\n".join(v.name for v in self.volumes)
+        surface_annot_str = "\n".join(s.name for s in self.surface_annotations)
+        volume_annot_str = "\n".join(v.name for v in self.volume_annotations)
         return (
             "\nNode:"
             f"\n\tname={self.name},\n"
@@ -104,6 +127,8 @@ class Node(BaseModel):
             f"\tdescription={self.description}\n"
             f"\tsurfaces=[{surface_str}]\n"
             f"\tvolumes=[{volume_str}]"
+            f"\tsurface annotations=[{surface_annot_str}]\n"
+            f"\tvolume annotations=[{volume_annot_str}]\n"
         )
 
 

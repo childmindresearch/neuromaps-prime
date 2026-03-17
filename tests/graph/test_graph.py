@@ -21,25 +21,45 @@ class TestGraphUnit:
         """Test (independently) building graph from YAML file."""
         lh = tmp_path / "src-ALIEN_den-999k_hemi-L_midthickness.surf.gii"
         rh = tmp_path / "src-ALIEN_den-999k_hemi-R_midthickness.surf.gii"
-        lh.touch()
-        rh.touch()
-        yaml_content = f"""
-nodes:
-    - ALIEN:
-        species: extraterrestrial
-        description: E.T. phone home
-        surfaces:
-            999k:
-                midthickness:
-                    left: {lh}
-                    right: {rh}
-        """
+        annot_lh = tmp_path / "src-ALIEN_den-999k_hemi-L_myelin.func.gii"
+        annot_rh = tmp_path / "src-ALIEN_den-999k_hemi-R_myelin.func.gii"
+        vol = tmp_path / "src-ALIEN_res-1mm_T1w.nii"
+        vol_annot = tmp_path / "src-ALIEN_res-1mm_myelin.nii"
+        for f in (lh, rh, annot_lh, annot_rh, vol, vol_annot):
+            f.touch()
+
+        yaml_content = (
+            "nodes:\n"
+            "  - ALIEN:\n"
+            "      species: extraterrestrial\n"
+            "      description: E.T. phone home\n"
+            "      surfaces:\n"
+            "        999k:\n"
+            "          midthickness:\n"
+            f"            left: {lh}\n"
+            f"            right: {rh}\n"
+            "          annotation:\n"
+            "            myelin:\n"
+            f"              left: {annot_lh}\n"
+            f"              right: {annot_rh}\n"
+            "      volumes:\n"
+            "        1mm:\n"
+            f"          T1w: {vol}\n"
+            "          annotation:\n"
+            f"            myelin: {vol_annot}\n"
+        )
         yaml_file = tmp_path / "test_graph.yaml"
         yaml_file.write_text(yaml_content)
 
         graph = NeuromapsGraph(yaml_file=yaml_file)
         assert graph.number_of_nodes() == 1
         assert graph.number_of_edges() == 0
+
+        node = graph.get_node_data("ALIEN")
+        assert len(node.surface_annotations) == 2  # left + right
+        assert len(node.volume_annotations) == 1
+        assert node.surface_annotations[0].label == "myelin"
+        assert node.volume_annotations[0].label == "myelin"
 
     def test_graph_build(self, graph: NeuromapsGraph) -> None:
         """Test graph initialization."""
@@ -59,6 +79,8 @@ nodes:
             assert node.name == node_name
             assert hasattr(node, "surfaces")
             assert hasattr(node, "volumes")
+            assert hasattr(node, "surface_annotations")
+            assert hasattr(node, "volume_annotations")
         with pytest.raises(ValueError, match="not found"):
             graph.get_node_data("non_existent_node")
 
@@ -119,7 +141,7 @@ nodes:
     def test_add_volume_transform_and_fetch(
         self, tmp_path: Path, graph: NeuromapsGraph
     ) -> None:
-        """Test adding and fetching surface transform."""
+        """Test adding and fetching volume transform."""
         test_vol = tmp_path / "fake.nii.gz"
         test_vol.touch()
 
@@ -164,7 +186,7 @@ nodes:
             assert isinstance(t, models.SurfaceTransform)
 
     def test_no_surface_atlases_search(self, graph: NeuromapsGraph) -> None:
-        """Test empty list returned if no criterias met for atlases."""
+        """Test empty list returned if no criteria met for atlases."""
         atlases = graph.search_surface_atlases(space="alien")
         assert len(atlases) == 0
 
@@ -200,12 +222,14 @@ nodes:
     def test_clear_evicts_all_cache_tables(
         self, tmp_path: Path, graph: NeuromapsGraph
     ) -> None:
-        """Test cache entries are cleared cache table."""
+        """Test all cache tables are cleared including annotation tables."""
         assert len(graph._cache.surface_atlas) > 0
         assert len(graph._cache.surface_transform) > 0
         graph._cache.clear()
         assert len(graph._cache.surface_atlas) == 0
         assert len(graph._cache.surface_transform) == 0
+        assert len(graph._cache.surface_annotation) == 0
+        assert len(graph._cache.volume_annotation) == 0
 
 
 class TestGraphIntegration:
@@ -218,6 +242,8 @@ class TestGraphIntegration:
             node_data = graph.get_node_data(node_name)
             assert isinstance(node_data.surfaces, list)
             assert isinstance(node_data.volumes, list)
+            assert isinstance(node_data.surface_annotations, list)
+            assert isinstance(node_data.volume_annotations, list)
 
     @pytest.mark.parametrize(
         "transformer_type,input_file",
@@ -274,7 +300,6 @@ class TestGraphIntegration:
             tmp_path / f"space-{target_space}_output_label.label.gii"
         )
 
-        # A dummy transform to add edge to the graph
         _ = graph.surface_to_surface_transformer(
             transformer_type="label",
             input_file=input_file,
@@ -284,12 +309,10 @@ class TestGraphIntegration:
             output_file_path=output_file_path,
         )
 
-        # Assert the graph has the computed edge
         assert graph.has_edge(
             source_space, target_space, key=graph.surface_to_surface_key
         )
 
-        # Assert if the computed edge is used.
         path = graph.find_path(
             source=source_space,
             target=target_space,
@@ -297,7 +320,6 @@ class TestGraphIntegration:
         )
         assert len(path) == 2
 
-        # Assert if this computed edge does not corrupt the shortest path finding.
         source_space = "MEBRAINS"
         shortest_path = graph.find_path(
             source=source_space,
@@ -309,7 +331,7 @@ class TestGraphIntegration:
 
     @pytest.mark.usefixtures("require_ants")
     def test_volume_to_volume(self, graph: NeuromapsGraph, tmp_path: Path) -> None:
-        """Test surface_to_surface transformer."""
+        """Test volume_to_volume transformer."""
         assert isinstance(graph.data_dir, Path)
 
         input_file = (
@@ -328,7 +350,7 @@ class TestGraphIntegration:
 
 
 class TestGraphCacheRequireSurface:
-    """Tests for GraphCache.require_surface_atlas."""
+    """Tests for GraphCache require_* methods."""
 
     def test_require_surface_atlas_hit(self, graph: NeuromapsGraph) -> None:
         """Test require_surface_atlas returns the atlas when found."""
@@ -351,6 +373,27 @@ class TestGraphCacheRequireSurface:
                 density="32k",
                 hemisphere="left",
                 resource_type="sphere",
+            )
+
+    def test_require_volume_atlas_hit(self, graph: NeuromapsGraph) -> None:
+        """Test require_volume_atlas returns the atlas when found."""
+        atlases = graph._cache.get_volume_atlases(space="D99")
+        assert atlases, "Expected at least one D99 atlas in the test graph"
+        a = atlases[0]
+        result = graph._cache.require_volume_atlas(
+            space=a.space,
+            resolution=a.resolution,
+            resource_type=a.resource_type,
+        )
+        assert result is a
+
+    def test_require_volume_atlas_miss(self, graph: NeuromapsGraph) -> None:
+        """Test require_volume_atlas raises ValueError when not found."""
+        with pytest.raises(ValueError, match="No 'T1w' volume atlas found"):
+            graph._cache.require_volume_atlas(
+                space="nonexistent",
+                resolution="250um",
+                resource_type="T1w",
             )
 
 
@@ -383,26 +426,51 @@ def _make_surface_transform(
     )
 
 
-class TestGraphCacheSurface:
-    """Unit tests for GraphCache.get_surface_transform covering all branches.
+def _make_surface_annotation(
+    f: Path,
+    space: str,
+    label: str,
+    density: str,
+    hemisphere: str,
+) -> models.SurfaceAnnotation:
+    return models.SurfaceAnnotation(
+        name=f"{space}_{density}_{hemisphere}_{label}",
+        file_path=f,
+        space=space,
+        label=label,
+        density=density,
+        hemisphere=hemisphere,
+    )
 
-    Branches under test:
-      1. Exact provider match  (provider given, key exists)
-      2. Provider miss → fallback  (provider given, key absent, other provider present)
-      3. No provider → fallback  (provider=None, at least one entry present)
-      4. Full miss  (no matching entry at all regardless of provider)
-    """
+
+def _make_volume_annotation(
+    f: Path,
+    space: str,
+    label: str,
+    resolution: str,
+) -> models.VolumeAnnotation:
+    return models.VolumeAnnotation(
+        name=f"{space}_{resolution}_{label}",
+        file_path=f,
+        space=space,
+        label=label,
+        resolution=resolution,
+    )
+
+
+class TestGraphCacheSurface:
+    """Unit tests for GraphCache.get_surface_transform covering all branches."""
 
     @pytest.fixture
     def f(self, tmp_path: Path) -> Path:
-        """Generate sphere fixture."""
+        """Sphere file path fixture."""
         p = tmp_path / "sphere.surf.gii"
         p.touch()
         return p
 
     @pytest.fixture
     def alt_f(self, tmp_path: Path) -> Path:
-        """Generate alt sphere fixture."""
+        """Alternate sphere file path fixture."""
         p = tmp_path / "alt_sphere.surf.gii"
         p.touch()
         return p
@@ -514,11 +582,11 @@ class TestGraphCacheSurface:
     @pytest.mark.parametrize(
         "bad_key",
         [
-            ("X", "B", "32k", "left", "sphere"),  # wrong source
-            ("A", "X", "32k", "left", "sphere"),  # wrong target
-            ("A", "B", "164k", "left", "sphere"),  # wrong density
-            ("A", "B", "32k", "right", "sphere"),  # wrong hemisphere
-            ("A", "B", "32k", "left", "midthickness"),  # wrong resource_type
+            ("X", "B", "32k", "left", "sphere"),
+            ("A", "X", "32k", "left", "sphere"),
+            ("A", "B", "164k", "left", "sphere"),
+            ("A", "B", "32k", "right", "sphere"),
+            ("A", "B", "32k", "left", "midthickness"),
         ],
         ids=[
             "wrong_source",
@@ -536,10 +604,6 @@ class TestGraphCacheSurface:
         )
         assert cache.get_surface_transform(*bad_key) is None
 
-    # ------------------------------------------------------------------ #
-    # Hemisphere case-insensitivity                                       #
-    # ------------------------------------------------------------------ #
-
     def test_hemisphere_case_insensitive(self, f: Path) -> None:
         """Hemisphere lookup is case-insensitive (stored as lowercase)."""
         cache = GraphCache()
@@ -549,16 +613,239 @@ class TestGraphCacheSurface:
 
 
 # ---------------------------------------------------------------------------
+# Annotation cache tests
+# ---------------------------------------------------------------------------
+
+
+class TestGraphCacheAnnotations:
+    """Unit tests for surface and volume annotation cache methods."""
+
+    @pytest.fixture
+    def f(self, tmp_path: Path) -> Path:
+        """Annotation fixture."""
+        p = tmp_path / "annot.func.gii"
+        p.touch()
+        return p
+
+    # ------------------------------------------------------------------ #
+    # Surface annotations                                                 #
+    # ------------------------------------------------------------------ #
+
+    def test_add_and_get_surface_annotation(self, f: Path) -> None:
+        """Round-trip add/get for a surface annotation."""
+        cache = GraphCache()
+        a = _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "left")
+        cache.add_surface_annotation(a)
+        assert cache.get_surface_annotation("Yerkes19", "myelin", "32k", "left") is a
+
+    def test_get_surface_annotation_miss(self) -> None:
+        """Returns None when no matching surface annotation exists."""
+        cache = GraphCache()
+        assert cache.get_surface_annotation("Yerkes19", "myelin", "32k", "left") is None
+
+    def test_surface_annotation_overwrite(self, f: Path, tmp_path: Path) -> None:
+        """Later insertion overwrites earlier surface annotation with the same key."""
+        cache = GraphCache()
+        a1 = _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "left")
+        f2 = tmp_path / "annot2.func.gii"
+        f2.touch()
+        a2 = _make_surface_annotation(f2, "Yerkes19", "myelin", "32k", "left")
+        cache.add_surface_annotation(a1)
+        cache.add_surface_annotation(a2)
+        assert cache.get_surface_annotation("Yerkes19", "myelin", "32k", "left") is a2
+
+    def test_get_surface_annotations_no_filter(self, f: Path) -> None:
+        """No filters returns all annotations for the space."""
+        cache = GraphCache()
+        cache.add_surface_annotations(
+            [
+                _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "left"),
+                _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "right"),
+                _make_surface_annotation(f, "Yerkes19", "curvature", "32k", "left"),
+                _make_surface_annotation(f, "D99", "myelin", "32k", "left"),
+            ]
+        )
+        results = cache.get_surface_annotations("Yerkes19")
+        assert len(results) == 3
+        assert all(r.space == "Yerkes19" for r in results)
+
+    def test_get_surface_annotations_filter_label(self, f: Path) -> None:
+        """Label filter narrows to matching annotations only."""
+        cache = GraphCache()
+        cache.add_surface_annotations(
+            [
+                _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "left"),
+                _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "right"),
+                _make_surface_annotation(f, "Yerkes19", "curvature", "32k", "left"),
+            ]
+        )
+        results = cache.get_surface_annotations("Yerkes19", label="myelin")
+        assert len(results) == 2
+        assert all(r.label == "myelin" for r in results)
+
+    def test_get_surface_annotations_filter_density(self, f: Path) -> None:
+        """Density filter narrows to matching annotations only."""
+        cache = GraphCache()
+        cache.add_surface_annotations(
+            [
+                _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "left"),
+                _make_surface_annotation(f, "Yerkes19", "myelin", "164k", "left"),
+            ]
+        )
+        results = cache.get_surface_annotations("Yerkes19", density="32k")
+        assert len(results) == 1
+        assert results[0].density == "32k"
+
+    def test_get_surface_annotations_filter_hemisphere(self, f: Path) -> None:
+        """Hemisphere filter narrows to matching annotations only."""
+        cache = GraphCache()
+        cache.add_surface_annotations(
+            [
+                _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "left"),
+                _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "right"),
+            ]
+        )
+        results = cache.get_surface_annotations("Yerkes19", hemisphere="left")
+        assert len(results) == 1
+        assert results[0].hemisphere == "left"
+
+    def test_require_surface_annotation_hit(self, f: Path) -> None:
+        """require_surface_annotation returns the annotation when found."""
+        cache = GraphCache()
+        a = _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "left")
+        cache.add_surface_annotation(a)
+        assert (
+            cache.require_surface_annotation("Yerkes19", "myelin", "32k", "left") is a
+        )
+
+    def test_require_surface_annotation_miss(self) -> None:
+        """require_surface_annotation raises ValueError when not found."""
+        cache = GraphCache()
+        with pytest.raises(ValueError, match="No 'myelin' surface annotation found"):
+            cache.require_surface_annotation("Yerkes19", "myelin", "32k", "left")
+
+    # ------------------------------------------------------------------ #
+    # Volume annotations                                                  #
+    # ------------------------------------------------------------------ #
+
+    def test_add_and_get_volume_annotation(self, f: Path) -> None:
+        """Round-trip add/get for a volume annotation."""
+        cache = GraphCache()
+        a = _make_volume_annotation(f, "D99", "myelin", "250um")
+        cache.add_volume_annotation(a)
+        assert cache.get_volume_annotation("D99", "myelin", "250um") is a
+
+    def test_get_volume_annotation_miss(self) -> None:
+        """Returns None when no matching volume annotation exists."""
+        cache = GraphCache()
+        assert cache.get_volume_annotation("D99", "myelin", "250um") is None
+
+    def test_volume_annotation_overwrite(self, f: Path, tmp_path: Path) -> None:
+        """Later insertion overwrites an earlier volume annotation with the same key."""
+        cache = GraphCache()
+        a1 = _make_volume_annotation(f, "D99", "myelin", "250um")
+        f2 = tmp_path / "annot2.nii"
+        f2.touch()
+        a2 = _make_volume_annotation(f2, "D99", "myelin", "250um")
+        cache.add_volume_annotation(a1)
+        cache.add_volume_annotation(a2)
+        assert cache.get_volume_annotation("D99", "myelin", "250um") is a2
+
+    def test_get_volume_annotations_no_filter(self, f: Path) -> None:
+        """No filters returns all annotations for the space."""
+        cache = GraphCache()
+        cache.add_volume_annotations(
+            [
+                _make_volume_annotation(f, "D99", "myelin", "250um"),
+                _make_volume_annotation(f, "D99", "curvature", "250um"),
+                _make_volume_annotation(f, "D99", "myelin", "500um"),
+                _make_volume_annotation(f, "Yerkes19", "myelin", "250um"),
+            ]
+        )
+        results = cache.get_volume_annotations("D99")
+        assert len(results) == 3
+        assert all(r.space == "D99" for r in results)
+
+    def test_get_volume_annotations_filter_label(self, f: Path) -> None:
+        """Label filter narrows to matching annotations only."""
+        cache = GraphCache()
+        cache.add_volume_annotations(
+            [
+                _make_volume_annotation(f, "D99", "myelin", "250um"),
+                _make_volume_annotation(f, "D99", "curvature", "250um"),
+            ]
+        )
+        results = cache.get_volume_annotations("D99", label="myelin")
+        assert len(results) == 1
+        assert results[0].label == "myelin"
+
+    def test_get_volume_annotations_filter_resolution(self, f: Path) -> None:
+        """Resolution filter narrows to matching annotations only."""
+        cache = GraphCache()
+        cache.add_volume_annotations(
+            [
+                _make_volume_annotation(f, "D99", "myelin", "250um"),
+                _make_volume_annotation(f, "D99", "myelin", "500um"),
+            ]
+        )
+        results = cache.get_volume_annotations("D99", resolution="250um")
+        assert len(results) == 1
+        assert results[0].resolution == "250um"
+
+    def test_require_volume_annotation_hit(self, f: Path) -> None:
+        """require_volume_annotation returns the annotation when found."""
+        cache = GraphCache()
+        a = _make_volume_annotation(f, "D99", "myelin", "250um")
+        cache.add_volume_annotation(a)
+        assert cache.require_volume_annotation("D99", "myelin", "250um") is a
+
+    def test_require_volume_annotation_miss(self) -> None:
+        """require_volume_annotation raises ValueError when not found."""
+        cache = GraphCache()
+        with pytest.raises(ValueError, match="No 'myelin' volume annotation found"):
+            cache.require_volume_annotation("D99", "myelin", "250um")
+
+    def test_bulk_add_surface_annotations(self, f: Path) -> None:
+        """Bulk insert populates all surface annotations correctly."""
+        cache = GraphCache()
+        annotations = [
+            _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "left"),
+            _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "right"),
+        ]
+        cache.add_surface_annotations(annotations)
+        assert len(cache.get_surface_annotations("Yerkes19")) == 2
+
+    def test_bulk_add_volume_annotations(self, f: Path) -> None:
+        """Bulk insert populates all volume annotations correctly."""
+        cache = GraphCache()
+        annotations = [
+            _make_volume_annotation(f, "D99", "myelin", "250um"),
+            _make_volume_annotation(f, "D99", "curvature", "250um"),
+        ]
+        cache.add_volume_annotations(annotations)
+        assert len(cache.get_volume_annotations("D99")) == 2
+
+    def test_clear_removes_annotations(self, f: Path) -> None:
+        """cache.clear() evicts both annotation tables."""
+        cache = GraphCache()
+        cache.add_surface_annotation(
+            _make_surface_annotation(f, "Yerkes19", "myelin", "32k", "left")
+        )
+        cache.add_volume_annotation(
+            _make_volume_annotation(f, "D99", "myelin", "250um")
+        )
+        cache.clear()
+        assert len(cache.surface_annotation) == 0
+        assert len(cache.volume_annotation) == 0
+
+
+# ---------------------------------------------------------------------------
 # Multi-hop provider warning tests
 # ---------------------------------------------------------------------------
 
 
 class TestMultiHopProviderWarning:
-    """Tests that a warning is emitted when a provider falls back during multi-hop.
-
-    Uses SurfaceTransformOps._two_hops directly so we can exercise the warning
-    logic without needing real neuroimaging files or a full graph.
-    """
+    """Tests that a warning is emitted when a provider falls back during multi-hop."""
 
     @pytest.fixture
     def cache_and_ops(
@@ -579,7 +866,6 @@ class TestMultiHopProviderWarning:
     def _add_transforms(
         self, cache: GraphCache, tmp_path: Path, providers: dict
     ) -> None:
-        """Register sphere transforms keyed by (src, tgt) → provider."""
         for (src, tgt), provider in providers.items():
             f = tmp_path / f"{src}_to_{tgt}_{provider}.surf.gii"
             f.touch()
@@ -590,13 +876,6 @@ class TestMultiHopProviderWarning:
             )
 
     def _add_atlas(self, cache: GraphCache, tmp_path: Path, space: str) -> None:
-        """Register a sphere atlas for mid-space so find_common_density resolves.
-
-        find_common_density intersects the mid-space atlas densities with the
-        mid→target transform densities, so both must be present at "32k".
-        """
-        from neuromaps_prime.graph import models
-
         f = tmp_path / f"{space}_sphere.surf.gii"
         f.touch()
         cache.add_surface_atlas(
@@ -629,7 +908,7 @@ class TestMultiHopProviderWarning:
         with caplog.at_level(
             logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
         ):
-            with pytest.raises(FileNotFoundError):  # wb_command not available in CI
+            with pytest.raises(FileNotFoundError):
                 ops._two_hops(
                     source_space="A",
                     mid_space="B",
@@ -650,7 +929,6 @@ class TestMultiHopProviderWarning:
     ) -> None:
         """Warning fires when the first hop's provider doesn't match the request."""
         cache, ops, tmp_path = cache_and_ops
-        # A→B only has CIVET; B→C has RheMap — request RheMap throughout
         self._add_transforms(
             cache, tmp_path, {("A", "B"): "CIVET", ("B", "C"): "RheMap"}
         )
@@ -659,7 +937,7 @@ class TestMultiHopProviderWarning:
         with caplog.at_level(
             logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
         ):
-            with pytest.raises(FileNotFoundError):  # wb_command not available in CI
+            with pytest.raises(FileNotFoundError):
                 ops._two_hops(
                     source_space="A",
                     mid_space="B",
@@ -681,7 +959,6 @@ class TestMultiHopProviderWarning:
     ) -> None:
         """Warning fires when the second hop's provider doesn't match the request."""
         cache, ops, tmp_path = cache_and_ops
-        # A→B has RheMap; B→C only has CIVET — request RheMap throughout
         self._add_transforms(
             cache, tmp_path, {("A", "B"): "RheMap", ("B", "C"): "CIVET"}
         )
@@ -693,7 +970,7 @@ class TestMultiHopProviderWarning:
         with caplog.at_level(
             logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
         ):
-            with pytest.raises(FileNotFoundError):  # wb_command not available in CI
+            with pytest.raises(FileNotFoundError):
                 ops._two_hops(
                     source_space="A",
                     mid_space="B",
@@ -723,7 +1000,7 @@ class TestMultiHopProviderWarning:
         with caplog.at_level(
             logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
         ):
-            with pytest.raises(FileNotFoundError):  # wb_command not available in CI
+            with pytest.raises(FileNotFoundError):
                 ops._two_hops(
                     source_space="A",
                     mid_space="B",
@@ -782,34 +1059,13 @@ def _make_volume_atlas(
 
 
 class TestGraphCacheVolume:
-    """Unit tests for GraphCache volume transform and atlas lookup methods.
-
-    Each test runs twice via the ``scenario`` fixture — once for
-    VolumeTransform (keyed by source+target+resolution+resource_type) and
-    once for VolumeAtlas (keyed by space+resolution+resource_type).
-    """
+    """Unit tests for GraphCache volume transform and atlas lookup methods."""
 
     @pytest.fixture(params=["transform", "atlas"])
     def scenario(
         self, request: pytest.FixtureRequest, tmp_path: Path
     ) -> dict[str, Any]:
-        """Scenario-specific helpers and caches for both volume resource types.
-
-        Returns a dict with:
-            empty_cache      - fresh GraphCache
-            populated_cache  - GraphCache with 4 entries across 2 logical groups
-            get_single       - fn(cache, *key) -> model | None
-            get_plural       - fn(cache, *group_key, **filters) -> list
-            add_single       - fn(cache, entry)
-            add_bulk         - fn(cache, entries)
-            make_entry       - fn(file, *key) -> model
-            make_alt_entry   - fn(file, *key) -> distinct model with same key
-            exact_key        - tuple for the canonical A/1mm/T1w entry
-            wrong_keys       - list of tuples that should all miss
-            group_key        - primary key used in plural queries
-            unrelated_check  - fn(result) -> bool; True if from the unrelated group
-            plural_empty_call - fn(cache) -> list; plural call on an empty cache
-        """
+        """Fixture for generating different scenarios."""
         f = tmp_path / "file.nii.gz"
         f.touch()
 
@@ -881,10 +1137,6 @@ class TestGraphCacheVolume:
                 plural_empty_call=lambda c: c.get_volume_atlases("A"),
             )
 
-    # ------------------------------------------------------------------ #
-    # get_volume_{transform,atlas} — singular                             #
-    # ------------------------------------------------------------------ #
-
     def test_hit(self, scenario: dict, tmp_path: Path) -> None:
         """Returns the entry when an exact match exists."""
         f = tmp_path / "hit.nii.gz"
@@ -932,17 +1184,12 @@ class TestGraphCacheVolume:
         f = tmp_path / "dk.nii.gz"
         f.touch()
         key_1mm = scenario["exact_key"]
-        # Swap the second-to-last element (resolution) from "1mm" to "2mm"
         key_2mm = (*key_1mm[:-2], "2mm", key_1mm[-1])
         entry_1mm = scenario["make_entry"](f, *key_1mm)
         entry_2mm = scenario["make_entry"](f, *key_2mm)
         scenario["add_bulk"](scenario["empty_cache"], [entry_1mm, entry_2mm])
         assert scenario["get_single"](scenario["empty_cache"], *key_1mm) is entry_1mm
         assert scenario["get_single"](scenario["empty_cache"], *key_2mm) is entry_2mm
-
-    # ------------------------------------------------------------------ #
-    # get_volume_{transforms,atlases} — plural                            #
-    # ------------------------------------------------------------------ #
 
     def test_no_filters_returns_all(self, scenario: dict) -> None:
         """Omitting all optional filters returns every entry for that group."""

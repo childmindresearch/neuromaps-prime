@@ -60,12 +60,29 @@ class TestResources:
                     weight=3.0,
                 ),
             ),
+            (
+                models.SurfaceAnnotation,
+                dict(
+                    space="Yerkes19",
+                    density="32k",
+                    hemisphere="left",
+                    label="myelin",
+                ),
+            ),
+            (
+                models.VolumeAnnotation,
+                dict(
+                    space="Yerkes19",
+                    resolution="2mm",
+                    label="myelin",
+                ),
+            ),
         ],
     )
     def test_validate_and_fetch(
         self, tmp_file: Path, model_cls: Any, extra_kwargs: dict[str, Any]
     ):
-        """Test resource instantation and fetching."""
+        """Test resource instantiation and fetching."""
         obj = model_cls(
             name="test",
             description="testing description",
@@ -88,13 +105,34 @@ class TestResources:
                 resource_type="SurfaceAtlas",
             )
 
+    def test_description_optional(self, tmp_file: Path):
+        """Test that description defaults to None for annotation models."""
+        surf_annot = models.SurfaceAnnotation(
+            name="test",
+            file_path=tmp_file,
+            space="Yerkes19",
+            density="32k",
+            hemisphere="left",
+            label="myelin",
+        )
+        vol_annot = models.VolumeAnnotation(
+            name="test",
+            file_path=tmp_file,
+            space="Yerkes19",
+            resolution="2mm",
+            label="myelin",
+        )
+        assert surf_annot.description is None
+        assert vol_annot.description is None
+
 
 class TestNode:
     """Tests associated with Node model."""
 
-    def test_init(self, tmp_file: Path):
-        """Test initialization of a node."""
-        surf = models.SurfaceAtlas(
+    @pytest.fixture
+    def surface(self, tmp_file: Path) -> models.SurfaceAtlas:
+        """Surface atlas fixture."""
+        return models.SurfaceAtlas(
             name="TestSurface",
             description="Test surface",
             file_path=tmp_file,
@@ -103,18 +141,101 @@ class TestNode:
             hemisphere="left",
             resource_type="SurfaceAtlas",
         )
+
+    @pytest.fixture
+    def volume(self, tmp_file: Path) -> models.VolumeAtlas:
+        """Volume atlas fixture."""
+        return models.VolumeAtlas(
+            name="TestVolume",
+            description="Test volume",
+            file_path=tmp_file,
+            space="Yerkes19",
+            resolution="2mm",
+            resource_type="VolumeAtlas",
+        )
+
+    @pytest.fixture
+    def surface_annotation(self, tmp_file: Path) -> models.SurfaceAnnotation:
+        """Surface annotation fixture."""
+        return models.SurfaceAnnotation(
+            name="TestSurfaceAnnotation",
+            file_path=tmp_file,
+            space="Yerkes19",
+            density="32k",
+            hemisphere="left",
+            label="myelin",
+        )
+
+    @pytest.fixture
+    def volume_annotation(self, tmp_file: Path) -> models.VolumeAnnotation:
+        """Volume annotation fixture."""
+        return models.VolumeAnnotation(
+            name="TestVolumeAnnotation",
+            file_path=tmp_file,
+            space="Yerkes19",
+            resolution="2mm",
+            label="myelin",
+        )
+
+    def test_init(self, surface: models.SurfaceAtlas):
+        """Test initialization of a node with surfaces only."""
         node = models.Node(
             name="TestNode",
             species="Test",
             description="A test node",
-            surfaces=[surf],
+            surfaces=[surface],
         )
-
         assert node.name == "TestNode"
         assert len(node.surfaces) == 1
         assert len(node.volumes) == 0
-        assert "A test node" in repr(node)
-        assert "TestSurface" in repr(node)
+        assert len(node.surface_annotations) == 0
+        assert len(node.volume_annotations) == 0
+
+    def test_init_with_annotations(
+        self,
+        surface: models.SurfaceAtlas,
+        volume: models.VolumeAtlas,
+        surface_annotation: models.SurfaceAnnotation,
+        volume_annotation: models.VolumeAnnotation,
+    ):
+        """Test initialization of a node with all resource types."""
+        node = models.Node(
+            name="TestNode",
+            species="Test",
+            description="A test node",
+            surfaces=[surface],
+            volumes=[volume],
+            surface_annotations=[surface_annotation],
+            volume_annotations=[volume_annotation],
+        )
+        assert len(node.surfaces) == 1
+        assert len(node.volumes) == 1
+        assert len(node.surface_annotations) == 1
+        assert len(node.volume_annotations) == 1
+
+    def test_repr(
+        self,
+        surface: models.SurfaceAtlas,
+        volume: models.VolumeAtlas,
+        surface_annotation: models.SurfaceAnnotation,
+        volume_annotation: models.VolumeAnnotation,
+    ):
+        """Test repr contains all resource names."""
+        node = models.Node(
+            name="TestNode",
+            species="Test",
+            description="A test node",
+            surfaces=[surface],
+            volumes=[volume],
+            surface_annotations=[surface_annotation],
+            volume_annotations=[volume_annotation],
+        )
+        r = repr(node)
+        assert "A test node" in r
+        assert "TestSurface" in r
+        assert "TestVolume" in r
+        assert "TestSurfaceAnnotation" in r
+        assert "TestVolumeAnnotation" in r
 
 
 class TestEdge:
@@ -138,3 +259,9 @@ class TestEdge:
         assert len(edge.surface_transforms) == 1
         assert len(edge.volume_transforms) == 0
         assert "SurfaceTransform" in repr(edge)
+
+    def test_init_defaults_to_empty(self):
+        """Test that edge initializes with empty transform lists."""
+        edge = models.Edge()
+        assert len(edge.surface_transforms) == 0
+        assert len(edge.volume_transforms) == 0
