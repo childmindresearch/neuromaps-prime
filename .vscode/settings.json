@@ -1,6 +1,6 @@
 {
     "yaml.schemas": {
-        "./schemas/neuromaps.schema.json": [
+        "./schemas/neuromaps_graph.schema.json": [
             "src/neuromaps_prime/resources/**/*.yaml"
         ]
     },

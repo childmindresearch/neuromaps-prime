@@ -1,0 +1,39 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "Nodes",
+    "type": "array",
+    "description": "List of brain template nodes.",
+    "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": {
+            "^[A-Za-z0-9_]+$": {
+                "type": "object",
+                "description": "A named brain template node.",
+                "required": [
+                    "description"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "species": {
+                        "type": "string",
+                        "description": "Species the template belongs to (e.g. 'human', 'macaque')."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Human-readable description of the template."
+                    },
+                    "references": {
+                        "$ref": "neuromaps_references.schema.json"
+                    },
+                    "surfaces": {
+                        "$ref": "neuromaps_surfaces.schema.json"
+                    },
+                    "volumes": {
+                        "$ref": "neuromaps_volumes.schema.json"
+                    }
+                }
+            }
+        }
+    }
+}

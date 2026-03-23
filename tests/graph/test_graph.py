@@ -46,7 +46,8 @@ class TestGraphUnit:
             "        1mm:\n"
             f"          T1w: {vol}\n"
             "          annotation:\n"
-            f"            myelin: {vol_annot}\n"
+            "            myelin:\n"
+            f"              uri: {vol_annot}\n"
         )
         yaml_file = tmp_path / "test_graph.yaml"
         yaml_file.write_text(yaml_content)

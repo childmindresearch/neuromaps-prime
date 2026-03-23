@@ -71,6 +71,8 @@ def graph(
                 if surf_type == "annotation":
                     for label, hemi_paths in hemis.items():
                         for hemi in list(hemi_paths):
+                            if hemi == "references":
+                                continue
                             hemi_paths[hemi] = mk(
                                 tmp_path / f"{name}_{density}_{hemi}_{label}.func.gii"
                             )
@@ -82,10 +84,10 @@ def graph(
         # Volumes
         volumes = node.get("volumes", {})
         for res, types in volumes.items():
-            for vol_type in list(types):
+            for vol_type in types:
                 if vol_type == "annotation":
-                    for label in list(types[vol_type]):
-                        types[vol_type][label] = mk(
+                    for label in types[vol_type]:
+                        types[vol_type][label]["uri"] = mk(
                             tmp_path / f"{name}_{res}_{label}.nii.gz"
                         )
                 else:
@@ -99,6 +101,8 @@ def graph(
         surfaces = edge.get("surfaces", {})
         for provider, density_dict in surfaces.items():
             for density, types in density_dict.items():
+                if density == "references":
+                    continue
                 for surf_type, hemis in types.items():
                     for hemi in list(hemis):
                         hemis[hemi] = mk(
@@ -109,6 +113,8 @@ def graph(
         volumes = edge.get("volumes", {})
         for provider, res_dict in volumes.items():
             for res, types in res_dict.items():
+                if res == "references":
+                    continue
                 for vol_type in list(types):
                     types[vol_type] = mk(
                         tmp_path / f"{src}_to_{dst}_{provider}_{res}_{vol_type}.nii.gz"

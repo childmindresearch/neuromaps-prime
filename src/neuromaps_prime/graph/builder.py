@@ -94,11 +94,11 @@ class GraphBuilder(BaseModel):
                 dict(space=node_name, description=description),
                 node_data.get("volumes", {}),
             )
-
             node_obj = Node(
                 name=node_name,
                 species=node_data.get("species", ""),
                 description=description,
+                references=node_data.get("references"),
                 surfaces=cast(list[SurfaceAtlas], surfaces),
                 volumes=cast(list[VolumeAtlas], volumes),
                 surface_annotations=surface_annotations,
@@ -203,19 +203,29 @@ class GraphBuilder(BaseModel):
         result: list[Any] = []
         annotations: list[SurfaceAnnotation] = []
 
+        transform_refs = None
         for outer_key, outer_val in surfaces_dict.items():
             if is_transform:
                 provider = outer_key
                 density_dict = outer_val
+                transform_refs = density_dict.get("references")
             else:
                 provider = ""
                 density_dict = {outer_key: outer_val}
 
             for density, types in density_dict.items():
+                if density == "references":
+                    continue
                 for surf_type, hemispheres in types.items():
                     if surf_type == "annotation":
-                        for label, hemi_paths in hemispheres.items():
-                            for hemi, path in hemi_paths.items():
+                        annot_references = None
+                        for label, value in hemispheres.items():
+                            for hemi, path in value.items():
+                                # Grab references first, before SurfaceAnnotation
+                                if "references" in value:
+                                    annot_references = value.get("references")
+                                if hemi == "references":
+                                    continue
                                 annotations.append(
                                     SurfaceAnnotation(
                                         name=f"{prefix}_{density}_{hemi}_{label}",
@@ -224,6 +234,7 @@ class GraphBuilder(BaseModel):
                                         density=density,
                                         hemisphere=hemi,
                                         file_path=self._resolve_path(path),
+                                        references=annot_references,
                                     )
                                 )
                         continue
@@ -237,6 +248,7 @@ class GraphBuilder(BaseModel):
                                 density=density,
                                 hemisphere=hemi,
                                 resource_type=surf_type,
+                                references=transform_refs,
                                 **fixed_fields,  # type: ignore[arg-type]
                                 **extra,  # type: ignore[arg-type]
                             )
@@ -276,25 +288,30 @@ class GraphBuilder(BaseModel):
         result: list[Any] = []
         annotations: list[VolumeAnnotation] = []
 
+        transform_refs = None
         for outer_key, outer_val in volumes_dict.items():
             if is_transform:
                 provider = outer_key
                 resolution_dict = outer_val
+                transform_refs = resolution_dict.get("references")
             else:
                 provider = ""
                 resolution_dict = {outer_key: outer_val}
 
             for res, types in resolution_dict.items():
-                for vol_type, path in types.items():
+                if res == "references":
+                    continue
+                for vol_type, vol_value in types.items():
                     if vol_type == "annotation":
-                        for label, label_path in path.items():
+                        for annot_key, annot_dict in vol_value.items():
                             annotations.append(
                                 VolumeAnnotation(
-                                    name=f"{prefix}_{res}_{label}",
+                                    name=f"{prefix}_{res}_{annot_key}",
                                     space=space,
-                                    label=label,
+                                    label=annot_key,
                                     resolution=res,
-                                    file_path=self._resolve_path(label_path),
+                                    file_path=self._resolve_path(annot_dict.get("uri")),
+                                    references=annot_dict.get("references"),
                                 )
                             )
                         continue
@@ -303,9 +320,10 @@ class GraphBuilder(BaseModel):
                     result.append(
                         cls(
                             name=f"{prefix}_{res}_{vol_type}",
-                            file_path=self._resolve_path(path),
+                            file_path=self._resolve_path(vol_value),
                             resolution=res,
                             resource_type=vol_type,
+                            references=transform_refs,
                             **fixed_fields,  # type: ignore[arg-type]
                             **extra,  # type: ignore[arg-type]
                         )

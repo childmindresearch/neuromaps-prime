@@ -1,0 +1,38 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "References",
+    "type": "array",
+    "description": "List of associated literature, citations, and DOIs.",
+    "items": {
+        "oneOf": [
+            {
+                "type": "string",
+                "description": "Free-form citation string."
+            },
+            {
+                "type": "object",
+                "description": "Structured reference entry with APA citation and optional lookup metadata.",
+                "required": [
+                    "citation"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "citation": {
+                        "type": "string",
+                        "description": "Full APA-formatted citation string."
+                    },
+                    "doi": {
+                        "type": "string",
+                        "description": "Digital Object Identifier for programmatic lookup.",
+                        "pattern": "^10\\.\\d{4,9}/[-._;()/:a-zA-Z0-9]+$"
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "URL to the reference.",
+                        "format": "uri"
+                    }
+                }
+            }
+        ]
+    }
+}

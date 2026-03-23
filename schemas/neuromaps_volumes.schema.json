@@ -1,0 +1,62 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "Volume Dictionary",
+    "type": "object",
+    "description": "Volume files keyed by resolution (e.g. '1mm', '2um').",
+    "additionalProperties": false,
+    "properties": {
+        "references": {
+            "oneOf": [
+                {
+                    "$ref": "neuromaps_references.schema.json"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        }
+    },
+    "patternProperties": {
+        "^(?!references)[0-9]+(u|m)m$": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "annotation": {
+                    "type": "object",
+                    "description": "Named annotation volumes.",
+                    "additionalProperties": false,
+                    "patternProperties": {
+                        "^[A-Za-z0-9_]+$": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "uri": {
+                                    "type": "string",
+                                    "format": "uri-reference",
+                                    "description": "URI pointing to an annotation volume file."
+                                },
+                                "references": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "neuromaps_references.schema.json"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patternProperties": {
+                "^((?!annotation)[A-Za-z0-9_])+$": {
+                    "type": "string",
+                    "format": "uri-reference",
+                    "description": "URI pointing to a volume file (e.g. T1w, T2w)."
+                }
+            }
+        }
+    }
+}

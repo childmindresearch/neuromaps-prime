@@ -12,6 +12,7 @@ class Resource(BaseModel):
     name: str
     description: str | None
     file_path: Path
+    references: list[str | dict[str, str]] | None = None
 
     @field_validator("file_path")
     @classmethod
@@ -109,6 +110,7 @@ class Node(BaseModel):
     name: str
     species: str
     description: str
+    references: list[str | dict[str, str]] | None = None
     surfaces: list[SurfaceAtlas] = Field(default_factory=list)
     volumes: list[VolumeAtlas] = Field(default_factory=list)
     surface_annotations: list[SurfaceAnnotation] = Field(default_factory=list)
