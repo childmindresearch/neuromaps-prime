@@ -13,6 +13,8 @@ class Resource(BaseModel, ABC):  # pragma: no cover
     name: str
     description: str
     file_path: Path
+    references: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
 
     @abstractmethod
     def fetch(self) -> Path:
@@ -110,6 +112,8 @@ class Node(BaseModel):
     name: str
     species: str
     description: str
+    references: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
     surfaces: list[SurfaceAtlas] = Field(default_factory=list)
     volumes: list[VolumeAtlas] = Field(default_factory=list)
 
