@@ -139,6 +139,14 @@ class TestGraphUnit:
         )
         assert isinstance(atlas, models.SurfaceAtlas)
 
+    @pytest.mark.xfail(reason="Not in graph YAML yet")
+    def test_fetch_surface_annotation(self, graph: NeuromapsGraph) -> None:
+        """Test fetching surface atlas."""
+        atlas = graph.fetch_surface_annotation(
+            space="Yerkes19", density="32k", label="myelin", hemisphere="left"
+        )
+        assert isinstance(atlas, models.SurfaceAnnotation)
+
     def test_add_volume_transform_and_fetch(
         self, tmp_path: Path, graph: NeuromapsGraph
     ) -> None:
@@ -173,6 +181,14 @@ class TestGraphUnit:
             space="D99", resolution="250um", resource_type="T1w"
         )
         assert isinstance(atlas, models.VolumeAtlas)
+
+    @pytest.mark.xfail(reason="Not in graph YAML yet")
+    def test_fetch_volume_annotation(self, graph: NeuromapsGraph) -> None:
+        """Test fetching surface atlas."""
+        atlas = graph.fetch_volume_annotation(
+            space="Yerkes19", resolution="250um", label="myelin"
+        )
+        assert isinstance(atlas, models.VolumeAnnotation)
 
     def test_search_surf_atlases_and_xfms(self, graph: NeuromapsGraph) -> None:
         """Test searching for surface atlases and transforms."""
