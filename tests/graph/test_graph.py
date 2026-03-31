@@ -207,6 +207,23 @@ class TestGraphUnit:
         atlases = graph.search_surface_atlases(space="alien")
         assert len(atlases) == 0
 
+    def test_search_vol_atlases_and_xfms(self, graph: NeuromapsGraph) -> None:
+        """Test searching for volume atlases and transforms."""
+        nodes = list(graph.nodes)
+        source, target = nodes[:2]
+        atlases = graph.search_volume_atlases(space=source)
+        assert all(isinstance(atlas, models.VolumeAtlas) for atlas in atlases)
+        assert all(hasattr(a, "resolution") for a in atlases)
+
+        transforms = graph.search_volume_transforms(source, target)
+        for t in transforms:
+            assert isinstance(t, models.VolumeTransform)
+
+    def test_no_volume_atlases_search(self, graph: NeuromapsGraph) -> None:
+        """Test empty list returned if no criteria met for atlases."""
+        atlases = graph.search_volume_atlases(space="alien")
+        assert len(atlases) == 0
+
     def test_find_highest_and_common_densities(self, graph: NeuromapsGraph) -> None:
         """Test density searching methods."""
         nodes = list(graph.nodes)
