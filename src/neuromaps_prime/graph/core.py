@@ -23,8 +23,10 @@ from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.graph.models import (
     Edge,
     Node,
+    SurfaceAnnotation,
     SurfaceAtlas,
     SurfaceTransform,
+    VolumeAnnotation,
     VolumeAtlas,
     VolumeTransform,
 )
@@ -262,6 +264,43 @@ class NeuromapsGraph(nx.MultiDiGraph):
             resolution=resolution,
             resource_type=resource_type,
             provider=provider,
+        )
+
+    def fetch_surface_annotation(
+        self, space: str, label: str, density: str, hemisphere: Literal["left", "right"]
+    ) -> SurfaceAnnotation | None:
+        """Fetch a surface atlas resource.
+
+        Args:
+            space: Brain template space name.
+            label: Annotation label.
+            density: Surface mesh density (e.g. ``'32k'``).
+            hemisphere: ``'left'`` or ``'right'``.
+
+        Returns:
+            The matching :class:`~neuromaps_prime.graph.models.SurfaceAnnotation`, or
+            ``None`` if not found.
+        """
+        return self._cache.get_surface_annotation(
+            space=space, label=label, density=density, hemisphere=hemisphere
+        )
+
+    def fetch_volume_annotation(
+        self, space: str, label: str, resolution: str
+    ) -> VolumeAnnotation | None:
+        """Fetch a volume atlas resource.
+
+        Args:
+            space: Brain template space name.
+            label: Annotation label.
+            resolution: Volume resolution (e.g. ``'1mm'``).
+
+        Returns:
+            The matching :class:`~neuromaps_prime.graph.models.VolumeAtlas`, or
+            ``None`` if not found.
+        """
+        return self._cache.get_volume_annotation(
+            space=space, label=label, resolution=resolution
         )
 
     # ------------------------------------------------------------------ #
