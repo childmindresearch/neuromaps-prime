@@ -1,7 +1,7 @@
 """Models for resources in the neuromaps_prime graph."""
 
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Sequence
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -12,7 +12,8 @@ class Resource(BaseModel):
     name: str
     description: str | None
     file_path: Path
-    references: list[str | dict[str, str]] | None = None
+    references: Sequence[str | dict[str, str]] | None = None
+    notes: Sequence[str] | None = None
 
     @field_validator("file_path")
     @classmethod
@@ -110,11 +111,11 @@ class Node(BaseModel):
     name: str
     species: str
     description: str
-    references: list[str | dict[str, str]] | None = None
-    surfaces: list[SurfaceAtlas] = Field(default_factory=list)
-    volumes: list[VolumeAtlas] = Field(default_factory=list)
-    surface_annotations: list[SurfaceAnnotation] = Field(default_factory=list)
-    volume_annotations: list[VolumeAnnotation] = Field(default_factory=list)
+    references: Sequence[str | dict[str, str]] | None = None
+    surfaces: Sequence[SurfaceAtlas] = Field(default_factory=list)
+    volumes: Sequence[VolumeAtlas] = Field(default_factory=list)
+    surface_annotations: Sequence[SurfaceAnnotation] = Field(default_factory=list)
+    volume_annotations: Sequence[VolumeAnnotation] = Field(default_factory=list)
 
     def __repr__(self) -> str:
         """String representation."""
@@ -137,8 +138,8 @@ class Node(BaseModel):
 class Edge(BaseModel):
     """Edge representation in transformation graph."""
 
-    surface_transforms: list[SurfaceTransform] = Field(default_factory=list)
-    volume_transforms: list[VolumeTransform] = Field(default_factory=list)
+    surface_transforms: Sequence[SurfaceTransform] = Field(default_factory=list)
+    volume_transforms: Sequence[VolumeTransform] = Field(default_factory=list)
 
     def __repr__(self) -> str:
         """String representation."""

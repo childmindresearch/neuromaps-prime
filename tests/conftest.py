@@ -71,7 +71,7 @@ def graph(
                 if surf_type == "annotation":
                     for label, hemi_paths in hemis.items():
                         for hemi in list(hemi_paths):
-                            if hemi == "references":
+                            if hemi in ("notes", "references"):
                                 continue
                             hemi_paths[hemi] = mk(
                                 tmp_path / f"{name}_{density}_{hemi}_{label}.func.gii"

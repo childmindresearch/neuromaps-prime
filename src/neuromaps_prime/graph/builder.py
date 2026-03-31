@@ -218,13 +218,12 @@ class GraphBuilder(BaseModel):
                     continue
                 for surf_type, hemispheres in types.items():
                     if surf_type == "annotation":
-                        annot_references = None
                         for label, value in hemispheres.items():
                             for hemi, path in value.items():
                                 # Grab references first, before SurfaceAnnotation
-                                if "references" in value:
-                                    annot_references = value.get("references")
-                                if hemi == "references":
+                                annot_references = value.get("references")
+                                annot_notes = value.get("notes")
+                                if hemi in ("notes", "references"):
                                     continue
                                 annotations.append(
                                     SurfaceAnnotation(
@@ -235,6 +234,7 @@ class GraphBuilder(BaseModel):
                                         hemisphere=hemi,
                                         file_path=self._resolve_path(path),
                                         references=annot_references,
+                                        notes=annot_notes,
                                     )
                                 )
                         continue
@@ -312,6 +312,7 @@ class GraphBuilder(BaseModel):
                                     resolution=res,
                                     file_path=self._resolve_path(annot_dict.get("uri")),
                                     references=annot_dict.get("references"),
+                                    notes=annot_dict.get("notes"),
                                 )
                             )
                         continue

@@ -61,6 +61,16 @@
                                             "type": "null"
                                         }
                                     ]
+                                },
+                                "notes": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "neuromaps_notes.schema.json"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
                                 }
                             }
                         }
