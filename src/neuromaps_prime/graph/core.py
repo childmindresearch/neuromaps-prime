@@ -362,6 +362,54 @@ class NeuromapsGraph(nx.MultiDiGraph):
             resource_type=resource_type,
         )
 
+    def search_volume_atlases(
+        self,
+        space: str,
+        resolution: str | None = None,
+        resource_type: str | None = None,
+    ) -> list[VolumeAtlas]:
+        """Search volume atlases for a space with optional filters.
+
+        Args:
+            space: Brain template space name.
+            resolution: Optional resolution filter.
+            hemisphere: Optional hemisphere filter.
+            resource_type: Optional resource type filter.
+
+        Returns:
+            List of matching :class:`~neuromaps_prime.graph.models.VolumeAtlas`
+            entries.
+        """
+        return self._cache.get_volume_atlases(
+            space=space, resolution=resolution, resource_type=resource_type
+        )
+
+    def search_volume_transforms(
+        self,
+        source_space: str,
+        target_space: str,
+        resolution: str | None = None,
+        resource_type: str | None = None,
+    ) -> list[VolumeTransform]:
+        """Search volume transforms between two spaces with optional filters.
+
+        Args:
+            source_space: Source space name.
+            target_space: Target space name.
+            resolution: Optional resolution filter.
+            resource_type: Optional resource type filter.
+
+        Returns:
+            List of matching :class:`~neuromaps_prime.graph.models.VolumeTransform`
+            entries.
+        """
+        return self._cache.get_volume_transforms(
+            source=source_space,
+            target=target_space,
+            resolution=resolution,
+            resource_type=resource_type,
+        )
+
     # ------------------------------------------------------------------ #
     # Density helpers                                                      #
     # ------------------------------------------------------------------ #
