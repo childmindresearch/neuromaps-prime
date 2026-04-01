@@ -44,7 +44,7 @@ jobs:
         APP_MODULE_NAME=$(ls src -U | head -1)  # Get the first module name in the src directory
         uv run pdoc src/"$APP_MODULE_NAME" -o docs_build -t docs/pdoc-theme --docformat google
     - name: Setup Pages
-      uses: actions/configure-pages@v5
+      uses: actions/configure-pages@v6
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v4
       with:
