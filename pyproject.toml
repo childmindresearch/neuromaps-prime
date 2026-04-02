@@ -56,10 +56,15 @@ source = "vcs"
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+markers = [
+  "unit: Fast (<1s) unit tests (e.g. utilities, BIDS parsing, file operations)",
+  "integration: Integration tests with real data",
+  "regression: Regressions tests with real data"
+]
 
-[tool.coverage.run]
+[tool.coverage.report]
 omit = [
-  "src/**/__init__.py",
+  "src/neuromaps_prime/resources",
   "src/neuromaps_prime/_version.py",
   "src/neuromaps_prime/plotting.py"
 ]
@@ -78,12 +83,38 @@ src = ["src"]
 target-version = "py312"
 
 [tool.ruff.lint]
-ignore = [
-  "ANN002",  # ignore type hinting *args
-  "ANN003",  # ignore type hinting **kwargs
-  "D417"  # ignore docstrings for *args and **kwargs
+select = [
+  "ANN",  # flake8-annotations
+  "ARG",  # flake8-unused-arguments
+  "B",  # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "C90",  # mccabe
+  "D",  # pydocstyle
+  "E",  # pycodestyle errors
+  "ERA",  # eradicate
+  "F",  # Pyflakes
+  "FA",  # flake8-future-annotations
+  "FBT",  # flake8-boolean-trap
+  "FURB",  # refurb
+  "I",  # isort
+  "N",  # pep8-naming
+  "NPY",  # NumPy-specific rules
+  "PD",  # pandas-vet
+  "PERF",  # Perflint
+  "PIE",  # flake8-pie
+  "PT",  # flake8-pytest-style
+  "PTH",  # flake8-use-pathlib
+  "Q",  # flake8-quotes
+  "RET",  # flake8-return
+  "RUF",  # Ruff-specific rules
+  "S",  # flake8-bandit
+  "SIM",  # flake8-simplify
+  "T20",  # flake8-print
+  "TID",  # flake8-tidy-imports
+  "TC",  # flake8-type-checking
+  "UP"  # pyupgrade
 ]
-select = ["ANN", "D", "E", "F", "I"]
+ignore = []
 fixable = ["ALL"]
 unfixable = []
 
@@ -91,8 +122,6 @@ unfixable = []
 convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
-"tests/conftest.py" = ["E402"]
-"tests/**/*.py" = ["ANN201", "ANN401", "D103"]
 
 [tool.ruff.format]
 quote-style = "double"
