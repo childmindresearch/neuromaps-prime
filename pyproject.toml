@@ -14,14 +14,15 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only"
 ]
 dependencies = [
-  "niwrap>=0.8.10",
+  "niwrap>=0.9.2",
   "nibabel>=5.2.1",
   "pyyaml>=6.0.2",
   "networkx>=3.6.1",
   "matplotlib>=3.10.7",
   "numpy>=2.4.2",
   "pydantic>=2.12.3",
-  "scipy>=1.17.0"
+  "scipy>=1.17.0",
+  "styxpodman"
 ]
 
 [dependency-groups]
@@ -128,3 +129,6 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.uv.sources]
+styxpodman = {git = "https://github.com/styx-api/styxpodman"}
