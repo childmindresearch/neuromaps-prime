@@ -1,87 +1,108 @@
-"""Tests for pydantic Graph models."""
+"""Tests for Graph models."""
 
-from pathlib import Path
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Protocol
 
 import pytest
 
 from neuromaps_prime.graph import models
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+
 
 @pytest.fixture
 def tmp_file(tmp_path: Path) -> Path:
+    """Temporary file fixture."""
     p = tmp_path / "test.file"
     p.touch()
     return p
+
+
+class ModelProtocol(Protocol):
+    """Protocol mocking Model type."""
+
+    file_path: Path
+
+    def __init__(  # noqa: D107
+        self,
+        name: str,
+        description: str,
+        file_path: Path,
+        **kwargs: Any,  # noqa: ANN401
+    ) -> None: ...
+
+    def fetch(self) -> Path: ...  # noqa: D102
 
 
 class TestResources:
     """Test different resource models."""
 
     @pytest.mark.parametrize(
-        "model_cls, extra_kwargs",
+        ("model_cls", "extra_kwargs"),
         [
             (
                 models.SurfaceAtlas,
-                dict(
-                    space="Yerkes19",
-                    density="32k",
-                    hemisphere="left",
-                    resource_type="surf_atlas",
-                ),
+                {
+                    "space": "Yerkes19",
+                    "density": "32k",
+                    "hemisphere": "left",
+                    "resource_type": "surf_atlas",
+                },
             ),
             (
                 models.VolumeAtlas,
-                dict(
-                    space="Yerkes19",
-                    resolution="2mm",
-                    resource_type="vol_atlas",
-                ),
+                {
+                    "space": "Yerkes19",
+                    "resolution": "2mm",
+                    "resource_type": "vol_atlas",
+                },
             ),
             (
                 models.SurfaceTransform,
-                dict(
-                    source_space="Yerkes19",
-                    target_space="CIVETNMT",
-                    density="32k",
-                    hemisphere="right",
-                    resource_type="surface_transform",
-                    provider="test",
-                ),
+                {
+                    "source_space": "Yerkes19",
+                    "target_space": "CIVETNMT",
+                    "density": "32k",
+                    "hemisphere": "right",
+                    "resource_type": "surface_transform",
+                    "provider": "test",
+                },
             ),
             (
                 models.VolumeTransform,
-                dict(
-                    source_space="Yerkes19",
-                    target_space="CIVETNMT",
-                    resolution="2mm",
-                    resource_type="volume_transform",
-                    provider="test",
-                    weight=3.0,
-                ),
+                {
+                    "source_space": "Yerkes19",
+                    "target_space": "CIVETNMT",
+                    "resolution": "2mm",
+                    "resource_type": "volume_transform",
+                    "provider": "test",
+                    "weight": 3.0,
+                },
             ),
             (
                 models.SurfaceAnnotation,
-                dict(
-                    space="Yerkes19",
-                    density="32k",
-                    hemisphere="left",
-                    label="myelin",
-                ),
+                {
+                    "space": "Yerkes19",
+                    "density": "32k",
+                    "hemisphere": "left",
+                    "label": "myelin",
+                },
             ),
             (
                 models.VolumeAnnotation,
-                dict(
-                    space="Yerkes19",
-                    resolution="2mm",
-                    label="myelin",
-                ),
+                {"space": "Yerkes19", "resolution": "2mm", "label": "myelin"},
             ),
         ],
     )
     def test_validate_and_fetch(
-        self, tmp_file: Path, model_cls: Any, extra_kwargs: dict[str, Any]
-    ):
+        self,
+        tmp_file: Path,
+        model_cls: Callable[..., ModelProtocol],
+        extra_kwargs: dict[str, Any],
+    ) -> None:
         """Test resource instantiation and fetching."""
         obj = model_cls(
             name="test",
@@ -92,7 +113,7 @@ class TestResources:
         assert obj.file_path == tmp_file
         assert obj.fetch() == tmp_file
 
-    def test_missing_file(self):
+    def test_missing_file(self) -> None:
         """Test missing file raises error."""
         with pytest.raises(FileNotFoundError, match="File path does not exist"):
             models.SurfaceAtlas(
@@ -105,7 +126,7 @@ class TestResources:
                 resource_type="SurfaceAtlas",
             )
 
-    def test_description_optional(self, tmp_file: Path):
+    def test_description_optional(self, tmp_file: Path) -> None:
         """Test that description defaults to None for annotation models."""
         surf_annot = models.SurfaceAnnotation(
             name="test",
@@ -177,7 +198,7 @@ class TestNode:
             label="myelin",
         )
 
-    def test_init(self, surface: models.SurfaceAtlas):
+    def test_init(self, surface: models.SurfaceAtlas) -> None:
         """Test initialization of a node with surfaces only."""
         node = models.Node(
             name="TestNode",
@@ -197,7 +218,7 @@ class TestNode:
         volume: models.VolumeAtlas,
         surface_annotation: models.SurfaceAnnotation,
         volume_annotation: models.VolumeAnnotation,
-    ):
+    ) -> None:
         """Test initialization of a node with all resource types."""
         node = models.Node(
             name="TestNode",
@@ -219,7 +240,7 @@ class TestNode:
         volume: models.VolumeAtlas,
         surface_annotation: models.SurfaceAnnotation,
         volume_annotation: models.VolumeAnnotation,
-    ):
+    ) -> None:
         """Test repr contains all resource names."""
         node = models.Node(
             name="TestNode",
@@ -241,7 +262,7 @@ class TestNode:
 class TestEdge:
     """Tests associated with Edge model."""
 
-    def test_init(self, tmp_file: Path):
+    def test_init(self, tmp_file: Path) -> None:
         """Test initialization of an edge."""
         surf_edge = models.SurfaceTransform(
             name="SurfaceTransform",
@@ -255,12 +276,11 @@ class TestEdge:
             provider="test",
         )
         edge = models.Edge(surface_transforms=[surf_edge])
-
         assert len(edge.surface_transforms) == 1
         assert len(edge.volume_transforms) == 0
         assert "SurfaceTransform" in repr(edge)
 
-    def test_init_defaults_to_empty(self):
+    def test_init_defaults_to_empty(self) -> None:
         """Test that edge initializes with empty transform lists."""
         edge = models.Edge()
         assert len(edge.surface_transforms) == 0
