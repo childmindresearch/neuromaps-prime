@@ -1,0 +1,32 @@
+name: Validate graph YAMLs
+
+on:
+  push:
+    branches:
+    - main
+    paths:
+    - resources/**/*.yaml
+    - schemas/**/neuromaps_*.schema.json
+    - .github/workflows/validate_graph.yaml
+  pull_request:
+    paths:
+    - resources/**/*.yaml
+    - schemas/**/neuromaps_*.schema.json
+    - .github/workflows/validate_graph.yaml
+
+jobs:
+  validate:
+    name: Validate graph YAML against schema
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - uses: astral-sh/setup-uv@v8.0.0
+
+    - name: Validate resources
+      run: |
+        find src/neuromaps_prime/resources -name "*.yaml" \
+          -exec uv run --only-group validate check-jsonschema \
+            --schemafile schemas/neuromaps_graph.schema.json \
+            --verbose {} +
