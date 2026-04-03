@@ -119,14 +119,16 @@ def setup_runner(
     log_level = min(verbose, len(_LOG_LEVELS) - 1)
     styx_logger.setLevel(_LOG_LEVELS[log_level])
 
-    rbc_logger = logging.getLogger("rbc")
-    rbc_logger.setLevel(_LOG_LEVELS[log_level])
-    if not rbc_logger.handlers:
+    neuromaps_prime_logger = logging.getLogger("neuromaps-PRIME")
+    neuromaps_prime_logger.setLevel(_LOG_LEVELS[log_level])
+    if not neuromaps_prime_logger.handlers:
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter("%(name)s - %(message)s"))
-        rbc_logger.addHandler(handler)
+        neuromaps_prime_logger.addHandler(handler)
 
-    return StyxContext(logger=rbc_logger, runner=styx_runner, verbose=verbose > 0)
+    return StyxContext(
+        logger=neuromaps_prime_logger, runner=styx_runner, verbose=verbose > 0
+    )
 
 
 def generate_exec_folder(suffix: str = "python") -> Path:
