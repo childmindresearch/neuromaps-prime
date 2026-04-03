@@ -6,17 +6,21 @@ pipeline. All resource lookups go through GraphCache directly.
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from niwrap import workbench
 from pydantic import BaseModel
 
-from neuromaps_prime.graph.cache import GraphCache
-from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
-from neuromaps_prime.graph.utils import GraphUtils
+from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
+from neuromaps_prime.graph.transforms.surface import (
+    SurfaceTransformOps,  # noqa: TC001 (pydantic req'd)
+)
+from neuromaps_prime.graph.utils import GraphUtils  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.transforms.utils import validate_volume_file
 from neuromaps_prime.transforms.volume import surface_project, vol_to_vol
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class VolumeTransformOps(BaseModel):
@@ -56,6 +60,7 @@ class VolumeTransformOps(BaseModel):
         output_file_path: str,
         interp: str = "linear",
         interp_params: dict[str, Any] | None = None,
+        *,
         provider: str | None = None,
     ) -> Path:
         """Warp a volume image from source_space to target_space.
@@ -127,6 +132,7 @@ class VolumeTransformOps(BaseModel):
         source_density: str | None = None,
         target_density: str | None = None,
         area_resource: str = "midthickness",
+        *,
         add_edge: bool = True,
         provider: str | None = None,
     ) -> Path | None:
@@ -150,6 +156,8 @@ class VolumeTransformOps(BaseModel):
             area_resource: Surface type used for area correction
                 (default ``'midthickness'``).
             add_edge: Whether to register composed transforms as graph edges.
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
 
         Returns:
             Path to the resampled output GIFTI, or ``None`` if the surface

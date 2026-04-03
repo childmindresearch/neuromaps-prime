@@ -10,13 +10,11 @@ Graph structure:
 
 from __future__ import annotations
 
-import logging
 import os
 from pathlib import Path
 from typing import Any, Literal
 
 import networkx as nx
-from niwrap import Runner
 
 from neuromaps_prime.graph.builder import GraphBuilder
 from neuromaps_prime.graph.cache import GraphCache
@@ -33,8 +31,8 @@ from neuromaps_prime.graph.models import (
 from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
 from neuromaps_prime.graph.transforms.volume import VolumeTransformOps
 from neuromaps_prime.graph.utils import GraphUtils
+from neuromaps_prime.niwrap import setup_runner
 from neuromaps_prime.resources import NEUROMAPSPRIME_GRAPH
-from neuromaps_prime.utils import set_runner
 
 
 class NeuromapsGraph(nx.MultiDiGraph):
@@ -45,32 +43,46 @@ class NeuromapsGraph(nx.MultiDiGraph):
 
     def __init__(
         self,
-        runner: Runner | Literal["local", "docker", "singularity"] = "local",
-        runner_kwargs: dict[str, Any] = {},
+        runner: Literal["auto", "local", "docker", "podman", "singularity"] = "auto",
+        tmp_dir: str | Path | None = None,
+        image_overrides: dict[str, str] | None = None,
+        verbose: int = 0,
         yaml_file: Path | None = None,
         data_dir: Path | None = None,
+        *,
         _testing: bool = False,
+        **kwargs,  # noqa: ANN003 (ignore annotation for kwargs)
     ) -> None:
-        """Initialize and populate NeuromapsGraph.
+        """Initialize NeuromapsGraph with appropriate runner and populate.
 
         Args:
-            runner: Execution backend for neuroimaging tools.
-            runner_kwargs: Keyword arguments forwarded to the runner.
+            runner: Type of runner to use. "auto" detects the first available
+                container runtime, falling back to "local".
+            tmp_dir: Working directory to output to
+            image_overrides: Dictionary containing overrides for container tags.
             yaml_file: Path to the graph definition YAML. Defaults to the
                 bundled ``neuromaps_graph.yaml``.
             data_dir: Optional root directory prepended to all relative file
                 paths in the YAML.
+            verbose: Verbosity level (0=WARNING, 1=INFO, 2+=DEBUG)
             _testing: When ``True``, skip YAML loading (for unit tests).
+            **kwargs: Additional keyword arguments passed for runner setup.
         """
+        # Setup
         super().__init__()
-
-        self.runner = set_runner(runner=runner, **runner_kwargs)
-        self.logger = logging.getLogger(self.runner.logger_name)
+        self.runner_ctx = setup_runner(
+            runner=runner,
+            tmp_dir=tmp_dir,
+            image_overrides=image_overrides,
+            verbose=verbose,
+            **kwargs,
+        )
+        # Resource locations
         self.data_dir = next(
             (Path(d) for d in (data_dir, os.getenv("NEUROMAPS_DATA")) if d), None
         )
         self.yaml_path = yaml_file or NEUROMAPSPRIME_GRAPH.yaml
-
+        # Graph initialization
         self._cache = GraphCache()
         self.utils = GraphUtils(graph=self, cache=self._cache)
         self.surface_ops = SurfaceTransformOps(cache=self._cache, utils=self.utils)
@@ -78,7 +90,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             cache=self._cache, utils=self.utils, surface_ops=self.surface_ops
         )
         self._builder = GraphBuilder(cache=self._cache, data_dir=self.data_dir)
-
+        # Testing
         if not _testing:
             self._builder.build_from_yaml(self, self.yaml_path)
 
@@ -503,6 +515,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         source_density: str | None = None,
         target_density: str | None = None,
         area_resource: str = "midthickness",
+        *,
         add_edge: bool = True,
         provider: str | None = None,
     ) -> Path | None:
@@ -553,6 +566,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         output_file_path: str,
         interp: str = "linear",
         interp_params: dict[str, Any] | None = None,
+        *,
         provider: str | None = None,
     ) -> Path:
         """Warp a volume image from source_space to target_space.
@@ -595,6 +609,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         source_density: str | None = None,
         target_density: str | None = None,
         area_resource: str = "midthickness",
+        *,
         add_edge: bool = True,
         provider: str | None = None,
     ) -> Path | None:

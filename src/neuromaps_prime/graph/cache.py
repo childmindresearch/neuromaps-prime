@@ -11,12 +11,12 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from neuromaps_prime.graph.models import (
-    SurfaceAnnotation,
-    SurfaceAtlas,
-    SurfaceTransform,
-    VolumeAnnotation,
-    VolumeAtlas,
-    VolumeTransform,
+    SurfaceAnnotation,  # noqa: TC001 (pydantic req'd)
+    SurfaceAtlas,  # noqa: TC001 (pydantic req'd)
+    SurfaceTransform,  # noqa: TC001 (pydantic req'd)
+    VolumeAnnotation,  # noqa: TC001 (pydantic req'd)
+    VolumeAtlas,  # noqa: TC001 (pydantic req'd)
+    VolumeTransform,  # noqa: TC001 (pydantic req'd)
 )
 
 # Key type aliases
@@ -173,11 +173,7 @@ class GraphCache(BaseModel):
         ] = annotation
 
     def get_surface_annotation(
-        self,
-        space: str,
-        label: str,
-        density: str,
-        hemisphere: Literal["left", "right"],
+        self, space: str, label: str, density: str, hemisphere: Literal["left", "right"]
     ) -> SurfaceAnnotation | None:
         """Return the matching :class:`SurfaceAnnotation`, or ``None``."""
         return self.surface_annotation.get((space, label, density, hemisphere.lower()))
@@ -210,11 +206,7 @@ class GraphCache(BaseModel):
         ]
 
     def require_surface_annotation(
-        self,
-        space: str,
-        label: str,
-        density: str,
-        hemisphere: Literal["left", "right"],
+        self, space: str, label: str, density: str, hemisphere: Literal["left", "right"]
     ) -> SurfaceAnnotation:
         """Return the matching :class:`SurfaceAnnotation` or raise ``ValueError``.
 
@@ -262,6 +254,7 @@ class GraphCache(BaseModel):
         density: str,
         hemisphere: Literal["left", "right"],
         resource_type: str,
+        *,
         provider: str | None = None,
     ) -> SurfaceTransform | None:
         """Return the matching :class:`SurfaceTransform`, or ``None``.
@@ -293,6 +286,7 @@ class GraphCache(BaseModel):
         density: str | None = None,
         hemisphere: Literal["left", "right"] | None = None,
         resource_type: str | None = None,
+        *,
         provider: str | None = None,
     ) -> list[SurfaceTransform]:
         """Return all surface transforms between two spaces with optional filters.
@@ -398,10 +392,7 @@ class GraphCache(BaseModel):
         return self.volume_annotation.get((space, label, resolution))
 
     def get_volume_annotations(
-        self,
-        space: str,
-        label: str | None = None,
-        resolution: str | None = None,
+        self, space: str, label: str | None = None, resolution: str | None = None
     ) -> list[VolumeAnnotation]:
         """Return all volume annotations for *space* with optional filters.
 
@@ -467,6 +458,7 @@ class GraphCache(BaseModel):
         target: str,
         resolution: str,
         resource_type: str,
+        *,
         provider: str | None = None,
     ) -> VolumeTransform | None:
         """Return the matching :class:`VolumeTransform`, or ``None``.
@@ -496,6 +488,7 @@ class GraphCache(BaseModel):
         target: str,
         resolution: str | None = None,
         resource_type: str | None = None,
+        *,
         provider: str | None = None,
     ) -> list[VolumeTransform]:
         """Return all volume transforms between two spaces with optional filters.

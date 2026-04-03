@@ -11,13 +11,12 @@ Intentionally stateless beyond the dependencies injected at construction:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
-import networkx as nx
 import yaml
 from pydantic import BaseModel, Field
 
-from neuromaps_prime.graph.cache import GraphCache
+from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.graph.models import (
     Edge,
     Node,
@@ -28,6 +27,9 @@ from neuromaps_prime.graph.models import (
     VolumeAtlas,
     VolumeTransform,
 )
+
+if TYPE_CHECKING:
+    import networkx as nx
 
 
 class GraphBuilder(BaseModel):
@@ -58,7 +60,7 @@ class GraphBuilder(BaseModel):
             graph: The NetworkX graph to populate with nodes and edges.
             yaml_file: Path to the YAML definition file.
         """
-        with open(yaml_file, "r") as fh:
+        with yaml_file.open() as fh:
             data = yaml.safe_load(fh)
         self.build_from_dict(graph, data)
 
@@ -86,12 +88,12 @@ class GraphBuilder(BaseModel):
 
             surfaces, surface_annotations = self._parse_surface_resources(
                 SurfaceAtlas,
-                dict(space=node_name, description=description),
+                {"space": node_name, "description": description},
                 node_data.get("surfaces", {}),
             )
             volumes, volume_annotations = self._parse_volume_resources(
                 VolumeAtlas,
-                dict(space=node_name, description=description),
+                {"space": node_name, "description": description},
                 node_data.get("volumes", {}),
             )
             node_obj = Node(
@@ -99,15 +101,15 @@ class GraphBuilder(BaseModel):
                 species=node_data.get("species", ""),
                 description=description,
                 references=node_data.get("references"),
-                surfaces=cast(list[SurfaceAtlas], surfaces),
-                volumes=cast(list[VolumeAtlas], volumes),
+                surfaces=cast("list[SurfaceAtlas]", surfaces),
+                volumes=cast("list[VolumeAtlas]", volumes),
                 surface_annotations=surface_annotations,
                 volume_annotations=volume_annotations,
             )
             graph.add_node(node_name, data=node_obj)
-            self.cache.add_surface_atlases(cast(list[SurfaceAtlas], surfaces))
+            self.cache.add_surface_atlases(cast("list[SurfaceAtlas]", surfaces))
             self.cache.add_surface_annotations(surface_annotations)
-            self.cache.add_volume_atlases(cast(list[VolumeAtlas], volumes))
+            self.cache.add_volume_atlases(cast("list[VolumeAtlas]", volumes))
             self.cache.add_volume_annotations(volume_annotations)
 
     # ------------------------------------------------------------------ #
@@ -128,21 +130,21 @@ class GraphBuilder(BaseModel):
         source, target = edge_data["from"], edge_data["to"]
         transforms, _ = self._parse_surface_resources(
             SurfaceTransform,
-            dict(
-                source_space=source,
-                target_space=target,
-                description=f"surf2surf transform from {source} to {target}",
-            ),
+            {
+                "source_space": source,
+                "target_space": target,
+                "description": f"surf2surf transform from {source} to {target}",
+            },
             edge_data.get("surfaces", {}),
         )
         graph.add_edge(
             source,
             target,
             key="surface_to_surface",
-            data=Edge(surface_transforms=cast(list[SurfaceTransform], transforms)),
+            data=Edge(surface_transforms=cast("list[SurfaceTransform]", transforms)),
             weight=1.0,
         )
-        self.cache.add_surface_transforms(cast(list[SurfaceTransform], transforms))
+        self.cache.add_surface_transforms(cast("list[SurfaceTransform]", transforms))
 
     def _build_volume_edge(
         self, graph: nx.MultiDiGraph, edge_data: dict[str, Any]
@@ -151,21 +153,21 @@ class GraphBuilder(BaseModel):
         source, target = edge_data["from"], edge_data["to"]
         transforms, _ = self._parse_volume_resources(
             VolumeTransform,
-            dict(
-                source_space=source,
-                target_space=target,
-                description=f"vol2vol transform from {source} to {target}",
-            ),
+            {
+                "source_space": source,
+                "target_space": target,
+                "description": f"vol2vol transform from {source} to {target}",
+            },
             edge_data.get("volumes", {}),
         )
         graph.add_edge(
             source,
             target,
             key="volume_to_volume",
-            data=Edge(volume_transforms=cast(list[VolumeTransform], transforms)),
+            data=Edge(volume_transforms=cast("list[VolumeTransform]", transforms)),
             weight=1.0,
         )
-        self.cache.add_volume_transforms(cast(list[VolumeTransform], transforms))
+        self.cache.add_volume_transforms(cast("list[VolumeTransform]", transforms))
 
     # ------------------------------------------------------------------ #
     # Generic resource parsers                                             #
@@ -255,8 +257,8 @@ class GraphBuilder(BaseModel):
                         )
 
         if cls is SurfaceAtlas:
-            return cast(list[SurfaceAtlas], result), annotations
-        return cast(list[SurfaceTransform], result), annotations
+            return cast("list[SurfaceAtlas]", result), annotations
+        return cast("list[SurfaceTransform]", result), annotations
 
     def _parse_volume_resources(
         self,
@@ -331,5 +333,5 @@ class GraphBuilder(BaseModel):
                     )
 
         if cls is VolumeAtlas:
-            return cast(list[VolumeAtlas], result), annotations
-        return cast(list[VolumeTransform], result), annotations
+            return cast("list[VolumeAtlas]", result), annotations
+        return cast("list[VolumeTransform]", result), annotations

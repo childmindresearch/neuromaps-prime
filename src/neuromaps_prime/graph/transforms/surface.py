@@ -10,12 +10,12 @@ import logging
 from pathlib import Path
 from typing import Any, Literal
 
-from niwrap import get_global_runner, workbench
+from niwrap import get_global_runner
 from pydantic import BaseModel, PrivateAttr
 
-from neuromaps_prime.graph.cache import GraphCache
+from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.graph.models import SurfaceTransform
-from neuromaps_prime.graph.utils import GraphUtils
+from neuromaps_prime.graph.utils import GraphUtils  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.transforms.surface import (
     label_resample,
     metric_resample,
@@ -74,6 +74,7 @@ class SurfaceTransformOps(BaseModel):
         source_density: str | None = None,
         target_density: str | None = None,
         area_resource: str = "midthickness",
+        *,
         add_edge: bool = True,
         provider: str | None = None,
     ) -> Path | None:
@@ -98,6 +99,8 @@ class SurfaceTransformOps(BaseModel):
                 (default ``'midthickness'``).
             add_edge: Whether to cache and register composed multi-hop
                 transforms as new graph edges.
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
 
         Returns:
             Path to the resampled output file, or ``None`` if the sphere
@@ -155,20 +158,28 @@ class SurfaceTransformOps(BaseModel):
             resource_type=area_resource,
         ).fetch()
 
-        resample_fn = {"label": label_resample, "metric": metric_resample}
-        result = resample_fn[transformer_type](
-            input_file_path=input_file,
-            current_sphere=sphere_transform.fetch(),
-            new_sphere=new_sphere,
-            method="ADAP_BARY_AREA",
-            area_surfs={"current-area": current_area, "new-area": new_area},
-            output_file_path=output_file_path,
-        )
-        return (
-            result.label_out
-            if isinstance(result, workbench.LabelResampleOutputs)
-            else result.metric_out
-        )
+        match transformer_type:
+            case "label":
+                return label_resample(
+                    input_file_path=input_file,
+                    current_sphere=sphere_transform.fetch(),
+                    new_sphere=new_sphere,
+                    method="ADAP_BARY_AREA",
+                    area_surfs={"current-area": current_area, "new-area": new_area},
+                    output_file_path=output_file_path,
+                ).label_out
+            case "metric":
+                return metric_resample(
+                    input_file_path=input_file,
+                    current_sphere=sphere_transform.fetch(),
+                    new_sphere=new_sphere,
+                    method="ADAP_BARY_AREA",
+                    area_surfs={"current-area": current_area, "new-area": new_area},
+                    output_file_path=output_file_path,
+                ).metric_out
+            case _:
+                msg = f"Unknown transformer_type: {transformer_type}"
+                raise ValueError(msg)
 
     # ------------------------------------------------------------------ #
     # Sphere transform resolution                                          #
@@ -181,6 +192,7 @@ class SurfaceTransformOps(BaseModel):
         density: str,
         hemisphere: Literal["left", "right"],
         output_file_path: str,
+        *,
         add_edge: bool = True,
         provider: str | None = None,
     ) -> SurfaceTransform | None:
@@ -240,6 +252,7 @@ class SurfaceTransformOps(BaseModel):
         density: str,
         hemisphere: Literal["left", "right"],
         output_file_path: str,
+        *,
         add_edge: bool,
         provider: str | None = None,
     ) -> SurfaceTransform:
@@ -299,6 +312,7 @@ class SurfaceTransformOps(BaseModel):
         density: str,
         hemisphere: Literal["left", "right"],
         output_file_path: str,
+        *,
         add_edge: bool,
         provider: str | None = None,
     ) -> SurfaceTransform:
@@ -375,6 +389,8 @@ class SurfaceTransformOps(BaseModel):
             output_file_path: Path for the composed output sphere.
             first_transform: Pre-fetched source→mid transform. Fetched from
                 cache when ``None``.
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
 
         Returns:
             Path to the composed output sphere file.

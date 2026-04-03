@@ -1,11 +1,12 @@
 """Functions for volumetric transformations using niwrap."""
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from niwrap import ants, workbench
 
-INTERP_PARAMS: dict[str, Callable[..., dict]] = {
+INTERP_PARAMS: dict[str, Callable[..., Any]] = {
     "linear": ants.ants_apply_transforms_linear,
     "nearestNeighbor": ants.ants_apply_transforms_nearest_neighbor,
     "multiLabel": ants.ants_apply_transforms_multi_label,
@@ -16,7 +17,7 @@ INTERP_PARAMS: dict[str, Callable[..., dict]] = {
     "hammingWindowedSinc": ants.ants_apply_transforms_hamming_windowed_sinc,
     "lanczosWindowedSinc": ants.ants_apply_transforms_lanczos_windowed_sinc,
 }
-INTERP_NOPARAMS: dict[str, Callable[..., dict]] = {
+INTERP_NOPARAMS: dict[str, Callable[..., Any]] = {
     "multiLabel": ants.ants_apply_transforms_multi_labelnoparams,
 }
 
@@ -68,7 +69,7 @@ def vol_to_vol(
         input_image=source,
         reference_image=target,
         output=ants.ants_apply_transforms_warped_output(out_fpath),
-        interpolation=interpolation,
+        interpolation=interpolation,  # type: ignore[arg-type]
     )
     return Path(xfm.output.output_image_outfile)
 
@@ -76,7 +77,7 @@ def vol_to_vol(
 def surface_project(
     volume: Path,
     surface: Path,
-    ribbon_surfs: workbench.VolumeToSurfaceMappingRibbonConstrainedParamsDict,
+    ribbon_surfs: workbench.VolumeToSurfaceMappingRibbonConstrainedParamsDict,  # type: ignore[valid-type]
     out_fpath: str,
 ) -> Path:
     """Project a volumetric image to a surface from source space to target space.

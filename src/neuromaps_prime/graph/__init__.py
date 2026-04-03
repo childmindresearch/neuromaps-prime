@@ -30,10 +30,10 @@ from neuromaps_prime.graph.transforms.volume import VolumeTransformOps
 from neuromaps_prime.graph.utils import GraphUtils
 
 __all__ = [
-    "NeuromapsGraph",
-    "GraphCache",
     "GraphBuilder",
+    "GraphCache",
     "GraphUtils",
+    "NeuromapsGraph",
     "SurfaceTransformOps",
     "VolumeTransformOps",
     "models",
