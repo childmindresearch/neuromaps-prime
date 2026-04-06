@@ -66,12 +66,13 @@ class TestVolumetricTransform:
         self, mock_ants_transform: MagicMock, mock_paths: dict[str, Path], interp: str
     ) -> None:
         """Test implemented interpolators."""
+        interp_params = {"gaussian": {"sigma": 1.5}, "BSpline": {"order": 3}}
         result = vol_to_vol(
             source=mock_paths["source"],
             target=mock_paths["target"],
             out_fpath=str(mock_paths["output"]),
             interp=interp,
-            interp_params={"sigma": 1.5} if interp == "gaussian" else None,
+            interp_params=interp_params.get(interp),  # type: ignore[arg-type]
         )
         mock_ants_transform.assert_called_once()
         call_kwargs = mock_ants_transform.call_args.kwargs
