@@ -177,6 +177,88 @@ class GraphBuilder(BaseModel):
         """Prepend data_dir to path when set, otherwise return as-is."""
         return (self.data_dir / path) if self.data_dir else Path(path)
 
+    def _parse_surface_annotations(
+        self, prefix: str, space: str, density: str, hemispheres: dict[str, Any]
+    ) -> list[SurfaceAnnotation]:
+        """Parse annotation entries from a surface type block.
+
+        Args:
+            prefix: Name prefix derived from space or source/target space pair.
+            space: Space identifier applied to every annotation.
+            density: Density key (e.g. ``"32k"``) shared by all entries in this block.
+            hemispheres: Dict keyed by label → {hemi: path, ...} with optional
+                ``"references"`` and ``"notes"`` keys.
+
+        Returns:
+            List of :class:`SurfaceAnnotation` instances parsed from the block.
+        """
+        annotations = []
+        for label, value in hemispheres.items():
+            # Grab references and notes once
+            references = value.get("references")
+            notes = value.get("notes")
+            for hemi, path in value.items():
+                if hemi in ("notes", "references"):
+                    continue
+                annotations.append(
+                    SurfaceAnnotation(
+                        name=f"{prefix}_{density}_{hemi}_{label}",
+                        space=space,
+                        label=label,
+                        density=density,
+                        hemisphere=hemi,
+                        file_path=self._resolve_path(path),
+                        references=references,
+                        notes=notes,
+                    )
+                )
+        return annotations
+
+    def _parse_surface_entries(
+        self,
+        cls: type[SurfaceAtlas] | type[SurfaceTransform],
+        prefix: str,
+        density: str,
+        surf_type: str,
+        hemispheres: dict[str, Any],
+        fixed_fields: dict[str, Any],
+        provider: str,
+        transform_refs: list[Any] | None,
+    ) -> list[Any]:
+        """Instantiate surface resource objects for a single type/density block.
+
+        Args:
+            cls: Model class to instantiate — either :class:`SurfaceAtlas` or
+                :class:`SurfaceTransform`.
+            prefix: Name prefix derived from space or source/target space pair.
+            density: Density key (e.g. ``"32k"``) shared by all entries in this block.
+            surf_type: Resource type string (e.g. ``"midthickness"``).
+            hemispheres: Dict mapping hemisphere key to file path.
+            fixed_fields: Fields forwarded verbatim to every instance (e.g. space,
+                description).
+            provider: Provider string injected for :class:`SurfaceTransform` entries;
+                empty string for atlases.
+            transform_refs: References list attached to the enclosing transform block,
+                or ``None`` for atlases.
+
+        Returns:
+            List of ``cls`` instances, one per hemisphere entry.
+        """
+        extra = {"provider": provider} if cls is SurfaceTransform else {}
+        return [
+            cls(
+                name=f"{prefix}_{density}_{hemi}_{surf_type}",
+                file_path=self._resolve_path(path),
+                density=density,
+                hemisphere=hemi,  # type: ignore[arg-type]
+                resource_type=surf_type,
+                references=transform_refs,
+                **fixed_fields,  # type: ignore[arg-type]
+                **extra,  # type: ignore[arg-type]
+            )
+            for hemi, path in hemispheres.items()
+        ]
+
     def _parse_surface_resources(
         self,
         cls: type[SurfaceAtlas] | type[SurfaceTransform],
@@ -193,8 +275,9 @@ class GraphBuilder(BaseModel):
                 for transforms.
 
         Returns:
-            Tuple of (resources, annotations) where resources are typed to cls
-            and annotations are any surface annotation entries found inline.
+            Tuple of ``(resources, annotations)`` where ``resources`` are cast to
+            the appropriate list type for ``cls`` and ``annotations`` are any
+            :class:`SurfaceAnnotation` entries found inline.
         """
         is_transform = cls is SurfaceTransform
         prefix = fixed_fields.get("space") or (
@@ -205,54 +288,35 @@ class GraphBuilder(BaseModel):
         result: list[Any] = []
         annotations: list[SurfaceAnnotation] = []
 
-        transform_refs = None
         for outer_key, outer_val in surfaces_dict.items():
             if is_transform:
-                provider = outer_key
-                density_dict = outer_val
+                provider, density_dict = outer_key, outer_val
                 transform_refs = density_dict.get("references")
             else:
-                provider = ""
-                density_dict = {outer_key: outer_val}
+                provider, density_dict = "", {outer_key: outer_val}
+                transform_refs = None
 
             for density, types in density_dict.items():
                 if density == "references":
                     continue
                 for surf_type, hemispheres in types.items():
                     if surf_type == "annotation":
-                        for label, value in hemispheres.items():
-                            for hemi, path in value.items():
-                                # Grab references first, before SurfaceAnnotation
-                                annot_references = value.get("references")
-                                annot_notes = value.get("notes")
-                                if hemi in ("notes", "references"):
-                                    continue
-                                annotations.append(
-                                    SurfaceAnnotation(
-                                        name=f"{prefix}_{density}_{hemi}_{label}",
-                                        space=space,
-                                        label=label,
-                                        density=density,
-                                        hemisphere=hemi,
-                                        file_path=self._resolve_path(path),
-                                        references=annot_references,
-                                        notes=annot_notes,
-                                    )
-                                )
-                        continue
-
-                    extra = {"provider": provider} if is_transform else {}
-                    for hemi, path in hemispheres.items():
-                        result.append(
-                            cls(
-                                name=f"{prefix}_{density}_{hemi}_{surf_type}",
-                                file_path=self._resolve_path(path),
-                                density=density,
-                                hemisphere=hemi,
-                                resource_type=surf_type,
-                                references=transform_refs,
-                                **fixed_fields,  # type: ignore[arg-type]
-                                **extra,  # type: ignore[arg-type]
+                        annotations.extend(
+                            self._parse_surface_annotations(
+                                prefix, space, density, hemispheres
+                            )
+                        )
+                    else:
+                        result.extend(
+                            self._parse_surface_entries(
+                                cls,
+                                prefix,
+                                density,
+                                surf_type,
+                                hemispheres,
+                                fixed_fields,
+                                provider,
+                                transform_refs,
                             )
                         )
 
