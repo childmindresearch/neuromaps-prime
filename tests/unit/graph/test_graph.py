@@ -196,6 +196,108 @@ class TestNeuromapsGraph:
         )
         assert isinstance(atlas, models.VolumeAnnotation)
 
+    def test_add_surface_atlas(self, tmp_path: Path, graph: NeuromapsGraph) -> None:
+        """Test adding a SurfaceAtlas registers it to node and cache."""
+        test_surf = tmp_path / "fake_atlas.surf.gii"
+        test_surf.touch()
+        space = next(iter(graph.nodes))
+
+        atlas = models.SurfaceAtlas(
+            name="surface_atlas_test",
+            space=space,
+            density="32k",
+            hemisphere="left",
+            resource_type="sphere",
+            file_path=test_surf,
+            description="Test surface atlas",
+        )
+        initial_count = len(graph.nodes[space]["data"].surfaces)
+        graph.add_atlas(atlas)
+
+        node_data = graph.nodes[space]["data"]
+        assert len(node_data.surfaces) == initial_count + 1
+        assert atlas in node_data.surfaces
+
+        fetched = graph.fetch_surface_atlas(
+            space=space, density="32k", hemisphere="left", resource_type="sphere"
+        )
+        assert fetched is atlas
+
+    def test_add_volume_atlas(self, tmp_path: Path, graph: NeuromapsGraph) -> None:
+        """Test adding a VolumeAtlas registers it to node and cache."""
+        test_vol = tmp_path / "fake_atlas.nii.gz"
+        test_vol.touch()
+        space = next(iter(graph.nodes))
+
+        atlas = models.VolumeAtlas(
+            name="volume_atlas_test",
+            space=space,
+            resolution="1mm",
+            resource_type="T1w",
+            file_path=test_vol,
+            description="Test volume atlas",
+        )
+        initial_count = len(graph.nodes[space]["data"].volumes)
+        graph.add_atlas(atlas)
+
+        node_data = graph.nodes[space]["data"]
+        assert len(node_data.volumes) == initial_count + 1
+        assert atlas in node_data.volumes
+
+        fetched = graph.fetch_volume_atlas(
+            space=space, resolution="1mm", resource_type="T1w"
+        )
+        assert fetched is atlas
+
+    def test_add_invalid_atlas_type(self, graph: NeuromapsGraph) -> None:
+        """Test that a non-atlas type raises TypeError."""
+        with pytest.raises(TypeError, match="Unsupported atlas type"):
+            graph.add_atlas("not_an_atlas")  # type: ignore[arg-type]
+
+    def test_add_atlas_invalid_space(
+        self, tmp_path: Path, graph: NeuromapsGraph
+    ) -> None:
+        """Test that an atlas with a non-existent space raises ValueError."""
+        test_surf = tmp_path / "ghost.surf.gii"
+        test_surf.touch()
+
+        atlas = models.SurfaceAtlas(
+            name="orphan_atlas",
+            space="non_existent_space",
+            density="32k",
+            hemisphere="left",
+            resource_type="sphere",
+            file_path=test_surf,
+            provider="test",
+            description="Atlas with unknown space",
+        )
+        with pytest.raises(ValueError, match="not found"):
+            graph.add_atlas(atlas)
+
+    def test_add_multiple_surface_atlases(
+        self, tmp_path: Path, graph: NeuromapsGraph
+    ) -> None:
+        """Test adding multiple SurfaceAtlases accumulates correctly."""
+        space = next(iter(graph.nodes))
+        initial_count = len(graph.nodes[space]["data"].surfaces)
+
+        for i, hemi in enumerate(("left", "right")):
+            surf = tmp_path / f"atlas_{hemi}.surf.gii"
+            surf.touch()
+            atlas = models.SurfaceAtlas(
+                name=f"multi_atlas_{i}",
+                space=space,
+                density="32k",
+                hemisphere=hemi,
+                resource_type="midthickness",
+                file_path=surf,
+                provider="test",
+                description=f"Multi surface atlas {hemi}",
+            )
+            graph.add_atlas(atlas)
+
+        assert len(graph.nodes[space]["data"].surfaces) == initial_count + 2
+
     def test_search_surf_atlases(self, graph: NeuromapsGraph) -> None:
         """Test searching for surface atlases."""
         atlases = graph.search_surface_atlases(space=next(iter(graph.nodes)))
