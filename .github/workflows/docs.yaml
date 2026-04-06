@@ -15,9 +15,9 @@ on:
   workflow_run:
     workflows: [Python Tests]
     types:
-    - completed
+      - completed
     branches:
-    - main
+      - main
   workflow_dispatch:
 
 jobs:
@@ -28,18 +28,18 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-    - uses: actions/checkout@v6
-    - uses: astral-sh/setup-uv@v8.0.0
-    - name: Install the project
-      run: uv sync --only-group docs
-    - name: Build docs
-      run: uv run pdoc src/neuromaps_prime -o docs_build -t docs/pdoc-theme --docformat google
-    - name: Setup Pages
-      uses: actions/configure-pages@v6
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v4
-      with:
-        path: ./docs_build
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v5
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8.0.0
+      - name: Install the project
+        run: uv sync --only-group docs
+      - name: Build docs
+        run: uv run pdoc src/neuromaps_prime -o docs_build -t docs/pdoc-theme --docformat google
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./docs_build
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
