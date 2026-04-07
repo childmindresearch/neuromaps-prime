@@ -190,7 +190,7 @@ class VolumeTransformOps(BaseModel):
             area_resource=area_resource,
         )
 
-        return self.surface_ops.transform(
+        return self.surface_ops.transform_surface(
             transformer_type=transformer_type,
             input_file=projected,
             source_space=source_space,

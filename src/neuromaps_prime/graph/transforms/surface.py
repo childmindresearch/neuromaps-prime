@@ -10,7 +10,6 @@ import logging
 from pathlib import Path
 from typing import Any, Literal
 
-from niwrap import get_global_runner
 from pydantic import BaseModel, PrivateAttr
 
 from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
@@ -57,13 +56,13 @@ class SurfaceTransformOps(BaseModel):
 
         Lazily grab logger from Graph initialization.
         """
-        self._logger = logging.getLogger(get_global_runner().logger_name)
+        self._logger = logging.getLogger("neuromaps-PRIME")
 
     # ------------------------------------------------------------------ #
-    # Public transformer                                                   #
+    # Surface-to-surface                                                 #
     # ------------------------------------------------------------------ #
 
-    def transform(  # pragma: no cover (individual pieces tested)
+    def transform_surface(
         self,
         transformer_type: Literal["metric", "label"],
         input_file: Path,
@@ -177,9 +176,6 @@ class SurfaceTransformOps(BaseModel):
                     area_surfs={"current-area": current_area, "new-area": new_area},
                     output_file_path=output_file_path,
                 ).metric_out
-            case _:
-                msg = f"Unknown transformer_type: {transformer_type}"
-                raise ValueError(msg)
 
     # ------------------------------------------------------------------ #
     # Sphere transform resolution                                          #

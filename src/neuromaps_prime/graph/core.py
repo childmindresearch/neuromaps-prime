@@ -139,7 +139,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             TypeError: If atlas is not SurfaceAtlas or VolumeAtlas.
             ValueError: If atlas space is not present in the graph.
         """
-        if not isinstance(atlas, (SurfaceAtlas, VolumeAtlas)):
+        if not isinstance(atlas, (SurfaceAtlas | VolumeAtlas)):
             raise TypeError(f"Unsupported atlas type: {type(atlas)}")
 
         node_name = atlas.space
@@ -542,7 +542,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             Path to the resampled output, or ``None`` if the transform could
             not be resolved.
         """
-        return self.surface_ops.transform(
+        return self.surface_ops.transform_surface(
             transformer_type=transformer_type,
             input_file=input_file,
             source_space=source_space,
