@@ -10,6 +10,7 @@ import logging
 from pathlib import Path
 from typing import Any, Literal
 
+from niwrap import workbench
 from pydantic import BaseModel, PrivateAttr
 
 from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
@@ -176,6 +177,102 @@ class SurfaceTransformOps(BaseModel):
                     area_surfs={"current-area": current_area, "new-area": new_area},
                     output_file_path=output_file_path,
                 ).metric_out
+
+    def transform_surface_to_volume(
+        self,
+        transformer_type: Literal["metric", "label"],
+        input_file: Path,
+        ref_volume: Path,
+        source_space: str,
+        target_space: str,
+        hemisphere: Literal["left", "right"],
+        output_file_path: str,
+        source_density: str | None = None,
+        target_density: str | None = None,
+        area_resource: str = "midthickness",
+        *,
+        add_edge: bool = True,
+        provider: str | None = None,
+    ) -> Path:
+        """Resample from source to target on surface and transform to volume.
+
+        Two-stage pipeline:
+          1. Surface → surface resampling via :class:`SurfaceTransformOps`.
+          2. Transform surface → volume
+
+        Args:
+            transformer_type: ``'metric'`` or ``'label'``.
+            input_file: Input GIFTI file to resample.
+            ref_volume: Reference volume space to transform to.
+            source_space: Source brain template space.
+            target_space: Target brain template space.
+            hemisphere: ``'left'`` or ``'right'``.
+            output_file_path: Path for the resampled output file.
+            source_density: Source mesh density. Estimated from input_file
+                when ``None``.
+            target_density: Target mesh density. Highest available used when
+                ``None``.
+            area_resource: Surface type used for area correction
+                (default ``'midthickness'``).
+            add_edge: Whether to cache and register composed multi-hop
+                transforms as new graph edges.
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
+
+        Returns:
+            Path to the resampled output NIFTI, or ``None`` if the surface
+            transform could not be resolved.
+
+        Raises:
+            ValueError: If transformer_type is invalid, or required surface
+                resources are missing.
+            FileNotFoundError: If input_file does not exist.
+        """
+        out_surface_fname = (
+            "out.label.gii" if transformer_type == "label" else "out.shape.gii"
+        )
+        out_surface = self.transform_surface(
+            transformer_type=transformer_type,
+            input_file=input_file,
+            source_space=source_space,
+            target_space=target_space,
+            hemisphere=hemisphere,
+            output_file_path=out_surface_fname,
+            source_density=source_density,
+            target_density=target_density,
+            area_resource=area_resource,
+            add_edge=add_edge,
+            provider=provider,
+        )
+        if out_surface is None:
+            raise FileNotFoundError("Unable to perform transformation to target space.")
+
+        target_density = target_density or self.utils.find_highest_density(
+            space=target_space
+        )
+        target_surface = self.cache.get_surface_atlas(
+            space=target_space,
+            density=target_density,
+            hemisphere=hemisphere,
+            resource_type="midthickness",
+        )
+        if target_surface is None:
+            raise FileNotFoundError("Unable to find target surface.")
+        match transformer_type:
+            case "label":
+                return workbench.label_to_volume_mapping(
+                    label=out_surface,
+                    surface=target_surface.file_path,
+                    volume_space=ref_volume,
+                    volume_out=output_file_path,
+                ).volume_out
+            case "metric":
+                return workbench.metric_to_volume_mapping(
+                    metric=out_surface,
+                    surface=target_surface.file_path,
+                    volume_space=ref_volume,
+                    volume_out=output_file_path,
+                ).volume_out
 
     # ------------------------------------------------------------------ #
     # Sphere transform resolution                                          #

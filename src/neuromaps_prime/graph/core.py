@@ -556,6 +556,60 @@ class NeuromapsGraph(nx.MultiDiGraph):
             provider=provider,
         )
 
+    def surface_to_volume_transformer(
+        self,
+        transformer_type: Literal["metric", "label"],
+        input_file: Path,
+        ref_volume: Path,
+        source_space: str,
+        target_space: str,
+        hemisphere: Literal["left", "right"],
+        output_file_path: str,
+        source_density: str | None = None,
+        target_density: str | None = None,
+        area_resource: str = "midthickness",
+        *,
+        add_edge: bool = True,
+        provider: str | None = None,
+    ) -> Path | None:
+        """Project a volume to surface then resample to target_space.
+
+        Args:
+            transformer_type: ``'metric'`` or ``'label'``.
+            input_file: NIfTI volume in source_space.
+            ref_volume: Reference volume space to transform to.
+            source_space: Source brain template space.
+            target_space: Target brain template space.
+            hemisphere: ``'left'`` or ``'right'``.
+            output_file_path: Path for the final resampled GIFTI output.
+            source_density: Source surface density. Highest available used
+                when ``None``.
+            target_density: Target surface density. Highest available used
+                when ``None``.
+            area_resource: Surface type for area correction
+                (default ``'midthickness'``).
+            add_edge: Whether to register composed transforms.
+            provider: Optional provider name. Falls back to the first
+                registered provider when ``None``.
+
+        Returns:
+            Path to the surface resampled to volume.
+        """
+        return self.surface_ops.transform_surface_to_volume(
+            transformer_type=transformer_type,
+            input_file=input_file,
+            ref_volume=ref_volume,
+            source_space=source_space,
+            target_space=target_space,
+            hemisphere=hemisphere,
+            output_file_path=output_file_path,
+            source_density=source_density,
+            target_density=target_density,
+            area_resource=area_resource,
+            add_edge=add_edge,
+            provider=provider,
+        )
+
     def volume_to_volume_transformer(
         self,
         input_file: Path,
