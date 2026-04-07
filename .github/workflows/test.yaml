@@ -15,8 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-    - name: Setup venv
-      uses: ./.github/actions/setup-venv
+    - uses: astral-sh/setup-uv@v8.0.0
     - name: Run tests
       id: run-tests
       run: >
@@ -24,9 +23,9 @@ jobs:
           --junitxml=pytest.xml \
           --cov-report=term-missing:skip-covered \
           --cov-report=xml:coverage.xml \
-          --cov=src tests \
+          --cov=src \
           --log-level=DEBUG \
-          --verbose
+          --verbose tests
     - name: Coverage comment
       if: github.event_name == 'pull_request'
       uses: MishaKav/pytest-coverage-comment@v1
@@ -38,10 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-    - name: Setup venv
-      uses: ./.github/actions/setup-venv
-      with:
-        only-dev: true
+    - uses: astral-sh/setup-uv@v8.0.0
+    - run: uv sync --only-dev
     - name: Ruff format
       run: uv run ruff format --check ./src
     - name: Ruff check
@@ -51,16 +48,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-    - name: Setup venv
-      uses: ./.github/actions/setup-venv
-    - run: |
-        uv run mypy ./src
+    - uses: astral-sh/setup-uv@v8.0.0
+    - run: uv sync --only-dev
+    - run: uv run mypy ./src
 
   deptry:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-    - name: Setup venv
-      uses: ./.github/actions/setup-venv
-    - run: |-
-        uv run deptry ./src
+    - uses: astral-sh/setup-uv@v8.0.0
+    - run: uv sync --only-dev
+    - run: uv run deptry ./src

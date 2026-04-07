@@ -1,4 +1,4 @@
-# Neuromaps-PRIME <img src="sticker.png" align="right" width="25%"/>
+# Neuromaps-PRIME <img src=".github/sticker.png" align="right" width="25%"/>
 
 [![Build](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test.yaml?query=branch%3Amain)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
