@@ -65,7 +65,7 @@ class TestVolumeToSurfaceTransformer:
     def make_atlas_side_effect(
         self,
         tmp_path: Path,
-        **entities: [str, Literal["left", "right"], str, str],  # noqa: ARG002
+        **entities: dict[str, str],  # noqa: ARG002
     ) -> Callable[[str, Literal["left", "right"], str, str], MagicMock]:
         """Create a side effect returning distinct atlases per resource type."""
 

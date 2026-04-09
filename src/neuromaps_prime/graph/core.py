@@ -595,7 +595,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         Returns:
             Path to the surface resampled to volume.
         """
-        return self.surface_ops.transform_surface_to_volume(
+        return self.surface_ops.transform_surface_to_volume(  # pragma: no cover
             transformer_type=transformer_type,
             input_file=input_file,
             ref_volume=ref_volume,
