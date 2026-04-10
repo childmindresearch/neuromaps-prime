@@ -102,72 +102,72 @@ nodes:
           right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
         annotation:
           RMampa:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMampa_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-ampa_annot.func.gii
             right: null
             references: null
             notes: null
           RMcgp5:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMcgp5_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-cgp5_annot.func.gii
             right: null
             references: null
             notes: null
           RMdamp:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMdamp_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-damp_annot.func.gii
             right: null
             references: null
             notes: null
           RMdpat:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMdpat_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-dpat_annot.func.gii
             right: null
             references: null
             notes: null
           RMdpmg:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMdpmg_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-dpmg_annot.func.gii
             right: null
             references: null
             notes: null
           RMflum:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMflum_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-flum_annot.func.gii
             right: null
             references: null
             notes: null
           RMkain:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMkain_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-kain_annot.func.gii
             right: null
             references: null
             notes: null
           RMketa:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMketa_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-keta_annot.func.gii
             right: null
             references: null
             notes: null
           RMmk80:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMmk80_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-mk80_annot.func.gii
             right: null
             references: null
             notes: null
           RMmusc:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMmusc_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-musc_annot.func.gii
             right: null
             references: null
             notes: null
           RMoxot:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMoxot_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-oxot_annot.func.gii
             right: null
             references: null
             notes: null
           RMpire:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMpire_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-pire_annot.func.gii
             right: null
             references: null
             notes: null
           RMpraz:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMpraz_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-praz_annot.func.gii
             right: null
             references: null
             notes: null
           RMuk14:
-            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RMuk14_annot.func.gii
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM_acq-uk14_annot.func.gii
             right: null
             references: null
             notes: null
