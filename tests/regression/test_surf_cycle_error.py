@@ -70,7 +70,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
 
             try:
                 current_surface = graph.surface_to_surface_transformer(
-                    transformer_type="metric",
+                    transformer_type="surface",
                     input_file=current_surface,
                     source_space=src,
                     target_space=dst,
