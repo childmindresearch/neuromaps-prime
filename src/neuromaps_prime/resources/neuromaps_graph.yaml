@@ -94,6 +94,12 @@ nodes:
         inflated:
           left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_inflated.surf.gii
           right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
+        annotation:
+          RM_cgp5:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_desc-RM-cgp5.func.gii
+            right: null
+            references: null
+            notes: null
     volumes:
       500um:
         T1w: share/Inputs/Yerkes19/src-Yerkes19_res-0p50mm_T1w.nii
