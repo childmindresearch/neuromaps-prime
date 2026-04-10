@@ -35,6 +35,7 @@ def surface_sphere_project_unproject(
     for path, desc in zip(
         [sphere_in, sphere_project_to, sphere_unproject_from],
         ["Input sphere", "Sphere to project to", "Sphere to unproject from"],
+        strict=True,
     ):
         if not path.exists():
             raise FileNotFoundError(f"{desc} not found: {path}")
@@ -55,9 +56,8 @@ def metric_resample(
     current_sphere: str | Path,
     new_sphere: str | Path,
     method: Literal["ADAP_BARY_AREA", "BARYCENTRIC"],
-    area_surfs: workbench.MetricResampleAreaSurfsParamsDict,
+    area_surfs: workbench.MetricResampleAreaSurfsParamsDict,  # type: ignore[valid-type]
     output_file_path: str,
-    **kwargs,
 ) -> workbench.MetricResampleOutputs:
     """Resample a surface metric from one sphere to another.
 
@@ -83,6 +83,7 @@ def metric_resample(
     for path, desc in zip(
         [input_file_path, current_sphere, new_sphere],
         ["Input file", "Current sphere", "New sphere"],
+        strict=True,
     ):
         if not path.exists():
             raise FileNotFoundError(f"{desc} not found: {path}")
@@ -110,9 +111,8 @@ def label_resample(
     current_sphere: str | Path,
     new_sphere: str | Path,
     method: Literal["ADAP_BARY_AREA", "BARYCENTRIC"],
-    area_surfs: workbench.LabelResampleAreaSurfsParamsDict,
+    area_surfs: workbench.LabelResampleAreaSurfsParamsDict,  # type: ignore[valid-type]
     output_file_path: str,
-    **kwargs,
 ) -> workbench.LabelResampleOutputs:
     """Resample a surface label from one sphere to another.
 
@@ -138,6 +138,7 @@ def label_resample(
     for path, desc in zip(
         [input_file_path, current_sphere, new_sphere],
         ["Input file", "Current sphere", "New sphere"],
+        strict=True,
     ):
         if not path.exists():
             raise FileNotFoundError(f"{desc} not found: {path}")

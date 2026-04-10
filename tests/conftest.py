@@ -155,13 +155,11 @@ def _rewrite_edge_files(tmp_path: Path, edge: dict[str, Any]) -> None:
 
 
 @pytest.fixture
-def graph(
-    niwrap_runner: niwrap.Runner, tmp_path: Path, request: pytest.FixtureRequest
-) -> NeuromapsGraph:
+def graph(tmp_path: Path, request: pytest.FixtureRequest) -> NeuromapsGraph:
     """Create a graph fixture to use for tests."""
     data_dir = request.config.getoption("--data-dir")
     if data_dir is not None:
-        return NeuromapsGraph(runner=niwrap_runner, data_dir=Path(data_dir).resolve())
+        return NeuromapsGraph(runner="auto", data_dir=Path(data_dir).resolve())
 
     graph = NeuromapsGraph(_testing=True)
     data = yaml.safe_load(graph.yaml_path.read_text())

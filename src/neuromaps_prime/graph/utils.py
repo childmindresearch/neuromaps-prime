@@ -11,7 +11,7 @@ from typing import Any
 import networkx as nx
 from pydantic import BaseModel
 
-from neuromaps_prime.graph.cache import GraphCache
+from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.transforms.utils import _get_density_key
 
 
@@ -165,11 +165,12 @@ class GraphUtils(BaseModel):
         """
         try:
             return self.graph.nodes[node_name]["data"]
-        except KeyError:
-            raise ValueError(
-                f"Node '{node_name}' not found."
-                f" Available nodes: {sorted(self.graph.nodes)}"
+        except KeyError as e:
+            msg = (
+                f"Node {node_name!r} not found. "
+                f"Availble nodes: {sorted(self.graph.nodes)}"
             )
+            raise ValueError(msg) from e
 
     def get_graph_info(self) -> dict[str, int]:
         """Return a summary of the graph structure.

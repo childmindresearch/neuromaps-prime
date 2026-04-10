@@ -37,9 +37,7 @@ dev = [
   "types-pyyaml>=6.0.12.20250915"
 ]
 docs = ["pdoc>=15.0.4"]
-validate = [
-  "check-jsonschema>=0.37.1"
-]
+validate = ["check-jsonschema>=0.37.1"]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
@@ -82,6 +80,7 @@ line-length = 88
 indent-width = 4
 src = ["src"]
 target-version = "py312"
+extend-exclude = ["examples/*.py"]
 
 [tool.ruff.lint]
 select = [

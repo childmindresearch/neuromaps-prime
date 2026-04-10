@@ -74,7 +74,7 @@ class TestSurfaceToSurfaceTransformer:
     ) -> None:
         """Test successful metric/label transformation delegates to surface ops."""
         mock_output = Path(basic_params.output_file_path)
-        mock_transformer.surface_ops.transform.return_value = mock_output
+        mock_transformer.surface_ops.transform_surface.return_value = mock_output
 
         with patch(
             "neuromaps_prime.transforms.utils.estimate_surface_density",
@@ -83,7 +83,7 @@ class TestSurfaceToSurfaceTransformer:
             result = mock_transformer.surface_to_surface_transformer(
                 transformer_type=transformer_type, **basic_params._asdict()
             )
-        mock_transformer.surface_ops.transform.assert_called_once_with(
+        mock_transformer.surface_ops.transform_surface.assert_called_once_with(
             transformer_type=transformer_type,
             **basic_params._asdict(),
             area_resource="midthickness",
@@ -106,7 +106,7 @@ class TestSurfaceToSurfaceTransformer:
         self, mock_transformer: NeuromapsGraph, basic_params: BasicParams
     ) -> None:
         """Test None returned if transform not found."""
-        mock_transformer.surface_ops.transform.return_value = None
+        mock_transformer.surface_ops.transform_surface.return_value = None
 
         with patch(
             "neuromaps_prime.transforms.utils.estimate_surface_density",
@@ -122,7 +122,7 @@ class TestSurfaceToSurfaceTransformer:
     ) -> None:
         """Test that ValueError is raised when a required surface atlas is missing."""
         mock_transformer.surface_ops = MagicMock()
-        mock_transformer.surface_ops.transform.side_effect = ValueError(
+        mock_transformer.surface_ops.transform_surface.side_effect = ValueError(
             "No 'midthickness' surface atlas found for space 'Yerkes19' "
             "(density='32k', hemisphere='left')"
         )
@@ -414,3 +414,108 @@ class TestSurfaceToSurfaceTransformPrivate:
             hemisphere="left",
         )
         assert output == str(tmp_path / "src-A_to-B_den-32k_hemi-L_sphere.surf.gii")
+
+
+class TestTransformSurface:
+    """Unit tests for SurfaceTransformOps.transform_surface."""
+
+    @pytest.fixture
+    def mock_ops(self, graph: NeuromapsGraph) -> NeuromapsGraph:
+        """Mock surface operations."""
+        graph.surface_ops.cache = MagicMock()
+        graph.surface_ops.utils = MagicMock()
+        graph.surface_ops._resolve_sphere_transform = MagicMock()
+        return graph
+
+    @pytest.fixture
+    def basic_params(self, tmp_path: Path) -> dict:
+        """Basic parameters."""
+        input_file = tmp_path / "in.func.gii"
+        input_file.touch()
+        return {
+            "input_file": input_file,
+            "source_space": "fsLR",
+            "target_space": "MNI152",
+            "hemisphere": "left",
+            "output_file_path": str(tmp_path / "out.func.gii"),
+            "source_density": "32k",
+            "target_density": "2mm",
+        }
+
+    @pytest.mark.parametrize("transformer_type", ["metric", "label"])
+    def test_happy_path(
+        self,
+        mock_ops: NeuromapsGraph,
+        basic_params: dict,
+        transformer_type: Literal["metric", "label"],
+        tmp_path: Path,
+    ) -> None:
+        """Metric and label paths call correct resample fn and return output path."""
+        mock_ops.surface_ops._resolve_sphere_transform.return_value = MagicMock(
+            fetch=MagicMock(return_value=tmp_path / "sphere.surf.gii")
+        )
+        mock_ops.surface_ops.cache.require_surface_atlas.return_value = MagicMock(
+            fetch=MagicMock(return_value=tmp_path / "area.surf.gii")
+        )
+        expected_out = tmp_path / "out.func.gii"
+        resample_result = MagicMock(metric_out=expected_out, label_out=expected_out)
+        resample_fn = (
+            "neuromaps_prime.graph.transforms.surface.metric_resample"
+            if transformer_type == "metric"
+            else "neuromaps_prime.graph.transforms.surface.label_resample"
+        )
+        with patch(resample_fn, return_value=resample_result):
+            result = mock_ops.surface_ops.transform_surface(
+                transformer_type=transformer_type, **basic_params
+            )
+        assert result == expected_out
+
+    def test_source_density_estimated_when_none(
+        self, mock_ops: NeuromapsGraph, basic_params: dict, tmp_path: Path
+    ) -> None:
+        """source_density=None triggers estimate_surface_density."""
+        basic_params["source_density"] = None
+        mock_ops.surface_ops._resolve_sphere_transform.return_value = MagicMock()
+        mock_ops.surface_ops.cache.require_surface_atlas.return_value = MagicMock(
+            fetch=MagicMock(return_value=tmp_path / "area.surf.gii")
+        )
+        with (
+            patch(
+                "neuromaps_prime.graph.transforms.surface.estimate_surface_density",
+                return_value="32k",
+            ) as mock_est,
+            patch("neuromaps_prime.graph.transforms.surface.metric_resample"),
+        ):
+            mock_ops.surface_ops.transform_surface(
+                transformer_type="metric", **basic_params
+            )
+        mock_est.assert_called_once_with(basic_params["input_file"])
+
+    def test_target_density_uses_highest_when_none(
+        self, mock_ops: NeuromapsGraph, basic_params: dict, tmp_path: Path
+    ) -> None:
+        """target_density=None calls find_highest_density."""
+        basic_params["target_density"] = None
+        mock_ops.surface_ops._resolve_sphere_transform.return_value = MagicMock()
+        mock_ops.surface_ops.utils.find_highest_density.return_value = "164k"
+        mock_ops.surface_ops.cache.require_surface_atlas.return_value = MagicMock(
+            fetch=MagicMock(return_value=tmp_path / "area.surf.gii")
+        )
+        with patch("neuromaps_prime.graph.transforms.surface.metric_resample"):
+            mock_ops.surface_ops.transform_surface(
+                transformer_type="metric", **basic_params
+            )
+        mock_ops.surface_ops.utils.find_highest_density.assert_called_once_with(
+            space="MNI152"
+        )
+
+    def test_returns_none_when_no_sphere_transform(
+        self, mock_ops: NeuromapsGraph, basic_params: dict
+    ) -> None:
+        """Returns None when _resolve_sphere_transform returns None."""
+        mock_ops.surface_ops._resolve_sphere_transform.return_value = None
+        result = mock_ops.surface_ops.transform_surface(
+            transformer_type="metric", **basic_params
+        )
+        assert result is None
+        mock_ops.surface_ops.cache.require_surface_atlas.assert_not_called()

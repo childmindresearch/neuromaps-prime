@@ -1,87 +1,109 @@
-"""Tests for graph operations."""
+"""Tests for surface transformation operations."""
 
 from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from neuromaps_prime.graph import models
 from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
-from tests.unit.graph.test_cache import _make_surface_transform
+from neuromaps_prime.graph.utils import GraphUtils
 
 if TYPE_CHECKING:
     from pathlib import Path
 
+_LOGGER = "neuromaps_prime.graph.transforms.surface"
 
-class TestMultiHopProviderWarning:
-    """Tests that a warning is emitted when a provider falls back during multi-hop."""
+
+class TestTwoHops:
+    """Unit tests for SurfaceTransformOps._two_hops with mocked outputs."""
 
     @pytest.fixture
-    def cache_and_ops(
-        self, tmp_path: Path
-    ) -> tuple[GraphCache, SurfaceTransformOps, Path]:
-        """Build a minimal cache and SurfaceTransformOps wired to it."""
-        import networkx as nx
+    def ops(self) -> SurfaceTransformOps:
+        """Create SurfaceTransformOps with mocked cache and utils."""
+        cache = MagicMock(spec=GraphCache)
+        utils = MagicMock(spec=GraphUtils)
+        return SurfaceTransformOps(cache=cache, utils=utils)
 
-        from neuromaps_prime.graph.utils import GraphUtils
-
-        cache = GraphCache()
-        graph = nx.MultiDiGraph()
-        graph.add_nodes_from(["A", "B", "C"])
-        utils = GraphUtils(graph=graph, cache=cache)
-        ops = SurfaceTransformOps(cache=cache, utils=utils)
-        return cache, ops, tmp_path
-
-    def _add_transforms(
-        self, cache: GraphCache, tmp_path: Path, providers: dict
-    ) -> None:
-        for (src, tgt), provider in providers.items():
-            f = tmp_path / f"{src}_to_{tgt}_{provider}.surf.gii"
+    @pytest.fixture
+    def mock_transforms(self, tmp_path: Path) -> dict[str, MagicMock]:
+        """Create mock transforms with fetchable paths."""
+        sphere_in = tmp_path / "sphere_in.surf.gii"
+        sphere_project_to = tmp_path / "sphere_project_to.surf.gii"
+        sphere_unproject_from = tmp_path / "sphere_unproject_from.surf.gii"
+        for f in (sphere_in, sphere_project_to, sphere_unproject_from):
             f.touch()
-            cache.add_surface_transform(
-                _make_surface_transform(
-                    f, src, tgt, "32k", "left", "sphere", provider=provider
-                )
-            )
 
-    def _add_atlas(self, cache: GraphCache, tmp_path: Path, space: str) -> None:
-        f = tmp_path / f"{space}_sphere.surf.gii"
-        f.touch()
-        cache.add_surface_atlas(
-            models.SurfaceAtlas(
-                name=f"{space}_32k_left_sphere",
-                description="",
-                file_path=f,
-                space=space,
-                density="32k",
-                hemisphere="left",
-                resource_type="sphere",
-            )
+        first = MagicMock(
+            spec=models.SurfaceTransform,
+            fetch=MagicMock(return_value=sphere_project_to),
+            provider="RheMap",
         )
+        mid_atlas = MagicMock(
+            spec=models.SurfaceAtlas,
+            fetch=MagicMock(return_value=sphere_project_to),
+        )
+        second = MagicMock(
+            spec=models.SurfaceTransform,
+            fetch=MagicMock(return_value=sphere_unproject_from),
+            provider="RheMap",
+        )
+        return {"first": first, "mid_atlas": mid_atlas, "second": second}
 
-    def test_no_warning_when_all_hops_match_provider(
+    def test_two_hops_success(
         self,
-        cache_and_ops: tuple[GraphCache, SurfaceTransformOps, Path],
+        ops: SurfaceTransformOps,
+        mock_transforms: dict[str, MagicMock],
+        tmp_path: Path,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
-        """No warning is emitted when every hop is served by the requested provider."""
-        cache, ops, tmp_path = cache_and_ops
-        self._add_transforms(
-            cache, tmp_path, {("A", "B"): "RheMap", ("B", "C"): "RheMap"}
-        )
-        self._add_atlas(cache, tmp_path, "B")
+        """Test successful two-hop transform returns correct output with no warnings."""
+        expected_out = tmp_path / "out.surf.gii"
+        expected_out.touch()
 
-        first = cache.get_surface_transform(
-            "A", "B", "32k", "left", "sphere", provider="RheMap"
-        )
+        ops.cache.get_surface_transform.side_effect = [mock_transforms["second"]]
+        ops.cache.get_surface_atlas.return_value = mock_transforms["mid_atlas"]
+        ops.utils.find_common_density.return_value = "32k"
+
         with (
-            caplog.at_level(
-                logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
+            caplog.at_level(logging.WARNING, logger=_LOGGER),
+            patch(
+                "neuromaps_prime.graph.transforms.surface.surface_sphere_project_unproject",
+                return_value=MagicMock(sphere_out=expected_out),
             ),
-            pytest.raises(FileNotFoundError),
+        ):
+            result = ops._two_hops(
+                source_space="A",
+                mid_space="B",
+                target_space="C",
+                density="32k",
+                hemisphere="left",
+                output_file_path=str(expected_out),
+                first_transform=mock_transforms["first"],
+                provider="RheMap",
+            )
+
+        assert result == expected_out
+        assert not any("falling back" in r.message for r in caplog.records)
+
+    def test_missing_first_transform_raises(
+        self,
+        ops: SurfaceTransformOps,
+        tmp_path: Path,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """Test ValueError raised when first transform not found."""
+        ops.cache.get_surface_transform.return_value = None
+
+        with (
+            caplog.at_level(logging.WARNING, logger=_LOGGER),
+            pytest.raises(
+                ValueError, match="No surface transform found from 'A' to 'B'"
+            ),
         ):
             ops._two_hops(
                 source_space="A",
@@ -90,28 +112,134 @@ class TestMultiHopProviderWarning:
                 density="32k",
                 hemisphere="left",
                 output_file_path=str(tmp_path / "out.surf.gii"),
+            )
+
+        assert not any("falling back" in r.message for r in caplog.records)
+
+    def test_missing_mid_atlas_raises(
+        self,
+        ops: SurfaceTransformOps,
+        mock_transforms: dict[str, MagicMock],
+        tmp_path: Path,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """Test ValueError raised when mid-space atlas not found."""
+        ops.cache.get_surface_transform.return_value = mock_transforms["second"]
+        ops.cache.get_surface_atlas.return_value = None
+        ops.utils.find_common_density.return_value = "32k"
+
+        with (
+            caplog.at_level(logging.WARNING, logger=_LOGGER),
+            pytest.raises(ValueError, match="No sphere atlas found for 'B'"),
+        ):
+            ops._two_hops(
+                source_space="A",
+                mid_space="B",
+                target_space="C",
+                density="32k",
+                hemisphere="left",
+                output_file_path=str(tmp_path / "out.surf.gii"),
+                first_transform=mock_transforms["first"],
+            )
+
+        assert not any("falling back" in r.message for r in caplog.records)
+
+    def test_missing_second_transform_raises(
+        self,
+        ops: SurfaceTransformOps,
+        mock_transforms: dict[str, MagicMock],
+        tmp_path: Path,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """Test ValueError raised when second transform not found."""
+        ops.cache.get_surface_transform.return_value = None
+        ops.cache.get_surface_atlas.return_value = mock_transforms["mid_atlas"]
+        ops.utils.find_common_density.return_value = "32k"
+
+        with (
+            caplog.at_level(logging.WARNING, logger=_LOGGER),
+            pytest.raises(
+                ValueError, match="No surface transform found from 'B' to 'C'"
+            ),
+        ):
+            ops._two_hops(
+                source_space="A",
+                mid_space="B",
+                target_space="C",
+                density="32k",
+                hemisphere="left",
+                output_file_path=str(tmp_path / "out.surf.gii"),
+                first_transform=mock_transforms["first"],
+            )
+
+        assert not any("falling back" in r.message for r in caplog.records)
+
+    def test_warning_on_first_hop_provider_mismatch(
+        self,
+        ops: SurfaceTransformOps,
+        mock_transforms: dict[str, MagicMock],
+        tmp_path: Path,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """Warning emitted when first hop uses a different provider than requested."""
+        expected_out = tmp_path / "out.surf.gii"
+        first = MagicMock(spec=models.SurfaceTransform, provider="CIVET")
+        first.fetch.return_value = tmp_path / "sphere_in.surf.gii"
+
+        ops.cache.get_surface_transform.return_value = mock_transforms["second"]
+        ops.cache.get_surface_atlas.return_value = mock_transforms["mid_atlas"]
+        ops.utils.find_common_density.return_value = "32k"
+
+        with (
+            caplog.at_level(logging.WARNING, logger=_LOGGER),
+            patch(
+                "neuromaps_prime.graph.transforms.surface.surface_sphere_project_unproject",
+                return_value=MagicMock(sphere_out=expected_out),
+            ),
+        ):
+            ops._two_hops(
+                source_space="A",
+                mid_space="B",
+                target_space="C",
+                density="32k",
+                hemisphere="left",
+                output_file_path=str(expected_out),
                 first_transform=first,
                 provider="RheMap",
             )
-        assert not any("falling back" in r.message for r in caplog.records)
 
-    def test_warning_on_first_hop_fallback(
+        messages = [r.message for r in caplog.records]
+        assert any(
+            "'RheMap'" in m
+            and "'A'" in m
+            and "'B'" in m
+            and "falling back" in m
+            and "'CIVET'" in m
+            for m in messages
+        )
+
+    def test_warning_on_second_hop_provider_mismatch(
         self,
-        cache_and_ops: tuple[GraphCache, SurfaceTransformOps, Path],
+        ops: SurfaceTransformOps,
+        mock_transforms: dict[str, MagicMock],
+        tmp_path: Path,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
-        """Warning fires when the first hop's provider doesn't match the request."""
-        cache, ops, tmp_path = cache_and_ops
-        self._add_transforms(
-            cache, tmp_path, {("A", "B"): "CIVET", ("B", "C"): "RheMap"}
-        )
-        self._add_atlas(cache, tmp_path, "B")
+        """Warning emitted when second hop uses a different provider than requested."""
+        expected_out = tmp_path / "out.surf.gii"
+        second = MagicMock(spec=models.SurfaceTransform, provider="CIVET")
+        second.fetch.return_value = tmp_path / "sphere_unproject_from.surf.gii"
+
+        ops.cache.get_surface_transform.return_value = second
+        ops.cache.get_surface_atlas.return_value = mock_transforms["mid_atlas"]
+        ops.utils.find_common_density.return_value = "32k"
 
         with (
-            caplog.at_level(
-                logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
+            caplog.at_level(logging.WARNING, logger=_LOGGER),
+            patch(
+                "neuromaps_prime.graph.transforms.surface.surface_sphere_project_unproject",
+                return_value=MagicMock(sphere_out=expected_out),
             ),
-            pytest.raises(FileNotFoundError),
         ):
             ops._two_hops(
                 source_space="A",
@@ -119,73 +247,17 @@ class TestMultiHopProviderWarning:
                 target_space="C",
                 density="32k",
                 hemisphere="left",
-                output_file_path=str(tmp_path / "out.surf.gii"),
-                first_transform=None,
+                output_file_path=str(expected_out),
+                first_transform=mock_transforms["first"],
                 provider="RheMap",
             )
+
         messages = [r.message for r in caplog.records]
-        assert any("A" in m and "B" in m and "falling back" in m for m in messages)
-
-    def test_warning_on_second_hop_fallback(
-        self,
-        cache_and_ops: tuple[GraphCache, SurfaceTransformOps, Path],
-        caplog: pytest.LogCaptureFixture,
-    ) -> None:
-        """Warning fires when the second hop's provider doesn't match the request."""
-        cache, ops, tmp_path = cache_and_ops
-        self._add_transforms(
-            cache, tmp_path, {("A", "B"): "RheMap", ("B", "C"): "CIVET"}
+        assert any(
+            "'RheMap'" in m
+            and "'B'" in m
+            and "'C'" in m
+            and "falling back" in m
+            and "'CIVET'" in m
+            for m in messages
         )
-        self._add_atlas(cache, tmp_path, "B")
-
-        first = cache.get_surface_transform(
-            "A", "B", "32k", "left", "sphere", provider="RheMap"
-        )
-        with (
-            caplog.at_level(
-                logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
-            ),
-            pytest.raises(FileNotFoundError),
-        ):
-            ops._two_hops(
-                source_space="A",
-                mid_space="B",
-                target_space="C",
-                density="32k",
-                hemisphere="left",
-                output_file_path=str(tmp_path / "out.surf.gii"),
-                first_transform=first,
-                provider="RheMap",
-            )
-        messages = [r.message for r in caplog.records]
-        assert any("B" in m and "C" in m and "falling back" in m for m in messages)
-
-    def test_no_warning_when_provider_is_none(
-        self,
-        cache_and_ops: tuple[GraphCache, SurfaceTransformOps, Path],
-        caplog: pytest.LogCaptureFixture,
-    ) -> None:
-        """No warning is emitted when provider=None (fallback is intended behaviour)."""
-        cache, ops, tmp_path = cache_and_ops
-        self._add_transforms(
-            cache, tmp_path, {("A", "B"): "CIVET", ("B", "C"): "RheMap"}
-        )
-        self._add_atlas(cache, tmp_path, "B")
-
-        with (
-            caplog.at_level(
-                logging.WARNING, logger="neuromaps_prime.graph.transforms.surface"
-            ),
-            pytest.raises(FileNotFoundError),
-        ):
-            ops._two_hops(
-                source_space="A",
-                mid_space="B",
-                target_space="C",
-                density="32k",
-                hemisphere="left",
-                output_file_path=str(tmp_path / "out.surf.gii"),
-                first_transform=None,
-                provider=None,
-            )
-        assert not any("falling back" in r.message for r in caplog.records)

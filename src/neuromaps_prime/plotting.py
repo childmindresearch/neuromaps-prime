@@ -1,13 +1,17 @@
 """Functions for plotting neuromaps graphs and subgraphs."""
 
+import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from matplotlib import cm
 from matplotlib.lines import Line2D
+
+_logger = logging.getLogger(__name__)
 
 
 def plot_graph(
@@ -92,7 +96,7 @@ def _get_optimized_layout(
             return nx.nx_agraph.graphviz_layout(graph, prog="dot")
         except (ImportError, FileNotFoundError):
             # Fallback to multipartite layout
-            return _hierarchical_multipartite_layout(graph, species_groups)
+            return _hierarchical_multipartite_layout(species_groups)
 
     elif layout == "circular":
         # Circular layout with species grouping
@@ -113,21 +117,21 @@ def _get_optimized_layout(
         try:
             return nx.planar_layout(graph)
         except nx.NetworkXException:
-            print("Graph is not planar, falling back to spring layout")
+            _logger.warning("Graph is not planar, falling back to spring layout")
             return nx.spring_layout(graph, k=k, iterations=iterations, seed=seed)
 
     return nx.spring_layout(graph, k=k, iterations=iterations, seed=seed)
 
 
 def _hierarchical_multipartite_layout(
-    graph: nx.MultiDiGraph, species_groups: dict
-) -> dict:
+    species_groups: dict[str, list[str]],
+) -> dict[str, tuple[int, int]]:
     """Create a hierarchical layout based on species groups."""
     pos = {}
     y_offset = 0
     species_list = sorted(species_groups.keys())
 
-    for i, species in enumerate(species_list):
+    for species in species_list:
         nodes = species_groups[species]
         n_nodes = len(nodes)
 
@@ -259,15 +263,10 @@ def _plot_single_graph(
     font_size: int,
     save_path: Path | None,
     layout: str,
-    legend_rect: tuple[float, float, float, float],
-    legend_loc: str,
-    k: float,
-    iterations: int,
-    seed: int,
     colormap: str,
 ) -> None:
     """Plot either surface or volume transforms in a single plot."""
-    fig, ax = plt.subplots(1, 1, figsize=figsize)
+    _, ax = plt.subplots(1, 1, figsize=figsize)
 
     # Use optimized layout
     pos = _get_optimized_layout(graph, layout)
@@ -336,7 +335,7 @@ def _get_node_colors(graph: nx.MultiDiGraph, colormap: str) -> tuple[list, dict]
     """Get node colors based on species from Node dataclass."""
     # Extract unique species from Node objects
     species_set = {node_data["data"].species for _, node_data in graph.nodes(data=True)}
-    species_list = sorted(list(species_set))
+    species_list = sorted(species_set)
 
     # Create color mapping for each species
     cmap = getattr(cm, colormap)
@@ -401,7 +400,7 @@ def _extract_volume_edges(graph: nx.MultiDiGraph) -> dict:
 
 def _get_edge_colors(edges: dict, colormap: Callable[[float], Any]) -> dict:
     """Get color mapping for edge attributes."""
-    attrs = {attr for (_, _, attr) in edges.keys()}
+    attrs = {attr for (_, _, attr) in edges}
     return {attr: colormap(i / max(1, len(attrs))) for i, attr in enumerate(attrs)}
 
 
@@ -462,7 +461,7 @@ def _draw_edges(
     for (u, v), group in edge_groups.items():
         n = len(group)
         base_rad = 0.1 if linestyle == "-" else -0.1
-        for i, (attr, edges_list) in enumerate(group):
+        for i, (attr, _) in enumerate(group):
             rad = base_rad + (i - (n - 1) / 2) * 0.15 if n > 1 else base_rad
             nx.draw_networkx_edges(
                 graph,
@@ -514,6 +513,6 @@ def _save_or_show(save_path: Path | None) -> None:
     """Save plot to file or show it."""
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches="tight", facecolor="white")
-        print(f"Graph saved to: {save_path}")
+        _logger.info(f"Graph saved to: {save_path}")
     else:
         plt.show()

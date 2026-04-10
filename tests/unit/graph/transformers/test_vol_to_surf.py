@@ -65,7 +65,7 @@ class TestVolumeToSurfaceTransformer:
     def make_atlas_side_effect(
         self,
         tmp_path: Path,
-        **entities: [str, Literal["left", "right"], str, str],  # noqa: ARG002
+        **entities: dict[str, str],  # noqa: ARG002
     ) -> Callable[[str, Literal["left", "right"], str, str], MagicMock]:
         """Create a side effect returning distinct atlases per resource type."""
 
@@ -109,7 +109,7 @@ class TestVolumeToSurfaceTransformer:
                 return_value=projected_file,
             ) as mock_surface_project,
         ):
-            mock_transformer.volume_ops.surface_ops.transform.return_value = (
+            mock_transformer.volume_ops.surface_ops.transform_surface.return_value = (
                 expected_output
             )
             result = mock_transformer.volume_to_surface_transformer(
@@ -122,7 +122,7 @@ class TestVolumeToSurfaceTransformer:
         assert mock_transformer.volume_ops.cache.require_surface_atlas.call_count == 3
         mock_ribbon.assert_called_once()
         mock_surface_project.assert_called_once()
-        mock_transformer.volume_ops.surface_ops.transform.assert_called_once()
+        mock_transformer.volume_ops.surface_ops.transform_surface.assert_called_once()
         assert result == expected_output
 
     @pytest.mark.parametrize(
@@ -144,7 +144,9 @@ class TestVolumeToSurfaceTransformer:
         mock_transformer.volume_ops.cache.require_surface_atlas.side_effect = (
             self.make_atlas_side_effect(tmp_path)
         )
-        mock_transformer.volume_ops.surface_ops.transform.return_value = projected_file
+        mock_transformer.volume_ops.surface_ops.transform_surface.return_value = (
+            projected_file
+        )
         with (
             patch(
                 "neuromaps_prime.graph.transforms.volume.workbench.volume_to_surface_mapping_ribbon_constrained",
@@ -173,7 +175,7 @@ class TestVolumeToSurfaceTransformer:
         mock_transformer.volume_ops.cache.require_surface_atlas.side_effect = (
             self.make_atlas_side_effect(tmp_path)
         )
-        mock_transformer.volume_ops.surface_ops.transform.return_value = Path(
+        mock_transformer.volume_ops.surface_ops.transform_surface.return_value = Path(
             basic_params.output_file_path
         )
 
@@ -188,7 +190,7 @@ class TestVolumeToSurfaceTransformer:
             ),
         ):
             mock_transformer.volume_to_surface_transformer(**basic_params._asdict())
-        mock_transformer.volume_ops.surface_ops.transform.assert_called_once()
+        mock_transformer.volume_ops.surface_ops.transform_surface.assert_called_once()
 
     def test_no_source_surface_atlas(
         self, mock_transformer: NeuromapsGraph, basic_params: BasicParams
