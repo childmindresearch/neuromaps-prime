@@ -61,6 +61,11 @@ nodes:
             right: resources/MEBRAINS/annotations/brain_masks/src-MEBRAINS_den-101k_hemi-R_desc-BM_annot.func.gii
             references: null
             notes: null
+          SD:
+            left: resources/MEBRAINS/annotations/sulcal_depth/src-MEBRAINS_hemi-L_desc-SD_annot.sulc
+            right: resources/MEBRAINS/annotations/sulcal_depth/src-MEBRAINS_hemi-R_desc-SD_annot.sulc
+            references: null
+            notes: null
           
     volumes:
       400um:
