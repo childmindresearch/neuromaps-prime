@@ -4,7 +4,6 @@ from pathlib import Path
 import nibabel as nib
 from niwrap import Runner, get_global_runner, set_global_runner, use_docker, use_local, use_singularity
 
-
 def set_runner(
     runner: Runner | str,
     image_overrides: dict[str, str] | None = None,
@@ -59,12 +58,15 @@ def merge_vertices_with_faces(vertex_file: Path, template_file: Path, out_file: 
     """Merge a vertex-only GIFTI surface with triangle arrays from a template surface."""
     vertex_gii = nib.load(str(vertex_file))
     template_gii = nib.load(str(template_file))
+
     triangles = [
         arr for arr in template_gii.darrays
-        if arr.intent == nib.nifti1.intent_codes['NIFTI_INTENT_TRIANGLE'] # this is wrong
+        if arr.data.ndim == 2 and arr.data.shape[1] == 3
     ]
+
     if not triangles:
         raise ValueError(f"No triangle arrays found in {template_file}")
+
     new_gii = nib.gifti.GiftiImage(darrays=vertex_gii.darrays + triangles)
     nib.save(new_gii, str(out_file))
     return out_file

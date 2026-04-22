@@ -71,7 +71,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
             try:
                 current_surface = graph.surface_to_surface_transformer(
                     transformer_type="surface",
-                    input_file=current_surface,
+                    input_file=full_surface, # use full_surface here
                     source_space=src,
                     target_space=dst,
                     hemisphere=hemisphere,
