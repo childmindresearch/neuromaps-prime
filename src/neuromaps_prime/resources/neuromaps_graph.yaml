@@ -219,6 +219,8 @@ nodes:
               - https://doi.org/10.1038/s41593-023-01351-2
             notes: 
               - α2-adrenergic receptor density, radioligand [³H]UK-14304 (uk14). Noradrenergic receptor.
+          MM:
+            bilateral: resources/Yerkes19/annotations/myelin_maps/src-Yerkes19_den-32k_desc-MM_annot.dscalar.nii
     volumes:
       500um:
         T1w: share/Inputs/Yerkes19/src-Yerkes19_res-0p50mm_T1w.nii
