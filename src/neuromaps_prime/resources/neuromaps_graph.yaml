@@ -107,98 +107,112 @@ nodes:
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: AMPA receptor density, radioligand [³H]AMPA. Ionotropic glutamate receptor.
+            notes: 
+              - AMPA receptor density, radioligand [³H]AMPA. Ionotropic glutamate receptor.
           RMcgp5:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-cgp5_desc-RM_annot.func.gii
             right: null
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: GABA_B receptor density, radioligand [³H]CGP54626. Metabotropic inhibitory GABA receptor.
+            notes:
+              - GABA_B receptor density, radioligand [³H]CGP54626. Metabotropic inhibitory GABA receptor.
           RMdamp:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-damp_desc-RM_annot.func.gii
             right: null
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: M3 muscarinic receptor density, radioligand [³H]4-DAMP. Cholinergic receptor.
+            notes: 
+              - M3 muscarinic receptor density, radioligand [³H]4-DAMP. Cholinergic receptor.
           RMdpat:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-dpat_desc-RM_annot.func.gii
             right: null
             references: 
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: 5-HT1A receptor density, radioligand [³H]8-OH-DPAT (dpat). Serotonin receptor.
+            notes: 
+              - 5-HT1A receptor density, radioligand [³H]8-OH-DPAT (dpat). Serotonin receptor.
           RMdpmg:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-dpmg_desc-RM_annot.func.gii
             right: null
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: D1 dopamine receptor density, radioligand [³H]SCH23390. Dopamine receptor.
+            notes: 
+              - D1 dopamine receptor density, radioligand [³H]SCH23390. Dopamine receptor.
           RMflum:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-flum_desc-RM_annot.func.gii
             right: null
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: GABA_A/BZ receptor density, radioligand [³H]flumazenil. Benzodiazepine site of GABA_A receptor.
+            notes: 
+              - GABA_A/BZ receptor density, radioligand [³H]flumazenil. Benzodiazepine site of GABA_A receptor.
           RMkain:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-kain_desc-RM_annot.func.gii
             right: null
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: Kainate receptor density, radioligand [³H]kainate. Ionotropic glutamate receptor.
+            notes: 
+              - Kainate receptor density, radioligand [³H]kainate. Ionotropic glutamate receptor.
           RMketa:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-keta_desc-RM_annot.func.gii
             right: null
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: 5-HT2A receptor density, radioligand [³H]ketanserin (keta). Serotonin receptor.
+            notes: 
+              - 5-HT2A receptor density, radioligand [³H]ketanserin (keta). Serotonin receptor.
           RMmk80:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-mk80_desc-RM_annot.func.gii
             right: null
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: NMDA receptor density, radioligand [³H]MK-801 (mk80). Ionotropic glutamate receptor.
+            notes: 
+              - NMDA receptor density, radioligand [³H]MK-801 (mk80). Ionotropic glutamate receptor.
           RMmusc:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-musc_desc-RM_annot.func.gii
             right: null
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: GABA_A receptor density, radioligand [³H]muscimol. Ionotropic inhibitory GABA receptor.
+            notes: 
+              - GABA_A receptor density, radioligand [³H]muscimol. Ionotropic inhibitory GABA receptor.
           RMoxot:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-oxot_desc-RM_annot.func.gii
             right: null
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: M2 muscarinic receptor density, radioligand [³H]oxotremorine-M. Cholinergic receptor.
+            notes: 
+              - M2 muscarinic receptor density, radioligand [³H]oxotremorine-M. Cholinergic receptor.
           RMpire:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-pire_desc-RM_annot.func.gii
             right: null
             references: 
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: M1 muscarinic receptor density, radioligand [³H]pirenzepine. Cholinergic receptor.
+            notes: 
+              - M1 muscarinic receptor density, radioligand [³H]pirenzepine. Cholinergic receptor.
           RMpraz:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-praz_desc-RM_annot.func.gii
             right: null
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: α1-adrenergic receptor density, radioligand [³H]prazosin. Noradrenergic receptor.
+            notes: 
+              - α1-adrenergic receptor density, radioligand [³H]prazosin. Noradrenergic receptor.
           RMuk14:
             left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-uk14_desc-RM_annot.func.gii
             right: null
             references:
               - https://doi.org/10.1007/s00429-021-02437-y
               - https://doi.org/10.1038/s41593-023-01351-2
-            notes: α2-adrenergic receptor density, radioligand [³H]UK-14304 (uk14). Noradrenergic receptor.
+            notes: 
+              - α2-adrenergic receptor density, radioligand [³H]UK-14304 (uk14). Noradrenergic receptor.
     volumes:
       500um:
         T1w: share/Inputs/Yerkes19/src-Yerkes19_res-0p50mm_T1w.nii
