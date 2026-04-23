@@ -52,13 +52,10 @@
                                     "format": "uri-reference",
                                     "description": "Surface file for the right hemisphere."
                                 },
-                                "supplemental": {
-                                    "type": [
-                                        "string",
-                                        "null"
-                                    ],
+                                "uri": {
+                                    "type": "string",
                                     "format": "uri-reference",
-                                    "description": "Other related annotation files (may be corresponding labels, descriptors, etc.)"
+                                    "description": "URI pointing to an annotation surface file."
                                 },
                                 "references": {
                                     "oneOf": [
