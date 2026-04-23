@@ -52,13 +52,13 @@
                                     "format": "uri-reference",
                                     "description": "Surface file for the right hemisphere."
                                 },
-                                "bilateral": {
+                                "supplemental": {
                                     "type": [
                                         "string",
                                         "null"
                                     ],
                                     "format": "uri-reference",
-                                    "description": "Surface file for both hemispheres."
+                                    "description": "Other related annotation files (may be corresponding labels, descriptors, etc.)"
                                 },
                                 "references": {
                                     "oneOf": [

@@ -224,13 +224,13 @@ nodes:
             notes: 
               - α2-adrenergic receptor density, radioligand [³H]UK-14304 (uk14). Noradrenergic receptor.
           MM:
-            bilateral: resources/Yerkes19/annotations/myelin_maps/src-Yerkes19_den-32k_desc-MM_annot.dscalar.nii
+            supplemental: resources/Yerkes19/annotations/myelin_maps/src-Yerkes19_den-32k_desc-MM_annot.dscalar.nii
           SMM:
-            bilateral: resources/Yerkes19/annotations/smoothed_myelin_maps/src-Yerkes19_den-32k_desc-SMM_annot.dscalar.nii
+            supplemental: resources/Yerkes19/annotations/smoothed_myelin_maps/src-Yerkes19_den-32k_desc-SMM_annot.dscalar.nii
           CT:
-            bilateral: resources/Yerkes19/annotations/cortical_thickness/src-Yerkes19_den-32k_desc-CT_annot.dscalar.nii
+            supplemental: resources/Yerkes19/annotations/cortical_thickness/src-Yerkes19_den-32k_desc-CT_annot.dscalar.nii
           CV:
-            bilateral: resources/Yerkes19/annotations/curvature/src-Yerkes19_den-32k_desc-CV_annot.dscalar.nii
+            supplemental: resources/Yerkes19/annotations/curvature/src-Yerkes19_den-32k_desc-CV_annot.dscalar.nii
           PC_MarkovMonkey:
             left: resources/Yerkes19/annotations/parcellations/src-Yerkes19_den-10k_hemi-L_atlas-MarkovMonkey_desc-PC_annot.label.gii
             right: resources/Yerkes19/annotations/parcellations/src-Yerkes19_den-10k_hemi-R_atlas-MarkovMonkey_desc-PC_annot.label.gii
