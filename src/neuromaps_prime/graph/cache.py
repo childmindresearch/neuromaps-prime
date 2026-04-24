@@ -119,12 +119,13 @@ class GraphCache(BaseModel):
         Returns:
             All matching :class:`SurfaceAtlas` entries (may be empty).
         """
+        h_norm = hemisphere.lower() if hemisphere is not None else None
         return [
             atlas
             for (sp, d, h, rt), atlas in self.surface_atlas.items()
             if sp == space
             and (density is None or d == density)
-            and (hemisphere is None or h == hemisphere.lower())
+            and (h_norm is None or h == h_norm)
             and (resource_type is None or rt == resource_type)
         ]
 
@@ -200,13 +201,14 @@ class GraphCache(BaseModel):
         Returns:
             All matching :class:`SurfaceAnnotation` entries (may be empty).
         """
+        h_norm = hemisphere.lower() if hemisphere is not None else None
         return [
             annotation
             for (sp, lb, d, h), annotation in self.surface_annotation.items()
             if sp == space
             and (label is None or lb == label)
             and (density is None or d == density)
-            and (hemisphere is None or h == hemisphere.lower())
+            and (h_norm is None or h == h_norm)
         ]
 
     def require_surface_annotation(
