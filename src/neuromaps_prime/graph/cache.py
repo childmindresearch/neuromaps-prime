@@ -24,7 +24,7 @@ SurfaceAtlasKey = tuple[str, str, str, str]  # (space, density, hemi, resource_t
 SurfaceTransformKey = tuple[
     str, str, str, str, str, str
 ]  # (src, tgt, density, hemi, resource_type, provider)
-SurfaceAnnotationKey = tuple[str, str, str, str]  # (space, label, density, hemi)
+SurfaceAnnotationKey = tuple[str, str, str, str | None]  # (space, label, density, hemi) with optional hemisphere
 VolumeAtlasKey = tuple[str, str, str]  # (space, resolution, resource_type)
 VolumeTransformKey = tuple[
     str, str, str, str, str
