@@ -222,7 +222,6 @@ class GraphBuilder(BaseModel):
                             annot_references = value.get("references")
                             annot_notes = value.get("notes")
 
-                            # --- scalar (optional, NOT a hemisphere) ---
                             scalar_path = (
                                 self._resolve_path(value["scalar"])
                                 if value.get("scalar") is not None
