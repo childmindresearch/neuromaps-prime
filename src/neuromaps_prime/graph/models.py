@@ -74,7 +74,8 @@ class SurfaceAnnotation(Resource):
     space: str
     label: str
     density: str
-    hemisphere: Literal["left", "right"]
+    hemisphere: Literal["left", "right"] | None
+    scalar_path: Path | None = None
 
 
 class VolumeAtlas(Resource):
