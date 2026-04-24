@@ -11,7 +11,7 @@ class Resource(BaseModel):
 
     name: str
     description: str | None
-    file_paths: Sequence[Path] = Field(default_factory=list)
+    file_path: Path
     references: Sequence[str | dict[str, str]] | None = None
     notes: Sequence[str] | None = None
 
@@ -29,9 +29,8 @@ class Resource(BaseModel):
         Raises:
             FileNotFoundError: If the file does not exist.
         """
-        for path in v:
-            if not path.exists():
-                raise FileNotFoundError(f"File path does not exist: {path}")
+        if not v.exists():
+            raise FileNotFoundError(f"File path does not exist: {v}")
         return v
 
     def fetch(self) -> Path:
@@ -40,7 +39,7 @@ class Resource(BaseModel):
         Returns:
             Path to the resource file.
         """
-        return self.file_paths[0]
+        return self.file_path
 
     def __repr__(self) -> str:
         """Custom string representation for debugging."""
