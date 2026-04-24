@@ -254,7 +254,7 @@ class GraphBuilder(BaseModel):
                                         space=space,
                                         label=label,
                                         density=density,
-                                        hemisphere=None,
+                                        hemisphere=hemi,
                                         file_path=scalar_path,
                                         scalar_path=scalar_path,
                                         references=annot_references,
