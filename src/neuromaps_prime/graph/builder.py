@@ -247,7 +247,9 @@ class GraphBuilder(BaseModel):
                                     )
                                 )
 
-                            if scalar_path and not any(value.get(h) for h in ("left", "right")):
+                            has_hemi = any(value.get(h) for h in ("left", "right"))
+
+                            if scalar_path and not has_hemi:
                                 annotations.append(
                                     SurfaceAnnotation(
                                         name=f"{prefix}_{density}_scalar_{label}",

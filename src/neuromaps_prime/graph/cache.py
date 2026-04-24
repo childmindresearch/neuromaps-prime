@@ -164,7 +164,12 @@ class GraphCache(BaseModel):
 
     def add_surface_annotation(self, annotation: SurfaceAnnotation) -> None:
         """Insert or overwrite a surface annotation entry."""
-        hemisphere = annotation.hemisphere.lower() if annotation.hemisphere is not None else None
+        hemisphere = (
+            annotation.hemisphere.lower()
+            if annotation.hemisphere is not None
+            else None
+        )
+
         self.surface_annotation[
             (
                 annotation.space,
