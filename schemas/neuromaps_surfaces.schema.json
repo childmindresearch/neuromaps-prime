@@ -52,14 +52,6 @@
                                     "format": "uri-reference",
                                     "description": "Surface file for the right hemisphere."
                                 },
-                                "scalar": {
-                                    "type": [
-                                        "string",
-                                        "null"
-                                    ],
-                                    "format": "uri-reference",
-                                    "description": "Annotation file."
-                                },
                                 "references": {
                                     "oneOf": [
                                         {
