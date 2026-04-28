@@ -219,20 +219,12 @@ class GraphBuilder(BaseModel):
                 for surf_type, hemispheres in types.items():
                     if surf_type == "annotation":
                         for label, value in hemispheres.items():
-                            annot_references = value.get("references")
-                            annot_notes = value.get("notes")
-
-                            scalar_path = (
-                                self._resolve_path(value["scalar"])
-                                if value.get("scalar") is not None
-                                else None
-                            )
-
-                            for hemi in ("left", "right"):
-                                path = value.get(hemi)
-                                if path is None:
+                            for hemi, path in value.items():
+                                # Grab references first, before SurfaceAnnotation
+                                annot_references = value.get("references")
+                                annot_notes = value.get("notes")
+                                if hemi in ("notes", "references"):
                                     continue
-
                                 annotations.append(
                                     SurfaceAnnotation(
                                         name=f"{prefix}_{density}_{hemi}_{label}",
@@ -241,24 +233,6 @@ class GraphBuilder(BaseModel):
                                         density=density,
                                         hemisphere=hemi,
                                         file_path=self._resolve_path(path),
-                                        scalar_path=scalar_path,
-                                        references=annot_references,
-                                        notes=annot_notes,
-                                    )
-                                )
-
-                            has_hemi = any(value.get(h) for h in ("left", "right"))
-
-                            if scalar_path and not has_hemi:
-                                annotations.append(
-                                    SurfaceAnnotation(
-                                        name=f"{prefix}_{density}_scalar_{label}",
-                                        space=space,
-                                        label=label,
-                                        density=density,
-                                        hemisphere=hemi,
-                                        file_path=scalar_path,
-                                        scalar_path=scalar_path,
                                         references=annot_references,
                                         notes=annot_notes,
                                     )
@@ -267,8 +241,6 @@ class GraphBuilder(BaseModel):
 
                     extra = {"provider": provider} if is_transform else {}
                     for hemi, path in hemispheres.items():
-                        if hemi in ("references", "notes"):
-                            continue
                         result.append(
                             cls(
                                 name=f"{prefix}_{density}_{hemi}_{surf_type}",

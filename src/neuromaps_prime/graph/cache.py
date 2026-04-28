@@ -24,7 +24,7 @@ SurfaceAtlasKey = tuple[str, str, str, str]  # (space, density, hemi, resource_t
 SurfaceTransformKey = tuple[
     str, str, str, str, str, str
 ]  # (src, tgt, density, hemi, resource_type, provider)
-SurfaceAnnotationKey = tuple[str, str, str, str | None]  # (space, label, density, hemi) with optional hemisphere
+SurfaceAnnotationKey = tuple[str, str, str, str]  # (space, label, density, hemi)
 VolumeAtlasKey = tuple[str, str, str]  # (space, resolution, resource_type)
 VolumeTransformKey = tuple[
     str, str, str, str, str
@@ -119,13 +119,12 @@ class GraphCache(BaseModel):
         Returns:
             All matching :class:`SurfaceAtlas` entries (may be empty).
         """
-        h_norm = hemisphere.lower() if hemisphere is not None else None
         return [
             atlas
             for (sp, d, h, rt), atlas in self.surface_atlas.items()
             if sp == space
             and (density is None or d == density)
-            and (h_norm is None or h == h_norm)
+            and (hemisphere is None or h == hemisphere.lower())
             and (resource_type is None or rt == resource_type)
         ]
 
@@ -164,18 +163,12 @@ class GraphCache(BaseModel):
 
     def add_surface_annotation(self, annotation: SurfaceAnnotation) -> None:
         """Insert or overwrite a surface annotation entry."""
-        hemisphere = (
-            annotation.hemisphere.lower()
-            if annotation.hemisphere is not None
-            else None
-        )
-
         self.surface_annotation[
             (
                 annotation.space,
                 annotation.label,
                 annotation.density,
-                hemisphere,
+                annotation.hemisphere.lower(),
             )
         ] = annotation
 
@@ -207,14 +200,13 @@ class GraphCache(BaseModel):
         Returns:
             All matching :class:`SurfaceAnnotation` entries (may be empty).
         """
-        h_norm = hemisphere.lower() if hemisphere is not None else None
         return [
             annotation
             for (sp, lb, d, h), annotation in self.surface_annotation.items()
             if sp == space
             and (label is None or lb == label)
             and (density is None or d == density)
-            and (h_norm is None or h == h_norm)
+            and (hemisphere is None or h == hemisphere.lower())
         ]
 
     def require_surface_annotation(
