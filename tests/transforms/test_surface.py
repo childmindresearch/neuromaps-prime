@@ -274,8 +274,10 @@ class TestSurfaceTransformIntegration:
             sphere_unproject_from=sphere_unproject_from.fetch(),
             sphere_out=str(sphere_out),
         )
-        assert utils.get_vertex_count(Path(sphere_in.fetch())) == utils.get_vertex_count(  # type: ignore[arg-type]
-            result.sphere_out
+        assert utils.get_vertex_count(Path(sphere_in.fetch())) == (
+            utils.get_vertex_count(
+                result.sphere_out  # type: ignore[arg-type]
+            )
         )
 
     @pytest.mark.skip(reason="No metric data to test resampling")
