@@ -206,13 +206,17 @@ nodes:
             notes: 
               - α2-adrenergic receptor density, radioligand [³H]UK-14304 (uk14). Noradrenergic receptor.
           MM:
-            scalar: resources/Yerkes19/annotations/myelin_maps/src-Yerkes19_den-32k_desc-MM_annot.dscalar.nii
+            left: resources/Yerkes19/annotations/myelin_maps/src-Yerkes19_den-32k_hemi-L_desc-MM_annot.func.gii
+            right: resources/Yerkes19/annotations/myelin_maps/src-Yerkes19_den-32k_hemi-R_desc-MM_annot.func.gii
           SMM:
-            scalar: resources/Yerkes19/annotations/smoothed_myelin_maps/src-Yerkes19_den-32k_desc-SMM_annot.dscalar.nii
+            left: resources/Yerkes19/annotations/smoothed_myelin_maps/src-Yerkes19_den-32k_hemi-L_desc-SMM_annot.func.gii
+            right: resources/Yerkes19/annotations/smoothed_myelin_maps/src-Yerkes19_den-32k_hemi-R_desc-SMM_annot.func.gii
           CT:
-            scalar: resources/Yerkes19/annotations/cortical_thickness/src-Yerkes19_den-32k_desc-CT_annot.dscalar.nii
+            left: resources/Yerkes19/annotations/cortical_thickness/src-Yerkes19_den-32k_hemi-L_desc-CT_annot.func.gii
+            right: resources/Yerkes19/annotations/cortical_thickness/src-Yerkes19_den-32k_hemi-R_desc-CT_annot.func.gii
           CV:
-            scalar: resources/Yerkes19/annotations/curvature/src-Yerkes19_den-32k_desc-CV_annot.dscalar.nii
+            left: resources/Yerkes19/annotations/curvature/src-Yerkes19_den-32k_hemi-L_desc-CV_annot.func.gii
+            right: resources/Yerkes19/annotations/curvature/src-Yerkes19_den-32k_hemi-R_desc-CV_annot.func.gii
           PC_MarkovMonkey:
             left: resources/Yerkes19/annotations/parcellations/src-Yerkes19_den-10k_hemi-L_atlas-MarkovMonkey_desc-PC_annot.label.gii
             right: resources/Yerkes19/annotations/parcellations/src-Yerkes19_den-10k_hemi-R_atlas-MarkovMonkey_desc-PC_annot.label.gii
