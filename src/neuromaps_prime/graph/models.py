@@ -1,36 +1,24 @@
 """Models for resources in the neuromaps_prime graph."""
 
-from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Sequence
 
 from pydantic import BaseModel, Field, field_validator
 
 
-class Resource(BaseModel, ABC):  # pragma: no cover
+class Resource(BaseModel):
     """Base model for resources in the neuromaps_prime graph."""
 
     name: str
-    description: str
+    description: str | None
     file_path: Path
-
-    @abstractmethod
-    def fetch(self) -> Path:
-        """Fetch the resource.
-
-        Returns:
-            Path to the resources file.
-
-        Raises:
-            FileNotFoundError: If the file does not exist.
-        """
-        # later add validation if the file path is valid, exists, etc.
-        pass
+    references: Sequence[str | dict[str, str]] | None = None
+    notes: Sequence[str] | None = None
 
     @field_validator("file_path")
     @classmethod
     def validate_file_path(cls, v: Path) -> Path:
-        """Validate that the file exists in the path.
+        """Validate that the file exists at the given path.
 
         Args:
             v: The file path to validate.
@@ -45,9 +33,17 @@ class Resource(BaseModel, ABC):  # pragma: no cover
             raise FileNotFoundError(f"File path does not exist: {v}")
         return v
 
+    def fetch(self) -> Path:
+        """Return the path to this resource's file.
+
+        Returns:
+            Path to the resource file.
+        """
+        return self.file_path
+
     def __repr__(self) -> str:
         """Custom string representation for debugging."""
-        return self.name
+        return self.name  # pragma: nocover
 
 
 class SurfaceAtlas(Resource):
@@ -58,10 +54,6 @@ class SurfaceAtlas(Resource):
     hemisphere: Literal["left", "right"]
     resource_type: str
 
-    def fetch(self) -> Path:
-        """Fetch the surface resource."""
-        return self.file_path
-
 
 class SurfaceTransform(Resource):
     """Model for surface transform resources."""
@@ -71,11 +63,18 @@ class SurfaceTransform(Resource):
     density: str
     hemisphere: Literal["left", "right"]
     resource_type: str
+    provider: str
     weight: float = 1.0
 
-    def fetch(self) -> Path:
-        """Fetch the transform resource."""
-        return self.file_path
+
+class SurfaceAnnotation(Resource):
+    """Model for surface annotation."""
+
+    description: str | None = None
+    space: str
+    label: str
+    density: str
+    hemisphere: Literal["left", "right"]
 
 
 class VolumeAtlas(Resource):
@@ -85,10 +84,6 @@ class VolumeAtlas(Resource):
     resolution: str
     resource_type: str
 
-    def fetch(self) -> Path:
-        """Fetch the volume resource."""
-        return self.file_path
-
 
 class VolumeTransform(Resource):
     """Model for volume transform resources."""
@@ -97,11 +92,17 @@ class VolumeTransform(Resource):
     target_space: str
     resolution: str
     resource_type: str
+    provider: str
     weight: float = 1.0
 
-    def fetch(self) -> Path:
-        """Fetch the transform resource."""
-        return self.file_path
+
+class VolumeAnnotation(Resource):
+    """Model for volume annotation resources."""
+
+    description: str | None = None
+    space: str
+    label: str
+    resolution: str
 
 
 class Node(BaseModel):
@@ -110,13 +111,18 @@ class Node(BaseModel):
     name: str
     species: str
     description: str
-    surfaces: list[SurfaceAtlas] = Field(default_factory=list)
-    volumes: list[VolumeAtlas] = Field(default_factory=list)
+    references: Sequence[str | dict[str, str]] | None = None
+    surfaces: Sequence[SurfaceAtlas] = Field(default_factory=list)
+    volumes: Sequence[VolumeAtlas] = Field(default_factory=list)
+    surface_annotations: Sequence[SurfaceAnnotation] = Field(default_factory=list)
+    volume_annotations: Sequence[VolumeAnnotation] = Field(default_factory=list)
 
     def __repr__(self) -> str:
         """String representation."""
         surface_str = "\n".join(s.name for s in self.surfaces)
         volume_str = "\n".join(v.name for v in self.volumes)
+        surface_annot_str = "\n".join(s.name for s in self.surface_annotations)
+        volume_annot_str = "\n".join(v.name for v in self.volume_annotations)
         return (
             "\nNode:"
             f"\n\tname={self.name},\n"
@@ -124,14 +130,16 @@ class Node(BaseModel):
             f"\tdescription={self.description}\n"
             f"\tsurfaces=[{surface_str}]\n"
             f"\tvolumes=[{volume_str}]"
+            f"\tsurface annotations=[{surface_annot_str}]\n"
+            f"\tvolume annotations=[{volume_annot_str}]\n"
         )
 
 
 class Edge(BaseModel):
     """Edge representation in transformation graph."""
 
-    surface_transforms: list[SurfaceTransform] = Field(default_factory=list)
-    volume_transforms: list[VolumeTransform] = Field(default_factory=list)
+    surface_transforms: Sequence[SurfaceTransform] = Field(default_factory=list)
+    volume_transforms: Sequence[VolumeTransform] = Field(default_factory=list)
 
     def __repr__(self) -> str:
         """String representation."""

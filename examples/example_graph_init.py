@@ -17,7 +17,7 @@ if __name__ == "__main__":
     print(graph)
 
     # Some extra info about the graph
-    print(graph.get_graph_info())
+    print(graph.utils.get_graph_info())
 
     # Print species of each node
     for node in graph.nodes(data=False):
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     )
 
     # Plot only surface transforms
-    surface_subgraph = graph.get_subgraph("surface_to_surface")
+    surface_subgraph = graph.utils.get_subgraph("surface_to_surface")
     plot_graph(
         surface_subgraph,
         graph_type="surface",
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     )
 
     # Plot only volume transforms
-    volume_subgraph = graph.get_subgraph("volume_to_volume")
+    volume_subgraph = graph.utils.get_subgraph("volume_to_volume")
     plot_graph(
         volume_subgraph,
         graph_type="volume",

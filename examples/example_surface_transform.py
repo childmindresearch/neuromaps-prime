@@ -37,7 +37,7 @@ if __name__ == "__main__":
         print("Label surface-to-surface transformation failed.")
 
     # see updated graph
-    surface_subgraph = graph.get_subgraph("surface_to_surface")
+    surface_subgraph = graph.utils.get_subgraph("surface_to_surface")
     plot_graph(
         surface_subgraph,
         graph_type="surface",
