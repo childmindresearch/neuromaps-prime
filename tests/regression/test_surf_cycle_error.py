@@ -10,7 +10,7 @@ from networkx.algorithms.cycles import recursive_simple_cycles
 
 from neuromaps_prime.graph import NeuromapsGraph
 from niwrap import workbench
-from neuromaps_prime.utils import extract_vertex_only, merge_vertices_with_faces, log_gii_shapes
+from neuromaps_prime.utils import log_gii_shapes
 
 
 @pytest.mark.usefixtures("require_workbench")
@@ -21,6 +21,9 @@ def test_surface_cycle(tmp_path: Path) -> None:
     graph = NeuromapsGraph(
         yaml_file=Path("src/neuromaps_prime/datasets/data/neuromaps_graph.yaml")
     )
+
+    print(graph.yaml_path.exists())
+    print(f"yaml_path={graph.yaml_path}", flush=True)
 
     origin = "Yerkes19"
     hemisphere = "right"
@@ -55,54 +58,50 @@ def test_surface_cycle(tmp_path: Path) -> None:
         cycle = cycle + [origin]  # close the loop
         print(f"\n=== Cycle {i}: {cycle} ===", flush=True)
 
-        # initial vertex-only surface
-        vertex_surface = tmp_path / f"cycle{i}_start_vertex.surf.gii"
-        current_surface = extract_vertex_only(Path(full_surface), vertex_surface)
-        shapes = log_gii_shapes(Path(current_surface))
-        print(f"{vertex_surface.name} vertex count: {len(nib.load(vertex_surface).darrays[0].data)}", flush=True)
-
+        shapes = log_gii_shapes(Path(full_surface))
         skip_cycle = False
 
         for step, (src, dst) in enumerate(zip(cycle[:-1], cycle[1:])):
             out_file = tmp_path / f"cycle{i}_step{step}.surf.gii"
             print(f"--- Step {step}: {src} -> {dst} ---", flush=True)
-            print(f"Current surface path: {current_surface}", flush=True)
+            density = graph.find_highest_density(space=src)
 
             try:
-                current_surface = graph.surface_to_surface_transformer(
-                    transformer_type="surface",
-                    input_file=full_surface, # use full_surface here
-                    source_space=src,
-                    target_space=dst,
+                current_surface = graph._surface_to_surface(
+                    source=src,
+                    target=dst,
                     hemisphere=hemisphere,
+                    density=density,
                     output_file_path=str(out_file),
                 )
             except Exception as e:
+                print(type(e).__name__)
                 print(f"[ERROR] Transform {src}->{dst} failed: {e}", flush=True)
                 skip_cycle = True
                 break
 
-            if not Path(current_surface).exists():
-                print(f"[ERROR] Transform output file does not exist: {current_surface}", flush=True)
+            from pprint import pprint 
+            pprint(graph._surface_transform_cache)
+            print(src, dst, hemisphere, density)
+            if not current_surface.file_path.exists():
+                print(f"[ERROR] Transform output file does not exist: {current_surface.file_path}", flush=True)
                 skip_cycle = True
                 break
 
-            shapes = log_gii_shapes(Path(current_surface))
-            if not shapes or all(len(arr.data) == 0 for arr in nib.load(current_surface).darrays):
+            shapes = log_gii_shapes(current_surface.file_path)
+            if not shapes or all(len(arr.data) == 0 for arr in nib.load(current_surface.file_path).darrays):
                 print(f"[WARN] Transform {src}->{dst} produced empty surface!", flush=True)
                 skip_cycle = True
                 break
 
-            print(f"Transform {src}->{dst} successful, vertex arrays: {[len(arr.data) for arr in nib.load(current_surface).darrays]}", flush=True)
+            print(f"Transform {src}->{dst} successful, vertex arrays: {[len(arr.data) for arr in nib.load(current_surface.file_path).darrays]}", flush=True)
 
         if skip_cycle:
             print(f"[INFO] Skipping cycle {i} due to empty/failed transform.", flush=True)
             continue
 
-        full_transformed = tmp_path / f"cycle{i}_full_transformed.surf.gii"
-        full_transformed = merge_vertices_with_faces(current_surface, full_surface, full_transformed)
-        shapes = log_gii_shapes(Path(full_transformed))
-        print(f"Full transformed surface vertex arrays: {[len(arr.data) for arr in nib.load(full_transformed).darrays]}", flush=True)
+        shapes = log_gii_shapes(Path(out_file))
+        print(f"Full transformed surface vertex arrays: {[len(arr.data) for arr in nib.load(out_file).darrays]}", flush=True)
 
         if len(shapes) != 1:
             print(f"[WARN] Unexpected number of arrays in full transformed surface, skipping cycle {i}", flush=True)
@@ -111,7 +110,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
         error_file = tmp_path / f"cycle{i}_error.func.gii"
         print(f"Computing signed distance for cycle {i}, output: {error_file.name}", flush=True)
         workbench.signed_distance_to_surface(
-            surface_comp=str(full_transformed),
+            surface_comp=str(out_file),
             surface_ref=str(full_surface),
             metric=str(error_file),
         )
