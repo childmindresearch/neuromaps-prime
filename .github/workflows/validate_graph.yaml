@@ -24,9 +24,23 @@ jobs:
 
     - uses: astral-sh/setup-uv@v8.0.0
 
-    - name: Validate resources
+    - name: Validate nodes
       run: |
-        find src/neuromaps_prime/resources -name "*.yaml" \
+        find src/neuromaps_prime/resources/nodes -name "*.yaml" \
           -exec uv run --only-group validate check-jsonschema \
-            --schemafile schemas/neuromaps_graph.schema.json \
+            --schemafile schemas/neuromaps_nodes.schema.json \
+            --verbose {} +
+
+    - name: Validate surface edges
+      run: |
+        find src/neuromaps_prime/resources/edges/surface -name "*.yaml" \
+          -exec uv run --only-group validate check-jsonschema \
+            --schemafile schemas/neuromaps_surface_edges.schema.json \
+            --verbose {} +
+
+    - name: Validate volume edges
+      run: |
+        find src/neuromaps_prime/resources/edges/volume -name "*.yaml" \
+          -exec uv run --only-group validate check-jsonschema \
+            --schemafile schemas/neuromaps_volume_edges.schema.json \
             --verbose {} +
