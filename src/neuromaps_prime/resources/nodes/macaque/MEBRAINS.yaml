@@ -1,0 +1,23 @@
+MEBRAINS:
+  species: macaque
+  description: MEBRAINS 1.0 Macaque Atlas
+  surfaces:
+    101k:
+      sphere:
+        left: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_sphere.surf.gii
+        right: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_sphere.surf.gii
+      pial:
+        left: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_pial.surf.gii
+        right: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_pial.surf.gii
+      midthickness:
+        left: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_midthickness.surf.gii
+        right: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_midthickness.surf.gii
+      white:
+        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
+        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
+      inflated:
+        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
+        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+  volumes:
+    400um:
+      T1w: share/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm_T1w.nii

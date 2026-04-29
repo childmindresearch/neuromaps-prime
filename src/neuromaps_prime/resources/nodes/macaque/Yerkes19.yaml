@@ -1,0 +1,39 @@
+Yerkes19:
+  species: macaque
+  description: Yerkes19 Macaque Atlas
+  surfaces:
+    10k:
+      sphere:
+        left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_sphere.surf.gii
+        right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_sphere.surf.gii
+      midthickness:
+        left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_midthickness.surf.gii
+        right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_midthickness.surf.gii
+      white:
+        left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_white.surf.gii
+        right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_white.surf.gii
+      pial:
+        left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_pial.surf.gii
+        right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_pial.surf.gii
+      inflated:
+        left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_inflated.surf.gii
+        right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_inflated.surf.gii
+    32k:
+      sphere:
+        left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
+        right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+      midthickness:
+        left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
+        right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
+      white:
+        left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_white.surf.gii
+        right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_white.surf.gii
+      pial:
+        left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_pial.surf.gii
+        right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_pial.surf.gii
+      inflated:
+        left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_inflated.surf.gii
+        right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
+  volumes:
+    500um:
+      T1w: share/Inputs/Yerkes19/src-Yerkes19_res-0p50mm_T1w.nii

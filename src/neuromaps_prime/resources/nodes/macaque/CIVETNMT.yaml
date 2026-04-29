@@ -1,0 +1,14 @@
+CIVETNMT:
+  species: macaque
+  description: CIVET Non-human Primate Template
+  surfaces:
+    41k:
+      sphere:
+        left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+        right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+      midthickness:
+        left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
+        right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
+      white:
+        left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_white.surf.gii
+        right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_white.surf.gii

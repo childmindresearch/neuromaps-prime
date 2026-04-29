@@ -1,0 +1,20 @@
+NMT2Sym:
+  species: macaque
+  description: NMT v2 Symmetric Macaque Template
+  surfaces:
+    41k:
+      sphere:
+        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sphere.rsl.gii
+        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sphere.rsl.gii
+      midthickness:
+        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_midthickness.rsl.gii
+        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_midthickness.rsl.gii
+      white:
+        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
+        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
+      inflated:
+        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
+        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+  volumes:
+    250um:
+      T1w: share/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm_T1w.nii

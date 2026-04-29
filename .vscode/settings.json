@@ -1,7 +1,7 @@
 {
     "yaml.schemas": {
-        "./schemas/neuromaps_graph.schema.json": [
-            "src/neuromaps_prime/resources/**/*.yaml"
+        "./schemas/neuromaps_nodes.schema.json": [
+            "src/neuromaps_prime/resources/nodes/**/*.yaml"
         ]
     },
     "yaml.validate": true

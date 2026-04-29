@@ -1,0 +1,20 @@
+D99:
+  species: macaque
+  description: D99 Macaque Atlas
+  surfaces:
+    41k:
+      midthickness:
+        left: share/Inputs/D99/src-D99_den-41k_hemi-L_midthickness.surf.gii
+        right: share/Inputs/D99/src-D99_den-41k_hemi-R_midthickness.surf.gii
+      pial:
+        left: share/Inputs/D99/src-D99_den-41k_hemi-L_pial.surf.gii
+        right: share/Inputs/D99/src-D99_den-41k_hemi-R_pial.surf.gii
+      sphere:
+        left: share/Inputs/D99/src-D99_den-41k_hemi-L_sphere.surf.gii
+        right: share/Inputs/D99/src-D99_den-41k_hemi-R_sphere.surf.gii
+      white:
+        left: share/Inputs/D99/src-D99_den-41k_hemi-L_white.surf.gii
+        right: share/Inputs/D99/src-D99_den-41k_hemi-R_white.surf.gii
+  volumes:
+    250um:
+      T1w: share/Inputs/D99/src-D99_res-0p25mm_T1w.nii
