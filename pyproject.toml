@@ -36,9 +36,6 @@ dev = [
   "types-pyyaml>=6.0.12.20250915"
 ]
 docs = ["pdoc>=15.0.4"]
-validate = [
-  "check-jsonschema>=0.37.1"
-]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
