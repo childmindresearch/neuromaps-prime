@@ -18,6 +18,13 @@ MEBRAINS:
       inflated:
         left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
         right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+      annotation:
+          BM:
+            left: resources/MEBRAINS/annotations/brain_masks/src-MEBRAINS_den-101k_hemi-L_desc-BM_annot.func.gii
+            right: resources/MEBRAINS/annotations/brain_masks/src-MEBRAINS_den-101k_hemi-R_desc-BM_annot.func.gii
+          SD:
+            left: resources/MEBRAINS/annotations/sulcal_depth/src-MEBRAINS_hemi-L_desc-SD_annot.sulc
+            right: resources/MEBRAINS/annotations/sulcal_depth/src-MEBRAINS_hemi-R_desc-SD_annot.sulc
   volumes:
     400um:
       T1w: share/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm_T1w.nii
