@@ -56,7 +56,7 @@ def validate_volume_file(file_path: str | Path) -> bool:
     A crude check based on file extension - checks the file ends with .nii or .nii.gz
 
     Args:
-        filepath: Path to volume file
+        file_path: Path to volume file
 
     Returns:
         Boolean indicating the file exists and is a volume.
@@ -76,7 +76,7 @@ def validate_surface_file(file_path: str | Path) -> bool:
     A crude check based on file extension - checks the file ends with .gii
 
     Args:
-        filepath: Path to surface file
+        file_path: Path to surface file
 
     Returns:
         Boolean indicating the file exists and is a surface.

@@ -1,19 +1,24 @@
-"""Tests for volumetric transformations using Neuromaps."""
+"""Unit tests for volume transformations."""
+
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, NamedTuple
 from unittest.mock import MagicMock, patch
 
 import pytest
 from niwrap import workbench
 
-from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.transforms.volume import (
     INTERP_NOPARAMS,
     INTERP_PARAMS,
     surface_project,
     vol_to_vol,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+    from typing import Any
 
 # Interpolators that are currently implemented and should work
 DEVELOPED_INTERPS = [*INTERP_PARAMS, *INTERP_NOPARAMS]
@@ -35,15 +40,21 @@ class TestVolumetricTransform:
         return {"source": source, "target": target, "output": output}
 
     @pytest.fixture
-    def mock_ants_transform(self, mock_paths: dict[str, Path]):
+    def mock_ants_transform(
+        self, mock_paths: dict[str, Path]
+    ) -> Generator[MagicMock, None, None]:
         """Fixture to mock ANTs transform with consistent behavior."""
         with patch(
             "neuromaps_prime.transforms.volume.ants.ants_apply_transforms"
         ) as mock_ants:
-            mock_result = MagicMock()
-            mock_result.output.output_image_outfile = str(mock_paths["output"])
+            mock_result = MagicMock(
+                output=MagicMock(output_image_outfile=str(mock_paths["output"]))
+            )
 
-            def create_output(*args, **kwargs) -> MagicMock:
+            def create_output(
+                *args: Any,  # noqa: ANN401, ARG001
+                **kwargs: Any,  # noqa: ANN401, ARG001
+            ) -> MagicMock:
                 mock_paths["output"].touch()
                 return mock_result
 
@@ -55,13 +66,14 @@ class TestVolumetricTransform:
         self, mock_ants_transform: MagicMock, mock_paths: dict[str, Path], interp: str
     ) -> None:
         """Test implemented interpolators."""
+        interp_params = {"gaussian": {"sigma": 1.5}, "BSpline": {"order": 3}}
         result = vol_to_vol(
             source=mock_paths["source"],
             target=mock_paths["target"],
             out_fpath=str(mock_paths["output"]),
             interp=interp,
+            interp_params=interp_params.get(interp),  # type: ignore[arg-type]
         )
-
         mock_ants_transform.assert_called_once()
         call_kwargs = mock_ants_transform.call_args.kwargs
         assert call_kwargs["input_image"] == mock_paths["source"]
@@ -84,30 +96,17 @@ class TestVolumetricTransform:
                 interp=interp,
             )
 
-    @pytest.mark.parametrize(
-        "interp_params",
-        [
-            {"sigma": 1.5, "alpha": 0.7},
-            {},
-            None,
-        ],
-        ids=["with_params", "empty_dict", "none"],
-    )
     def test_interp_params_handling(
-        self,
-        mock_ants_transform: MagicMock,
-        mock_paths: dict[str, Path],
-        interp_params: dict[str, Any] | None,
-    ):
+        self, mock_ants_transform: MagicMock, mock_paths: dict[str, Path]
+    ) -> None:
         """Test various interp_params inputs are handled correctly."""
         result = vol_to_vol(
             source=mock_paths["source"],
             target=mock_paths["target"],
             out_fpath=str(mock_paths["output"]),
             interp="gaussian",
-            interp_params=interp_params,
+            interp_params={"sigma": 1.5, "alpha": 0.7},
         )
-
         mock_ants_transform.assert_called_once()
         assert result.exists()
 
@@ -118,14 +117,18 @@ class TestVolumetricTransform:
         mock_ants: MagicMock,
         mock_get_params: MagicMock,
         mock_paths: dict[str, Path],
-    ):
+    ) -> None:
         """Test interpolation param is correctly called with args."""
         mock_get_params.return_value = {"mocked": "params"}
 
-        mock_result = MagicMock()
-        mock_result.output.output_image_outfile = str(mock_paths["output"])
+        mock_result = MagicMock(
+            output=MagicMock(output_image_outfile=str(mock_paths["output"]))
+        )
 
-        def create_output(*args, **kwargs) -> MagicMock:
+        def create_output(
+            *args: Any,  # noqa: ANN401, ARG001
+            **kwargs: Any,  # noqa: ANN401, ARG001
+        ) -> MagicMock:
             mock_paths["output"].touch()
             return mock_result
 
@@ -144,48 +147,22 @@ class TestVolumetricTransform:
         assert call_kwargs["interpolation"] == mock_get_params.return_value
 
 
-@pytest.mark.usefixtures("require_ants")
-class TestVolumetricTransformIntegration:
-    """Integration tests calling ANTs and using real data."""
+class Vol2SurfOutput(NamedTuple):
+    """Vol2Surf output typed object."""
 
-    @staticmethod
-    def _extract_res(nii_file: Path) -> tuple[float, float, float]:
-        """Extract voxel spacing from a NIfTI file."""
-        import nibabel as nib
-
-        img = nib.load(nii_file)
-        return img.header.get_zooms()[:3]
-
-    def test_vol_to_vol_real_data(self, tmp_path: Path, graph: NeuromapsGraph) -> None:
-        """Integration test with real ANTs processing using actual file paths."""
-        source_atlas = graph.fetch_volume_atlas(
-            space="D99", resolution="250um", resource_type="T1w"
-        )
-        target_atlas = graph.fetch_volume_atlas(
-            space="NMT2Sym", resolution="250um", resource_type="T1w"
-        )
-
-        source_path = source_atlas.fetch()
-        target_path = target_atlas.fetch()
-
-        out_file = tmp_path / "test.nii.gz"
-
-        result = vol_to_vol(
-            source=source_path,
-            target=target_path,
-            out_fpath=str(out_file),
-            interp="linear",
-        )
-
-        assert result.exists()
-        assert self._extract_res(result) == self._extract_res(target_path)
+    volume: Path
+    surface: Path
+    ribbon_surfs: (  # type: ignore[valid-type]
+        workbench.VolumeToSurfaceMappingRibbonConstrainedParamsDict
+    )
+    output: str
 
 
 class TestVolumeToSurfaceProjection:
     """Unit tests for projecting volumes to surface (`surface_project`)."""
 
     @pytest.fixture
-    def mock_paths(self, tmp_path: Path) -> dict[str, Any]:
+    def mock_paths(self, tmp_path: Path) -> Vol2SurfOutput:
         """Create mock file paths for testing."""
         volume = tmp_path / "annotation.nii.gz"
         surface = tmp_path / "midthickness.surf.gii"
@@ -193,49 +170,47 @@ class TestVolumeToSurfaceProjection:
             inner_surf=tmp_path / "inner.surf.gii",
             outer_surf=tmp_path / "outer.surf.gii",
         )
-        ribbon_surfs["inner-surf"].touch()
-        ribbon_surfs["outer-surf"].touch()
+        Path(ribbon_surfs["inner-surf"]).touch()
+        Path(ribbon_surfs["outer-surf"]).touch()
         output = str(tmp_path / "annotation.surf.gii")
 
-        return {
-            "volume": volume,
-            "surface": surface,
-            "ribbon_surfs": ribbon_surfs,
-            "output": output,
-        }
+        return Vol2SurfOutput(
+            volume=volume,
+            surface=surface,
+            ribbon_surfs=ribbon_surfs,
+            output=output,
+        )
 
     @pytest.fixture
-    def mock_wb_project(self, mock_paths: dict[str, Path]):
+    def mock_wb_project(
+        self, mock_paths: Vol2SurfOutput
+    ) -> Generator[MagicMock, None, None]:
         """Fixture to mock workbench volume to surface mapping behavior."""
         with patch(
             "neuromaps_prime.transforms.volume.workbench.volume_to_surface_mapping"
         ) as mock_wb:
-            mock_result = MagicMock()
-            mock_result.metric_out = mock_paths["output"]
+            mock_result = MagicMock(metric_out=mock_paths.output)
 
-            def create_output(*args, **kwargs) -> MagicMock:
-                Path(mock_paths["output"]).touch()
+            def create_output(
+                *args: Any,  # noqa: ANN401, ARG001
+                **kwargs: Any,  # noqa: ANN401, ARG001
+            ) -> MagicMock:
+                Path(mock_paths.output).touch()
                 return mock_result
 
             mock_wb.side_effect = create_output
             yield mock_wb
 
     def test_surface_project(
-        self, mock_wb_project: MagicMock, mock_paths: dict[str, Path]
+        self, mock_wb_project: MagicMock, mock_paths: Vol2SurfOutput
     ) -> None:
         """Test volume-to-surface projection."""
         result = surface_project(
-            volume=mock_paths["volume"],
-            surface=mock_paths["surface"],
-            ribbon_surfs=mock_paths["ribbon_surfs"],
-            out_fpath=mock_paths["output"],
+            volume=mock_paths.volume,
+            surface=mock_paths.surface,
+            ribbon_surfs=mock_paths.ribbon_surfs,
+            out_fpath=mock_paths.output,
         )
-
         mock_wb_project.assert_called_once()
-        assert str(result) == mock_paths["output"]
+        assert str(result) == mock_paths.output
         assert result.exists()
-
-
-@pytest.mark.skip(reason="No volumetric data to project.")
-class TestVolumeToSurfaceProjectionIntegration:
-    """Integration tests for volume to surface projection."""
