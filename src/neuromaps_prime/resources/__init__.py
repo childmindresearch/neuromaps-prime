@@ -14,16 +14,26 @@ _ROOT = Path(__file__).parent.resolve()
 
 
 class NeuromapsPrimeYAML(NamedTuple):
-    """Path to default Neuromaps-PRIME graph config.
+    """Path to default Neuromaps-PRIME graph resources.
 
     Attributes:
         yaml: Default graph framework for neuromaps-prime.
     """
 
-    yaml: Path
+    nodes: tuple[Path, ...]
+    surface_edges: tuple[Path, ...]
+    volume_edges: tuple[Path, ...]
 
 
-NEUROMAPSPRIME_GRAPH = NeuromapsPrimeYAML(yaml=_ROOT / "neuromaps_graph.yaml")
+def _rglob(subdir: str) -> tuple[Path, ...]:
+    return tuple(sorted((_ROOT / subdir).rglob("*.yaml")))
+
+
+NEUROMAPSPRIME_GRAPH = NeuromapsPrimeYAML(
+    nodes=_rglob("nodes"),
+    surface_edges=_rglob("edges/surface"),
+    volume_edges=_rglob("edges/volume"),
+)
 
 
 __all__ = ["NEUROMAPSPRIME_GRAPH"]
