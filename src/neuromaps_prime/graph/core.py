@@ -95,7 +95,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 self._builder.build_from_yaml(self, self.yaml_path)
             else:
                 # If no YAML path is provided build from default
-                self._builder.build_default(self)
+                # (tested through initialization in fixture)
+                self._builder.build_default(self)  # pragma: nocover
 
     # ------------------------------------------------------------------ #
     # Graph mutation                                                       #

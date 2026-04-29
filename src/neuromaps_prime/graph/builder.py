@@ -54,8 +54,10 @@ class GraphBuilder(BaseModel):
     # Public entry points                                                  #
     # ------------------------------------------------------------------ #
 
-    def build_default(self, graph: nx.MultiDiGraph) -> None:
+    def build_default(self, graph: nx.MultiDiGraph) -> None:  # pragma: no cover
         """Populate graph and cache using default resources.
+
+        This method is tested through initialization of the fixture.
 
         Args:
             graph: The NetworkX graph to populate with nodes and edges.

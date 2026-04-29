@@ -14,6 +14,7 @@ from styxpodman import PodmanRunner
 
 from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.niwrap import resolve_runner
+from neuromaps_prime.resources import NEUROMAPSPRIME_GRAPH
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -162,7 +163,23 @@ def graph(tmp_path: Path, request: pytest.FixtureRequest) -> NeuromapsGraph:
         return NeuromapsGraph(runner="auto", data_dir=Path(data_dir).resolve())
 
     graph = NeuromapsGraph(_testing=True)
-    data = yaml.safe_load(graph.yaml_path.read_text())
+
+    def _load_dict(paths: tuple[Path, ...]) -> list[dict[str, Any]]:
+        return [yaml.safe_load(path.read_bytes()) for path in paths]
+
+    def _load_list(paths: tuple[Path, ...]) -> list[dict[str, Any]]:
+        merged = []
+        for path in paths:
+            merged.extend(yaml.safe_load(path.read_bytes()))
+        return merged
+
+    data = {
+        "nodes": _load_dict(NEUROMAPSPRIME_GRAPH.nodes),
+        "edges": {
+            "surface_to_surface": _load_list(NEUROMAPSPRIME_GRAPH.surface_edges),
+            "volume_to_volume": _load_list(NEUROMAPSPRIME_GRAPH.volume_edges),
+        },
+    }
 
     for node_block in data.get("nodes", {}):
         for node_name, node in node_block.items():
