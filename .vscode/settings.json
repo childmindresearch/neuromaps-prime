@@ -2,6 +2,12 @@
     "yaml.schemas": {
         "./schemas/neuromaps_nodes.schema.json": [
             "src/neuromaps_prime/resources/nodes/**/*.yaml"
+        ],
+        "./schemas/neuromaps_surface_edges.schema.json": [
+            "src/neuromaps_prime/resources/edges/surface/**/*.yaml"
+        ],
+        "./schemas/neuromaps_volume_edges.schema.json": [
+            "src/neuromaps_prime/resources/edges/volume/**/*.yaml"
         ]
     },
     "yaml.validate": true
