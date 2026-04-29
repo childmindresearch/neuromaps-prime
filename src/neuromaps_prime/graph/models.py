@@ -1,7 +1,8 @@
 """Models for resources in the neuromaps_prime graph."""
 
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Literal, Sequence
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
