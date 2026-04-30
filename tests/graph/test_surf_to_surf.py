@@ -153,7 +153,6 @@ class TestSurfaceToSurfaceTransformPrivate:
             density="32k",
             hemisphere="right",
             output_file_path="single_hop",
-            add_edge=False,
         )
         mock_graph.fetch_surface_to_surface_transform.assert_called_once()
         assert out is mock_result
@@ -164,6 +163,7 @@ class TestSurfaceToSurfaceTransformPrivate:
         mock_graph.find_path = MagicMock(return_value=["CIVETNMT", "Yerkes19", "fsLR"])
         mock_graph._compose_multihop_surface_transform = MagicMock(
             return_value=mock_result
+        )
         out = mock_graph._surface_to_surface(
             source="CIVETNMT",
             target="fsLR",
@@ -184,10 +184,9 @@ class TestSurfaceToSurfaceTransformPrivate:
         mock_graph.fetch_surface_to_surface_transform = MagicMock(
             return_value=first_xfm
         )
-        mock_graph.surface_ops._compose_next_hop = MagicMock(
-            side_effect=[hop2_xfm, hop3_xfm]
-        )
+        mock_graph._compose_next_hop = MagicMock(side_effect=[hop2_xfm, hop3_xfm])
         output_fpath = str(tmp_path / "output.surf.gii")
+
         result = mock_graph._compose_multihop_surface_transform(
             paths=["A", "B", "C", "D"],
             source="A",
@@ -196,7 +195,6 @@ class TestSurfaceToSurfaceTransformPrivate:
             output_file_path=output_fpath,
             add_edge=True,
         )
-
         mock_graph.fetch_surface_to_surface_transform.assert_called_once()
         assert mock_graph._compose_next_hop.call_count == 2
         first_call = mock_graph._compose_next_hop.call_args_list[0][1]
@@ -217,6 +215,7 @@ class TestSurfaceToSurfaceTransformPrivate:
             mock_graph._compose_multihop_surface_transform(
                 paths=["A", "B", "C"],
                 source="A",
+                density="32k",
                 hemisphere="left",
                 output_file_path="output.surf.gii",
                 add_edge=True,
@@ -269,8 +268,10 @@ class TestSurfaceToSurfaceTransformPrivate:
         mock_graph.find_common_density = MagicMock(return_value="32k")
         mock_graph.fetch_surface_atlas = MagicMock(return_value=mid_atlas)
         mock_graph.fetch_surface_to_surface_transform = MagicMock(
+                  return_value=target_xfm
+        )
 
-       with patch("niwrap.workbench.surface_sphere_project_unproject") as mock_project:
+        with patch("niwrap.workbench.surface_sphere_project_unproject") as mock_project:
             mock_project.return_value = SimpleNamespace(sphere_out=output_path)
             result = mock_graph.surface_ops._two_hops(
                 source_space="A",
@@ -281,7 +282,6 @@ class TestSurfaceToSurfaceTransformPrivate:
                 output_file_path=str(output_path),
                 first_transform=first_xfm,
             )
-
         assert result == output_path
         mock_graph.find_common_density.assert_called_once()
         mock_graph.fetch_surface_atlas.assert_called_once()
@@ -307,6 +307,7 @@ class TestSurfaceToSurfaceTransformPrivate:
         """Test error raised when no mid atlas."""
         first_transform = MagicMock(spec=models.SurfaceTransform)
         first_transform.fetch.return_value = tmp_path / "sphere_in.surf.gii"
+
         mock_graph.find_common_density = MagicMock(return_value="41k")
         mock_graph.fetch_surface_atlas = MagicMock(return_value=None)
 
@@ -325,8 +326,10 @@ class TestSurfaceToSurfaceTransformPrivate:
         """Test error raised no target transformation."""
         first_transform = MagicMock(spec=models.SurfaceTransform)
         first_transform.fetch.return_value = tmp_path / "sphere_in.surf.gii"
+
         mid_atlas = MagicMock(spec=models.SurfaceAtlas)
         mid_atlas.fetch.return_value = tmp_path / "sphere_project.surf.gii"
+        
         mock_graph.find_common_density = MagicMock(return_value="41k")
         mock_graph.fetch_surface_atlas = MagicMock(return_value=mid_atlas)
         mock_graph.fetch_surface_to_surface_transform = MagicMock(return_value=None)
