@@ -97,8 +97,48 @@ class TestSurfaceToSurfaceTransformer:
         basic_params: dict[str, Any],
     ) -> None:
         """Test None returned if transform not found."""
+        mock_estimate_density.return_value = "32k"
+        mock_transformer._surface_to_surface.return_value = None
+        out = mock_transformer.surface_to_surface_transformer(
+            transformer_type="metric", **basic_params
+        )
+        assert out is None
+        mock_transformer.fetch_surface_atlas.assert_not_called()
+
+    @patch("neuromaps_prime.transforms.utils.estimate_surface_density")
+    @pytest.mark.parametrize(
+        "expected_calls",
+        [1, 2, 3],
+    )
 
     def test_fetch_surface_atlas_errors(
+            self,
+        mock_estimate_density: MagicMock,
+        mock_transformer: MagicMock,
+        mock_surface_atlas: MagicMock,
+        basic_params: dict[str, Any],
+        expected_calls: int,
+    ):
+        """Test successful metric transformation."""
+        # Setup
+        mock_estimate_density.return_value = "32k"
+        mock_transformer._surface_to_surface.return_value = mock_surface_atlas
+
+        call_count = 0
+
+        def fetch_side_effect(
+            space: str, hemisphere: str, density: str, resource_type: str
+        ) -> MagicMock | None:
+            nonlocal call_count
+            call_count += 1
+            return None if call_count == expected_calls else mock_surface_atlas
+
+        mock_transformer.fetch_surface_atlas.side_effect = fetch_side_effect
+        with pytest.raises(ValueError, match="No .* found for"):
+            mock_transformer.surface_to_surface_transformer(
+                transformer_type="metric", **basic_params
+            )
+        assert mock_transformer.fetch_surface_atlas.call_count == expected_calls
 
 
 class TestSurfaceToSurfaceTransformPrivate:
@@ -106,12 +146,6 @@ class TestSurfaceToSurfaceTransformPrivate:
 
     @pytest.fixture
     def mock_graph(self, graph: NeuromapsGraph) -> NeuromapsGraph:
-        """Mock graph collaborators accessed by SurfaceTransformOps.
-
-        Replaces surface_ops.cache and surface_ops.utils with MagicMocks so
-        that internal calls on those objects are interceptable without hitting
-        Pydantic's __setattr__ validation.
-        """
         """Mock graph for faking calls."""
         graph.add_transform = MagicMock()
         graph.validate = MagicMock()
@@ -147,7 +181,9 @@ class TestSurfaceToSurfaceTransformPrivate:
         mock_result = MagicMock(spec=models.SurfaceTransform)
         mock_graph.find_path = MagicMock(return_value=["Yerkes19", "fsLR"])
         mock_graph.fetch_surface_to_surface_transform = MagicMock(
-         out = mock_graph._surface_to_surface(
+            return_value=mock_result
+        )
+        out = mock_graph._surface_to_surface(
             source="Yerkes19",
             target="fsLR",
             density="32k",
@@ -329,7 +365,7 @@ class TestSurfaceToSurfaceTransformPrivate:
 
         mid_atlas = MagicMock(spec=models.SurfaceAtlas)
         mid_atlas.fetch.return_value = tmp_path / "sphere_project.surf.gii"
-        
+
         mock_graph.find_common_density = MagicMock(return_value="41k")
         mock_graph.fetch_surface_atlas = MagicMock(return_value=mid_atlas)
         mock_graph.fetch_surface_to_surface_transform = MagicMock(return_value=None)
