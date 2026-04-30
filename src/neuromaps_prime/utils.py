@@ -1,84 +1,215 @@
-"""Utility functions."""
+"""Graph utility operations for NeuromapsGraph.
 
-from pathlib import Path
-import nibabel as nib
-from niwrap import Runner, get_global_runner, set_global_runner, use_docker, use_local, use_singularity
+Provides graph traversal, validation, density resolution, and introspection
+utilities that operate on the NetworkX graph structure.
+"""
 
-def set_runner(
-    runner: Runner | str,
-    image_overrides: dict[str, str] | None = None,
-    **kwargs,
-) -> Runner:
-    """Set StyxRunner to use for NiWrap.
+from __future__ import annotations
+
+from typing import Any
+
+import networkx as nx
+from pydantic import BaseModel
+
+from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
+from neuromaps_prime.transforms.utils import _get_density_key
+
+
+class GraphUtils(BaseModel):
+    """Graph traversal, validation, and introspection utilities.
+
+    Attributes:
+    ----------
+    graph:
+        The underlying NetworkX :class:`~networkx.MultiDiGraph`.
+    cache:
+        The :class:`GraphCache` instance used for resource lookups.
+    """
+
+    model_config = {"arbitrary_types_allowed": True}
+
+    graph: nx.MultiDiGraph
+    cache: GraphCache
+
+    # ------------------------------------------------------------------ #
+    # Validation                                                           #
+    # ------------------------------------------------------------------ #
+
+    def validate_spaces(self, source: str, target: str) -> None:
+        """Assert that both *source* and *target* exist as nodes in the graph.
+
+        Args:
+            source: Source space name.
+            target: Target space name.
+
+        Raises:
+            ValueError: If either space is absent from the graph.
+        """
+        nodes = set(self.graph.nodes)
+        if source not in nodes:
+            raise ValueError(
+                f"Source space '{source}' does not exist in the graph."
+                f" Available spaces: {sorted(nodes)}"
+            )
+        if target not in nodes:
+            raise ValueError(
+                f"Target space '{target}' does not exist in the graph."
+                f" Available spaces: {sorted(nodes)}"
+            )
+
+    # ------------------------------------------------------------------ #
+    # Path finding                                                         #
+    # ------------------------------------------------------------------ #
+
+    def find_path(
+        self, source: str, target: str, edge_type: str | None = None
+    ) -> list[str]:
+        """Find the shortest weighted path between two spaces.
+
+        Args:
+            source: Source space name.
+            target: Target space name.
+            edge_type: If provided, restrict traversal to edges of this key
+                (``'surface_to_surface'`` or ``'volume_to_volume'``).
+
+        Returns:
+            Ordered list of space names from *source* to *target*, or an
+            empty list when no path exists.
+        """
+        try:
+            g = self.get_subgraph(edge_type) if edge_type else self.graph
+            return nx.shortest_path(g, source=source, target=target, weight="weight")
+        except nx.NetworkXNoPath:
+            return []
+
+    def get_subgraph(self, edge_type: str) -> nx.MultiDiGraph:
+        """Return a view containing all nodes but only edges of *edge_type*.
+
+        Results are cached per *edge_type* value — the cache is intentionally
+        unbounded because the set of edge types is small and fixed.
+
+        Args:
+            edge_type: Edge key to retain (e.g. ``'surface_to_surface'``).
+
+        Returns:
+            A new :class:`~networkx.MultiDiGraph` containing only the
+            requested edges.
+        """
+        return _cached_subgraph(self.graph, edge_type)
+
+    # ------------------------------------------------------------------ #
+    # Density helpers                                                      #
+    # ------------------------------------------------------------------ #
+
+    def find_common_density(self, mid_space: str, target_space: str) -> str:
+        """Find the highest density shared by *mid_space* atlases and transforms.
+
+        Args:
+            mid_space: Intermediate space name.
+            target_space: Final target space name.
+
+        Returns:
+            The highest common density string (e.g. ``'32k'``).
+
+        Raises:
+            ValueError: If no common density exists.
+        """
+        atlas_densities = {
+            a.density for a in self.cache.get_surface_atlases(space=mid_space)
+        }
+        transform_densities = {
+            t.density
+            for t in self.cache.get_surface_transforms(
+                source=mid_space, target=target_space
+            )
+        }
+        common = atlas_densities & transform_densities
+        if not common:
+            raise ValueError(
+                f"No common density found between '{mid_space}' and '{target_space}'."
+            )
+        return max(common, key=_get_density_key)
+
+    def find_highest_density(self, space: str) -> str:
+        """Return the highest surface density available for *space*.
+
+        Args:
+            space: Brain template space name.
+
+        Returns:
+            The highest density string (e.g. ``'164k'``).
+
+        Raises:
+            ValueError: If no surface atlases are registered for *space*.
+        """
+        densities = {a.density for a in self.cache.get_surface_atlases(space=space)}
+        if not densities:
+            raise ValueError(f"No surface atlases found for space '{space}'.")
+        return max(densities, key=_get_density_key)
+
+    # ------------------------------------------------------------------ #
+    # Introspection                                                        #
+    # ------------------------------------------------------------------ #
+
+    def get_node_data(self, node_name: str) -> Any:  # noqa: ANN401
+        """Return the :class:`~neuromaps_prime.graph.models.Node` stored on *node_name*.
+
+        Args:
+            node_name: Name of the node to retrieve.
+
+        Returns:
+            The ``Node`` data object attached to the node.
+
+        Raises:
+            ValueError: If node_name is not present in the graph.
+        """
+        try:
+            return self.graph.nodes[node_name]["data"]
+        except KeyError as e:
+            msg = (
+                f"Node {node_name!r} not found. "
+                f"Availble nodes: {sorted(self.graph.nodes)}"
+            )
+            raise ValueError(msg) from e
+
+    def get_graph_info(self) -> dict[str, int]:
+        """Return a summary of the graph structure.
+
+        Returns:
+            Dictionary with counts of nodes, edges, surfaces, volumes, and
+            each transform type.
+        """
+        nodes_data = [self.get_node_data(n) for n in self.graph.nodes]
+        edge_keys = [k for _, _, k in self.graph.edges(keys=True)]
+        return {
+            "num_nodes": self.graph.number_of_nodes(),
+            "num_edges": self.graph.number_of_edges(),
+            "num_surfaces": sum(len(n.surfaces) for n in nodes_data),
+            "num_volumes": sum(len(n.volumes) for n in nodes_data),
+            "num_surface_to_surface_transforms": edge_keys.count("surface_to_surface"),
+            "num_volume_to_volume_transforms": edge_keys.count("volume_to_volume"),
+        }
+
+
+# ---------------------------------------------------------------------------
+# Module-level cached subgraph builder
+# ---------------------------------------------------------------------------
+
+
+def _cached_subgraph(graph: nx.MultiDiGraph, edge_type: str) -> nx.MultiDiGraph:
+    """Build and cache a subgraph filtered to *edge_type* edges.
 
     Args:
-        runner: Styx runner type to use (one of 'local', 'docker', 'singularity').
-        image_overrides: Optional dictionary of container tag overrides.
+        graph: The full graph to filter.
+        edge_type: Edge key to retain.
+
+    Returns:
+        A new :class:`~networkx.MultiDiGraph` with all nodes and only the
+        matching edges.
     """
-    if image_overrides is not None and not isinstance(image_overrides, dict):
-        raise TypeError(
-            f"Expected image_overrides dictionary, got {type(image_overrides)}"
-        )
-
-    if isinstance(runner, str):
-        match runner_exec := runner.lower():
-            case "local":
-                use_local(**kwargs)
-            case "docker" | "singularity":
-                runner_fn = use_docker if runner_exec == "docker" else use_singularity
-                runner_fn(
-                    **{f"{runner_exec}_executable": runner_exec},
-                    image_overrides=image_overrides,
-                    **kwargs,
-                )
-            case _:
-                raise NotImplementedError(f"'{runner_exec}' runner not implemented.")
-    else:
-        runner.image_overrides = image_overrides
-        set_global_runner(runner)
-
-    return get_global_runner()
-
-
-def extract_vertex_only(in_file: Path, out_file: Path) -> Path:
-    """Extract only the vertex (pointset) arrays from a GIFTI surface."""
-    gii = nib.load(str(in_file))
-    vertex_arrays = [
-        arr for arr in gii.darrays
-        if arr.intent == nib.nifti1.intent_codes['NIFTI_INTENT_POINTSET']
-    ]
-    if not vertex_arrays:
-        raise ValueError(f"No vertex arrays found in {in_file}")
-    new_gii = nib.gifti.GiftiImage(darrays=vertex_arrays)
-    nib.save(new_gii, str(out_file))
-    return out_file
-
-
-def merge_vertices_with_faces(vertex_file: Path, template_file: Path, out_file: Path) -> Path:
-    """Merge a vertex-only GIFTI surface with triangle arrays from a template surface."""
-    vertex_gii = nib.load(str(vertex_file))
-    template_gii = nib.load(str(template_file))
-
-    triangles = [
-        arr for arr in template_gii.darrays
-        if arr.data.ndim == 2 and arr.data.shape[1] == 3
-    ]
-
-    if not triangles:
-        raise ValueError(f"No triangle arrays found in {template_file}")
-
-    new_gii = nib.gifti.GiftiImage(darrays=vertex_gii.darrays + triangles)
-    nib.save(new_gii, str(out_file))
-    return out_file
-
-
-def log_gii_shapes(path: Path) -> list[int]:
-    """Log the number of vertices in each pointset array of a GIFTI surface file."""
-    gii = nib.load(path)
-    vertex_arrays = [
-        arr for arr in gii.darrays
-        if arr.intent == nib.nifti1.intent_codes['NIFTI_INTENT_POINTSET']
-    ]
-    shapes = [arr.data.shape[0] for arr in vertex_arrays]
-    print(f"{path.name} has {shapes} vertices")
-    return shapes
+    subgraph = nx.MultiDiGraph()
+    subgraph.add_nodes_from(graph.nodes(data=True))
+    for u, v, key, data in graph.edges(data=True, keys=True):
+        if key == edge_type:
+            subgraph.add_edge(u, v, key=key, **data)
+    return subgraph
