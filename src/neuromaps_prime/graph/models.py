@@ -27,7 +27,6 @@ class Resource(BaseModel, ABC):  # pragma: no cover
         # later add validation if the file path is valid, exists, etc.
         pass
 
-
     @field_validator("file_path")
     @classmethod
     def validate_file_path(cls, v: Path) -> Path:
