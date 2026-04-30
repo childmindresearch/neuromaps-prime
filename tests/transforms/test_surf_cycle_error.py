@@ -45,8 +45,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
 
     directed_graph = networkx_graph.to_directed()
     cycles: list[list[str]] = [
-        cycle for cycle in recursive_simple_cycles(directed_graph)
-        if origin in cycle
+        cycle for cycle in recursive_simple_cycles(directed_graph) if origin in cycle
     ]
     assert cycles, "No cycles found!"
     logger.info("Found %s cycles containing %s", len(cycles), origin)
@@ -63,7 +62,6 @@ def test_surface_cycle(tmp_path: Path) -> None:
     log_gii_shapes(Path(full_surface))
 
     for i, cycle in enumerate(cycles):
-
         while cycle[0] != origin:
             cycle = cycle[1:] + cycle[:1]
         cycle = [*cycle, origin]
@@ -149,6 +147,4 @@ def test_surface_cycle(tmp_path: Path) -> None:
 
         logger.info("Cycle %s MEDIAN ERROR: %s", i, median_error)
 
-        assert median_error < 1.0, (
-            f"Median error in {cycle} exceeds 1: {median_error}"
-        )
+        assert median_error < 1.0, f"Median error in {cycle} exceeds 1: {median_error}"
