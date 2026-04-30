@@ -1,6 +1,5 @@
 """Global pytest fixtures, arguments, and options."""
 
-
 from pathlib import Path
 from typing import Any, Generator
 
@@ -37,11 +36,13 @@ def pytest_addoption(parser: pytest.Parser):
 @pytest.fixture(scope="session", autouse=True)
 def runner(
     request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory
-) -> niwrap.Runner:
-    """Globally set niwrap runner for the testing suite."""
-    # Set up niwrap runner
-    runner_type, runner_exec = resolve_runner(
-        request.config.getoption("--runner").lower()
+) -> ) -> Generator[Runner, None, None]:
+    """Globally set runner for the testing suite."""
+    tmp_dir = tmp_path_factory.mktemp("styx_tmp")
+    pytest_runner = set_runner(
+        runner=request.config.getoption("--runner").lower(),
+        image_overrides=request.config.getoption("--runner-images"),
+        data_dir=tmp_dir,
     )
     yield pytest_runner
 
@@ -99,7 +100,6 @@ def graph(
                 )
 
     # Rewrite node file paths
-
     for node_block in data.get("nodes", {}):
         for node_name, node in node_block.items():
             rewrite_node_files(node_name, node)
@@ -111,6 +111,7 @@ def graph(
 
     graph._build_from_dict(data)
     return graph
+
 
 @pytest.fixture
 def require_ants(runner: Runner) -> None:
