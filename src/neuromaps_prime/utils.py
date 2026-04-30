@@ -9,6 +9,7 @@ from niwrap import (
     use_singularity,
 )
 
+
 def set_runner(
     runner: Runner | str,
     image_overrides: dict[str, str] | None = None,
@@ -19,7 +20,7 @@ def set_runner(
     Args:
         runner: Styx runner type to use (one of 'local', 'docker', 'singularity).
         image_overrides: Optional dictionary of container tag overrides.
-        
+
     Raises:
         TypeError: if image_overrides is not dictionary.
         NotImplementedError: if provided runner not a valid StyxRunner.
