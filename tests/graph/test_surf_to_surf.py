@@ -76,13 +76,15 @@ class TestSurfaceToSurfaceTransformer:
             mock_resample.return_value = mock_output
             mock_transformer.surface_to_surface_transformer(
                 transformer_type=transformer_type, **basic_params
-                            )
+            )
         mock_transformer._surface_to_surface.assert_called_once()
         assert mock_transformer.fetch_surface_atlas.call_count == 3
         mock_resample.assert_called_once()
 
     def test_invalid_transformer_type(
-        self, graph: NeuromapsGraph, basic_params: dict[str, Any],
+        self,
+        graph: NeuromapsGraph,
+        basic_params: dict[str, Any],
     ) -> None:
         """Test error raised if invalid type."""
         with pytest.raises(ValueError, match="Invalid transformer_type"):
@@ -93,7 +95,8 @@ class TestSurfaceToSurfaceTransformer:
     @patch("neuromaps_prime.transforms.utils.estimate_surface_density")
     def test_no_transform(
         self,
-        graph: NeuromapsGraph,
+        mock_estimate_density: MagicMock,
+        mock_transformer: NeuromapsGraph,
         basic_params: dict[str, Any],
     ) -> None:
         """Test None returned if transform not found."""
@@ -110,7 +113,6 @@ class TestSurfaceToSurfaceTransformer:
         "expected_calls",
         [1, 2, 3],
     )
-
     def test_fetch_surface_atlas_errors(
             self,
         mock_estimate_density: MagicMock,
@@ -237,7 +239,6 @@ class TestSurfaceToSurfaceTransformPrivate:
         assert first_call["hop_idx"] == 2
         assert first_call["next_space"] == "C"
         assert first_call["current_transform"] == first_xfm
-
         second_call = mock_graph._compose_next_hop.call_args_list[1][1]
         assert second_call["hop_idx"] == 3
         assert second_call["next_space"] == "D"
@@ -300,16 +301,16 @@ class TestSurfaceToSurfaceTransformPrivate:
         target_xfm.fetch.return_value.touch()
         output_path = tmp_path / "output_surf.gii"
         output_path.touch()
-
         mock_graph.find_common_density = MagicMock(return_value="32k")
         mock_graph.fetch_surface_atlas = MagicMock(return_value=mid_atlas)
         mock_graph.fetch_surface_to_surface_transform = MagicMock(
-                  return_value=target_xfm
+            return_value=target_xfm
         )
 
         with patch("niwrap.workbench.surface_sphere_project_unproject") as mock_project:
             mock_project.return_value = SimpleNamespace(sphere_out=output_path)
-            result = mock_graph.surface_ops._two_hops(
+
+            result = mock_graph._two_hops(
                 source_space="A",
                 mid_space="B",
                 target_space="C",
@@ -343,7 +344,6 @@ class TestSurfaceToSurfaceTransformPrivate:
         """Test error raised when no mid atlas."""
         first_transform = MagicMock(spec=models.SurfaceTransform)
         first_transform.fetch.return_value = tmp_path / "sphere_in.surf.gii"
-
         mock_graph.find_common_density = MagicMock(return_value="41k")
         mock_graph.fetch_surface_atlas = MagicMock(return_value=None)
 
@@ -362,7 +362,6 @@ class TestSurfaceToSurfaceTransformPrivate:
         """Test error raised no target transformation."""
         first_transform = MagicMock(spec=models.SurfaceTransform)
         first_transform.fetch.return_value = tmp_path / "sphere_in.surf.gii"
-
         mid_atlas = MagicMock(spec=models.SurfaceAtlas)
         mid_atlas.fetch.return_value = tmp_path / "sphere_project.surf.gii"
 
