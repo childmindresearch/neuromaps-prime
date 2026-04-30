@@ -16,7 +16,6 @@ from neuromaps_prime.transforms.utils import log_gii_shapes
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.usefixtures("require_workbench")
 def test_surface_cycle(tmp_path: Path) -> None:
     """Test surface consistency by cycling through transforms."""
     logging.basicConfig(level=logging.INFO)
