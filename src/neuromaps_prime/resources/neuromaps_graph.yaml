@@ -55,6 +55,14 @@ nodes:
         inflated:
           left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
           right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+        annotation:
+          BM:
+            left: resources/MEBRAINS/annotations/brain_masks/src-MEBRAINS_den-101k_hemi-L_desc-BM_annot.func.gii
+            right: resources/MEBRAINS/annotations/brain_masks/src-MEBRAINS_den-101k_hemi-R_desc-BM_annot.func.gii
+          SD:
+            left: resources/MEBRAINS/annotations/sulcal_depth/src-MEBRAINS_hemi-L_desc-SD_annot.sulc
+            right: resources/MEBRAINS/annotations/sulcal_depth/src-MEBRAINS_hemi-R_desc-SD_annot.sulc
+          
     volumes:
       400um:
         T1w: share/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm_T1w.nii
@@ -78,6 +86,10 @@ nodes:
         inflated:
           left: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-L_inflated.surf.gii
           right: share/Inputs/Yerkes19/src-Yerkes19_den-10k_hemi-R_inflated.surf.gii
+        annotation:
+          PC_Yeo7Networks:
+            left: resources/Yerkes19/annotations/parcellations/src-Yerkes19_den-10k_hemi-L_atlas-Yeo7Networks_desc-PC_annot.label.gii
+            right: resources/Yerkes19/annotations/parcellations/src-Yerkes19_den-10k_hemi-R_atlas-Yeo7Networks_desc-PC_annot.label.gii
       32k:
         sphere:
           left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
@@ -94,6 +106,122 @@ nodes:
         inflated:
           left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_inflated.surf.gii
           right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_inflated.surf.gii
+        annotation:
+          RM_auto_ampa:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-ampa_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - AMPA receptor density, radioligand [³H]AMPA. Ionotropic glutamate receptor.
+          RM_auto_cgp5:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-cgp5_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes:
+              - GABA_B receptor density, radioligand [³H]CGP54626. Metabotropic inhibitory GABA receptor.
+          RM_auto_damp:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-damp_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - M3 muscarinic receptor density, radioligand [³H]4-DAMP. Cholinergic receptor.
+          RM_auto_dpat:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-dpat_desc-RM_annot.func.gii
+            references: 
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - 5-HT1A receptor density, radioligand [³H]8-OH-DPAT (dpat). Serotonin receptor.
+          RM_auto_dpmg:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-dpmg_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - D1 dopamine receptor density, radioligand [³H]SCH23390. Dopamine receptor.
+          RM_auto_flum:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-flum_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - GABA_A/BZ receptor density, radioligand [³H]flumazenil. Benzodiazepine site of GABA_A receptor.
+          RM_auto_kain:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-kain_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - Kainate receptor density, radioligand [³H]kainate. Ionotropic glutamate receptor.
+          RM_auto_keta:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-keta_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - 5-HT2A receptor density, radioligand [³H]ketanserin (keta). Serotonin receptor.
+          RM_auto_mk80:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-mk80_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - NMDA receptor density, radioligand [³H]MK-801 (mk80). Ionotropic glutamate receptor.
+          RM_auto_musc:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-musc_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - GABA_A receptor density, radioligand [³H]muscimol. Ionotropic inhibitory GABA receptor.
+          RM_auto_oxot:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-oxot_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - M2 muscarinic receptor density, radioligand [³H]oxotremorine-M. Cholinergic receptor.
+          RM_auto_pire:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-pire_desc-RM_annot.func.gii
+            references: 
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - M1 muscarinic receptor density, radioligand [³H]pirenzepine. Cholinergic receptor.
+          RM_auto_praz:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-praz_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - α1-adrenergic receptor density, radioligand [³H]prazosin. Noradrenergic receptor.
+          RM_auto_uk14:
+            left: resources/Yerkes19/annotations/receptor_maps/src-Yerkes19_den-32k_hemi-L_acq-auto_trc-uk14_desc-RM_annot.func.gii
+            references:
+              - https://doi.org/10.1007/s00429-021-02437-y
+              - https://doi.org/10.1038/s41593-023-01351-2
+            notes: 
+              - α2-adrenergic receptor density, radioligand [³H]UK-14304 (uk14). Noradrenergic receptor.
+          MM:
+            left: resources/Yerkes19/annotations/myelin_maps/src-Yerkes19_den-32k_hemi-L_desc-MM_annot.func.gii
+            right: resources/Yerkes19/annotations/myelin_maps/src-Yerkes19_den-32k_hemi-R_desc-MM_annot.func.gii
+          SMM:
+            left: resources/Yerkes19/annotations/smoothed_myelin_maps/src-Yerkes19_den-32k_hemi-L_desc-SMM_annot.func.gii
+            right: resources/Yerkes19/annotations/smoothed_myelin_maps/src-Yerkes19_den-32k_hemi-R_desc-SMM_annot.func.gii
+          CT:
+            left: resources/Yerkes19/annotations/cortical_thickness/src-Yerkes19_den-32k_hemi-L_desc-CT_annot.func.gii
+            right: resources/Yerkes19/annotations/cortical_thickness/src-Yerkes19_den-32k_hemi-R_desc-CT_annot.func.gii
+          CV:
+            left: resources/Yerkes19/annotations/curvature/src-Yerkes19_den-32k_hemi-L_desc-CV_annot.func.gii
+            right: resources/Yerkes19/annotations/curvature/src-Yerkes19_den-32k_hemi-R_desc-CV_annot.func.gii
+          PC_MarkovMonkey:
+            left: resources/Yerkes19/annotations/parcellations/src-Yerkes19_den-10k_hemi-L_atlas-MarkovMonkey_desc-PC_annot.label.gii
+            right: resources/Yerkes19/annotations/parcellations/src-Yerkes19_den-10k_hemi-R_atlas-MarkovMonkey_desc-PC_annot.label.gii
+          PC_Yeo7Networks:
+            left: resources/Yerkes19/annotations/parcellations/src-Yerkes19_den-32k_hemi-L_atlas-Yeo7Networks_desc-PC_annot.label.gii
     volumes:
       500um:
         T1w: share/Inputs/Yerkes19/src-Yerkes19_res-0p50mm_T1w.nii
