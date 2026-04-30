@@ -1,215 +1,47 @@
-"""Graph utility operations for NeuromapsGraph.
+"""Utility functions."""
 
-Provides graph traversal, validation, density resolution, and introspection
-utilities that operate on the NetworkX graph structure.
-"""
+from niwrap import (
+    Runner,
+    get_global_runner,
+    set_global_runner,
+    use_docker,
+    use_local,
+    use_singularity,
+)
 
-from __future__ import annotations
-
-from typing import Any
-
-import networkx as nx
-from pydantic import BaseModel
-
-from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
-from neuromaps_prime.transforms.utils import _get_density_key
-
-
-class GraphUtils(BaseModel):
-    """Graph traversal, validation, and introspection utilities.
-
-    Attributes:
-    ----------
-    graph:
-        The underlying NetworkX :class:`~networkx.MultiDiGraph`.
-    cache:
-        The :class:`GraphCache` instance used for resource lookups.
-    """
-
-    model_config = {"arbitrary_types_allowed": True}
-
-    graph: nx.MultiDiGraph
-    cache: GraphCache
-
-    # ------------------------------------------------------------------ #
-    # Validation                                                           #
-    # ------------------------------------------------------------------ #
-
-    def validate_spaces(self, source: str, target: str) -> None:
-        """Assert that both *source* and *target* exist as nodes in the graph.
-
-        Args:
-            source: Source space name.
-            target: Target space name.
-
-        Raises:
-            ValueError: If either space is absent from the graph.
-        """
-        nodes = set(self.graph.nodes)
-        if source not in nodes:
-            raise ValueError(
-                f"Source space '{source}' does not exist in the graph."
-                f" Available spaces: {sorted(nodes)}"
-            )
-        if target not in nodes:
-            raise ValueError(
-                f"Target space '{target}' does not exist in the graph."
-                f" Available spaces: {sorted(nodes)}"
-            )
-
-    # ------------------------------------------------------------------ #
-    # Path finding                                                         #
-    # ------------------------------------------------------------------ #
-
-    def find_path(
-        self, source: str, target: str, edge_type: str | None = None
-    ) -> list[str]:
-        """Find the shortest weighted path between two spaces.
-
-        Args:
-            source: Source space name.
-            target: Target space name.
-            edge_type: If provided, restrict traversal to edges of this key
-                (``'surface_to_surface'`` or ``'volume_to_volume'``).
-
-        Returns:
-            Ordered list of space names from *source* to *target*, or an
-            empty list when no path exists.
-        """
-        try:
-            g = self.get_subgraph(edge_type) if edge_type else self.graph
-            return nx.shortest_path(g, source=source, target=target, weight="weight")
-        except nx.NetworkXNoPath:
-            return []
-
-    def get_subgraph(self, edge_type: str) -> nx.MultiDiGraph:
-        """Return a view containing all nodes but only edges of *edge_type*.
-
-        Results are cached per *edge_type* value — the cache is intentionally
-        unbounded because the set of edge types is small and fixed.
-
-        Args:
-            edge_type: Edge key to retain (e.g. ``'surface_to_surface'``).
-
-        Returns:
-            A new :class:`~networkx.MultiDiGraph` containing only the
-            requested edges.
-        """
-        return _cached_subgraph(self.graph, edge_type)
-
-    # ------------------------------------------------------------------ #
-    # Density helpers                                                      #
-    # ------------------------------------------------------------------ #
-
-    def find_common_density(self, mid_space: str, target_space: str) -> str:
-        """Find the highest density shared by *mid_space* atlases and transforms.
-
-        Args:
-            mid_space: Intermediate space name.
-            target_space: Final target space name.
-
-        Returns:
-            The highest common density string (e.g. ``'32k'``).
-
-        Raises:
-            ValueError: If no common density exists.
-        """
-        atlas_densities = {
-            a.density for a in self.cache.get_surface_atlases(space=mid_space)
-        }
-        transform_densities = {
-            t.density
-            for t in self.cache.get_surface_transforms(
-                source=mid_space, target=target_space
-            )
-        }
-        common = atlas_densities & transform_densities
-        if not common:
-            raise ValueError(
-                f"No common density found between '{mid_space}' and '{target_space}'."
-            )
-        return max(common, key=_get_density_key)
-
-    def find_highest_density(self, space: str) -> str:
-        """Return the highest surface density available for *space*.
-
-        Args:
-            space: Brain template space name.
-
-        Returns:
-            The highest density string (e.g. ``'164k'``).
-
-        Raises:
-            ValueError: If no surface atlases are registered for *space*.
-        """
-        densities = {a.density for a in self.cache.get_surface_atlases(space=space)}
-        if not densities:
-            raise ValueError(f"No surface atlases found for space '{space}'.")
-        return max(densities, key=_get_density_key)
-
-    # ------------------------------------------------------------------ #
-    # Introspection                                                        #
-    # ------------------------------------------------------------------ #
-
-    def get_node_data(self, node_name: str) -> Any:  # noqa: ANN401
-        """Return the :class:`~neuromaps_prime.graph.models.Node` stored on *node_name*.
-
-        Args:
-            node_name: Name of the node to retrieve.
-
-        Returns:
-            The ``Node`` data object attached to the node.
-
-        Raises:
-            ValueError: If node_name is not present in the graph.
-        """
-        try:
-            return self.graph.nodes[node_name]["data"]
-        except KeyError as e:
-            msg = (
-                f"Node {node_name!r} not found. "
-                f"Availble nodes: {sorted(self.graph.nodes)}"
-            )
-            raise ValueError(msg) from e
-
-    def get_graph_info(self) -> dict[str, int]:
-        """Return a summary of the graph structure.
-
-        Returns:
-            Dictionary with counts of nodes, edges, surfaces, volumes, and
-            each transform type.
-        """
-        nodes_data = [self.get_node_data(n) for n in self.graph.nodes]
-        edge_keys = [k for _, _, k in self.graph.edges(keys=True)]
-        return {
-            "num_nodes": self.graph.number_of_nodes(),
-            "num_edges": self.graph.number_of_edges(),
-            "num_surfaces": sum(len(n.surfaces) for n in nodes_data),
-            "num_volumes": sum(len(n.volumes) for n in nodes_data),
-            "num_surface_to_surface_transforms": edge_keys.count("surface_to_surface"),
-            "num_volume_to_volume_transforms": edge_keys.count("volume_to_volume"),
-        }
-
-
-# ---------------------------------------------------------------------------
-# Module-level cached subgraph builder
-# ---------------------------------------------------------------------------
-
-
-def _cached_subgraph(graph: nx.MultiDiGraph, edge_type: str) -> nx.MultiDiGraph:
-    """Build and cache a subgraph filtered to *edge_type* edges.
-
+def set_runner(
+    runner: Runner | str,
+    image_overrides: dict[str, str] | None = None,
+    **kwargs,
+) -> Runner:
+    """Set StyxRunner to use for NiWrap.
     Args:
-        graph: The full graph to filter.
-        edge_type: Edge key to retain.
+        runner: Styx runner type to use (one of 'local', 'docker', 'singularity).
+        image_overrides: Optional dictionary of container tag overrides.
+    Raises:
+        TypeError: if image_overrides is not dictionary.
+        NotImplementedError: if provided runner not a valid StyxRunner.
 
-    Returns:
-        A new :class:`~networkx.MultiDiGraph` with all nodes and only the
-        matching edges.
-    """
-    subgraph = nx.MultiDiGraph()
-    subgraph.add_nodes_from(graph.nodes(data=True))
-    for u, v, key, data in graph.edges(data=True, keys=True):
-        if key == edge_type:
-            subgraph.add_edge(u, v, key=key, **data)
-    return subgraph
+if image_overrides is not None and not isinstance(image_overrides, dict):
+        raise TypeError(
+            f"Expected image_overrides dictionary, got {type(image_overrides)}"
+        )
+
+    if isinstance(runner, str):
+        match runner_exec := runner.lower():
+            case "local":
+                use_local(**kwargs)
+            case "docker" | "singularity":
+                runner_fn = use_docker if runner_exec == "docker" else use_singularity
+                runner_fn(
+                    **{f"{runner_exec}_executable": runner_exec},
+                    image_overrides=image_overrides,
+                    **kwargs,
+                )
+            case _:
+                raise NotImplementedError(f"'{runner_exec}' runner not implemented.")
+    else:
+        runner.image_overrides = image_overrides
+        set_global_runner(runner)
+
+    return get_global_runner()
