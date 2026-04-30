@@ -23,7 +23,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
     logger.info("=== BUILDING NEUROMAPS GRAPH ===")
 
     graph = NeuromapsGraph(
-        yaml_file=Path("src/neuromaps_prime/datasets/data/neuromaps_graph.yaml")
+        yaml_file=Path("src/neuromaps_prime/resources/neuromaps_graph.yaml")
     )
 
     logger.info("yaml_exists=%s", graph.yaml_path.exists())
@@ -35,7 +35,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
 
     logger.info("Origin=%s, hemisphere=%s, density=%s", origin, hemisphere, density)
 
-    networkx_graph = graph.get_subgraph(edges="surface_to_surface")
+    networkx_graph = graph
     logger.info(
         "Graph has %s nodes and %s edges",
         len(networkx_graph.nodes),
