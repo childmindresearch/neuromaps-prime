@@ -65,9 +65,10 @@ class TestVolumeToVolumeTransformer:
         """Test successful volume transformation."""
         # Setup
         mock_transformer.fetch_volume_to_volume_transform.return_value = (
-        mock_transformer.volume_ops.cache.get_volume_atlas.return_value = (
-            mock_volume_atlas
+            mock_volume_transform
         )
+        mock_transformer.fetch_volume_atlas.return_value = mock_volume_atlas
+        mock_vol_to_vol.return_value = Path(basic_params["output_file_path"])
 
         with patch("niwrap.ants.ants_apply_transforms") as mock_ants:
             mock_output = MagicMock()
@@ -75,14 +76,14 @@ class TestVolumeToVolumeTransformer:
             mock_output.output.output_image_outfile = Path(
                 basic_params["output_file_path"]
             )
-
-        mock_transformer.volume_ops.utils.validate_spaces.assert_called_once_with(
-            basic_params.source_space, basic_params.target_space
-        )
-        mock_transformer.volume_ops.cache.get_volume_transform.assert_called_once()
-        mock_transformer.volume_ops.cache.get_volume_atlas.assert_called_once()
-        mock_vol_to_vol.assert_called_once()
-        assert result == expected_output
+            mock_output.output.output_image_outfile.touch()
+            mock_ants.return_value = mock_output
+            result = mock_transformer.volume_to_volume_transformer(**basic_params)
+        mock_transformer.validate.assert_called_once()
+        mock_transformer.fetch_volume_to_volume_transform.assert_called_once()
+        mock_transformer.fetch_volume_atlas.assert_called_once()
+        mock_ants.assert_called_once()
+        assert result.exists()
 
     def test_no_transform(
         self, mock_transformer: NeuromapsGraph, basic_params: dict[str, Any]
@@ -91,9 +92,9 @@ class TestVolumeToVolumeTransformer:
         mock_transformer.fetch_volume_to_volume_transform.return_value = None
 
         with pytest.raises(ValueError, match="No volume transform found"):
-            mock_transformer.volume_to_volume_transformer(**basic_params._asdict())
-        mock_transformer.volume_ops.cache.get_volume_transform.assert_called_once()
-        mock_transformer.volume_ops.cache.get_volume_atlas.assert_not_called()
+            mock_transformer.volume_to_volume_transformer(**basic_params)
+        mock_transformer.fetch_volume_to_volume_transform.assert_called_once()
+        mock_transformer.fetch_volume_atlas.assert_not_called()
 
     def test_no_target_atlas(
         self,
@@ -105,7 +106,7 @@ class TestVolumeToVolumeTransformer:
         mock_transformer.fetch_volume_to_volume_transform.return_value = (
             mock_volume_transform
         )
-        mock_transformer.volume_ops.cache.get_volume_atlas.return_value = None
+        mock_transformer.fetch_volume_atlas.return_value = None
 
         with pytest.raises(ValueError, match="No target volume atlas found"):
             mock_transformer.volume_to_volume_transformer(**basic_params)
