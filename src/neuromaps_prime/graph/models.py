@@ -14,6 +14,20 @@ class Resource(BaseModel, ABC):  # pragma: no cover
     description: str
     file_path: Path
 
+    @abstractmethod
+    def fetch(self) -> Path:
+        """Fetch the resource.
+
+        Returns:
+            Path to the resources file.
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
+        """
+        # later add validation if the file path is valid, exists, etc.
+        pass
+
+
     @field_validator("file_path")
     @classmethod
     def validate_file_path(cls, v: Path) -> Path:
@@ -45,6 +59,10 @@ class SurfaceAtlas(Resource):
     hemisphere: Literal["left", "right"]
     resource_type: str
 
+    def fetch(self) -> Path:
+        """Fetch the surface resource."""
+        return self.file_path
+
 
 class SurfaceTransform(Resource):
     """Model for surface transform resources."""
@@ -59,6 +77,7 @@ class SurfaceTransform(Resource):
     def fetch(self) -> Path:
         """Fetch the transform resource."""
         return self.file_path
+
 
 class VolumeAtlas(Resource):
     """Model for volume atlas resources."""
@@ -112,8 +131,8 @@ class Node(BaseModel):
 class Edge(BaseModel):
     """Edge representation in transformation graph."""
 
-    surface_transforms: Sequence[SurfaceTransform] = Field(default_factory=list)
-    volume_transforms: Sequence[VolumeTransform] = Field(default_factory=list)
+    surface_transforms: list[SurfaceTransform] = Field(default_factory=list)
+    volume_transforms: list[VolumeTransform] = Field(default_factory=list)
 
     def __repr__(self) -> str:
         """String representation."""
