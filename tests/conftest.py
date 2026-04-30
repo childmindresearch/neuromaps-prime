@@ -36,7 +36,7 @@ def pytest_addoption(parser: pytest.Parser):
 @pytest.fixture(scope="session", autouse=True)
 def runner(
     request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory
-) -> ) -> Generator[Runner, None, None]:
+) -> Generator[Runner, None, None]:
     """Globally set runner for the testing suite."""
     tmp_dir = tmp_path_factory.mktemp("styx_tmp")
     pytest_runner = set_runner(
@@ -54,7 +54,7 @@ def graph(
     """Create a graph fixture to use for tests."""
     data_dir = request.config.getoption("--data-dir")
     if data_dir is not None:
-        return NeuromapsGraph(runner="auto", data_dir=Path(data_dir).resolve())
+        return NeuromapsGraph(runner=runner, data_dir=Path(data_dir).resolve())
 
     graph = NeuromapsGraph(_testing=True)
     data = yaml.safe_load(graph.yaml_path.read_text())
