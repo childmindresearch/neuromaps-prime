@@ -958,7 +958,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         target_atlas = self.fetch_volume_atlas(
             space=target_space,
             resolution=resolution,
-            resource_type="composite",
+            resource_type=resource_type,
         )
         if target_atlas is None:
             raise ValueError(
