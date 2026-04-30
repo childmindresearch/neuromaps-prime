@@ -114,7 +114,7 @@ class TestSurfaceToSurfaceTransformer:
         [1, 2, 3],
     )
     def test_fetch_surface_atlas_errors(
-            self,
+        self,
         mock_estimate_density: MagicMock,
         mock_transformer: MagicMock,
         mock_surface_atlas: MagicMock,
@@ -292,6 +292,7 @@ class TestSurfaceToSurfaceTransformPrivate:
         """Test two hop functionality."""
         first_xfm = MagicMock(spec=models.SurfaceTransform)
         first_xfm.fetch.return_value = tmp_path / "sphere_in.surf.gii"
+        
         first_xfm.fetch.return_value.touch()
         mid_atlas = MagicMock(spec=models.SurfaceAtlas)
         mid_atlas.fetch.return_value = tmp_path / "sphere_project.surf.gii"
