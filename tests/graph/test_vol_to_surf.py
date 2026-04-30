@@ -8,6 +8,7 @@ import pytest
 
 from neuromaps_prime.graph import NeuromapsGraph
 
+
 class TestVolumeToSurfaceTransformer:
     """Unit tests for volume to surface transformer."""
 
@@ -37,6 +38,7 @@ class TestVolumeToSurfaceTransformer:
         }
 
     def make_atlas_side_effect(self, tmp_path: Path) -> Any:
+        """Create a side effect returning distinct atlases per resource type."""
 
         def fetch_surface_atlas_side_effect(
             space: str, density: str, hemisphere: str, resource_type: str
@@ -49,7 +51,7 @@ class TestVolumeToSurfaceTransformer:
 
         return fetch_surface_atlas_side_effect
 
-@patch(
+    @patch(
         "neuromaps_prime.graph.workbench.volume_to_surface_mapping_ribbon_constrained"
     )
     @patch("neuromaps_prime.graph.surface_project")
@@ -67,25 +69,34 @@ class TestVolumeToSurfaceTransformer:
         basic_params["transformer_type"] = transformer_type
         projected_file = tmp_path / "projected.func.gii"
         projected_file.touch()
+        expected_output = Path(basic_params["output_file_path"])
 
         mock_transformer.fetch_surface_atlas.side_effect = self.make_atlas_side_effect(
             tmp_path
         )
-            mock_transformer.volume_ops.surface_ops.transform_surface.return_value = (
-                expected_output
-            )
-            result = mock_transformer.volume_to_surface_transformer(
-                **basic_params._asdict()
-            )
 
-        mock_transformer.volume_ops.utils.validate_spaces.assert_called_once_with(
-            basic_params.source_space, basic_params.target_space
+        mock_ribbon.return_value = MagicMock()
+        mock_surface_project.return_value = projected_file
+        mock_transformer.surface_to_surface_transformer.return_value = expected_output
+
+        result = mock_transformer.volume_to_surface_transformer(**basic_params)
+
+        mock_transformer.validate.assert_called_once_with(
+            basic_params["source_space"], basic_params["target_space"]
         )
-        assert mock_transformer.volume_ops.cache.require_surface_atlas.call_count == 3
-        mock_ribbon.assert_called_once()
+        assert mock_transformer.fetch_surface_atlas.call_count == 3
+        mock_ribbon.assert_called_once_with(
+            inner_surf=tmp_path / "white.surf.gii",
+            outer_surf=tmp_path / "pial.surf.gii",
+
         mock_surface_project.assert_called_once()
         mock_transformer.surface_to_surface_transformer.assert_called_once()
         assert result == expected_output
+
+    @patch(
+        "neuromaps_prime.graph.workbench.volume_to_surface_mapping_ribbon_constrained"
+    )
+    @patch("neuromaps_prime.graph.surface_project")
 
     @pytest.mark.parametrize(
         "transformer_type,expected_ext", [("metric", "func"), ("label", "label")]
@@ -96,18 +107,14 @@ class TestVolumeToSurfaceTransformer:
         mock_ribbon: MagicMock,
         mock_transformer: NeuromapsGraph,
         basic_params: dict[str, Any],
-        basic_params: BasicParams,
         tmp_path: Path,
         transformer_type: str,
-        transformer_type: Literal["label", "metric"],
         expected_ext: str,
     ) -> None:
         """Test projected file path uses correct extension for metric vs label."""
         basic_params["transformer_type"] = transformer_type
-        basic_params = basic_params._replace(transformer_type=transformer_type)
         projected_file = tmp_path / f"projected.{expected_ext}.gii"
         projected_file.touch()
-        expected_output = Path(basic_params["output_file_path"])
 
         mock_transformer.fetch_surface_atlas.side_effect = self.make_atlas_side_effect(
             tmp_path
