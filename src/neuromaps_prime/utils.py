@@ -15,14 +15,16 @@ def set_runner(
     **kwargs,
 ) -> Runner:
     """Set StyxRunner to use for NiWrap.
+
     Args:
         runner: Styx runner type to use (one of 'local', 'docker', 'singularity).
         image_overrides: Optional dictionary of container tag overrides.
+        
     Raises:
         TypeError: if image_overrides is not dictionary.
         NotImplementedError: if provided runner not a valid StyxRunner.
-
-if image_overrides is not None and not isinstance(image_overrides, dict):
+    """
+    if image_overrides is not None and not isinstance(image_overrides, dict):
         raise TypeError(
             f"Expected image_overrides dictionary, got {type(image_overrides)}"
         )
