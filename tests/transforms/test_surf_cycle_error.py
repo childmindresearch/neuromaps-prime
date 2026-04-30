@@ -8,10 +8,11 @@ import nibabel as nib
 import numpy as np
 import pytest
 from networkx.algorithms.cycles import recursive_simple_cycles
-from neuromaps_prime.transforms.utils import log_gii_shapes
 from niwrap import workbench
 
 from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.transforms.utils import log_gii_shapes
+
 
 logger = logging.getLogger(__name__)
 
