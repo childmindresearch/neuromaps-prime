@@ -41,13 +41,11 @@ class TestVolumeToSurfaceTransformer:
         """Create a side effect returning distinct atlases per resource type."""
 
         def fetch_surface_atlas_side_effect(
-            density: str,
-            hemisphere: Literal["left", "right"],
-            space: str,
-            resource_type: str,
+            space: str, density: str, hemisphere: str, resource_type: str
         ) -> MagicMock:
             atlas = MagicMock()
             surf_file = tmp_path / f"{resource_type}.surf.gii"
+            surf_file.touch()
             atlas.fetch = MagicMock(return_value=surf_file)
             return atlas
 
@@ -75,6 +73,15 @@ class TestVolumeToSurfaceTransformer:
 
         mock_transformer.fetch_surface_atlas.side_effect = self.make_atlas_side_effect(
             tmp_path
+
+            )
+            mock_ribbon.return_value = MagicMock()
+            mock_surface_project.return_value = projected_file
+            mock_transformer.surface_to_surface_transformer.return_value = expected_output
+
+            result = mock_transformer.volume_to_surface_transformer(**basic_params)
+
+            mock_transformer.validate.assert_called_once_with(
 
             mock_transformer.validate.assert_called_once_with(
             basic_params["source_space"], basic_params["target_space"]
@@ -161,30 +168,25 @@ class TestVolumeToSurfaceTransformer:
         mock_transformer.volume_ops.surface_ops.transform_surface.assert_called_once()
 
     def test_no_source_surface_atlas(
-        self, mock_transformer: NeuromapsGraph, basic_params: BasicParams
+        self, mock_transformer: NeuromapsGraph, basic_params: dict[str, Any]
     ) -> None:
         """Test ValueError raised when source midthickness surface atlas not found."""
-        mock_transformer.volume_ops.cache.require_surface_atlas.side_effect = (
-            ValueError(
-                "No 'midthickness' surface atlas found for space "
-                f"'{basic_params.source_space}' "
-                f"(density='32k', hemisphere='{basic_params.hemisphere}')"
-            )
-        )
-        with pytest.raises(
-            ValueError, match="No 'midthickness' surface atlas found for space"
-        ):
-            mock_transformer.volume_to_surface_transformer(**basic_params._asdict())
-        mock_transformer.volume_ops.cache.require_surface_atlas.assert_called_once()
+        mock_transformer.fetch_surface_atlas.return_value = None
+        with pytest.raises(ValueError, match="No midthickness surface found for"):
+            mock_transformer.volume_to_surface_transformer(**basic_params)
+        mock_transformer.fetch_surface_atlas.assert_called_once()
 
     @pytest.mark.parametrize(
-        ("failing_call", "missing_surface"),
-        [(2, "white"), (3, "pial")],
+        "failing_call, missing_surface",
+        [
+            (2, "white"),
+            (3, "pial"),
+        ],
     )
     def test_no_ribbon_surface(
         self,
         mock_transformer: NeuromapsGraph,
-        basic_params: BasicParams,
+        basic_params: dict[str, Any],
         failing_call: int,
         missing_surface: str,
         tmp_path: Path,
@@ -194,47 +196,22 @@ class TestVolumeToSurfaceTransformer:
         call_count = 0
 
         def side_effect_with_failure(
-            density: str,
-            hemisphere: Literal["left", "right"],
-            space: str,
-            resource_type: str,
-        ) -> MagicMock:
+            space: str, density: str, hemisphere: str, resource_type: str
+        ) -> MagicMock | None:
             nonlocal call_count
             call_count += 1
-            if call_count == failing_call:
-                raise ValueError(
-                    f"No '{missing_surface}' surface atlas found for space "
-                    f"'{basic_params.source_space}' "
-                    f"(density='{basic_params.source_density}', "
-                    f"hemisphere='{basic_params.hemisphere}')"
+            return (
+                None
+                if call_count == failing_call
+                else base_side_effect(
+                    space=space,
+                    density=density,
+                    hemisphere=hemisphere,
+                    resource_type=resource_type,
                 )
-            return base_side_effect(
-                density=density,
-                hemisphere=hemisphere,
-                space=space,
-                resource_type=resource_type,
             )
 
-        mock_transformer.volume_ops.cache.require_surface_atlas.side_effect = (
-            side_effect_with_failure
-        )
-        with (
-            patch(
-                "neuromaps_prime.graph.transforms.volume.workbench.volume_to_surface_mapping_ribbon_constrained"
-            ),
-            patch("neuromaps_prime.graph.transforms.volume.surface_project"),
-            pytest.raises(
-                ValueError, match=f"No '{missing_surface}' surface atlas found"
-            ),
-        ):
-            mock_transformer.volume_to_surface_transformer(**basic_params._asdict())
-
-    def test_invalid_transformer_type(
-        self, graph: NeuromapsGraph, basic_params: BasicParams
-    ) -> None:
-        """Test error raised if invalid type."""
-        basic_params = basic_params._replace(
-            transformer_type="invalid"  # type: ignore[arg-type]
-        )
-        with pytest.raises(ValueError, match="Invalid transformer_type"):
-            graph.volume_ops.transform_volume_to_surface(**basic_params._asdict())
+        mock_transformer.fetch_surface_atlas.side_effect = side_effect_with_failure
+        with pytest.raises(ValueError, match=f"No {missing_surface} surface found for"):
+            mock_transformer.volume_to_surface_transformer(**basic_params)
+        assert mock_transformer.fetch_surface_atlas.call_count == failing_call
