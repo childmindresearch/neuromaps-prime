@@ -73,7 +73,6 @@ class TestVolumeToSurfaceTransformer:
 
         mock_transformer.fetch_surface_atlas.side_effect = self.make_atlas_side_effect(
             tmp_path
-
         )
         mock_ribbon.return_value = MagicMock()
         mock_surface_project.return_value = projected_file
@@ -89,7 +88,6 @@ class TestVolumeToSurfaceTransformer:
             inner_surf=tmp_path / "white.surf.gii",
             outer_surf=tmp_path / "pial.surf.gii",
         )
-
         mock_surface_project.assert_called_once()
         mock_transformer.surface_to_surface_transformer.assert_called_once()
         assert result == expected_output
