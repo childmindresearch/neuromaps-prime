@@ -1,9 +1,8 @@
 """Tests associated with surface-to-surface transformation."""
 
-
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, NamedTuple
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -11,34 +10,16 @@ import pytest
 from neuromaps_prime import models
 from neuromaps_prime.graph import NeuromapsGraph
 
-if TYPE_CHECKING:
-    from typing import Literal
-
-
-class BasicParams(NamedTuple):
-    """Test param object."""
-
-    input_file: Path
-    source_space: str
-    target_space: str
-    hemisphere: Literal["left", "right"]
-    output_file_path: str
-    source_density: str
-    target_density: str
-
 
 class TestSurfaceToSurfaceTransformer:
-    """Tests for surface to surface transformer."""
+    """Unit tests for surface to surface transformer."""
 
     @pytest.fixture
     def mock_transformer(self, graph: NeuromapsGraph) -> NeuromapsGraph:
         """Create a mock transformer instance with necessary methods."""
-        graph.surface_ops = MagicMock(
-            spec=SurfaceTransformOps,
-            surface_ops=MagicMock(cache=MagicMock(spec=GraphCache)),
-            find_highest_density=MagicMock(return_value="32k"),
-            fetch_surface_atlas=MagicMock(),
-        )
+        graph._surface_to_surface = MagicMock()
+        graph.find_highest_density = MagicMock(return_value="32k")
+        graph.fetch_surface_atlas = MagicMock()
         return graph
 
     @pytest.fixture
@@ -46,23 +27,27 @@ class TestSurfaceToSurfaceTransformer:
         """Create mock surface atlas object."""
         current_sphere = tmp_path / "atlas.surf.gii"
         current_sphere.touch()
-        return MagicMock(fetch=MagicMock(return_value=current_sphere))
+        atlas = MagicMock()
+        atlas.fetch = MagicMock(return_value=current_sphere)
+        return atlas
 
     @pytest.fixture
-    def basic_params(self, tmp_path: Path) -> BasicParams:
+    def basic_params(self, tmp_path: Path) -> dict[str, Any]:
         """Basic parameters for testing."""
         input_file = tmp_path / "in.func.gii"
         input_file.touch()
-        return BasicParams(
-            input_file=input_file,
-            source_space="Yerkes19",
-            target_space="CIVETNMT",
-            hemisphere="left",
-            output_file_path=f"{tmp_path}/out.func.gii",
-            source_density="32k",
-            target_density="41k",
-        )
+        return {
+            "input_file": input_file,
+            "source_space": "Yerkes19",
+            "target_space": "CIVETNMT",
+            "hemisphere": "left",
+            "output_file_path": f"{tmp_path}/out.func.gii",
+            "source_density": "32k",
+            "target_density": "41k",
+        }
 
+    @patch("neuromaps_prime.transforms.utils.estimate_surface_density")
+    @patch("niwrap.workbench.metric_resample_area_surfs")
     @pytest.mark.parametrize("transformer_type", ["label", "metric"])
     def test_metric_transformation_success(
         self,
@@ -71,24 +56,31 @@ class TestSurfaceToSurfaceTransformer:
         transformer_type: Literal["label", "metric"],
     ) -> None:
         """Test successful metric/label transformation delegates to surface ops."""
-        mock_output = Path(basic_params.output_file_path)
-        mock_transformer.surface_ops.transform_surface.return_value = mock_output
+        mock_area_params: MagicMock,
+        mock_estimate_density: MagicMock,
+        mock_transformer: MagicMock,
+        mock_surface_atlas: MagicMock,
+        basic_params: dict[str, Any],
+        transformer_type: str,
+    ):
+        """Test successful metric transformation."""
+        # Setup
+        mock_estimate_density.return_value = "32k"
+        mock_transformer._surface_to_surface.return_value = mock_surface_atlas
+        mock_transformer.fetch_surface_atlas.return_value = mock_surface_atlas
+        mock_area_params.return_value = {
+            "current_area": Path("/mock/current.surf.gii"),
+            "new_area": Path("/mock/new.surf.gii"),
+        }
 
-        with patch(
-            "neuromaps_prime.transforms.utils.estimate_surface_density",
-            return_value="32k",
-        ):
-            result = mock_transformer.surface_to_surface_transformer(
-                transformer_type=transformer_type, **basic_params._asdict()
-            )
-        mock_transformer.surface_ops.transform_surface.assert_called_once_with(
-            transformer_type=transformer_type,
-            **basic_params._asdict(),
-            area_resource="midthickness",
-            add_edge=True,
-            provider=None,
-        )
-        assert result == mock_output
+        resample_fn = f"niwrap.workbench.{transformer_type}_resample"
+        with patch(resample_fn) as mock_resample:
+            mock_output = MagicMock()
+            mock_output.label_out = Path(basic_params["output_file_path"])
+            mock_output.label_out.touch()
+            mock_resample.return_value = mock_output
+            mock_transformer.surface_to_surface_transformer(
+                transformer_type=transformer_type, **basic_params
 
     def test_invalid_transformer_type(
         self, graph: NeuromapsGraph, basic_params: BasicParams
