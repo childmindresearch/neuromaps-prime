@@ -359,11 +359,11 @@ edges:
       CIVET:
         32k:
           midthickness:
-            left: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-L_midthickness.surf.gii
-            right: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-R_midthickness.surf.gii
+            left: share/Outputs/CIVETNMT-Yerkes19/src-Yerkes19_to-CIVETNMT_den-32k_hemi-L_midthickness.surf.gii
+            right: share/Outputs/CIVETNMT-Yerkes19/src-Yerkes19_to-CIVETNMT_den-32k_hemi-R_midthickness.surf.gii
           sphere:
-            left: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-L_sphere.surf.gii
-            right: share/Outputs/CIVETNMT-Yerkes19/src-yerkes19_to-CIVETNMT_den-32k_hemi-R_sphere.surf.gii
+            left: share/Outputs/CIVETNMT-Yerkes19/src-Yerkes19_to-CIVETNMT_den-32k_hemi-L_sphere.surf.gii
+            right: share/Outputs/CIVETNMT-Yerkes19/src-Yerkes19_to-CIVETNMT_den-32k_hemi-R_sphere.surf.gii
 
   - from: Yerkes19
     to: D99
@@ -383,11 +383,11 @@ edges:
       CIVET:
         32k:
           midthickness:
-            left: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_midthickness.surf.gii
-            right: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_midthickness.surf.gii
+            left: share/Outputs/MEBRAINS-Yerkes19/src-Yerkes19_to-MEBRAINS_den-32k_hemi-L_midthickness.surf.gii
+            right: share/Outputs/MEBRAINS-Yerkes19/src-Yerkes19_to-MEBRAINS_den-32k_hemi-R_midthickness.surf.gii
           sphere:
-            left: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-L_sphere.surf.gii
-            right: share/Outputs/MEBRAINS-Yerkes19/src-yerkes19_to-MEBRAINS_den-32k_hemi-R_sphere.surf.gii
+            left: share/Outputs/MEBRAINS-Yerkes19/src-Yerkes19_to-MEBRAINS_den-32k_hemi-L_sphere.surf.gii
+            right: share/Outputs/MEBRAINS-Yerkes19/src-Yerkes19_to-MEBRAINS_den-32k_hemi-R_sphere.surf.gii
 
   - from: Yerkes19
     to: NMT2Sym
@@ -395,11 +395,11 @@ edges:
       CIVET:
         32k:
           midthickness:
-            left: share/Outputs/NMT2Sym-Yerkes19/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_midthickness.surf.gii
-            right: share/Outputs/NMT2Sym-Yerkes19/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_midthickness.surf.gii
+            left: share/Outputs/NMT2Sym-Yerkes19/src-Yerkes19_to-NMT2Sym_den-32k_hemi-L_midthickness.surf.gii
+            right: share/Outputs/NMT2Sym-Yerkes19/src-Yerkes19_to-NMT2Sym_den-32k_hemi-R_midthickness.surf.gii
           sphere:
-            left: share/Outputs/NMT2Sym-Yerkes19/src-yerkes19_to-NMT2Sym_den-32k_hemi-L_sphere.surf.gii
-            right: share/Outputs/NMT2Sym-Yerkes19/src-yerkes19_to-NMT2Sym_den-32k_hemi-R_sphere.surf.gii
+            left: share/Outputs/NMT2Sym-Yerkes19/src-Yerkes19_to-NMT2Sym_den-32k_hemi-L_sphere.surf.gii
+            right: share/Outputs/NMT2Sym-Yerkes19/src-Yerkes19_to-NMT2Sym_den-32k_hemi-R_sphere.surf.gii
 
 
 ################### Cross species Edges ####################
