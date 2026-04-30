@@ -13,7 +13,6 @@ from niwrap import workbench
 from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.transforms.utils import log_gii_shapes
 
-
 logger = logging.getLogger(__name__)
 
 
