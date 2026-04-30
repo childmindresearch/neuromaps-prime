@@ -68,36 +68,21 @@ def graph(
         surfaces = node.get("surfaces", {})
         for density, types in surfaces.items():
             for surf_type, hemis in types.items():
-                if surf_type == "annotation":
-                    for label, hemi_paths in hemis.items():
-                        for hemi in list(hemi_paths):
-                            if hemi in ("notes", "references"):
-                                continue
-                            hemi_paths[hemi] = mk(
-                                tmp_path / f"{name}_{density}_{hemi}_{label}.func.gii"
-                            )
-                else:
-                    for hemi in list(hemis):
-                        hemis[hemi] = mk(
-                            tmp_path / f"{name}_{density}_{hemi}_{surf_type}.surf.gii"
-                        )
+                for hemi in list(hemis):
+                    hemis[hemi] = mk(
+                        tmp_path / f"{name}_{density}_{hemi}_{surf_type}.surf.gii"
+                    )
         # Volumes
         volumes = node.get("volumes", {})
         for res, types in volumes.items():
-            for vol_type in types:
-                if vol_type == "annotation":
-                    for label in types[vol_type]:
-                        types[vol_type][label]["uri"] = mk(
-                            tmp_path / f"{name}_{res}_{label}.nii.gz"
-                        )
-                else:
-                    types[vol_type] = mk(tmp_path / f"{name}_{res}_{vol_type}.nii.gz")
+            for vol_type in list(types):
+                types[vol_type] = mk(tmp_path / f"{name}_{res}_{vol_type}.nii.gz")
 
     def rewrite_edge_files(edge: dict[str, Any]) -> None:
         src = edge["from"]
         dst = edge["to"]
 
-        # Surfaces: provider → density → surf_type → hemi → path
+        # Surfaces
         surfaces = edge.get("surfaces", {})
         for provider, density_dict in surfaces.items():
             for density, types in density_dict.items():
@@ -130,7 +115,7 @@ def graph(
         for edge in edge_list:
             rewrite_edge_files(edge)
 
-    graph._builder.build_from_dict(graph=graph, data=data)
+    graph._build_from_dict(data)
     return graph
 
 

@@ -9,14 +9,14 @@ from niwrap import workbench
 
 from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.transforms.volume import (
-    INTERP_NOPARAMS,
+    _NOT_IMPLEMENTED,
     INTERP_PARAMS,
     surface_project,
     vol_to_vol,
 )
 
 # Interpolators that are currently implemented and should work
-DEVELOPED_INTERPS = [*INTERP_PARAMS, *INTERP_NOPARAMS]
+DEVELOPED_INTERPS = [k for k in INTERP_PARAMS if k not in _NOT_IMPLEMENTED]
 
 
 class TestVolumetricTransform:
@@ -71,6 +71,19 @@ class TestVolumetricTransform:
         assert result == mock_paths["output"]
         assert result.exists()
 
+    @pytest.mark.parametrize("interp", _NOT_IMPLEMENTED)
+    def test_vol_to_vol_not_implemented_interps(
+        self, mock_paths: dict[str, Path], interp: str
+    ) -> None:
+        """Test future interpolators for raising NotImplementedError."""
+        with pytest.raises(NotImplementedError, match="not yet implemented"):
+            vol_to_vol(
+                source=mock_paths["source"],
+                target=mock_paths["target"],
+                out_fpath=str(mock_paths["output"]),
+                interp=interp,
+            )
+            
     @pytest.mark.parametrize("interp", ["foo", "bar", "invalid"])
     def test_vol_to_vol_unsupported_interps(
         self, mock_paths: dict[str, Path], interp: str
