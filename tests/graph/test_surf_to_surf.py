@@ -1,6 +1,5 @@
 """Tests associated with surface-to-surface transformation."""
 
-from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
@@ -9,9 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from neuromaps_prime.graph import NeuromapsGraph, models
-from neuromaps_prime.graph.cache import GraphCache
-from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
+from neuromaps_prime import models
+from neuromaps_prime.graph import NeuromapsGraph
 
 if TYPE_CHECKING:
     from typing import Literal
