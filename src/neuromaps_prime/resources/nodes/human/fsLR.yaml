@@ -1,0 +1,41 @@
+fsLR:
+  species: human
+  description: HCP S1200 fsLR Human Atlas
+  surfaces:
+    10k:
+      # 10K surfaces all use https://github.com/TingsterX/alignment_macaque-human
+      sphere:
+        left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_sphere.surf.gii
+        right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_sphere.surf.gii
+      midthickness:
+        left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_midthickness.surf.gii
+        right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_midthickness.surf.gii
+      white:
+        left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_white.surf.gii
+        right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_white.surf.gii
+      pial:
+        left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_pial.surf.gii
+        right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_pial.surf.gii
+      inflated:
+        left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_inflated.surf.gii
+        right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_inflated.surf.gii
+    32k:
+    # 32k inflated and midthickness from neuromaps, otherwise same as 10k source
+      sphere:
+        left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_sphere.surf.gii
+        right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_sphere.surf.gii
+      midthickness:
+        left: share/Inputs/fsLR/src-fsLR_den-32k_hemi-L_midthickness.surf.gii
+        right: share/Inputs/fsLR/src-fsLR_den-32k_hemi-R_midthickness.surf.gii
+      white:
+        left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_white.surf.gii
+        right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_white.surf.gii
+      pial:
+        left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_pial.surf.gii
+        right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_pial.surf.gii
+      inflated:
+        left: share/Inputs/fsLR/src-fsLR_den-32k_hemi-L_inflated.surf.gii
+        right: share/Inputs/fsLR/src-fsLR_den-32k_hemi-R_inflated.surf.gii
+      flat:
+        left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_flat.surf.gii
+        right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_flat.surf.gii

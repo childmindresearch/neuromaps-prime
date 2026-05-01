@@ -27,6 +27,7 @@ from neuromaps_prime.graph.models import (
     VolumeAtlas,
     VolumeTransform,
 )
+from neuromaps_prime.resources import NEUROMAPSPRIME_GRAPH
 
 if TYPE_CHECKING:
     import networkx as nx
@@ -52,6 +53,33 @@ class GraphBuilder(BaseModel):
     # ------------------------------------------------------------------ #
     # Public entry points                                                  #
     # ------------------------------------------------------------------ #
+
+    def build_default(self, graph: nx.MultiDiGraph) -> None:  # pragma: no cover
+        """Populate graph and cache using default resources.
+
+        This method is tested through initialization of the fixture.
+
+        Args:
+            graph: The NetworkX graph to populate with nodes and edges.
+        """
+
+        def _load_dict(paths: tuple[Path, ...]) -> list[dict[str, Any]]:
+            return [yaml.safe_load(path.read_bytes()) for path in paths]
+
+        def _load_list(paths: tuple[Path, ...]) -> list[dict[str, Any]]:
+            merged = []
+            for path in paths:
+                merged.extend(yaml.safe_load(path.read_bytes()))
+            return merged
+
+        data = {
+            "nodes": _load_dict(NEUROMAPSPRIME_GRAPH.nodes),
+            "edges": {
+                "surface_to_surface": _load_list(NEUROMAPSPRIME_GRAPH.surface_edges),
+                "volume_to_volume": _load_list(NEUROMAPSPRIME_GRAPH.volume_edges),
+            },
+        }
+        self.build_from_dict(graph, data)
 
     def build_from_yaml(self, graph: nx.MultiDiGraph, yaml_file: Path) -> None:
         """Populate graph and cache from a YAML file.

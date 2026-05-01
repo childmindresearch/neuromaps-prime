@@ -1,0 +1,65 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "Surface Edges",
+    "type": "array",
+    "description": "Surface-to-surface transformations between brain template nodes.",
+    "additionalProperties": false,
+    "properties": {
+        "items": {
+            "type": "object",
+            "required": [
+                "from",
+                "to",
+                "surfaces"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "description": "Source node."
+                },
+                "to": {
+                    "type": "string",
+                    "description": "Target node."
+                },
+                "surfaces": {
+                    "type": "object",
+                    "description": "Surface registration files, keyed by annotation name then resolution.",
+                    "additionalProperties": false,
+                    "patternProperties": {
+                        "^[A-Za-z0-9_]+$": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "references": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "neuromaps_references.schema.json"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                }
+                            },
+                            "patternProperties": {
+                                "^[0-9]+k?$": {
+                                    "type": "object",
+                                    "required": [
+                                        "sphere"
+                                    ],
+                                    "additionalProperties": true,
+                                    "properties": {
+                                        "sphere": {
+                                            "$ref": "neuromaps_surface-hemi.schema.json"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

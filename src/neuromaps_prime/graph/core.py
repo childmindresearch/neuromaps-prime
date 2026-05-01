@@ -32,7 +32,6 @@ from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
 from neuromaps_prime.graph.transforms.volume import VolumeTransformOps
 from neuromaps_prime.graph.utils import GraphUtils
 from neuromaps_prime.niwrap import setup_runner
-from neuromaps_prime.resources import NEUROMAPSPRIME_GRAPH
 
 
 class NeuromapsGraph(nx.MultiDiGraph):
@@ -81,7 +80,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         self.data_dir = next(
             (Path(d) for d in (data_dir, os.getenv("NEUROMAPS_DATA")) if d), None
         )
-        self.yaml_path = yaml_file or NEUROMAPSPRIME_GRAPH.yaml
+        self.yaml_path = yaml_file
         # Graph initialization
         self._cache = GraphCache()
         self.utils = GraphUtils(graph=self, cache=self._cache)
@@ -92,7 +91,12 @@ class NeuromapsGraph(nx.MultiDiGraph):
         self._builder = GraphBuilder(cache=self._cache, data_dir=self.data_dir)
         # Testing
         if not _testing:
-            self._builder.build_from_yaml(self, self.yaml_path)
+            if self.yaml_path is not None:
+                self._builder.build_from_yaml(self, self.yaml_path)
+            else:
+                # If no YAML path is provided build from default
+                # (tested through initialization in fixture)
+                self._builder.build_default(self)  # pragma: nocover
 
     # ------------------------------------------------------------------ #
     # Graph mutation                                                       #

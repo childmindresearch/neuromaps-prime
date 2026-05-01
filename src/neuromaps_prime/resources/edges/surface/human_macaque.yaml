@@ -1,0 +1,37 @@
+- from: Yerkes19
+  to: fsLR
+  surfaces:
+    human_macaque:
+      10k:
+        midthickness:
+          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_midthickness.surf.gii
+        sphere:
+          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_sphere.surf.gii
+          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_sphere.surf.gii
+      32k:
+        midthickness:
+          left: share/Outputs/fsLR-Yerkes19/src-Yerkes19_to-fsLR_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/fsLR-Yerkes19/src-Yerkes19_to-fsLR_den-32k_hemi-R_midthickness.surf.gii
+        sphere:
+          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-R_sphere.surf.gii
+
+- from: fsLR
+  to: Yerkes19
+  surfaces:
+    human_macaque:
+      10k:
+        midthickness:
+          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_midthickness.surf.gii
+        sphere:
+          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_sphere.surf.gii
+          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_sphere.surf.gii
+      32k:
+        midthickness:
+          left: share/Outputs/Yerkes19-fsLR/src-fsLR_to-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
+          right: share/Outputs/Yerkes19-fsLR/src-fsLR_to-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
+        sphere:
+          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
+          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii

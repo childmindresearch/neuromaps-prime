@@ -322,7 +322,7 @@ class TestNeuromapsGraph:
 
     def test_search_vol_transforms(self, graph: NeuromapsGraph) -> None:
         """Test searching for volume transforms."""
-        transforms = graph.search_volume_transforms(*list(graph.nodes)[:2])
+        transforms = graph.search_volume_transforms("Yerkes19", "CIVETNMT")
         assert all(isinstance(t, models.VolumeTransform) for t in transforms)
 
     def test_no_volume_atlases_search(self, graph: NeuromapsGraph) -> None:
@@ -336,7 +336,7 @@ class TestNeuromapsGraph:
 
     def test_find_common_density(self, graph: NeuromapsGraph) -> None:
         """Test finding common density between two spaces."""
-        common = graph.find_common_density(*list(graph.nodes)[:2])
+        common = graph.find_common_density("Yerkes19", "fsLR")
         assert isinstance(common, str)
 
     def test_no_common_densities(self, graph: NeuromapsGraph) -> None:
