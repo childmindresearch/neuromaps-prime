@@ -77,12 +77,15 @@ def test_surface_cycle(tmp_path: Path) -> None:
             density = graph.find_highest_density(space=src)
 
             try:
-                current_surface = graph._surface_to_surface(
-                    source=src,
-                    target=dst,
+                current_surface = graph.surface_to_surface_transformer(
+                    transformer_type="metric",
+                    input_file=full_surface,
+                    source_space=src,
+                    target_space=dst,
                     hemisphere=hemisphere,
-                    density=density,
                     output_file_path=str(out_file),
+                    source_density=graph.find_highest_density(space=src),
+                    target_density=graph.find_highest_density(space=dst),
                 )
             except Exception:
                 logger.exception("Transform %s -> %s failed", src, dst)
