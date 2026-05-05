@@ -86,7 +86,7 @@
   to: Yerkes19
   surfaces:
     CIVET:
-      32k:
+      41k:
         midthickness:
           left: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-41k_hemi-L_midthickness.surf.gii
           right: share/Outputs/Yerkes19-D99/src-D99_to-Yerkes19_den-41k_hemi-R_midthickness.surf.gii
