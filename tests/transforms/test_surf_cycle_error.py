@@ -43,6 +43,8 @@ def test_surface_cycle(tmp_path: Path) -> None:
     )
 
     directed_graph = networkx_graph.to_directed()
+
+    # number of possible round trip paths in the network
     cycles: list[list[str]] = [
         cycle for cycle in recursive_simple_cycles(directed_graph) if origin in cycle
     ]
@@ -58,8 +60,13 @@ def test_surface_cycle(tmp_path: Path) -> None:
 
     logger.info("Full surface path: %s", full_surface)
 
+    # log/debug this
     log_gii_shapes(Path(full_surface))
 
+    # i = cycle index
+    # cycle = one round trip path
+    # enumerate (sorted(cycles, key=len(cycles))) 
+    # to start with shorter cycles first
     for i, cycle in enumerate(cycles):
         while cycle[0] != origin:
             cycle = cycle[1:] + cycle[:1]
@@ -70,16 +77,22 @@ def test_surface_cycle(tmp_path: Path) -> None:
         skip_cycle = False
 
         for step, (src, dst) in enumerate(pairwise(cycle)):
+            # rename this file to include the src and target (to provide more debugging information)
             out_file = tmp_path / f"cycle{i}_step{step}.surf.gii"
 
             logger.info("--- Step %s: %s -> %s ---", step, src, dst)
 
             density = graph.find_highest_density(space=src)
 
+            # fix this to perform the transformation between the src and dst spaces, 
+            # rather than transforming from the original surface each time 
+            # (which is not how the transforms are intended to be used
+            # change to compute src to target transform, then apply to the current surface, 
+            # which is the output of the previous transform)
             try:
                 current_surface = graph.surface_to_surface_transformer(
                     transformer_type="metric",
-                    input_file=full_surface,
+                    input_file=full_surface,    # first full surface = highest density original sphere (Yerkes19)
                     source_space=src,
                     target_space=dst,
                     hemisphere=hemisphere,
@@ -87,6 +100,8 @@ def test_surface_cycle(tmp_path: Path) -> None:
                     source_density=graph.find_highest_density(space=src),
                     target_density=graph.find_highest_density(space=dst),
                 )
+
+            # not expected to fail
             except Exception:
                 logger.exception("Transform %s -> %s failed", src, dst)
                 skip_cycle = True
@@ -102,6 +117,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
                 skip_cycle = True
                 break
 
+            # arrays are mismatched here. why?
             shapes = log_gii_shapes(current_surface.file_path)
 
             arrays = nib.load(current_surface.file_path).darrays
@@ -117,9 +133,14 @@ def test_surface_cycle(tmp_path: Path) -> None:
                 [len(arr.data) for arr in arrays],
             )
 
+        # print the shapes for both source and destination + print filepaths for both
         if skip_cycle:
             logger.info("Skipping cycle %s due to failure/empty transform", i)
             continue
+
+        # somehow comparing pointset array for one and triangle array for other
+        # "All data arrays (columns) in the file must have the same number of rows.  
+        # The first array (column) contains 32492 rows.  Array 2 contains 64980 rows."
 
         shapes = log_gii_shapes(Path(out_file))
         arrays = nib.load(out_file).darrays
@@ -138,15 +159,17 @@ def test_surface_cycle(tmp_path: Path) -> None:
         logger.info("Computing signed distance for cycle %s -> %s", i, error_file.name)
 
         workbench.signed_distance_to_surface(
-            surface_comp=str(out_file),
-            surface_ref=str(full_surface),
+            surface_comp=str(out_file), # the final surface after cycling through transforms, pull out of loop. should be computed at the very end of the cycle
+            surface_ref=str(full_surface), # the original Yerkes19 sphere
             metric=str(error_file),
         )
 
         error_gii = nib.load(error_file)
         error_data = np.abs(error_gii.darrays[0].data)
-        median_error = np.median(error_data)
+        median_error = np.median(error_data) # report as single median error
 
         logger.info("Cycle %s MEDIAN ERROR: %s", i, median_error)
 
         assert median_error < 1.0, f"Median error in {cycle} exceeds 1: {median_error}"
+
+        # also report standard deviation of error
