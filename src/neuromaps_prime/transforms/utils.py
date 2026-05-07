@@ -88,6 +88,7 @@ def validate_surface_file(file_path: str | Path) -> bool:
         raise ValueError("Expected surface file.")
     return True
 
+
 def log_gii_shapes(path: Path) -> list[int]:
     """Return the number of vertices in each pointset array of a GIFTI surface file."""
     gii = cast("GiftiImage", nib.load(path))
