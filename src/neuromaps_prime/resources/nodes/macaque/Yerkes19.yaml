@@ -34,7 +34,7 @@ Yerkes19:
     32k:
       sphere:
         left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aab76e18c73904446?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_sphere.surf.gii
       midthickness:
         left: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
         right: share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
