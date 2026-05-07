@@ -115,7 +115,7 @@ class TestResources:
 
     def test_missing_file(self) -> None:
         """Test missing file raises error."""
-        with pytest.raises(FileNotFoundError, match="File path does not exist"):
+        with pytest.raises(FileNotFoundError, match="File does not exist"):
             models.SurfaceAtlas(
                 name="invalid",
                 description="missing",
@@ -124,7 +124,7 @@ class TestResources:
                 density="32k",
                 hemisphere="left",
                 resource_type="SurfaceAtlas",
-            )
+            ).fetch()
 
     def test_description_optional(self, tmp_file: Path) -> None:
         """Test that description defaults to None for annotation models."""

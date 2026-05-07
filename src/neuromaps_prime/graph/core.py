@@ -10,11 +10,11 @@ Graph structure:
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Any, Literal
 
 import networkx as nx
+from platformdirs import user_cache_dir
 
 from neuromaps_prime.graph.builder import GraphBuilder
 from neuromaps_prime.graph.cache import GraphCache
@@ -33,6 +33,8 @@ from neuromaps_prime.graph.transforms.volume import VolumeTransformOps
 from neuromaps_prime.graph.utils import GraphUtils
 from neuromaps_prime.niwrap import setup_runner
 
+NEUROMAPS_DATA_DIR = Path(user_cache_dir("neuromaps_prime"))
+
 
 class NeuromapsGraph(nx.MultiDiGraph):
     """Multi-directed graph of brain template spaces and their transformations."""
@@ -47,7 +49,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         image_overrides: dict[str, str] | None = None,
         verbose: int = 0,
         yaml_file: Path | None = None,
-        data_dir: Path | None = None,
+        data_dir: Path = NEUROMAPS_DATA_DIR,
         *,
         _testing: bool = False,
         **kwargs,  # noqa: ANN003 (ignore annotation for kwargs)
@@ -61,8 +63,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             image_overrides: Dictionary containing overrides for container tags.
             yaml_file: Path to the graph definition YAML. Defaults to the
                 bundled ``neuromaps_graph.yaml``.
-            data_dir: Optional root directory prepended to all relative file
-                paths in the YAML.
+            data_dir: Directory to save remote data. Defaults to system cache directory.
             verbose: Verbosity level (0=WARNING, 1=INFO, 2+=DEBUG)
             _testing: When ``True``, skip YAML loading (for unit tests).
             **kwargs: Additional keyword arguments passed for runner setup.
@@ -77,11 +78,11 @@ class NeuromapsGraph(nx.MultiDiGraph):
             **kwargs,
         )
         # Resource locations
-        self.data_dir = next(
-            (Path(d) for d in (data_dir, os.getenv("NEUROMAPS_DATA")) if d), None
-        )
-        self.yaml_path = yaml_file
+        if not data_dir.exists():
+            data_dir.mkdir(parents=True, exist_ok=True)
         # Graph initialization
+        self.data_dir = data_dir
+        self.yaml_path = yaml_file
         self._cache = GraphCache()
         self.utils = GraphUtils(graph=self, cache=self._cache)
         self.surface_ops = SurfaceTransformOps(cache=self._cache, utils=self.utils)
