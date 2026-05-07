@@ -27,6 +27,9 @@ def download_and_validate(uri: str, dest: str | Path) -> None:
         uri: Remote URI to fetch data from
         dest: Output file path name
         token: Optional token to use for remote storage
+
+    Raises:
+        ValueError: if storage cannot be identified from provided URI
     """
     match id_storage(uri):
         case "osf":
