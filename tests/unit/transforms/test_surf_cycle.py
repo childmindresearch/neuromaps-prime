@@ -65,7 +65,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
 
     # i = cycle index
     # cycle = one round trip path
-    # enumerate (sorted(cycles, key=len(cycles))) 
+    # enumerate (sorted(cycles, key=len(cycles)))
     # to start with shorter cycles first
     for i, cycle in enumerate(cycles):
         while cycle[0] != origin:
@@ -84,15 +84,15 @@ def test_surface_cycle(tmp_path: Path) -> None:
 
             density = graph.find_highest_density(space=src)
 
-            # fix this to perform the transformation between the src and dst spaces, 
-            # rather than transforming from the original surface each time 
+            # fix this to perform the transformation between the src and dst spaces,
+            # rather than transforming from the original surface each time
             # (which is not how the transforms are intended to be used
-            # change to compute src to target transform, then apply to the current surface, 
+            # change to compute src to target transform, then apply to the current surface,
             # which is the output of the previous transform)
             try:
                 current_surface = graph.surface_to_surface_transformer(
                     transformer_type="metric",
-                    input_file=full_surface,    # first full surface = highest density original sphere (Yerkes19)
+                    input_file=full_surface,  # first full surface = highest density original sphere (Yerkes19)
                     source_space=src,
                     target_space=dst,
                     hemisphere=hemisphere,
@@ -139,7 +139,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
             continue
 
         # somehow comparing pointset array for one and triangle array for other
-        # "All data arrays (columns) in the file must have the same number of rows.  
+        # "All data arrays (columns) in the file must have the same number of rows.
         # The first array (column) contains 32492 rows.  Array 2 contains 64980 rows."
 
         shapes = log_gii_shapes(Path(out_file))
@@ -159,14 +159,16 @@ def test_surface_cycle(tmp_path: Path) -> None:
         logger.info("Computing signed distance for cycle %s -> %s", i, error_file.name)
 
         workbench.signed_distance_to_surface(
-            surface_comp=str(out_file), # the final surface after cycling through transforms, pull out of loop. should be computed at the very end of the cycle
-            surface_ref=str(full_surface), # the original Yerkes19 sphere
+            surface_comp=str(
+                out_file
+            ),  # the final surface after cycling through transforms, pull out of loop. should be computed at the very end of the cycle
+            surface_ref=str(full_surface),  # the original Yerkes19 sphere
             metric=str(error_file),
         )
 
         error_gii = nib.load(error_file)
         error_data = np.abs(error_gii.darrays[0].data)
-        median_error = np.median(error_data) # report as single median error
+        median_error = np.median(error_data)  # report as single median error
 
         logger.info("Cycle %s MEDIAN ERROR: %s", i, median_error)
 
