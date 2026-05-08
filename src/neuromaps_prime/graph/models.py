@@ -31,9 +31,13 @@ class Resource(BaseModel):
         Raises:
             FileNotFoundError: if file cannot be fetched
         """
-        if not self.file_path.exists():
-            if self.uri is None:
-                raise FileNotFoundError("File does not exist and cannot be fetched.")
+        if self.file_path.exists():
+            return self.file_path
+        if self.uri is None:
+            raise FileNotFoundError("File does not exist and cannot be fetched.")
+        if (local_file := Path(self.uri)).exists():
+            self.file_path = local_file
+        else:
             _logger.info(f"Fetching {self.file_path.name} from remote server.")
             download_and_validate(uri=self.uri, dest=self.file_path)
             if not self.file_path.exists():

@@ -10,7 +10,6 @@ Intentionally stateless beyond the dependencies injected at construction:
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 import yaml
@@ -30,6 +29,8 @@ from neuromaps_prime.graph.models import (
 from neuromaps_prime.resources import NEUROMAPSPRIME_GRAPH
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     import networkx as nx
 
 
@@ -200,10 +201,6 @@ class GraphBuilder(BaseModel):
     # ------------------------------------------------------------------ #
     # Generic resource parsers                                             #
     # ------------------------------------------------------------------ #
-
-    def _resolve_path(self, path: str) -> Path:
-        """Prepend data_dir to path when set, otherwise return as-is."""
-        return (self.data_dir / path) if self.data_dir else Path(path)
 
     def _parse_surface_annotations(
         self, prefix: str, space: str, density: str, annots: dict[str, Any]
@@ -402,13 +399,15 @@ class GraphBuilder(BaseModel):
                 for vol_type, vol_value in types.items():
                     if vol_type == "annotation":
                         for annot_key, annot_dict in vol_value.items():
+                            name = f"{prefix}_{res}_{annot_key}.nii.gz"
                             annotations.append(
                                 VolumeAnnotation(
-                                    name=f"{prefix}_{res}_{annot_key}",
+                                    name=name,
                                     space=space,
                                     label=annot_key,
                                     resolution=res,
-                                    file_path=self._resolve_path(annot_dict.get("uri")),
+                                    uri=annot_dict.get("uri"),
+                                    file_path=self.data_dir / name,
                                     references=annot_dict.get("references"),
                                     notes=annot_dict.get("notes"),
                                 )
@@ -416,10 +415,12 @@ class GraphBuilder(BaseModel):
                         continue
 
                     extra = {"provider": provider} if is_transform else {}
+                    name = f"{prefix}_{res}_{vol_type}"
                     result.append(
                         cls(
-                            name=f"{prefix}_{res}_{vol_type}",
-                            file_path=self._resolve_path(vol_value),
+                            name=name,
+                            uri=vol_value,
+                            file_path=self.data_dir / name,
                             resolution=res,
                             resource_type=vol_type,
                             references=transform_refs,
