@@ -10,6 +10,7 @@ Intentionally stateless beyond the dependencies injected at construction:
 
 from __future__ import annotations
 
+from pathlib import Path  # noqa: TC003 (pydantic req'd)
 from typing import TYPE_CHECKING, Any, cast
 
 import yaml
@@ -29,8 +30,6 @@ from neuromaps_prime.graph.models import (
 from neuromaps_prime.resources import NEUROMAPSPRIME_GRAPH
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     import networkx as nx
 
 

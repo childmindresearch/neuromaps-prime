@@ -23,7 +23,8 @@ dependencies = [
   "pydantic>=2.12.3",
   "scipy>=1.17.0",
   "styxpodman",
-  "requests>=2.33.1"
+  "requests>=2.33.1",
+  "platformdirs>=4.9.6"
 ]
 
 [dependency-groups]
