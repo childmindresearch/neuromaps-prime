@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlparse
 
 from neuromaps_prime.remote import OSFStorage
 
@@ -15,8 +16,15 @@ def id_storage(uri: str) -> Literal["osf"] | None:
     Returns:
         String indicating type of storage (one of 'osf')
     """
-    if "osf.io" in uri:
-        return "osf"
+
+    def _find_host(storage: str, host: str) -> bool:
+        return storage == host or host.endswith(storage)
+
+    host = urlparse(uri).hostname
+    if host is not None:
+        host = host.lower()
+        if _find_host(storage="osf.io", host=host):
+            return "osf"
     return None
 
 
