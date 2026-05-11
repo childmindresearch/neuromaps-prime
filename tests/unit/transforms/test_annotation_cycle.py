@@ -1,0 +1,189 @@
+"""Compute surface-to-surface transform error."""
+
+import logging
+from itertools import pairwise
+from pathlib import Path
+
+import nibabel as nib
+import numpy as np
+from networkx.algorithms.cycles import recursive_simple_cycles
+
+from niwrap import workbench
+
+from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.transforms.utils import log_gii_shapes
+
+logger = logging.getLogger(__name__)
+
+
+def test_surface_cycle(tmp_path: Path) -> None:
+    """Test surface consistency by cycling through surface transforms."""
+    logging.basicConfig(level=logging.INFO)
+
+    logger.info("=== BUILDING NEUROMAPS GRAPH ===")
+
+    graph = NeuromapsGraph(
+        runner="local",
+        data_dir=Path("/Users/tamsin.rogers/Desktop/github/neuromaps-prime"),
+    )
+
+    origin = "Yerkes19"
+    hemisphere = "left"
+
+    density = graph.find_highest_density(space=origin)
+
+    # LOAD ORIGIN METRIC
+    origin_metric = Path(
+        "/Users/tamsin.rogers/Desktop/github/neuromaps-prime/resources/"
+        "Yerkes19/annotations/receptor_maps/"
+        "src-Yerkes19_den-32k_hemi-L_acq-auto_trc-ampa_desc-RM_annot.func.gii"
+    )
+
+    logger.info("Origin metric: %s", origin_metric)
+    log_gii_shapes(origin_metric)
+
+    # GET ORIGIN SPHERE
+    origin_sphere = graph.fetch_surface_atlas(
+        space=origin,
+        density=density,
+        hemisphere=hemisphere,
+        resource_type="sphere",
+    ).file_path
+
+    logger.info("Origin sphere: %s", origin_sphere)
+
+    # PROJECT METRIC → SPHERE SPACE (START OF CYCLING STATE)
+    metric_on_surface = workbench.metric_resample(
+        metric_in=str(origin_metric),
+        current_sphere=str(origin_sphere),
+        new_sphere=str(origin_sphere),
+        method="ADAP_BARY_AREA",
+        area_surfs={
+            "current-area": graph.fetch_surface_atlas(
+                space=origin,
+                density=density,
+                hemisphere=hemisphere,
+                resource_type="midthickness",
+            ).file_path,
+            "new-area": graph.fetch_surface_atlas(
+                space=origin,
+                density=density,
+                hemisphere=hemisphere,
+                resource_type="midthickness",
+            ).file_path,
+        },
+        metric_out=str(tmp_path / "metric_on_origin_sphere.func.gii"),
+    ).metric_out
+
+    metric_on_surface = Path(metric_on_surface)
+
+    log_gii_shapes(metric_on_surface)
+
+    # BUILD GRAPH CYCLES
+    directed = graph.to_directed()
+
+    cycles = [
+        c for c in recursive_simple_cycles(directed)
+        if origin in c
+    ]
+
+    assert cycles, "No cycles found in graph"
+
+    logger.info("Found %d cycles", len(cycles))
+
+    # RUN CYCLIC TRANSFORMS
+    for i, cycle in enumerate(cycles):
+
+        # normalize cycle to start at origin
+        while cycle[0] != origin:
+            cycle = cycle[1:] + cycle[:1]
+        cycle = [*cycle, origin]
+
+        logger.info("=== Cycle %d: %s ===", i, cycle)
+
+        current_metric = metric_on_surface
+
+        for step, (src, dst) in enumerate(pairwise(cycle)):
+            logger.info("Step %d: %s -> %s", step, src, dst)
+
+            out_file = tmp_path / f"cycle{i}_step{step}_{src}_to_{dst}.func.gii"
+
+            # GET SPHERE TRANSFORM
+            target_sphere_transform = graph.fetch_surface_to_surface_transform(
+                source=src,
+                target=dst,
+                density=graph.find_highest_density(space=src),
+                hemisphere=hemisphere,
+                resource_type="sphere",
+            )
+
+            if target_sphere_transform is None:
+                raise RuntimeError(f"No transform {src} -> {dst}")
+
+            target_sphere = target_sphere_transform.file_path
+
+            current_sphere = graph.fetch_surface_atlas(
+                space=src,
+                density=graph.find_highest_density(space=src),
+                hemisphere=hemisphere,
+                resource_type="sphere",
+            ).file_path
+
+            # AREA CORRECTION SURFACES
+            area_surfs = {
+                "current-area": graph.fetch_surface_atlas(
+                    space=src,
+                    density=graph.find_highest_density(space=src),
+                    hemisphere=hemisphere,
+                    resource_type="midthickness",
+                ).file_path,
+                "new-area": graph.fetch_surface_atlas(
+                    space=dst,
+                    density=graph.find_highest_density(space=dst),
+                    hemisphere=hemisphere,
+                    resource_type="midthickness",
+                ).file_path,
+            }
+            # RESAMPLE METRIC THROUGH SPHERE TRANSFORM
+            current_metric = workbench.metric_resample(
+                metric_in=str(current_metric),
+                current_sphere=str(current_sphere),
+                new_sphere=str(target_sphere),
+                method="ADAP_BARY_AREA",
+                area_surfs=area_surfs,
+                metric_out=str(out_file),
+            ).metric_out
+
+            current_metric = Path(current_metric)
+
+            log_gii_shapes(current_metric)
+
+        # CYCLE CLOSURE ERROR (BACK TO ORIGIN SPACE)
+        error_file = tmp_path / f"cycle{i}_error.func.gii"
+
+        ref_gii = nib.load(metric_on_surface)
+        comp_gii = nib.load(current_metric)
+
+        ref = ref_gii.darrays[0].data.astype(float)
+        comp = comp_gii.darrays[0].data.astype(float)
+
+
+        valid_mask = np.isfinite(ref) & np.isfinite(comp)
+        if not np.any(valid_mask):
+            raise ValueError(
+                f"Cycle {i}: no valid vertices to compare (all NaN or inf)"
+            )
+        error = np.abs(comp[valid_mask] - ref[valid_mask])
+        median_error = float(np.median(error)) if error.size > 0 else float("nan")
+        full_error = np.full(ref.shape, np.nan, dtype=float)
+        full_error[valid_mask] = error
+        np.save(error_file.with_suffix(".npy"), full_error)
+        logger.info(
+            "Cycle %d: median error (valid vertices only) = %s",
+            i,
+            median_error,
+        )
+        assert np.isfinite(median_error), f"Cycle {i}: median error is NaN"
+        assert median_error < 1.0, (
+            f"Cycle {i} failed: median error {median_error}"
+        )
