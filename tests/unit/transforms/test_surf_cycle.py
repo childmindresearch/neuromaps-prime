@@ -70,36 +70,38 @@ def test_surface_cycle(tmp_path: Path) -> None:
         logger.info("=== Cycle %s: %s ===", i, cycle)
         logger.info("=== Cycle type %s: ===", type(cycle[0]))
 
-        metric_output = full_surface_path
+        output = full_surface_path
 
         for step, (src, dst) in enumerate(pairwise(cycle)):
-            out_file = tmp_path / f"cycle{i}_step{step}_{src}_to_{dst}.shape.gii"
+            out_file = tmp_path / f"cycle{i}_step{step}_{src}_to_{dst}.surf.gii"
 
             logger.info("Step %s: %s -> %s", step, src, dst)
 
             # original Yerkes19 midthickness
             if step==0:
-                current_metric = Path("/Users/tamsin.rogers/Desktop/github/neuromaps-prime/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_desc-vaavg_midthickness.shape.gii")
+                #current_metric = Path("/Users/tamsin.rogers/Desktop/github/neuromaps-prime/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_desc-vaavg_midthickness.shape.gii")
+                # original Yerkes19 surf sphere
+                current_sphere = graph.fetch_surface_atlas(
+                    space=src,
+                        density=graph.find_highest_density(space=src),
+                        hemisphere=hemisphere,
+                        resource_type="sphere",
+                    ).file_path
             # result of transform in previous step
             else:
-                current_metric = result
-            
-            # original Yerkes19 surf sphere
-            current_sphere = graph.fetch_surface_atlas(
-                space=src,
-                    density=graph.find_highest_density(space=src),
-                    hemisphere=hemisphere,
-                    resource_type="sphere",
-                ).file_path
+                current_sphere = result
 
             # now fetch the new target sphere
             target_sphere = graph.surface_ops._resolve_sphere_transform(
                 source=src,
                 target=dst,
-                density=graph.find_common_density(mid_space=src, target_space=dst),
+                density=graph.find_highest_density(space=src),
                 hemisphere=hemisphere,
                 output_file_path="output.sphere.gii",
-            ).file_path
+            )
+
+            logger.info("src,dst,density %s: %s -> %s", src, dst, graph.find_highest_density(space=dst))
+            target_sphere = target_sphere.file_path
 
             # midthickness files - so we know where (on the sphere) to map transformation values to
             area_surfs = {
@@ -111,25 +113,25 @@ def test_surface_cycle(tmp_path: Path) -> None:
                     ).file_path,
                 "new-area": graph.fetch_surface_atlas(
                     space=dst,
-                    density=graph.find_highest_density(space=src),
+                    density=graph.find_highest_density(space=dst),
                     hemisphere=hemisphere,
                     resource_type="midthickness"
                     ).file_path
                 }
             
-            result = metric_resample(
-                input_file_path=str(current_metric),
+            result = workbench.surface_resample(
+                surface_in=str(current_sphere),
                 current_sphere=str(current_sphere),
                 new_sphere=str(target_sphere),
                 method="ADAP_BARY_AREA",
                 area_surfs=area_surfs,
-                output_file_path=str(out_file),
-            ).metric_out
+                surface_out=str(out_file),
+            ).surface_out
 
-            metric_output = Path(result)
+            output = Path(result)
 
             #shapes = log_gii_shapes(metric_output)
-            arrays = nib.load(metric_output).darrays
+            arrays = nib.load(output).darrays
 
             logger.info(
                 "OK %s -> %s | arrays=%s",
@@ -138,12 +140,12 @@ def test_surface_cycle(tmp_path: Path) -> None:
                 [len(a.data) for a in arrays],
             )
 
-            logger.info("Step %s complete: %s", step, metric_output)
+            logger.info("Step %s complete: %s", step, output)
 
     error_file = tmp_path / f"cycle{i}_error.func.gii"
 
     workbench.signed_distance_to_surface(
-        surface_comp=str(metric_output),
+        surface_comp=str(output),
         surface_ref=str(full_surface_path),
         metric=str(error_file),
     )
