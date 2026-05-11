@@ -13,6 +13,7 @@ from niwrap import workbench
 
 from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.transforms.utils import log_gii_shapes
+from neuromaps_prime.transforms.surface import metric_resample
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,8 @@ def test_surface_cycle(tmp_path: Path) -> None:
     logger.info("=== BUILDING NEUROMAPS GRAPH ===")
 
     graph = NeuromapsGraph(
-        data_dir=Path("/Users/tamsin.rogers/Desktop/github/neuromaps-prime")
+        runner="local",
+        data_dir=Path("/Users/tamsin.rogers/Desktop/github/neuromaps-prime"),
     )
 
     origin = "Yerkes19"
@@ -66,76 +68,92 @@ def test_surface_cycle(tmp_path: Path) -> None:
         cycle = [*cycle, origin]
 
         logger.info("=== Cycle %s: %s ===", i, cycle)
+        logger.info("=== Cycle type %s: ===", type(cycle[0]))
 
-        current_surface = full_surface_path
-        skip_cycle = False
+        metric_output = full_surface_path
 
         for step, (src, dst) in enumerate(pairwise(cycle)):
-            out_file = tmp_path / f"cycle{i}_step{step}.surf.gii"
+            out_file = tmp_path / f"cycle{i}_step{step}_{src}_to_{dst}.shape.gii"
 
             logger.info("Step %s: %s -> %s", step, src, dst)
 
-            try:
-                result = graph.surface_to_surface_transformer(
-                    transformer_type="metric",
-                    input_file=current_surface,   # 👈 CHAINING FIX
-                    source_space=src,
-                    target_space=dst,
+            # original Yerkes19 midthickness
+            if step==0:
+                current_metric = Path("/Users/tamsin.rogers/Desktop/github/neuromaps-prime/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_desc-vaavg_midthickness.shape.gii")
+            # result of transform in previous step
+            else:
+                current_metric = result
+            
+            # original Yerkes19 surf sphere
+            current_sphere = graph.fetch_surface_atlas(
+                space=src,
+                    density=graph.find_highest_density(space=src),
                     hemisphere=hemisphere,
-                    output_file_path=str(out_file),
-                    source_density=graph.find_highest_density(space=src),
-                    target_density=graph.find_highest_density(space=dst),
-                )
+                    resource_type="sphere",
+                ).file_path
 
-            except Exception:
-                logger.exception("Transform failed %s -> %s", src, dst)
-                skip_cycle = True
-                break
+            # now fetch the new target sphere
+            target_sphere = graph.surface_ops._resolve_sphere_transform(
+                source=src,
+                target=dst,
+                density=graph.find_common_density(mid_space=src, target_space=dst),
+                hemisphere=hemisphere,
+                output_file_path="output.sphere.gii",
+            ).file_path
 
-            if result is None:
-                logger.error("No transform returned for %s -> %s", src, dst)
-                skip_cycle = True
-                break
+            # midthickness files - so we know where (on the sphere) to map transformation values to
+            area_surfs = {
+                "current-area": graph.fetch_surface_atlas(
+                    space=src,
+                    density=graph.find_highest_density(space=src),
+                    hemisphere=hemisphere,
+                    resource_type="midthickness"
+                    ).file_path,
+                "new-area": graph.fetch_surface_atlas(
+                    space=dst,
+                    density=graph.find_highest_density(space=src),
+                    hemisphere=hemisphere,
+                    resource_type="midthickness"
+                    ).file_path
+                }
+            
+            result = metric_resample(
+                input_file_path=str(current_metric),
+                current_sphere=str(current_sphere),
+                new_sphere=str(target_sphere),
+                method="ADAP_BARY_AREA",
+                area_surfs=area_surfs,
+                output_file_path=str(out_file),
+            ).metric_out
 
-            current_surface = Path(result)
+            metric_output = Path(result)
 
-            if not current_surface.exists():
-                logger.error("Missing output: %s", current_surface)
-                skip_cycle = True
-                break
-
-            shapes = log_gii_shapes(current_surface)
-            arrays = nib.load(current_surface).darrays
-
-            if not shapes or any(len(a.data) == 0 for a in arrays):
-                logger.warning("Empty surface at %s -> %s", src, dst)
-                skip_cycle = True
-                break
+            #shapes = log_gii_shapes(metric_output)
+            arrays = nib.load(metric_output).darrays
 
             logger.info(
                 "OK %s -> %s | arrays=%s",
-                src, dst,
+                src,
+                dst,
                 [len(a.data) for a in arrays],
             )
 
-        if skip_cycle:
-            logger.info("Skipping cycle %d", i)
-            continue
+            logger.info("Step %s complete: %s", step, metric_output)
 
-        error_file = tmp_path / f"cycle{i}_error.func.gii"
+    error_file = tmp_path / f"cycle{i}_error.func.gii"
 
-        workbench.signed_distance_to_surface(
-            surface_comp=str(current_surface),
-            surface_ref=str(full_surface_path),
-            metric=str(error_file),
-        )
+    workbench.signed_distance_to_surface(
+        surface_comp=str(metric_output),
+        surface_ref=str(full_surface_path),
+        metric=str(error_file),
+    )
 
-        error_gii = nib.load(error_file)
-        error_data = np.abs(error_gii.darrays[0].data)
-        median_error = float(np.median(error_data))
+    error_gii = nib.load(error_file)
+    error_data = np.abs(error_gii.darrays[0].data)
+    median_error = float(np.median(error_data))
 
-        logger.info("Cycle %d median error: %f", i, median_error)
+    logger.info("Cycle %d median error: %f", i, median_error)
 
-        assert median_error < 1.0, (
-            f"Median error in cycle {cycle} exceeds threshold: {median_error}"
-        )
+    assert median_error < 1.0, (
+        f"Median error in cycle {cycle} exceeds threshold: {median_error}"
+    )

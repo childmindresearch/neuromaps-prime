@@ -90,14 +90,11 @@ def validate_surface_file(file_path: str | Path) -> bool:
     return True
 
 
-def log_gii_shapes(path: Path) -> list[int]:
-    """Return the number of vertices in each pointset array of a GIFTI surface file."""
-    gii = cast("GiftiImage", nib.load(path))
+def log_gii_shapes(path: Path) -> int:
+    gii = nib.load(path)
 
-    vertex_arrays = [
-        arr
+    return next(
+        arr.data.shape[0]
         for arr in gii.darrays
         if arr.intent == nib.nifti1.intent_codes["NIFTI_INTENT_POINTSET"]
-    ]
-
-    return [arr.data.shape[0] for arr in vertex_arrays]
+    )
