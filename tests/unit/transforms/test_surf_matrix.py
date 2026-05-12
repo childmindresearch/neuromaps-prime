@@ -216,19 +216,46 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     logger.info("Saved CSV → %s", csv_path)
 
     # HEATMAP EXPORT
-    _fig, ax = plt.subplots(figsize=(8, 6))
-    im = ax.imshow(matrix.values, interpolation="nearest")
-    ax.set_xticks(range(len(spaces)))
-    ax.set_yticks(range(len(spaces)))
-    ax.set_xticklabels(spaces, rotation=45, ha="right")
-    ax.set_yticklabels(spaces)
-    ax.set_title("Surface Transform Error Matrix of Right Hemisphere")
-    plt.colorbar(im, ax=ax)
-    img_path = output_dir / "surface_transform_matrix.png"
-    plt.tight_layout()
-    plt.savefig(img_path, dpi=200)
-    logger.info("Saved heatmap → %s", img_path)
+    mat = matrix.to_numpy()
+    n = len(spaces)
 
+    # FULL-SCALE HEATMAP
+    _fig1, ax1 = plt.subplots(figsize=(8, 6))
+    im1 = ax1.imshow(mat, interpolation="nearest")
+    ax1.set_xticks(range(n))
+    ax1.set_yticks(range(n))
+    ax1.set_xticklabels(spaces, rotation=45, ha="right")
+    ax1.set_yticklabels(spaces)
+    ax1.set_title("Surface Transform Error Matrix (Full Scale, Including fsLR Extremes)")
+    plt.colorbar(im1, ax=ax1)
+    full_path = output_dir / "surface_transform_matrix_full.png"
+    plt.tight_layout()
+    plt.savefig(full_path, dpi=200)
+    logger.info("Saved full-scale heatmap → %s", full_path)
+
+    # NHP-SCALED HEATMAP
+    nhp_spaces = [s for s in spaces if s != "fsLR"]
+    nhp_vals = matrix.loc[nhp_spaces, nhp_spaces].to_numpy()
+    vmin = 0.0
+    vmax = np.nanpercentile(nhp_vals, 95)
+    _fig2, ax2 = plt.subplots(figsize=(8, 6))
+    im2 = ax2.imshow(
+        mat,
+        interpolation="nearest",
+        vmin=vmin,
+        vmax=vmax,
+    )
+    ax2.set_xticks(range(n))
+    ax2.set_yticks(range(n))
+    ax2.set_xticklabels(spaces, rotation=45, ha="right")
+    ax2.set_yticklabels(spaces)
+    ax2.set_title("Surface Transform Error Matrix (NHP-Scaled View, Excluding fsLR Extremes)")
+    plt.colorbar(im2, ax=ax2)
+    nhp_path = output_dir / "surface_transform_matrix_nhp_scaled.png"
+    plt.tight_layout()
+    plt.savefig(nhp_path, dpi=200)
+
+    logger.info("Saved NHP-scaled heatmap → %s", nhp_path)
     """
     assert median_error < 1.0, (
         f"Transform error too high: median={median_error}"
