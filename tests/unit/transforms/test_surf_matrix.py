@@ -44,37 +44,27 @@ def fetch_surface(
 
 
 def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
-    """Return graph nodes that have YAML-defined surface resources on disk."""
-
+    """Return graph nodes that have required surface resources."""
     valid = []
 
     for node in graph.nodes:
         try:
-            density = graph.find_highest_density(node)
-
             sphere = graph.fetch_surface_atlas(
                 space=node,
-                density=density,
+                density=graph.find_highest_density(node),
                 hemisphere=hemisphere,
                 resource_type="sphere",
             )
 
             midthickness = graph.fetch_surface_atlas(
                 space=node,
-                density=density,
+                density=graph.find_highest_density(node),
                 hemisphere=hemisphere,
                 resource_type="midthickness",
             )
 
-            if not sphere.file_path.exists():
-                logger.debug("Skipping %s (missing sphere file)", node)
-                continue
-
-            if not midthickness.file_path.exists():
-                logger.debug("Skipping %s (missing midthickness file)", node)
-                continue
-
-            valid.append(node)
+            if sphere is not None and midthickness is not None:
+                valid.append(node)
 
         except Exception as e:
             logger.debug("Skipping node %s due to error: %s", node, e)
@@ -95,6 +85,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     graph = NeuromapsGraph(
         runner="local",
         data_dir=Path("/Users/tamsin.rogers/Desktop/github/neuromaps-prime"),
+        builder_kwargs={"strict_paths": False},
     )
 
     hemisphere = "right"
