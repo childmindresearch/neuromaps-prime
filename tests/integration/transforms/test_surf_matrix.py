@@ -48,9 +48,6 @@ def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
     valid = []
 
     for node in graph.nodes:
-        if node.startswith("S1200"):
-            continue
-
         try:
             sphere = graph.fetch_surface_atlas(
                 space=node,
