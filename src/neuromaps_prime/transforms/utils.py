@@ -5,6 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import nibabel as nib
+from nibabel.gifti import GiftiImage
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ def get_vertex_count(surface_file: Path) -> int:
         Number of vertices in the surface file.
     """
     surface = nib.load(surface_file)
-    if not isinstance(surface, nib.GiftiImage):
+    if not isinstance(surface, GiftiImage):
         raise TypeError(f"Input file is not a GIFTI surface file: {surface_file}.")
     return surface.darrays[0].data.shape[0]
 
@@ -95,6 +96,8 @@ def validate_surface_file(file_path: str | Path) -> bool:
 def log_gii_shapes(path: Path) -> int:
     """Log the shapes and metadata of a GIFTI file."""
     gii = nib.load(path)
+    if not isinstance(gii, GiftiImage):
+        raise TypeError(f"Expected GIFTI file: {path}")
 
     for i, arr in enumerate(gii.darrays):
         logger.info(
