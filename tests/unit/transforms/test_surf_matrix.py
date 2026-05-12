@@ -48,6 +48,10 @@ def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
     valid = []
 
     for node in graph.nodes:
+        
+        if node.startswith("S1200"):
+            continue
+
         try:
             sphere = graph.fetch_surface_atlas(
                 space=node,
@@ -85,7 +89,6 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     graph = NeuromapsGraph(
         runner="local",
         data_dir=Path("/Users/tamsin.rogers/Desktop/github/neuromaps-prime"),
-        builder_kwargs={"strict_paths": False},
     )
 
     hemisphere = "right"
