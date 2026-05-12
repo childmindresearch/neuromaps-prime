@@ -222,7 +222,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     ax.set_yticks(range(len(spaces)))
     ax.set_xticklabels(spaces, rotation=45, ha="right")
     ax.set_yticklabels(spaces)
-    ax.set_title("Surface Transform Error Matrix")
+    ax.set_title("Surface Transform Error Matrix of Right Hemisphere")
     plt.colorbar(im, ax=ax)
     img_path = output_dir / "surface_transform_matrix.png"
     plt.tight_layout()
