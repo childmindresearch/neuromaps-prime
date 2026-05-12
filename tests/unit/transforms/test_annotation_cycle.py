@@ -82,10 +82,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
     # BUILD GRAPH CYCLES
     directed = graph.to_directed()
 
-    cycles = [
-        c for c in recursive_simple_cycles(directed)
-        if origin in c
-    ]
+    cycles = [c for c in recursive_simple_cycles(directed) if origin in c]
 
     assert cycles, "No cycles found in graph"
 
@@ -96,7 +93,6 @@ def test_surface_cycle(tmp_path: Path) -> None:
 
     # RUN CYCLIC TRANSFORMS
     for i, cycle in enumerate(cycles):
-
         # normalize cycle to start at origin
         while cycle[0] != origin:
             cycle = cycle[1:] + cycle[:1]
@@ -112,13 +108,9 @@ def test_surface_cycle(tmp_path: Path) -> None:
         # RUN ENTIRE CYCLE
         # ----------------------------------------------------------
         for step, (src, dst) in enumerate(pairwise(cycle)):
-
             logger.info("Step %d: %s -> %s", step, src, dst)
 
-            out_file = (
-                tmp_path /
-                f"cycle{i}_step{step}_{src}_to_{dst}.func.gii"
-            )
+            out_file = tmp_path / f"cycle{i}_step{step}_{src}_to_{dst}.func.gii"
 
             try:
                 common_density = graph.find_common_density(src, dst)
@@ -131,14 +123,12 @@ def test_surface_cycle(tmp_path: Path) -> None:
                 )
 
                 # GET SPHERE TRANSFORM
-                target_sphere_transform = (
-                    graph.fetch_surface_to_surface_transform(
-                        source=src,
-                        target=dst,
-                        density=common_density,
-                        hemisphere=hemisphere,
-                        resource_type="sphere",
-                    )
+                target_sphere_transform = graph.fetch_surface_to_surface_transform(
+                    source=src,
+                    target=dst,
+                    density=common_density,
+                    hemisphere=hemisphere,
+                    resource_type="sphere",
                 )
 
                 if target_sphere_transform is None:
@@ -259,20 +249,11 @@ def test_surface_cycle(tmp_path: Path) -> None:
 
         error = np.abs(comp[valid_mask] - ref[valid_mask])
 
-        median_error = (
-            float(np.median(error))
-            if error.size > 0 else float("nan")
-        )
+        median_error = float(np.median(error)) if error.size > 0 else float("nan")
 
-        mean_error = (
-            float(np.mean(error))
-            if error.size > 0 else float("nan")
-        )
+        mean_error = float(np.mean(error)) if error.size > 0 else float("nan")
 
-        sd_error = (
-            float(np.std(error))
-            if error.size > 0 else float("nan")
-        )
+        sd_error = float(np.std(error)) if error.size > 0 else float("nan")
 
         # save vertex-wise error map
         full_error = np.full(ref.shape, np.nan, dtype=float)
@@ -328,18 +309,10 @@ def test_surface_cycle(tmp_path: Path) -> None:
     )
 
     overall = {
-        "median_of_medians": float(
-            df["median_error"].median()
-        ),
-        "mean_of_means": float(
-            df["mean_error"].mean()
-        ),
-        "sd_of_means": float(
-            df["mean_error"].std()
-        ),
-        "mean_sd": float(
-            df["sd_error"].mean()
-        ),
+        "median_of_medians": float(df["median_error"].median()),
+        "mean_of_means": float(df["mean_error"].mean()),
+        "sd_of_means": float(df["mean_error"].std()),
+        "mean_sd": float(df["sd_error"].mean()),
         "n_cycles": len(df),
     }
 

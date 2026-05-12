@@ -50,10 +50,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
     # build directed graph
     directed = graph.to_directed()
 
-    cycles = [
-        c for c in recursive_simple_cycles(directed)
-        if origin in c
-    ]
+    cycles = [c for c in recursive_simple_cycles(directed) if origin in c]
     assert cycles, "No cycles found"
 
     logger.info("Found %d cycles", len(cycles))
@@ -75,14 +72,14 @@ def test_surface_cycle(tmp_path: Path) -> None:
             logger.info("Step %s: %s -> %s", step, src, dst)
 
             # original Yerkes19 midthickness
-            if step==0:
+            if step == 0:
                 # original Yerkes19 surf sphere
                 current_sphere = graph.fetch_surface_atlas(
                     space=src,
-                        density=graph.find_highest_density(space=src),
-                        hemisphere=hemisphere,
-                        resource_type="sphere",
-                    ).file_path
+                    density=graph.find_highest_density(space=src),
+                    hemisphere=hemisphere,
+                    resource_type="sphere",
+                ).file_path
             # result of transform in previous step
             else:
                 current_sphere = full_surface
@@ -106,23 +103,23 @@ def test_surface_cycle(tmp_path: Path) -> None:
             )
             target_sphere = target_sphere.file_path
 
-            # midthickness files - so we know where (on the sphere) 
+            # midthickness files - so we know where (on the sphere)
             # to map transformation values to
             area_surfs = {
                 "current-area": graph.fetch_surface_atlas(
                     space=src,
                     density=graph.find_highest_density(space=src),
                     hemisphere=hemisphere,
-                    resource_type="midthickness"
-                    ).file_path,
+                    resource_type="midthickness",
+                ).file_path,
                 "new-area": graph.fetch_surface_atlas(
                     space=dst,
                     density=graph.find_highest_density(space=dst),
                     hemisphere=hemisphere,
-                    resource_type="midthickness"
-                    ).file_path
-                }
-            
+                    resource_type="midthickness",
+                ).file_path,
+            }
+
             result = workbench.surface_resample(
                 surface_in=str(current_sphere),
                 current_sphere=str(current_sphere),

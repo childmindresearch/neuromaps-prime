@@ -19,6 +19,7 @@ output_dir = Path(
 )
 output_dir.mkdir(parents=True, exist_ok=True)
 
+
 def median_abs_signed_distance(metric_file: Path) -> float:
     """Compute median absolute signed-distance error from func.gii."""
     gii = nib.load(metric_file)
@@ -27,12 +28,12 @@ def median_abs_signed_distance(metric_file: Path) -> float:
 
 
 def fetch_surface(
-        graph: NeuromapsGraph,
-        space: str,
-        density: str,
-        hemi: str,
-        kind: str,
-    ) -> Path:
+    graph: NeuromapsGraph,
+    space: str,
+    density: str,
+    hemi: str,
+    kind: str,
+) -> Path:
     """Fetch a surface and return local path."""
     return Path(
         graph.fetch_surface_atlas(
@@ -42,6 +43,7 @@ def fetch_surface(
             resource_type=kind,
         ).fetch()
     )
+
 
 def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
     """Return graph nodes that have required surface resources."""
@@ -95,7 +97,6 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     logger.info("=== BUILDING SURFACE TRANSFORM MATRIX ===")
 
     for src, dst in product(spaces, spaces):
-
         if src == dst:
             results[(src, dst)] = 0.0
             continue
@@ -105,12 +106,12 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         src_density = graph.find_highest_density(space=src)
         dst_density = graph.find_highest_density(space=dst)
 
-        # midthickness defines the geometry of the surface, 
-        # so we use it as the reference for error computation 
+        # midthickness defines the geometry of the surface,
+        # so we use it as the reference for error computation
         src_surface = fetch_surface(graph, src, src_density, hemisphere, "midthickness")
         dst_surface = fetch_surface(graph, dst, dst_density, hemisphere, "midthickness")
 
-        # sphere defines the mapping between surfaces, 
+        # sphere defines the mapping between surfaces,
         # so we use it for resampling
         src_sphere = fetch_surface(graph, src, src_density, hemisphere, "sphere")
         dst_sphere = fetch_surface(graph, dst, dst_density, hemisphere, "sphere")
@@ -136,7 +137,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         # compute error between resampled surface and target surface
         error_file = tmp_path / f"{src}_to_{dst}_error.func.gii"
 
-        # now compute vertex-wise signed distance from the 
+        # now compute vertex-wise signed distance from the
         # resampled surface to the target surface
         workbench.signed_distance_to_surface(
             surface_comp=str(out_surface),
@@ -144,7 +145,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
             metric=str(error_file),
         )
 
-        # the absolute signed distance gives us a measure of how far the resampled 
+        # the absolute signed distance gives us a measure of how far the resampled
         # surface is from the target surface at each vertex
         # the sign indicates the direction of error (inside vs outside)
         error = median_abs_signed_distance(error_file)
@@ -234,6 +235,4 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     )
     """
 
-    assert np.isfinite(median_error), (
-        f"Median error is not finite: {median_error}"
-    )
+    assert np.isfinite(median_error), f"Median error is not finite: {median_error}"
