@@ -6,7 +6,9 @@ from typing import cast
 
 import nibabel as nib
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 def estimate_surface_density(surface_file: Path) -> str:
     """Return density string of GIFTI surface based on vertex count.
