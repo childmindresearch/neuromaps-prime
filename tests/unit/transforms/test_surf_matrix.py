@@ -226,7 +226,9 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     ax1.set_yticks(range(n))
     ax1.set_xticklabels(spaces, rotation=45, ha="right")
     ax1.set_yticklabels(spaces)
-    ax1.set_title("Surface Transform Error Matrix (Full Scale, Including fsLR Extremes)")
+    ax1.set_title(
+        "Surface Transform Error Matrix (Full Scale, Including fsLR Extremes)"
+    )
     plt.colorbar(im1, ax=ax1)
     full_path = output_dir / "surface_transform_matrix_full.png"
     plt.tight_layout()
@@ -249,7 +251,9 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     ax2.set_yticks(range(n))
     ax2.set_xticklabels(spaces, rotation=45, ha="right")
     ax2.set_yticklabels(spaces)
-    ax2.set_title("Surface Transform Error Matrix (NHP-Scaled View, Excluding fsLR Extremes)")
+    ax2.set_title(
+        "Surface Transform Error Matrix (NHP-Scaled View, Excluding fsLR Extremes)"
+    )
     plt.colorbar(im2, ax=ax2)
     nhp_path = output_dir / "surface_transform_matrix_nhp_scaled.png"
     plt.tight_layout()
