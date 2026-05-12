@@ -49,6 +49,7 @@ class GraphBuilder(BaseModel):
 
     cache: GraphCache
     data_dir: Path | None = Field(default=None)
+    strict_paths: bool = True
 
     # ------------------------------------------------------------------ #
     # Public entry points                                                  #
@@ -203,7 +204,10 @@ class GraphBuilder(BaseModel):
 
     def _resolve_path(self, path: str) -> Path:
         """Prepend data_dir to path when set, otherwise return as-is."""
-        return (self.data_dir / path) if self.data_dir else Path(path)
+        full_path = (self.data_dir / path) if self.data_dir else Path(path)
+        if not self.strict_paths and not full_path.exists():
+            return full_path
+        return full_path
 
     def _parse_surface_annotations(
         self, prefix: str, space: str, density: str, hemispheres: dict[str, Any]
