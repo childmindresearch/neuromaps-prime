@@ -1,4 +1,4 @@
-"""Compute annotation transform error."""
+"""Compute surface-to-surface transform error."""
 
 import logging
 from itertools import pairwise
@@ -8,7 +8,6 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 from networkx.algorithms.cycles import recursive_simple_cycles
-
 from niwrap import workbench
 
 from neuromaps_prime.graph import NeuromapsGraph
@@ -17,8 +16,8 @@ from neuromaps_prime.transforms.utils import log_gii_shapes
 logger = logging.getLogger(__name__)
 
 
-def test_annotation_cycle(tmp_path: Path) -> None:
-    """Test annotation consistency by cycling through annotation transforms."""
+def test_surface_cycle(tmp_path: Path) -> None:
+    """Test surface consistency by cycling through surface transforms."""
     logging.basicConfig(level=logging.INFO)
 
     logger.info("=== BUILDING NEUROMAPS GRAPH ===")
@@ -92,12 +91,10 @@ def test_annotation_cycle(tmp_path: Path) -> None:
 
     logger.info("Found %d cycles", len(cycles))
 
-    # STORE PER-CYCLE SUMMARY STATS
+    # store per-cycle summary stats
     cycle_errors = []
 
-    # ----------------------------------------------------------
     # RUN CYCLIC TRANSFORMS
-    # ----------------------------------------------------------
     for i, cycle in enumerate(cycles):
 
         # normalize cycle to start at origin
@@ -111,9 +108,9 @@ def test_annotation_cycle(tmp_path: Path) -> None:
         current_metric = metric_on_surface
         cycle_completed = True
 
-        # ------------------------------------------------------
+        # ----------------------------------------------------------
         # RUN ENTIRE CYCLE
-        # ------------------------------------------------------
+        # ----------------------------------------------------------
         for step, (src, dst) in enumerate(pairwise(cycle)):
 
             logger.info("Step %d: %s -> %s", step, src, dst)
@@ -124,29 +121,21 @@ def test_annotation_cycle(tmp_path: Path) -> None:
             )
 
             try:
-                # ----------------------------------------------
-                # USE NATIVE SPACE DENSITIES
-                # ----------------------------------------------
-                src_density = graph.find_highest_density(space=src)
-                dst_density = graph.find_highest_density(space=dst)
+                common_density = graph.find_common_density(src, dst)
 
                 logger.info(
-                    "Using native densities: "
-                    "%s=%s %s=%s",
+                    "Using common density %s for %s -> %s",
+                    common_density,
                     src,
-                    src_density,
                     dst,
-                    dst_density,
                 )
 
-                # ----------------------------------------------
-                # FETCH TRANSFORM SPHERE
-                # ----------------------------------------------
+                # GET SPHERE TRANSFORM
                 target_sphere_transform = (
                     graph.fetch_surface_to_surface_transform(
                         source=src,
                         target=dst,
-                        density=src_density,
+                        density=common_density,
                         hemisphere=hemisphere,
                         resource_type="sphere",
                     )
@@ -163,55 +152,48 @@ def test_annotation_cycle(tmp_path: Path) -> None:
 
                 target_sphere = target_sphere_transform.file_path
 
-                # ----------------------------------------------
-                # FETCH CURRENT SPHERE
-                # ----------------------------------------------
-                current_sphere_obj = (
-                    graph.fetch_surface_atlas(
-                        space=src,
-                        density=src_density,
-                        hemisphere=hemisphere,
-                        resource_type="sphere",
-                    )
+                current_sphere_obj = graph.fetch_surface_atlas(
+                    space=src,
+                    density=common_density,
+                    hemisphere=hemisphere,
+                    resource_type="sphere",
                 )
 
                 if current_sphere_obj is None:
                     logger.warning(
                         "Missing source sphere for %s (%s)",
                         src,
-                        src_density,
+                        common_density,
                     )
                     cycle_completed = False
                     break
 
                 current_sphere = current_sphere_obj.file_path
 
-                # ----------------------------------------------
-                # FETCH AREA CORRECTION SURFACES
-                # ----------------------------------------------
+                # AREA CORRECTION SURFACES
                 current_area = graph.fetch_surface_atlas(
                     space=src,
-                    density=src_density,
+                    density=common_density,
                     hemisphere=hemisphere,
                     resource_type="midthickness",
                 )
 
                 new_area = graph.fetch_surface_atlas(
                     space=dst,
-                    density=dst_density,
+                    density=common_density,
                     hemisphere=hemisphere,
                     resource_type="midthickness",
                 )
 
                 if current_area is None or new_area is None:
                     logger.warning(
-                        "Skipping cycle %d step %d "
-                        "(%s -> %s): "
-                        "missing midthickness surface",
+                        "Skipping cycle %d step %d (%s -> %s): "
+                        "missing midthickness surface at density %s",
                         i,
                         step,
                         src,
                         dst,
+                        common_density,
                     )
                     cycle_completed = False
                     break
@@ -221,19 +203,15 @@ def test_annotation_cycle(tmp_path: Path) -> None:
                     "new-area": new_area.file_path,
                 }
 
-                # ----------------------------------------------
                 # RESAMPLE METRIC THROUGH SPHERE TRANSFORM
-                # ----------------------------------------------
-                current_metric = (
-                    workbench.metric_resample(
-                        metric_in=str(current_metric),
-                        current_sphere=str(current_sphere),
-                        new_sphere=str(target_sphere),
-                        method="ADAP_BARY_AREA",
-                        area_surfs=area_surfs,
-                        metric_out=str(out_file),
-                    ).metric_out
-                )
+                current_metric = workbench.metric_resample(
+                    metric_in=str(current_metric),
+                    current_sphere=str(current_sphere),
+                    new_sphere=str(target_sphere),
+                    method="ADAP_BARY_AREA",
+                    area_surfs=area_surfs,
+                    metric_out=str(out_file),
+                ).metric_out
 
                 current_metric = Path(current_metric)
 
@@ -241,8 +219,7 @@ def test_annotation_cycle(tmp_path: Path) -> None:
 
             except Exception as e:
                 logger.warning(
-                    "Skipping cycle %d step %d "
-                    "(%s -> %s): %s",
+                    "Skipping cycle %d step %d (%s -> %s): %s",
                     i,
                     step,
                     src,
@@ -252,19 +229,17 @@ def test_annotation_cycle(tmp_path: Path) -> None:
                 cycle_completed = False
                 break
 
-        # ------------------------------------------------------
+        # ----------------------------------------------------------
         # SKIP INCOMPLETE CYCLES
-        # ------------------------------------------------------
+        # ----------------------------------------------------------
         if not cycle_completed:
-            logger.warning(
-                "Skipping incomplete cycle %d",
-                i,
-            )
+            logger.warning("Skipping incomplete cycle %d", i)
             continue
 
-        # ------------------------------------------------------
+        # ----------------------------------------------------------
         # CYCLE CLOSURE ERROR
-        # ------------------------------------------------------
+        # ONLY AFTER ENTIRE CYCLE COMPLETES
+        # ----------------------------------------------------------
         error_file = tmp_path / f"cycle{i}_error.func.gii"
 
         ref_gii = nib.load(metric_on_surface)
@@ -273,10 +248,7 @@ def test_annotation_cycle(tmp_path: Path) -> None:
         ref = ref_gii.darrays[0].data.astype(float)
         comp = comp_gii.darrays[0].data.astype(float)
 
-        valid_mask = (
-            np.isfinite(ref) &
-            np.isfinite(comp)
-        )
+        valid_mask = np.isfinite(ref) & np.isfinite(comp)
 
         if not np.any(valid_mask):
             logger.warning(
@@ -285,10 +257,7 @@ def test_annotation_cycle(tmp_path: Path) -> None:
             )
             continue
 
-        error = np.abs(
-            comp[valid_mask] -
-            ref[valid_mask]
-        )
+        error = np.abs(comp[valid_mask] - ref[valid_mask])
 
         median_error = (
             float(np.median(error))
@@ -305,13 +274,8 @@ def test_annotation_cycle(tmp_path: Path) -> None:
             if error.size > 0 else float("nan")
         )
 
-        # SAVE VERTEX-WISE ERROR MAP
-        full_error = np.full(
-            ref.shape,
-            np.nan,
-            dtype=float,
-        )
-
+        # save vertex-wise error map
+        full_error = np.full(ref.shape, np.nan, dtype=float)
         full_error[valid_mask] = error
 
         np.save(
@@ -320,8 +284,7 @@ def test_annotation_cycle(tmp_path: Path) -> None:
         )
 
         logger.info(
-            "Cycle %d COMPLETE: "
-            "median=%f mean=%f sd=%f",
+            "Cycle %d COMPLETE: median=%f mean=%f sd=%f",
             i,
             median_error,
             mean_error,
@@ -330,12 +293,12 @@ def test_annotation_cycle(tmp_path: Path) -> None:
 
         if not np.isfinite(median_error):
             logger.warning(
-                "Cycle %d produced non-finite error",
+                "Cycle %d produced non-finite median error",
                 i,
             )
             continue
 
-        # STORE SUMMARY STATS
+        # store summary stats
         cycle_errors.append(
             {
                 "cycle": i,
@@ -347,17 +310,15 @@ def test_annotation_cycle(tmp_path: Path) -> None:
             }
         )
 
-    # ----------------------------------------------------------
+    # ------------------------------------------------------------------
     # AFTER ALL CYCLES COMPLETE
-    # ----------------------------------------------------------
+    # ------------------------------------------------------------------
+
     assert cycle_errors, "No valid cycles completed"
 
     df = pd.DataFrame(cycle_errors)
 
-    csv_file = (
-        tmp_path /
-        "test_annotation_cycle.csv"
-    )
+    csv_file = tmp_path / "cycle_error_summary.csv"
 
     df.to_csv(csv_file, index=False)
 
@@ -379,20 +340,17 @@ def test_annotation_cycle(tmp_path: Path) -> None:
         "mean_sd": float(
             df["sd_error"].mean()
         ),
-        "n_cycles": int(len(df)),
+        "n_cycles": len(df),
     }
 
-    logger.info(
-        "=== OVERALL CYCLE ERROR SUMMARY ==="
-    )
+    logger.info("=== OVERALL CYCLE ERROR SUMMARY ===")
 
     for key, value in overall.items():
         logger.info("%s: %s", key, value)
 
-    print("\n=== PER-CYCLE ERRORS ===")
-    print(df)
+    logger.info("=== PER-CYCLE ERRORS ===\n%s", df)
 
-    print("\n=== OVERALL SUMMARY ===")
+    logger.info("=== OVERALL SUMMARY ===")
 
     for key, value in overall.items():
-        print(f"{key}: {value}")
+        logger.info("%s: %s", key, value)

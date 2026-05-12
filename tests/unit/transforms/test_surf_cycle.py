@@ -6,14 +6,11 @@ from pathlib import Path
 
 import nibabel as nib
 import numpy as np
-import pytest
 from networkx.algorithms.cycles import recursive_simple_cycles
-
 from niwrap import workbench
 
 from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.transforms.utils import log_gii_shapes
-from neuromaps_prime.transforms.surface import metric_resample
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +76,6 @@ def test_surface_cycle(tmp_path: Path) -> None:
 
             # original Yerkes19 midthickness
             if step==0:
-                #current_metric = Path("/Users/tamsin.rogers/Desktop/github/neuromaps-prime/share/Inputs/Yerkes19/src-Yerkes19_den-32k_hemi-R_desc-vaavg_midthickness.shape.gii")
                 # original Yerkes19 surf sphere
                 current_sphere = graph.fetch_surface_atlas(
                     space=src,
@@ -89,7 +85,7 @@ def test_surface_cycle(tmp_path: Path) -> None:
                     ).file_path
             # result of transform in previous step
             else:
-                current_sphere = result
+                current_sphere = full_surface
 
             # now fetch the new target sphere
             target_sphere = graph.surface_ops._resolve_sphere_transform(
@@ -100,10 +96,18 @@ def test_surface_cycle(tmp_path: Path) -> None:
                 output_file_path="output.sphere.gii",
             )
 
-            logger.info("src,dst,density %s: %s -> %s", src, dst, graph.find_highest_density(space=dst))
+            dst_density = graph.find_highest_density(space=dst)
+
+            logger.info(
+                "src,dst,density %s: %s -> %s",
+                src,
+                dst,
+                dst_density,
+            )
             target_sphere = target_sphere.file_path
 
-            # midthickness files - so we know where (on the sphere) to map transformation values to
+            # midthickness files - so we know where (on the sphere) 
+            # to map transformation values to
             area_surfs = {
                 "current-area": graph.fetch_surface_atlas(
                     space=src,
@@ -130,7 +134,6 @@ def test_surface_cycle(tmp_path: Path) -> None:
 
             output = Path(result)
 
-            #shapes = log_gii_shapes(metric_output)
             arrays = nib.load(output).darrays
 
             logger.info(

@@ -4,13 +4,10 @@ import logging
 from itertools import product
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-
-import pytest
-
 from niwrap import workbench
 
 from neuromaps_prime.graph import NeuromapsGraph
@@ -29,7 +26,13 @@ def median_abs_signed_distance(metric_file: Path) -> float:
     return float(np.median(data))
 
 
-def fetch_surface(graph: NeuromapsGraph, space: str, density: str, hemi: str, kind: str) -> Path:
+def fetch_surface(
+        graph: NeuromapsGraph,
+        space: str,
+        density: str,
+        hemi: str,
+        kind: str,
+    ) -> Path:
     """Fetch a surface and return local path."""
     return Path(
         graph.fetch_surface_atlas(
@@ -42,7 +45,6 @@ def fetch_surface(graph: NeuromapsGraph, space: str, density: str, hemi: str, ki
 
 def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
     """Return graph nodes that have required surface resources."""
-
     valid = []
 
     for node in graph.nodes:
@@ -64,21 +66,20 @@ def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
             if sphere is not None and midthickness is not None:
                 valid.append(node)
 
-        except Exception:
+        except Exception as e:
+            logger.debug("Skipping node %s due to error: %s", node, e)
             continue
 
     return sorted(valid)
 
 
 def test_surface_transform_matrix(tmp_path: Path) -> None:
-    """
-    Pairwise surface transform error matrix.
+    """Pairwise surface transform error matrix.
 
     Each entry measures:
         A_midthickness → B_midthickness
     using sphere-defined barycentric mapping (triangle coordiantes).
     """
-
     logging.basicConfig(level=logging.INFO)
 
     graph = NeuromapsGraph(
@@ -104,11 +105,13 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         src_density = graph.find_highest_density(space=src)
         dst_density = graph.find_highest_density(space=dst)
 
-        # midthickness defines the geometry of the surface, so we use it as the reference for error computation 
+        # midthickness defines the geometry of the surface, 
+        # so we use it as the reference for error computation 
         src_surface = fetch_surface(graph, src, src_density, hemisphere, "midthickness")
         dst_surface = fetch_surface(graph, dst, dst_density, hemisphere, "midthickness")
 
-        # sphere defines the mapping between surfaces, so we use it for resampling
+        # sphere defines the mapping between surfaces, 
+        # so we use it for resampling
         src_sphere = fetch_surface(graph, src, src_density, hemisphere, "sphere")
         dst_sphere = fetch_surface(graph, dst, dst_density, hemisphere, "sphere")
 
@@ -133,15 +136,17 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         # compute error between resampled surface and target surface
         error_file = tmp_path / f"{src}_to_{dst}_error.func.gii"
 
-        # now compute vertex-wise signed distance from resampled surface to target surface
+        # now compute vertex-wise signed distance from the 
+        # resampled surface to the target surface
         workbench.signed_distance_to_surface(
             surface_comp=str(out_surface),
             surface_ref=str(dst_surface),
             metric=str(error_file),
         )
 
-        # the absolute signed distance gives us a measure of how far the resampled surface is from the target surface at each vertex
-        # # the sign indicates the direction of error (inside vs outside)
+        # the absolute signed distance gives us a measure of how far the resampled 
+        # surface is from the target surface at each vertex
+        # the sign indicates the direction of error (inside vs outside)
         error = median_abs_signed_distance(error_file)
         results[(src, dst)] = error
 
@@ -154,8 +159,10 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     for (src, dst), val in results.items():
         matrix.loc[src, dst] = val
 
-    logger.info("\n=== TRANSFORM ERROR MATRIX ===\n%s", matrix)
-
+    # directed transform error matrix
+    logger.info("\n=== TRANSFORM ERROR MATRIX ===")
+    logger.info("median surface-to-surface registration error (A → B)")
+    logger.info("\n%s", matrix)
     """
     MATRIX DEFINITIONS
 
@@ -187,13 +194,17 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
 
     # assess symmetry
     asymmetry = matrix - matrix.T
-    logger.info("\n=== ASYMMETRY MATRIX (map space A → space B) ===\n%s", asymmetry)
+    logger.info("\n=== ASYMMETRIC MATRIX ===")
+    logger.info("directionality bias in mapping; A → B vs B → A")
+    logger.info("\n%s", asymmetry)
 
     symmetric = (matrix + matrix.T) / 2.0
-    logger.info("\n=== SYMMETRIC MATRIX (overall difference between spaces)===\n%s", symmetric)
+    logger.info("\n=== SYMMETRIC MATRIX ===")
+    logger.info("intrinsic geometric difference between spaces")
+    logger.info("\n%s", symmetric)
 
     # assess global error
-    off_diag = matrix.values[~np.eye(len(matrix), dtype=bool)]
+    off_diag = matrix.to_numpy()[~np.eye(len(matrix), dtype=bool)]
     median_error = np.nanmedian(off_diag)
 
     logger.info("Global median off-diagonal error: %.5f", median_error)
@@ -204,7 +215,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     logger.info("Saved CSV → %s", csv_path)
 
     # HEATMAP EXPORT
-    fig, ax = plt.subplots(figsize=(8, 6))
+    _fig, ax = plt.subplots(figsize=(8, 6))
     im = ax.imshow(matrix.values, interpolation="nearest")
     ax.set_xticks(range(len(spaces)))
     ax.set_yticks(range(len(spaces)))
