@@ -25,11 +25,11 @@ def _build_graph() -> NeuromapsGraph:
 
 
 def _load_origin(
-        origin: str,
-        hemisphere: str,
-        graph: NeuromapsGraph,
-        tmp_path: Path,
-    ) -> tuple[int, Path, Path, Path]:
+    origin: str,
+    hemisphere: str,
+    graph: NeuromapsGraph,
+    tmp_path: Path,
+) -> tuple[int, Path, Path, Path]:
     density = graph.find_highest_density(space=origin)
 
     origin_metric = Path(
@@ -80,13 +80,13 @@ def _load_origin(
 
 # CYCLE
 def _run_cycle(
-        i: int,
-        cycle: list[str],
-        graph: NeuromapsGraph,
-        metric_on_surface: Path,
-        hemisphere: str,
-        tmp_path: Path,
-    ) -> tuple[list[str], Path] | tuple[None, None]:
+    i: int,
+    cycle: list[str],
+    graph: NeuromapsGraph,
+    metric_on_surface: Path,
+    hemisphere: str,
+    tmp_path: Path,
+) -> tuple[list[str], Path] | tuple[None, None]:
     # normalize cycle to start at origin
     origin = cycle[0]
     while cycle[0] != origin:
@@ -202,12 +202,12 @@ def _run_cycle(
 
 # ERROR COMPUTATION
 def _compute_error(
-        i: int,
-        cycle: list[str],
-        current_metric: Path,
-        metric_on_surface: Path,
-        tmp_path: Path,
-    ) -> dict | None:
+    i: int,
+    cycle: list[str],
+    current_metric: Path,
+    metric_on_surface: Path,
+    tmp_path: Path,
+) -> dict | None:
     error_file = tmp_path / f"cycle{i}_error.func.gii"
 
     ref_gii = nib.load(metric_on_surface)
@@ -281,9 +281,7 @@ def test_annotation_cycle(tmp_path: Path) -> None:
     cycle_errors = []
 
     for i, cycle in enumerate(cycles):
-        result = _run_cycle(
-            i, cycle, graph, metric_on_surface, hemisphere, tmp_path
-        )
+        result = _run_cycle(i, cycle, graph, metric_on_surface, hemisphere, tmp_path)
 
         if result is None or result[0] is None:
             logger.warning("Skipping incomplete cycle %d", i)
@@ -291,9 +289,7 @@ def test_annotation_cycle(tmp_path: Path) -> None:
 
         cycle, current_metric = result
 
-        entry = _compute_error(
-            i, cycle, current_metric, metric_on_surface, tmp_path
-        )
+        entry = _compute_error(i, cycle, current_metric, metric_on_surface, tmp_path)
 
         if entry:
             cycle_errors.append(entry)
