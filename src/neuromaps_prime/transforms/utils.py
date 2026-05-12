@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import cast
 
 import nibabel as nib
-
+import logging
+logger = logging.getLogger(__name__)
 
 def estimate_surface_density(surface_file: Path) -> str:
     """Return density string of GIFTI surface based on vertex count.
@@ -93,8 +94,17 @@ def validate_surface_file(file_path: str | Path) -> bool:
 def log_gii_shapes(path: Path) -> int:
     gii = nib.load(path)
 
-    return next(
-        arr.data.shape[0]
-        for arr in gii.darrays
-        if arr.intent == nib.nifti1.intent_codes["NIFTI_INTENT_POINTSET"]
-    )
+    for i, arr in enumerate(gii.darrays):
+        logger.info(
+            "DARRAY %d: shape=%s intent=%s",
+            i,
+            arr.data.shape,
+            arr.intent,
+        )
+
+    # return first valid vertex-like array if present
+    for arr in gii.darrays:
+        if arr.data.ndim == 1:
+            return arr.data.shape[0]
+
+    return 0
