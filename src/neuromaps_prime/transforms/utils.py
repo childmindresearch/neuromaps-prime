@@ -1,11 +1,10 @@
 """Utility functions for working with GIFTI files and surface projections."""
 
+import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import cast
 
 import nibabel as nib
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +93,7 @@ def validate_surface_file(file_path: str | Path) -> bool:
 
 
 def log_gii_shapes(path: Path) -> int:
+    """Log the shapes and metadata of a GIFTI file."""
     gii = nib.load(path)
 
     for i, arr in enumerate(gii.darrays):
