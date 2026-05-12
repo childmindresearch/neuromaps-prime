@@ -48,7 +48,6 @@ def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
     valid = []
 
     for node in graph.nodes:
-        
         if node.startswith("S1200"):
             continue
 
