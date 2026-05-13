@@ -122,7 +122,7 @@ def setup_runner(
         logging.DEBUG if verbose >= len(_LOG_LEVELS) - 1 else logging.WARNING
     )
 
-    neuromaps_prime_logger = logging.getLogger("neuromaps-PRIME")
+    neuromaps_prime_logger = logging.getLogger("neuromaps_prime")
     neuromaps_prime_logger.setLevel(_LOG_LEVELS[log_level])
     if not neuromaps_prime_logger.handlers:
         handler = logging.StreamHandler()
