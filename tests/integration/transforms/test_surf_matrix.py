@@ -276,4 +276,5 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     )
     """
 
+    # TO DO: actual error assertion
     assert np.isfinite(median_error), f"Median error is not finite: {median_error}"
