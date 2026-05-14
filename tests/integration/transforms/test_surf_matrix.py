@@ -25,24 +25,6 @@ def median_abs_signed_distance(metric_file: Path) -> float:
     return float(np.median(data))
 
 
-def fetch_surface(
-    graph: NeuromapsGraph,
-    space: str,
-    density: str,
-    hemi: str,
-    kind: str,
-) -> Path:
-    """Fetch a surface and return local path."""
-    return Path(
-        graph.fetch_surface_atlas(
-            space=space,
-            density=density,
-            hemisphere=hemi,
-            resource_type=kind,
-        ).fetch()
-    )
-
-
 def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
     """Return graph nodes that have required surface resources."""
     valid = []
@@ -106,13 +88,43 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
 
         # midthickness defines the geometry of the surface,
         # so we use it as the reference for error computation
-        src_surface = fetch_surface(graph, src, src_density, hemisphere, "midthickness")
-        dst_surface = fetch_surface(graph, dst, dst_density, hemisphere, "midthickness")
+        src_surface = Path(
+            graph.fetch_surface_atlas(
+                space=src,
+                density=src_density,
+                hemisphere=hemisphere,
+                resource_type="midthickness",
+            ).fetch()
+        )
+
+        dst_surface = Path(
+            graph.fetch_surface_atlas(
+                space=dst,
+                density=dst_density,
+                hemisphere=hemisphere,
+                resource_type="midthickness",
+            ).fetch()
+        )
 
         # sphere defines the mapping between surfaces,
         # so we use it for resampling
-        src_sphere = fetch_surface(graph, src, src_density, hemisphere, "sphere")
-        dst_sphere = fetch_surface(graph, dst, dst_density, hemisphere, "sphere")
+        src_sphere = Path(
+            graph.fetch_surface_atlas(
+                space=src,
+                density=src_density,
+                hemisphere=hemisphere,
+                resource_type="sphere",
+            ).fetch()
+        )
+
+        dst_sphere = Path(
+            graph.fetch_surface_atlas(
+                space=dst,
+                density=dst_density,
+                hemisphere=hemisphere,
+                resource_type="sphere",
+            ).fetch()
+        )
 
         # apply transform
         out_surface = tmp_path / f"{src}_to_{dst}.surf.gii"
