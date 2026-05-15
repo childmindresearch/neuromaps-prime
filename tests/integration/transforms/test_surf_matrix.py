@@ -83,6 +83,7 @@ def annotate_heatmap(ax: mpl_axes.Axes, mat: np.ndarray) -> None:
                 fontsize=7,
             )
 
+
 def test_surface_transform_matrix(tmp_path: Path) -> None:
     """Pairwise surface transform error matrix.
 
