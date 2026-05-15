@@ -4,6 +4,7 @@ import logging
 from itertools import product
 from pathlib import Path
 
+import matplotlib.axes._axes as mpl_axes
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
@@ -67,7 +68,8 @@ def surface_error_stats(metric_file: Path) -> tuple[float, float, float]:
     )
 
 
-def annotate_heatmap(ax, mat):
+def annotate_heatmap(ax: mpl_axes.Axes, mat: np.ndarray) -> None:
+    """Annotate a heatmap with numeric values in each cell."""
     for i in range(mat.shape[0]):
         for j in range(mat.shape[1]):
             val = mat[i, j]
@@ -80,7 +82,6 @@ def annotate_heatmap(ax, mat):
                 color="white",
                 fontsize=7,
             )
-
 
 def test_surface_transform_matrix(tmp_path: Path) -> None:
     """Pairwise surface transform error matrix.
