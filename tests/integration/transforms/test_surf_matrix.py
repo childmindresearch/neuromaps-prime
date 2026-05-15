@@ -130,7 +130,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
             "new-area": dst_surface,
         }
 
-        # resample because the surfaces are not in the same space
+        # resample because the surfaces are not the same mesh
         workbench.surface_resample(
             surface_in=str(src_surface),
             current_sphere=str(src_sphere),
