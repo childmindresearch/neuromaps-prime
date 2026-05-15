@@ -51,6 +51,9 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Integration test outputs
+/tests/integration/transforms/surface_matrix_outputs/
+
 # Translations
 *.mo
 *.pot
