@@ -207,9 +207,9 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
 
     symmetric = (matrix + matrix.T) / 2.0
     logger.info("\n=== SYMMETRIC MATRIX ===")
-    logger.info("intrinsic geometric difference between spaces")
+    logger.info("average bidirectional transform error between spaces (A↔B)")
     logger.info("\n%s", symmetric)
-
+    
     # assess global error
     off_diag = matrix.to_numpy()[~np.eye(len(matrix), dtype=bool)]
     median_error = np.nanmedian(off_diag)
