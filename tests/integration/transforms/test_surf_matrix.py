@@ -54,6 +54,7 @@ def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
 
     return valid
 
+
 def surface_error_stats(metric_file: Path) -> tuple[float, float, float]:
     """Return median, mean, and std of absolute signed-distance error."""
     gii = nib.load(metric_file)
@@ -65,18 +66,21 @@ def surface_error_stats(metric_file: Path) -> tuple[float, float, float]:
         float(np.std(data)),
     )
 
+
 def annotate_heatmap(ax, mat):
     for i in range(mat.shape[0]):
         for j in range(mat.shape[1]):
             val = mat[i, j]
             ax.text(
-                j, i,
+                j,
+                i,
                 f"{val:.2f}",
                 ha="center",
                 va="center",
                 color="white",
                 fontsize=7,
             )
+
 
 def test_surface_transform_matrix(tmp_path: Path) -> None:
     """Pairwise surface transform error matrix.
@@ -185,7 +189,11 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         results[(src, dst)] = median_err
         logger.info(
             "Error %s → %s | median=%.5f mean=%.5f std=%.5f",
-            src, dst, median_err, mean_err, std_err,
+            src,
+            dst,
+            median_err,
+            mean_err,
+            std_err,
         )
 
     # build matrix
@@ -267,9 +275,14 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
 
     # nhp
     nhp_mask = np.array(
-        [[(i in [spaces.index(s) for s in nhp_spaces]) and
-        (j in [spaces.index(s) for s in nhp_spaces])]
-        for i in range(n) for j in range(n)]
+        [
+            [
+                (i in [spaces.index(s) for s in nhp_spaces])
+                and (j in [spaces.index(s) for s in nhp_spaces])
+            ]
+            for i in range(n)
+            for j in range(n)
+        ]
     ).reshape(n, n)
 
     nhp_off_diag = mat[np.logical_and(mask, nhp_mask)]
@@ -278,8 +291,10 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     human_nhp_vals = []
     for i, si in enumerate(spaces):
         for j, sj in enumerate(spaces):
-            if i != j and ((si in human_spaces and sj in nhp_spaces) or
-                        (si in nhp_spaces and sj in human_spaces)):
+            if i != j and (
+                (si in human_spaces and sj in nhp_spaces)
+                or (si in nhp_spaces and sj in human_spaces)
+            ):
                 human_nhp_vals.append(mat[i, j])
 
     human_nhp_vals = np.array(human_nhp_vals) if human_nhp_vals else np.array([np.nan])
@@ -308,15 +323,17 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
 
     # HEATMAP
     _fig1, ax1 = plt.subplots(figsize=(8, 6))
-    im1 = ax1.imshow(mat, interpolation="nearest", cmap="turbo",)
+    im1 = ax1.imshow(
+        mat,
+        interpolation="nearest",
+        cmap="turbo",
+    )
     annotate_heatmap(ax1, mat)
     ax1.set_xticks(range(n))
     ax1.set_yticks(range(n))
     ax1.set_xticklabels(spaces, rotation=45, ha="right")
     ax1.set_yticklabels(spaces)
-    ax1.set_title(
-        "Surface Transform Error Matrix (Full Scale, Including fsLR)"
-    )
+    ax1.set_title("Surface Transform Error Matrix (Full Scale, Including fsLR)")
     plt.colorbar(im1, ax=ax1)
 
     full_path = output_dir / "surface_transform_matrix_full.png"
@@ -331,11 +348,11 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
 
     _fig2, ax2 = plt.subplots(figsize=(8, 6))
     im2 = ax2.imshow(
-    mat,
-    interpolation="nearest",
-    cmap="turbo",
-    vmin=vmin,
-    vmax=vmax,
+        mat,
+        interpolation="nearest",
+        cmap="turbo",
+        vmin=vmin,
+        vmax=vmax,
     )
     annotate_heatmap(ax2, mat)
 
@@ -343,9 +360,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     ax2.set_yticks(range(n))
     ax2.set_xticklabels(spaces, rotation=45, ha="right")
     ax2.set_yticklabels(spaces)
-    ax2.set_title(
-        "Surface Transform Error Matrix (NHP-Scaled View; fsLR excluded)"
-    )
+    ax2.set_title("Surface Transform Error Matrix (NHP-Scaled View; fsLR excluded)")
     plt.colorbar(im2, ax=ax2)
 
     nhp_path = output_dir / "surface_transform_matrix_nhp_scaled.png"
