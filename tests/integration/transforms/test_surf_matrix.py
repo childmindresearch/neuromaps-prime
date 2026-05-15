@@ -54,6 +54,29 @@ def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
 
     return valid
 
+def surface_error_stats(metric_file: Path) -> tuple[float, float, float]:
+    """Return median, mean, and std of absolute signed-distance error."""
+    gii = nib.load(metric_file)
+    data = np.abs(gii.darrays[0].data)
+
+    return (
+        float(np.median(data)),
+        float(np.mean(data)),
+        float(np.std(data)),
+    )
+
+def annotate_heatmap(ax, mat):
+    for i in range(mat.shape[0]):
+        for j in range(mat.shape[1]):
+            val = mat[i, j]
+            ax.text(
+                j, i,
+                f"{val:.2f}",
+                ha="center",
+                va="center",
+                color="white",
+                fontsize=7,
+            )
 
 def test_surface_transform_matrix(tmp_path: Path) -> None:
     """Pairwise surface transform error matrix.
@@ -73,6 +96,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     spaces = get_valid_spaces(graph, hemisphere)
 
     results = {}
+    all_errors = []
 
     logger.info("=== BUILDING SURFACE TRANSFORM MATRIX ===")
 
@@ -146,18 +170,23 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         # now compute vertex-wise signed distance from the
         # resampled surface to the target surface
         workbench.signed_distance_to_surface(
-            surface_comp=str(out_surface),
-            surface_ref=str(dst_surface),
+            surface_comp=out_surface,
+            surface_ref=dst_surface,
             metric=str(error_file),
         )
+        gii = nib.load(error_file)
+        vertex_errors = np.abs(gii.darrays[0].data)
+        all_errors.append(vertex_errors)
 
         # the absolute signed distance gives us a measure of how far the resampled
         # surface is from the target surface at each vertex
         # the sign indicates the direction of error (inside vs outside)
-        error = median_abs_signed_distance(error_file)
-        results[(src, dst)] = error
-
-        logger.info("Error %s → %s = %.5f", src, dst, error)
+        median_err, mean_err, std_err = surface_error_stats(error_file)
+        results[(src, dst)] = median_err
+        logger.info(
+            "Error %s → %s | median=%.5f mean=%.5f std=%.5f",
+            src, dst, median_err, mean_err, std_err,
+        )
 
     # build matrix
     matrix = pd.DataFrame(index=spaces, columns=spaces, dtype=float)
@@ -174,29 +203,30 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     MATRIX DEFINITIONS
 
     1. TRANSFORM ERROR MATRIX (directed)
-    M[A, B] =
-        median vertex-wise absolute signed-distance error after:
-        A_midthickness → B_midthickness
-        using sphere-based barycentric resampling.
+        M[A, B] =
+            median vertex-wise absolute signed-distance error after:
+            A_midthickness → B_midthickness
+            using sphere-based barycentric resampling.
 
-    Interpretation:
-    - Rows = source space
-    - Columns = target space
-    - Asymmetric by construction (A→B ≠ B→A)
+        Interpretation:
+        - Rows = source space
+        - Columns = target space
+        - Asymmetric by construction (A→B ≠ B→A)
 
-    2. ASYMMETRY MATRIX
-    A[A, B] = M[A, B] - M[B, A]
+    2. ASYMMETRIC MATRIX
+        A[A, B] = M[A, B] - M[B, A]
 
-    Interpretation:
-    - Measures directional distortion bias
-    - Large magnitude = non-invertible or unstable mapping
+        Interpretation:
+        - Difference in transformation error when reversing source and target
+        - Captures directionality in surface resampling + registration pipeline
+        - Large magnitude indicates asymmetric mapping quality between A → B vs B → A
 
     3. SYMMETRIC MATRIX
-    S[A, B] = (M[A, B] + M[B, A]) / 2
+        S[A, B] = (M[A, B] + M[B, A]) / 2
 
-    Interpretation:
-    - Undirected “geometric distance” between atlas spaces
-    - Best representation of intrinsic atlas similarity
+        Interpretation:
+        - Undirected “geometric distance” between atlas spaces
+        - Best representation of intrinsic atlas similarity
     """
 
     # assess symmetry
@@ -278,7 +308,8 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
 
     # HEATMAP
     _fig1, ax1 = plt.subplots(figsize=(8, 6))
-    im1 = ax1.imshow(mat, interpolation="nearest")
+    im1 = ax1.imshow(mat, interpolation="nearest", cmap="turbo",)
+    annotate_heatmap(ax1, mat)
     ax1.set_xticks(range(n))
     ax1.set_yticks(range(n))
     ax1.set_xticklabels(spaces, rotation=45, ha="right")
@@ -300,18 +331,20 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
 
     _fig2, ax2 = plt.subplots(figsize=(8, 6))
     im2 = ax2.imshow(
-        mat,
-        interpolation="nearest",
-        vmin=vmin,
-        vmax=vmax,
+    mat,
+    interpolation="nearest",
+    cmap="turbo",
+    vmin=vmin,
+    vmax=vmax,
     )
+    annotate_heatmap(ax2, mat)
 
     ax2.set_xticks(range(n))
     ax2.set_yticks(range(n))
     ax2.set_xticklabels(spaces, rotation=45, ha="right")
     ax2.set_yticklabels(spaces)
     ax2.set_title(
-        "Surface Transform Error Matrix (NHP-Scaled View; fsLR excluded from scaling only)"
+        "Surface Transform Error Matrix (NHP-Scaled View; fsLR excluded)"
     )
     plt.colorbar(im2, ax=ax2)
 
@@ -320,3 +353,18 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     plt.savefig(nhp_path, dpi=200)
 
     logger.info("Saved NHP-scaled heatmap → %s", nhp_path)
+
+    # HISTOGRAM
+    all_errors = np.concatenate(all_errors)
+    plt.figure()
+    plt.hist(all_errors, bins=200)
+    plt.title("Global vertex-wise surface transform error distribution")
+    plt.xlabel("Signed distance error (abs)")
+    plt.ylabel("Vertex count")
+
+    hist_path = output_dir / "surface_transform_histogram.png"
+    plt.tight_layout()
+    plt.savefig(hist_path, dpi=200)
+    plt.close()
+
+    logger.info("Saved global histogram → %s", hist_path)
