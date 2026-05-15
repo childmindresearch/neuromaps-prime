@@ -52,7 +52,7 @@ def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
             logger.debug("Skipping node %s due to error: %s", node, e)
             continue
 
-    return sorted(valid)
+    return valid
 
 
 def test_surface_transform_matrix(tmp_path: Path) -> None:
