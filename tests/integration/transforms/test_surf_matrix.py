@@ -14,7 +14,7 @@ from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
 
-output_dir = Path(__file__).resolve().parent / "outputs"
+output_dir = Path(__file__).resolve().parent / "surface_matrix_outputs"
 output_dir.mkdir(parents=True, exist_ok=True)
 
 
