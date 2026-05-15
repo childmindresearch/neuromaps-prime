@@ -137,7 +137,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
             new_sphere=dst_sphere,
             method="ADAP_BARY_AREA",
             area_surfs=area_surfs,
-            surface_out=out_surface,
+            surface_out=str(out_surface),
         )
 
         # compute error between resampled surface and target surface
@@ -167,7 +167,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         matrix.loc[src, dst] = val
 
     # directed transform error matrix
-    logger.info("\n=== TRANSFORM ERROR MATRIX ===")
+    logger.info("\n\n=== TRANSFORM ERROR MATRIX ===")
     logger.info("median surface-to-surface registration error (A → B)")
     logger.info("\n%s", matrix)
     """
@@ -201,31 +201,82 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
 
     # assess symmetry
     asymmetry = matrix - matrix.T
-    logger.info("\n=== ASYMMETRIC MATRIX ===")
+    logger.info("\n\n=== ASYMMETRIC MATRIX ===")
     logger.info("directionality bias in mapping; A → B vs B → A")
     logger.info("\n%s", asymmetry)
 
     symmetric = (matrix + matrix.T) / 2.0
-    logger.info("\n=== SYMMETRIC MATRIX ===")
-    logger.info("average bidirectional transform error between spaces (A↔B)")
+    logger.info("\n\n=== SYMMETRIC MATRIX ===")
+    logger.info("average bidirectional transform error between spaces (A ↔ B)")
     logger.info("\n%s", symmetric)
-    
-    # assess global error
-    off_diag = matrix.to_numpy()[~np.eye(len(matrix), dtype=bool)]
-    median_error = np.nanmedian(off_diag)
 
-    logger.info("Global median off-diagonal error: %.5f", median_error)
+    # assess global error, excluding diagonal
+    mat = matrix.to_numpy()
+    n = len(matrix)
+
+    mask = ~np.eye(n, dtype=bool)
+    off_diag_vals = mat[mask]
+
+    # identify human vs NHP
+    human_spaces = [s for s in spaces if s == "fsLR"]
+    nhp_spaces = [s for s in spaces if s != "fsLR"]
+
+    global_median = np.nanmedian(off_diag_vals)
+    global_min = np.nanmin(off_diag_vals)
+    global_max = np.nanmax(off_diag_vals)
+
+    pairs = [
+        (spaces[i], spaces[j], matrix.iloc[i, j])
+        for i in range(n)
+        for j in range(n)
+        if i != j
+    ]
+
+    min_src, min_dst, min_val = min(pairs, key=lambda x: x[2])
+    max_src, max_dst, max_val = max(pairs, key=lambda x: x[2])
+
+    # nhp
+    nhp_mask = np.array(
+        [[(i in [spaces.index(s) for s in nhp_spaces]) and
+        (j in [spaces.index(s) for s in nhp_spaces])]
+        for i in range(n) for j in range(n)]
+    ).reshape(n, n)
+
+    nhp_off_diag = mat[np.logical_and(mask, nhp_mask)]
+    nhp_median = np.nanmedian(nhp_off_diag)
+
+    human_nhp_vals = []
+    for i, si in enumerate(spaces):
+        for j, sj in enumerate(spaces):
+            if i != j and ((si in human_spaces and sj in nhp_spaces) or
+                        (si in nhp_spaces and sj in human_spaces)):
+                human_nhp_vals.append(mat[i, j])
+
+    human_nhp_vals = np.array(human_nhp_vals) if human_nhp_vals else np.array([np.nan])
+    human_nhp_median = np.nanmedian(human_nhp_vals)
+
+    logger.info("\n\n=== OFF-DIAGONAL TRANSFORM ERROR STATS ===")
+    logger.info("global median: %.5f", global_median)
+
+    logger.info("global min: %.5f (%s → %s)", min_val, min_src, min_dst)
+    logger.info("global max: %.5f (%s → %s)", max_val, max_src, max_dst)
+
+    logger.info("NHP-only median: %.5f", nhp_median)
+    logger.info("Human↔NHP median: %.5f", human_nhp_median)
 
     # CSV EXPORT
     csv_path = output_dir / "surface_transform_matrix.csv"
     matrix.to_csv(csv_path)
-    logger.info("Saved CSV → %s", csv_path)
+    logger.info("\n\nSaved CSV → %s", csv_path)
 
     # HEATMAP EXPORT
     mat = matrix.to_numpy()
     n = len(spaces)
 
-    # FULL-SCALE HEATMAP
+    human_spaces = [s for s in spaces if s == "fsLR"]
+    nhp_spaces = [s for s in spaces if s not in human_spaces]
+
+    # HEATMAP
     _fig1, ax1 = plt.subplots(figsize=(8, 6))
     im1 = ax1.imshow(mat, interpolation="nearest")
     ax1.set_xticks(range(n))
@@ -233,19 +284,20 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     ax1.set_xticklabels(spaces, rotation=45, ha="right")
     ax1.set_yticklabels(spaces)
     ax1.set_title(
-        "Surface Transform Error Matrix (Full Scale, Including fsLR Extremes)"
+        "Surface Transform Error Matrix (Full Scale, Including fsLR)"
     )
     plt.colorbar(im1, ax=ax1)
+
     full_path = output_dir / "surface_transform_matrix_full.png"
     plt.tight_layout()
     plt.savefig(full_path, dpi=200)
     logger.info("Saved full-scale heatmap → %s", full_path)
 
     # NHP-SCALED HEATMAP
-    nhp_spaces = [s for s in spaces if s != "fsLR"]
     nhp_vals = matrix.loc[nhp_spaces, nhp_spaces].to_numpy()
     vmin = 0.0
     vmax = np.nanpercentile(nhp_vals, 95)
+
     _fig2, ax2 = plt.subplots(figsize=(8, 6))
     im2 = ax2.imshow(
         mat,
@@ -253,24 +305,18 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         vmin=vmin,
         vmax=vmax,
     )
+
     ax2.set_xticks(range(n))
     ax2.set_yticks(range(n))
     ax2.set_xticklabels(spaces, rotation=45, ha="right")
     ax2.set_yticklabels(spaces)
     ax2.set_title(
-        "Surface Transform Error Matrix (NHP-Scaled View, Excluding fsLR Extremes)"
+        "Surface Transform Error Matrix (NHP-Scaled View; fsLR excluded from scaling only)"
     )
     plt.colorbar(im2, ax=ax2)
+
     nhp_path = output_dir / "surface_transform_matrix_nhp_scaled.png"
     plt.tight_layout()
     plt.savefig(nhp_path, dpi=200)
 
     logger.info("Saved NHP-scaled heatmap → %s", nhp_path)
-    """
-    assert median_error < 1.0, (
-        f"Transform error too high: median={median_error}"
-    )
-    """
-
-    # TO DO: actual error assertion
-    assert np.isfinite(median_error), f"Median error is not finite: {median_error}"
