@@ -360,7 +360,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     ax2.set_yticks(range(n))
     ax2.set_xticklabels(spaces, rotation=45, ha="right")
     ax2.set_yticklabels(spaces)
-    ax2.set_title("Surface Transform Error Matrix (NHP-Scaled View; fsLR excluded)")
+    ax2.set_title("Surface Transform Error Matrix (NHP-Scaled View; fsLR clipped)")
     plt.colorbar(im2, ax=ax2)
 
     nhp_path = output_dir / "surface_transform_matrix_nhp_scaled.png"
