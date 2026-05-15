@@ -126,8 +126,8 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         out_surface = tmp_path / f"{src}_to_{dst}.surf.gii"
 
         area_surfs = {
-            "current-area": str(src_surface),
-            "new-area": str(dst_surface),
+            "current-area": src_surface,
+            "new-area": dst_surface,
         }
 
         # resample because the surfaces are not in the same space
