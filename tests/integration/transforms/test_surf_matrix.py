@@ -260,8 +260,6 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     nhp_spaces = [s for s in spaces if s != "fsLR"]
 
     global_median = np.nanmedian(off_diag_vals)
-    global_min = np.nanmin(off_diag_vals)
-    global_max = np.nanmax(off_diag_vals)
 
     pairs = [
         (spaces[i], spaces[j], matrix.iloc[i, j])
