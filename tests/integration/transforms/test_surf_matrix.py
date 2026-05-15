@@ -358,7 +358,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     all_errors = np.concatenate(all_errors)
     plt.figure()
     plt.hist(all_errors, bins=200)
-    plt.title("Global vertex-wise surface transform error distribution")
+    plt.title("Vertex-wise Surface Transform Error Distribution")
     plt.xlabel("Signed distance error (abs)")
     plt.ylabel("Vertex count")
 
