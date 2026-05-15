@@ -77,10 +77,6 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     logger.info("=== BUILDING SURFACE TRANSFORM MATRIX ===")
 
     for src, dst in product(spaces, spaces):
-        if src == dst:
-            results[(src, dst)] = 0.0
-            continue
-
         logger.info("=== %s → %s ===", src, dst)
 
         src_density = graph.find_highest_density(space=src)
