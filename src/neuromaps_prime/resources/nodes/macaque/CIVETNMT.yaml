@@ -4,11 +4,11 @@ CIVETNMT:
   surfaces:
     41k:
       sphere:
-        left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
-        right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+        left: https://files.osf.io/v1/resources/32xpf/providers/osfstorage/spaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+        right: https://files.osf.io/v1/resources/32xpf/providers/osfstorage/spaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
       midthickness:
-        left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
-        right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
+        left: https://files.osf.io/v1/resources/32xpf/providers/osfstorage/spaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
+        right: https://files.osf.io/v1/resources/32xpf/providers/osfstorage/spaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
       white:
-        left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_white.surf.gii
-        right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_white.surf.gii
+        left: https://files.osf.io/v1/resources/32xpf/providers/osfstorage/spaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_white.surf.gii
+        right: https://files.osf.io/v1/resources/32xpf/providers/osfstorage/spaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_white.surf.gii
