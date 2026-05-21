@@ -20,12 +20,6 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 
-def pytest_configure() -> None:
-    """Suppress verbose matplotlib logging during test runs."""
-    logging.getLogger("matplotlib").setLevel(logging.WARNING)
-    logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
-
-
 def pytest_collection_modifyitems(items: Sequence[pytest.Item]) -> None:
     """Apply appropriate markers based on test location."""
     markers = {"unit", "integration", "regression"}
