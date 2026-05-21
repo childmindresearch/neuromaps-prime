@@ -20,7 +20,8 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 
-def pytest_configure():
+def pytest_configure() -> None:
+    """Suppress verbose matplotlib logging during test runs."""
     logging.getLogger("matplotlib").setLevel(logging.WARNING)
     logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
 
