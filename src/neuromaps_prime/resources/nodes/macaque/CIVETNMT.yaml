@@ -12,3 +12,15 @@ CIVETNMT:
       white:
         left: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_white.surf.gii
         right: share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_white.surf.gii
+      annotation:
+        AT:
+          left:
+          right:
+          references:
+          notes:
+        PC:
+          left:
+          right:
+          references:
+          notes:
+

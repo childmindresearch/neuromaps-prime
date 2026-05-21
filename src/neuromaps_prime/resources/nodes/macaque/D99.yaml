@@ -15,6 +15,17 @@ D99:
       white:
         left: share/Inputs/D99/src-D99_den-41k_hemi-L_white.surf.gii
         right: share/Inputs/D99/src-D99_den-41k_hemi-R_white.surf.gii
+      annotation:
+        AT:
+          left:
+          right:
+          references:
+          notes:
+        TPL:
+          left:
+          right:
+          references:
+          notes:
   volumes:
     250um:
       T1w: share/Inputs/D99/src-D99_res-0p25mm_T1w.nii

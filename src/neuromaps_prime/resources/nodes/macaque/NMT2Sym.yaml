@@ -15,6 +15,22 @@ NMT2Sym:
       inflated:
         left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
         right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+      annotation:
+        AT:
+          left:
+          right:
+          references:
+          notes:
+        BM:
+          left:
+          right:
+          references:
+          notes:
+        SD:
+          left:
+          right: src-NMT2Sym_hemi-R_desc-SD_annot.sulc
+          references:
+          notes:
   volumes:
     250um:
       T1w: share/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm_T1w.nii
