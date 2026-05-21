@@ -15,6 +15,22 @@ NMT2Sym:
       inflated:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfab76e18c73904626?view_only=b214f40525fe44b5bea3103478d08d0d
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523df4d366de13d714041?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        AT:
+          left:
+          right:
+          references:
+          notes:
+        BM:
+          left:
+          right:
+          references:
+          notes:
+        SD:
+          left:
+          right: src-NMT2Sym_hemi-R_desc-SD_annot.sulc
+          references:
+          notes:
   volumes:
     250um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523de8a846359933ec5a5?view_only=b214f40525fe44b5bea3103478d08d0d

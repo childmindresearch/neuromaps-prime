@@ -15,6 +15,17 @@ D99:
       white:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303cc9143f354902958?view_only=b214f40525fe44b5bea3103478d08d0d
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523022882bdb2bc3ebdee?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        AT:
+          left:
+          right:
+          references:
+          notes:
+        TPL:
+          left:
+          right:
+          references:
+          notes:
   volumes:
     250um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52302a52f9bb3897129cf?view_only=b214f40525fe44b5bea3103478d08d0d

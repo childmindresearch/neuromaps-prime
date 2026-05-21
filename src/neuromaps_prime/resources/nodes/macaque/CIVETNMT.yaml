@@ -12,3 +12,15 @@ CIVETNMT:
       white:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522eda52f9bb3897129b8?view_only=b214f40525fe44b5bea3103478d08d0d
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522ec4f3931c54c90480e?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        AT:
+          left:
+          right:
+          references:
+          notes:
+        PC:
+          left:
+          right:
+          references:
+          notes:
+
