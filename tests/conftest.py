@@ -19,6 +19,9 @@ from neuromaps_prime.resources import NEUROMAPSPRIME_GRAPH
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+def pytest_configure():
+    logging.getLogger("matplotlib").setLevel(logging.WARNING)
+    logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
 
 def pytest_collection_modifyitems(items: Sequence[pytest.Item]) -> None:
     """Apply appropriate markers based on test location."""
