@@ -4,18 +4,19 @@ title: 'Resource Request: '
 labels: [resource]
 
 body:
-- type: input
-  id: resource-name
+- type: textarea
+  id: resource-description
   attributes:
-    label: Resource Name
-    description: Name of the resource.
+    label: Resource Description
+    description: Please provide a clear and concise description of the resource.
+    placeholder: Describe the resource here.
   validations:
     required: true
-
 - type: dropdown
   id: resource-type
   attributes:
     label: Resource Type
+    description: Select the type of resource.
     options:
       - Annotation
       - Atlas
@@ -23,35 +24,33 @@ body:
       - Other
   validations:
     required: true
-
-- type: textarea
-  id: description
-  attributes:
-    label: Description
-    description: Describe the resource and why it should be included.
-  validations:
-    required: true
-
 - type: input
-  id: uri
+  id: resource-source
   attributes:
-    label: Public URI / Source
-    description: Provide a URI if available.
+    label: Resource URI / Source
+    description: Please provide a direct URI or source link if available.
+    placeholder: https://...
   validations:
     required: false
-
 - type: textarea
   id: references
   attributes:
     label: References
-    description: Include publications or DOIs if available.
+    description: Please provide any relevant references, publications, or DOIs.
+    placeholder: Add references here.
   validations:
     required: false
-
 - type: textarea
-  id: notes
+  id: access-details
   attributes:
-    label: Access / Additional Notes
-    description: Include DUA requirements, upload coordination, caveats, or other context.
+    label: Access Details
+    description: Please describe any access restrictions, DUA requirements, or upload coordination needs.
+    placeholder: Describe access or sharing details here.
   validations:
     required: false
+- type: textarea
+  id: additional-notes
+  attributes:
+    label: Additional Notes
+    description: Add any notes, caveats, version information, or other context here.
+    placeholder: Add additional notes here.
