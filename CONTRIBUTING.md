@@ -18,15 +18,24 @@ We welcome contributions of new resources (annotations, atlases, transforms, etc
 1. **Resource already has a public URI**
 
    If your resource is already hosted publicly, you can contribute it directly:
-   - Update the relevant YAML file(s) with the appropriate path/URI, references, and notes following the structure specified in the corresponding schema files under `/schemas` for that resource type.
-   - Open a pull request following the guidelines above
+   - Update the relevant YAML file(s) under the appropriate resource category
+   - Follow the structure specified in the corresponding schema files under `/schemas` for that resource type
+   - Ensure all required fields are included (e.g. URI, references, version, and notes where applicable)
+   - Open a PR following the guidelines above
 
 2. **Resource needs to be uploaded**
 
    If your resource is not yet hosted anywhere:
-   - Open an issue describing the resource you would like to add
-   - Include any relevant details such as references, notes, caveats, or licensing information
-   - We will reach out to discuss next steps for uploading to our storage
+   - Open a resource request issue using the provided template
+   - Include any relevant details, including:
+      - Resource description
+      - Type (annotation, atlas, transform, or other)
+      - Source link or reference (if available)
+      - Publications or DOIs
+      - Access restrictions or licensing informatino
+      - Any additional notes/caveats
+   - Maintainers will review the request and reach out to coordinate uploading
+   - After upload, open a PR to add the resource to the appropriate YAML file(s)
 
 > [!NOTE]
 > When contributing a resource, please include where possible:
