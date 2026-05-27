@@ -32,7 +32,7 @@ We welcome contributions of new resources (annotations, atlases, transforms, etc
       - Type (annotation, atlas, transform, or other)
       - Source link or reference (if available)
       - Publications or DOIs
-      - Access restrictions or licensing informatino
+      - Access restrictions or licensing information
       - Any additional notes/caveats
    - Maintainers will review the request and reach out to coordinate uploading
    - After upload, open a PR to add the resource to the appropriate YAML file(s)
