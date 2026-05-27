@@ -1,0 +1,20 @@
+- from: NCBR
+  to: fsaverage
+  surfaces:
+    human_chimpanzee:
+      164k:
+        sphere:
+          left: share/Outputs/NCBR-fsaverage/src-fsaverage_to-NCBR_den-164k_hemi-L_sphere.surf.gii
+          right: share/Outputs/NCBR-fsaverage/src-fsaverage_to-NCBR_den-164k_hemi-R_sphere.surf.gii
+        white:
+          left: share/Outputs/NCBR-fsaverage/src-fsaverage_to-NCBR_den-164k_hemi-L_white.surf.gii
+          right: share/Outputs/NCBR-fsaverage/src-fsaverage_to-NCBR_den-164k_hemi-R_white.surf.gii
+
+- from: fsaverage
+  to: NCBR
+  surfaces:
+    human_chimpanzee:
+      164k:
+        sphere:
+          left: share/Outputs/fsaverage-NCBR/src-NCBR_to-fsaverage_den-164k_hemi-L_sphere.surf.gii
+          right: share/Outputs/fsaverage-NCBR/src-NCBR_to-fsaverage_den-164k_hemi-R_sphere.surf.gii
