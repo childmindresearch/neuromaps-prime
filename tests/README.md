@@ -24,10 +24,11 @@ pytest --runner docker
 
 Directory-based markers are auto-applied by `conftest.py` based on the test file location.
 
-| Marker | Directory | Typical duration |
-|--------|-----------|-----------------|
-| `unit` | `tests/unit/` | < 1 s per test |
-| `integration` | `tests/integration/` | 1–5 min |
+| Marker | Directory | Description |
+|--------|-----------|-------------|
+| `unit` | `tests/unit/` | Pure logic tests, no external tools or data needed |
+| `integration` | `tests/integration/` | Integration tests - functionality with real data |
+| `regression` | `tests/regression/` | Regression tests - performance/correctness with real data |
 
 ## Directory structure
 
