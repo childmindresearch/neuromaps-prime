@@ -1,0 +1,85 @@
+# Surfaces sourced from neuromaps OSF
+# (https://osf.io/4mw3a)
+# Annotations are direct URL
+fsaverage:
+  species: human
+  description: fsaverage Human Template
+  surfaces:
+    10k:
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d101ad20570d7eeb1b/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d17ef401e8b5cc752d/?view_only=b214f40525fe44b5bea3103478d08d0d
+      white:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d100e86708937eea7a/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d17ef401e8b5cc752e/?view_only=b214f40525fe44b5bea3103478d08d0d
+      pial:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d1bfa98ff448cc75b5/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d1bfa98ff448cc75b6/?view_only=b214f40525fe44b5bea3103478d08d0d
+      inflated:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d1ae88a491b17ee845/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d19b96bc757282a455/?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        RM_genepc1:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c2290118f70b01fca797eb
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c228f5f3ce9401fa24e521
+          references:
+          - https://doi.org/10.1038/nature11405
+          - https://doi.org/10.7554/eLife.72129
+          notes:
+          - Abagen Gene PC1
+    164k:
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3784a4fb9e964cc78b5/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f378ae88a491b17ee7fc/?view_only=b214f40525fe44b5bea3103478d08d0d
+      white:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3797ef401e8b5cc74ed/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f345bfa98ff448cc7564/?view_only=b214f40525fe44b5bea3103478d08d0d
+      pial:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f37801ad20570d7eeacd/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3797a6372a22ecc762c/?view_only=b214f40525fe44b5bea3103478d08d0d
+      inflated:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3799b96bc757282a3f5/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f37800e86708937eea31/?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        RM_az10419369:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543b0723a11190518c8a6
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543a2c86e2818da88f993
+          references:
+          - https://doi.org/10.1523/JNEUROSCI.2830-16.2016
+          notes:
+          - Beliveau 2017 AZ10419369
+        RM_cimbi36:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543bf228a5a18987bc2c1
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543cdc86e2818da88f9e7
+          references:
+          - https://doi.org/10.1523/JNEUROSCI.2830-16.2016
+          notes:
+          - Beliveau 2017 cimbi36
+        RM_cumi101:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543ea1daa6b183975935a
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543dbc86e2818d988f7ea
+          references:
+          - https://doi.org/10.1523/JNEUROSCI.2830-16.2016
+          notes:
+          - Beliveau 2017 cumi101
+        RM_dasb:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/63854394228a5a18987bc26e
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/63854385c86e2818da88f94b
+          references:
+          - https://doi.org/10.1523/JNEUROSCI.2830-16.2016
+          notes:
+          - Beliveau 2017 dasb
+        RM_sb207145:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638542c2c86e2818d588f461
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638542b2a98e5f1ac2103866
+          references:
+          - https://doi.org/10.1523/JNEUROSCI.2830-16.2016
+          notes:
+          - Beliveau 2017 sb207145
+        RM_norgaard_flumazenil:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638553fe228a5a18d67bcac8
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6385540d228a5a18d67bcadd
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2021.117878
+          notes:
+          - Norgaard 2021 flumazenil
