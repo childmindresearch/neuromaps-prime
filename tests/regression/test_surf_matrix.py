@@ -356,11 +356,11 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     full_path = output_dir / "surface_transform_matrix_full.png"
     plt.tight_layout()
     fig3_caption = (
-    "Figure 3. Heatmap of pairwise surface-to-surface transform error "
-    "between atlas spaces. Each matrix entry represents the median "
-    "vertex-wise absolute signed-distance error after resampling one "
-    "midthickness surface onto another using sphere-based barycentric "
-    "registration."
+        "Figure 3. Heatmap of pairwise surface-to-surface transform error "
+        "between atlas spaces. Each matrix entry represents the median "
+        "vertex-wise absolute signed-distance error after resampling one "
+        "midthickness surface onto another using sphere-based barycentric "
+        "registration."
     )
     plt.subplots_adjust(left=0.10, bottom=0.30)
     plt.figtext(
@@ -408,13 +408,13 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     )
     nhp_path = output_dir / "surface_transform_matrix_nhp_scaled.png"
     fig3_caption = (
-    "Figure 3. Heatmap of pairwise surface-to-surface transform error "
-    "between atlas spaces. Each matrix entry represents the median "
-    "vertex-wise absolute signed-distance error after resampling one "
-    "midthickness surface onto another using sphere-based barycentric "
-    "registration. Color scaling is clipped to the 95th percentile of "
-    "non-human primate (NHP) values to improve visualization of "
-    "interspecies differences."
+        "Figure 3. Heatmap of pairwise surface-to-surface transform error "
+        "between atlas spaces. Each matrix entry represents the median "
+        "vertex-wise absolute signed-distance error after resampling one "
+        "midthickness surface onto another using sphere-based barycentric "
+        "registration. Color scaling is clipped to the 95th percentile of "
+        "non-human primate (NHP) values to improve visualization of "
+        "interspecies differences."
     )
     plt.subplots_adjust(left=0.10, bottom=0.30)
     plt.figtext(
