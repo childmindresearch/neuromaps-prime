@@ -93,10 +93,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     """
     logging.basicConfig(level=logging.INFO)
 
-    graph = NeuromapsGraph(
-        runner="local",
-        data_dir=Path("/Users/tamsin.rogers/Desktop/github/neuromaps-prime"),
-    )
+    graph = NeuromapsGraph()
 
     hemisphere = "right"
     spaces = get_valid_spaces(graph, hemisphere)
