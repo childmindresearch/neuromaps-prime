@@ -93,7 +93,10 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     """
     logging.basicConfig(level=logging.INFO)
 
-    graph = NeuromapsGraph()
+    graph = NeuromapsGraph(
+        runner="local",
+        data_dir=Path("/Users/tamsin.rogers/Desktop/github/neuromaps-prime"),
+    )
 
     hemisphere = "right"
     spaces = get_valid_spaces(graph, hemisphere)
@@ -187,9 +190,18 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         median_err, mean_err, std_err = surface_error_stats(error_file)
         results[(src, dst)] = median_err
         logger.info(
-            "Error %s → %s | median=%.5f mean=%.5f std=%.5f",
+            "Error %s → %s\n"
+            "  src_surface: %s\n"
+            "  dst_surface: %s\n"
+            "  src_sphere:  %s\n"
+            "  dst_sphere:  %s\n"
+            "  median=%.5f mean=%.5f std=%.5f",
             src,
             dst,
+            src_surface,
+            dst_surface,
+            src_sphere,
+            dst_sphere,
             median_err,
             mean_err,
             std_err,
@@ -328,13 +340,41 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     annotate_heatmap(ax1, mat)
     ax1.set_xticks(range(n))
     ax1.set_yticks(range(n))
+    ax1.set_xlabel("Target template space", labelpad=12)
+    ax1.set_ylabel("Source template space", labelpad=12)
     ax1.set_xticklabels(spaces, rotation=45, ha="right")
     ax1.set_yticklabels(spaces)
-    ax1.set_title("Surface Transform Error Matrix (Full Scale, Including fsLR)")
-    plt.colorbar(im1, ax=ax1)
-
+    ax1.set_title(
+        "Surface Transform Error Matrix (Full Scale, Including fsLR)",
+        fontweight="bold",
+        color="#0044AA",
+        pad=10,
+    )
+    cbar = plt.colorbar(im1, ax=ax1)
+    cbar.set_label(
+        "Median absolute signed-distance error",
+        rotation=90,
+        labelpad=12,
+    )
     full_path = output_dir / "surface_transform_matrix_full.png"
     plt.tight_layout()
+    fig3_caption = (
+    "Figure 3. Heatmap of pairwise surface-to-surface transform error "
+    "between atlas spaces. Each matrix entry represents the median "
+    "vertex-wise absolute signed-distance error after resampling one "
+    "midthickness surface onto another using sphere-based barycentric "
+    "registration."
+    )
+    plt.subplots_adjust(left=0.10, bottom=0.30)
+    plt.figtext(
+        0.5,
+        0.02,
+        fig3_caption,
+        ha="center",
+        fontsize=9,
+        fontstyle="italic",
+        wrap=True,
+    )
     plt.savefig(full_path, dpi=200)
     logger.info("Saved full-scale heatmap → %s", full_path)
 
@@ -342,7 +382,6 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     nhp_vals = matrix.loc[nhp_spaces, nhp_spaces].to_numpy()
     vmin = 0.0
     vmax = np.nanpercentile(nhp_vals, 95)
-
     _fig2, ax2 = plt.subplots(figsize=(8, 6))
     im2 = ax2.imshow(
         mat,
@@ -352,31 +391,76 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         vmax=vmax,
     )
     annotate_heatmap(ax2, mat)
-
     ax2.set_xticks(range(n))
     ax2.set_yticks(range(n))
+    ax2.set_xlabel("Target template space", labelpad=12)
+    ax2.set_ylabel("Source template space", labelpad=12)
     ax2.set_xticklabels(spaces, rotation=45, ha="right")
     ax2.set_yticklabels(spaces)
-    ax2.set_title("Surface Transform Error Matrix (NHP-Scaled View; fsLR clipped)")
-    plt.colorbar(im2, ax=ax2)
-
+    ax2.set_title(
+        "Surface Transform Error Matrix (NHP-Scaled View; fsLR clipped)",
+        fontweight="bold",
+        color="#0044AA",
+        pad=10,
+    )
+    cbar = plt.colorbar(im2, ax=ax2)
+    cbar.set_label(
+        "Median absolute signed-distance error",
+        rotation=90,
+        labelpad=12,
+    )
     nhp_path = output_dir / "surface_transform_matrix_nhp_scaled.png"
-    plt.tight_layout()
+    fig3_caption = (
+    "Figure 3. Heatmap of pairwise surface-to-surface transform error "
+    "between atlas spaces. Each matrix entry represents the median "
+    "vertex-wise absolute signed-distance error after resampling one "
+    "midthickness surface onto another using sphere-based barycentric "
+    "registration. Color scaling is clipped to the 95th percentile of "
+    "non-human primate (NHP) values to improve visualization of "
+    "interspecies differences."
+    )
+    plt.subplots_adjust(left=0.10, bottom=0.30)
+    plt.figtext(
+        0.5,
+        0.02,
+        fig3_caption,
+        ha="center",
+        fontsize=9,
+        fontstyle="italic",
+        wrap=True,
+    )
     plt.savefig(nhp_path, dpi=200)
-
     logger.info("Saved NHP-scaled heatmap → %s", nhp_path)
 
     # HISTOGRAM
     all_errors = np.concatenate(all_errors)
     plt.figure()
+    max_val = np.nanmax(all_errors)
     plt.hist(all_errors, bins=200)
-    plt.title("Vertex-wise Surface Transform Error Distribution")
-    plt.xlabel("Signed distance error (abs)")
-    plt.ylabel("Vertex count")
-
+    plt.xlim(0, max_val)
+    plt.title(
+        "Vertex-wise Surface Transform Error Distribution",
+        fontweight="bold",
+        color="#0044AA",
+        pad=10,
+    )
+    plt.xlabel("Absolute igned distance error", labelpad=12)
+    plt.ylabel("Vertex count", labelpad=12)
+    fig4_caption = (
+        "Figure 4. Distribution of vertex-wise absolute signed-distance errors"
+        " across all pairwise surface transformations."
+    )
     hist_path = output_dir / "surface_transform_histogram.png"
-    plt.tight_layout()
+    plt.subplots_adjust(left=0.15, bottom=0.30)
+    plt.figtext(
+        0.5,
+        0.02,
+        fig4_caption,
+        ha="center",
+        fontsize=9,
+        fontstyle="italic",
+        wrap=True,
+    )
     plt.savefig(hist_path, dpi=200)
     plt.close()
-
     logger.info("Saved global histogram → %s", hist_path)
