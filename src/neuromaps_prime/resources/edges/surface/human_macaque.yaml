@@ -4,18 +4,18 @@
     human_macaque:
       10k:
         midthickness:
-          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_midthickness.surf.gii
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b999b6fa812c2b8cc7c/?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b981e78bf36907df9d8/?view_only=b214f40525fe44b5bea3103478d08d0d
         sphere:
-          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-10k_hemi-R_sphere.surf.gii
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b99b422df79d9b8c810/?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b98e81de16f937df329/?view_only=b214f40525fe44b5bea3103478d08d0d
       32k:
         midthickness:
-          left: share/Outputs/fsLR-Yerkes19/src-Yerkes19_to-fsLR_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/fsLR-Yerkes19/src-Yerkes19_to-fsLR_den-32k_hemi-R_midthickness.surf.gii
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b99e81de16f937df32b/?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b991e78bf36907df9de/?view_only=b214f40525fe44b5bea3103478d08d0d
         sphere:
-          left: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/S1200-Yerkes19/src-Yerkes19_to-S1200_den-32k_hemi-R_sphere.surf.gii
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b989b6fa812c2b8cc7a/?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b99f44e0687016b9f1b/?view_only=b214f40525fe44b5bea3103478d08d0d
 
 - from: fsLR
   to: Yerkes19
@@ -23,15 +23,15 @@
     human_macaque:
       10k:
         midthickness:
-          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_midthickness.surf.gii
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d34f562d9ece2b8c75e/?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d3497f5a8d6e96b9bed/?view_only=b214f40525fe44b5bea3103478d08d0d
         sphere:
-          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-L_sphere.surf.gii
-          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-10k_hemi-R_sphere.surf.gii
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d359b6fa812c2b8cd05/?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d349b6fa812c2b8cd04/?view_only=b214f40525fe44b5bea3103478d08d0d
       32k:
         midthickness:
-          left: share/Outputs/Yerkes19-fsLR/src-fsLR_to-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
-          right: share/Outputs/Yerkes19-fsLR/src-fsLR_to-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a20477165f69cffb350349b/?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d35e81de16f937df3c8/?view_only=b214f40525fe44b5bea3103478d08d0d
         sphere:
-          left: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-L_sphere.surf.gii
-          right: share/Outputs/Yerkes19-S1200/src-S1200_to-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d531e78bf36907dfa59/?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d35e81de16f937df3c9/?view_only=b214f40525fe44b5bea3103478d08d0d
