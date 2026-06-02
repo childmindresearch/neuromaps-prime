@@ -8,15 +8,5 @@
 - [ ] Documentation
 - [ ] Other
 
-## Resource Contribution (if applicable)
-**Resource Type:** (Annotation / Atlas / Transform / Other)
-
-**Resource URI:**
-
-**References:**
-
-**YAML Changes:**
-<!-- Which YAML file(s) were updated and under which resource category? -->
-
 ## Related Issue(s)
 - #[issue number] by @[original issue author]
