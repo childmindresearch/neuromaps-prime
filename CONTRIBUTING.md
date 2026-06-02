@@ -20,7 +20,7 @@ We welcome contributions of new resources (annotations, atlases, transforms, etc
    If your resource is already hosted publicly, you can contribute it directly:
    - Update the relevant YAML file(s) under the appropriate resource category
    - Follow the structure specified in the corresponding schema files under `/schemas` for that resource type
-   - Ensure all required fields are included (e.g. URI, references, version, and notes where applicable)
+   - Ensure all required fields are included (e.g. URI, references, and notes where applicable)
    - Open a PR following the guidelines above
 
 2. **Resource needs to be uploaded**
@@ -34,7 +34,7 @@ We welcome contributions of new resources (annotations, atlases, transforms, etc
       - Publications or DOIs
       - Access restrictions or licensing information
       - Any additional notes/caveats
-   - Maintainers will review the request and reach out to coordinate uploading
+   - Maintainers will review the request and reach out with any questions or next steps
    - After upload, open a PR to add the resource to the appropriate YAML file(s)
 
 > [!NOTE]
