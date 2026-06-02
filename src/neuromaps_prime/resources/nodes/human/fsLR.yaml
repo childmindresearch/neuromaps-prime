@@ -5,37 +5,37 @@ fsLR:
     10k:
       # 10K surfaces all use https://github.com/TingsterX/alignment_macaque-human
       sphere:
-        left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_sphere.surf.gii
-        right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_sphere.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5240123e17e1124712d02/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523fec807054314902be0/?view_only=b214f40525fe44b5bea3103478d08d0d
       midthickness:
-        left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_midthickness.surf.gii
-        right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_midthickness.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d524032882bdb2bc3ebf0c/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523fe4d366de13d71404b/?view_only=b214f40525fe44b5bea3103478d08d0d
       white:
-        left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_white.surf.gii
-        right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_white.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52401aa1f78e19790364c/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523ffa52f9bb389712bee/?view_only=b214f40525fe44b5bea3103478d08d0d
       pial:
-        left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_pial.surf.gii
-        right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_pial.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52403c807054314902bf2/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d524036846076e8371381f/?view_only=b214f40525fe44b5bea3103478d08d0d
       inflated:
-        left: share/Inputs/S1200/src-S1200_den-10k_hemi-L_inflated.surf.gii
-        right: share/Inputs/S1200/src-S1200_den-10k_hemi-R_inflated.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52401ab76e18c73904630/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d524004d366de13d71404e/?view_only=b214f40525fe44b5bea3103478d08d0d
     32k:
     # 32k inflated and midthickness from neuromaps, otherwise same as 10k source
       sphere:
-        left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_sphere.surf.gii
-        right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_sphere.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523fe2882bdb2bc3ebf00/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523fd2882bdb2bc3ebefd/?view_only=b214f40525fe44b5bea3103478d08d0d
       midthickness:
-        left: share/Inputs/fsLR/src-fsLR_den-32k_hemi-L_midthickness.surf.gii
-        right: share/Inputs/fsLR/src-fsLR_den-32k_hemi-R_midthickness.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523542882bdb2bc3ebe33/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5235ae06110211c3ead48/?view_only=b214f40525fe44b5bea3103478d08d0d
       white:
-        left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_white.surf.gii
-        right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_white.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5240149b4c2d6503eccbe/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523ff49b4c2d6503eccb5/?view_only=b214f40525fe44b5bea3103478d08d0d
       pial:
-        left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_pial.surf.gii
-        right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_pial.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523fda52f9bb389712bec/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523fdab76e18c7390462c/?view_only=b214f40525fe44b5bea3103478d08d0d
       inflated:
-        left: share/Inputs/fsLR/src-fsLR_den-32k_hemi-L_inflated.surf.gii
-        right: share/Inputs/fsLR/src-fsLR_den-32k_hemi-R_inflated.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52353743de820043ead85/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52354743de820043ead87/?view_only=b214f40525fe44b5bea3103478d08d0d
       flat:
-        left: share/Inputs/S1200/src-S1200_den-32k_hemi-L_flat.surf.gii
-        right: share/Inputs/S1200/src-S1200_den-32k_hemi-R_flat.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5240049b4c2d6503eccb7/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d524006846076e8371381c/?view_only=b214f40525fe44b5bea3103478d08d0d
