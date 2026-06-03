@@ -1,0 +1,55 @@
+name: Resource Request
+description: Request or propose a resource for inclusion in neuromaps-prime.
+title: 'Resource Request: '
+labels: [resource]
+body:
+- type: textarea
+  id: resource-description
+  attributes:
+    label: Resource Description
+    description: Please provide a clear and concise description of the resource.
+    placeholder: Describe the resource here.
+  validations:
+    required: true
+- type: checkboxes
+  id: resource-type
+  attributes:
+    label: Resource Type
+    description: Select all types that apply.
+    options:
+      - label: Annotation
+      - label: Atlas
+      - label: Transform
+      - label: Other
+- type: textarea
+  id: resource-source
+  attributes:
+    label: Resource URI(s) / Source(s)
+    description: >-
+      Provide one or more URIs, repository links, or source locations.
+      For datasets with multiple files, list each on a new line.
+    placeholder: "https://...\nhttps://..."
+  validations:
+    required: false
+- type: textarea
+  id: references
+  attributes:
+    label: References
+    description: Please provide any relevant references, publications, or DOIs.
+    placeholder: Add references here.
+  validations:
+    required: false
+- type: textarea
+  id: access-details
+  attributes:
+    label: Access Details
+    description: Please describe any access restrictions, DUA requirements, or upload coordination needs.
+    placeholder: Describe access or sharing details here.
+  validations:
+    required: false
+- type: textarea
+  id: additional-notes
+  attributes:
+    label: Additional Notes
+    description: Add any notes or other context here.
+    placeholder: Add additional notes here.
