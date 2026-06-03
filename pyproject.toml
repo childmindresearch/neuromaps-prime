@@ -31,13 +31,13 @@ dependencies = [
 dev = [
   "deptry>=0.24.0",
   "matplotlib-stubs>=0.3.6",
-  "mypy>=1.19.0",
+  "mypy>=2.1.0",
   "pre-commit>=4.5.0",
   "pytest>=9.0.3",
   "pytest-cov>=7.0.0",
-  "ruff>=0.14.7",
-  "types-pyyaml>=6.0.12.20250915",
-  "types-requests>=2.33.0.20260503",
+  "ruff>=0.15.15",
+  "types-pyyaml>=6.0.12.20260518",
+  "types-requests>=2.33.0.20260518",
 ]
 docs = ["pdoc>=15.0.4"]
 tests = ["pandas>=3.0.3"]
