@@ -19,12 +19,12 @@ dependencies = [
   "pyyaml>=6.0.2",
   "networkx>=3.6.1",
   "matplotlib>=3.10.7",
-  "numpy>=2.4.2",
+  "numpy>=2.4.6",
   "pydantic>=2.12.3",
   "scipy>=1.17.0",
   "styxpodman",
-  "requests>=2.33.1",
-  "platformdirs>=4.9.6",
+  "requests>=2.34.2",
+  "platformdirs>=4.10.0",
 ]
 
 [dependency-groups]
