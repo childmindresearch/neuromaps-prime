@@ -15,6 +15,59 @@ NMT2Sym:
       inflated:
         left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
         right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+      annotation:
+        SD:
+          right: resources/NMT2Sym/annotations/sulcal_depth/src-NMT2Sym_hemi-R_desc-SD_annot.sulc
+          notes: 
+            - Sulcal depth map
   volumes:
     250um:
       T1w: share/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm_T1w.nii
+      annotation:
+        AT_CHARM_scale1: 
+          uri: resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-1_desc-AT_annot.nii.gz
+          references:
+            - https://doi.org/10.1016/j.neuroimage.2021.117997
+          notes:
+            - CHARM hierarchical atlas level 1. 
+            - Lookup table at resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-1_desc-AT_annot.txt
+        AT_CHARM_scale2:
+          uri: resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-2_desc-AT_annot.nii.gz
+          references:
+            - https://doi.org/10.1016/j.neuroimage.2021.117997
+          notes:
+            - CHARM hierarchical atlas level 2. 
+            - Lookup table at resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-2_desc-AT_annot.txt
+        AT_CHARM_scale3:
+          uri: resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-3_desc-AT_annot.nii.gz
+          references:
+            - https://doi.org/10.1016/j.neuroimage.2021.117997
+          notes:
+            - CHARM hierarchical atlas level 3. 
+            - Lookup table at resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-3_desc-AT_annot.txt
+        AT_CHARM_scale4:
+          uri: resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-4_desc-AT_annot.nii.gz
+          references:
+            - https://doi.org/10.1016/j.neuroimage.2021.117997
+          notes:
+            - CHARM hierarchical atlas level 4. 
+            - Lookup table at resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-4_desc-AT_annot.txt
+        AT_CHARM_scale5:
+          uri: resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-5_desc-AT_annot.nii.gz
+          references:
+            - https://doi.org/10.1016/j.neuroimage.2021.117997
+          notes:
+            - CHARM hierarchical atlas level 5. 
+            - Lookup table at resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-5_desc-AT_annot.txt
+        AT_CHARM_scale6:
+          uri: resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-6_desc-AT_annot.nii.gz
+          references:
+            - https://doi.org/10.1016/j.neuroimage.2021.117997
+          notes:
+            - CHARM hierarchical atlas level 6. 
+            - Lookup table at resources/NMT2Sym/annotations/atlas/src-NMT2Sym_space-sym_atlas-CHARM_scale-6_desc-AT_annot.txt
+        BM:
+          uri: resources/NMT2Sym/annotations/brain_masks/src-NMT2Sym_space-sym_label-corticalGM_desc-BM_annot.nii.gz
+          notes:
+            - Binary mask of cortical grey matter.
+

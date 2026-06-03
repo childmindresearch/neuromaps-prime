@@ -18,3 +18,12 @@ D99:
   volumes:
     250um:
       T1w: share/Inputs/D99/src-D99_res-0p25mm_T1w.nii
+    annotation:
+      AT:
+        uri:
+        references:
+        notes:
+      TPL:
+        uri: resources/D99/annotations/templates/src-D99_desc-TPL_annot.nii.gz
+        references:
+        notes: Ex vivo MTR (magnetization transfer ratio) reference volume. Scanned at 7T with 200μm isotropic resolution. Standard reference space for the D99 v2.0 atlas.
