@@ -18,15 +18,16 @@ We welcome contributions of new resources (annotations, atlases, transforms, etc
 1. **Resource already has a public URI**
 
    If your resource is already hosted publicly, you can contribute it directly:
-   - Update the relevant YAML file(s) under the appropriate resource category
-   - Follow the structure specified in the corresponding schema files under `/schemas` for that resource type
-   - Ensure all required fields are included (e.g. URI, references, and notes where applicable)
-   - Open a PR following the guidelines above
+   - Locate the appropriate YAML file under `src/neuromaps_prime/resources/` — resources are organized by type (e.g. `nodes/`, `edges/`) and species (e.g. `human/`, `macaque/`)
+   - Add your resource following the structure of the corresponding schema under [`/schemas`](https://github.com/childmindresearch/neuromaps-prime/tree/main/schemas)
+      - For example: node entries follow `neuromaps_nodes.schema.json`
+   - Ensure all required fields are included (e.g. `description`, `species`, and surface/volume URIs where applicable)
+   - Open a [PR](https://github.com/childmindresearch/neuromaps-prime/pulls) following the guidelines above
 
 2. **Resource needs to be uploaded**
 
    If your resource is not yet hosted anywhere:
-   - Open a resource request issue using the provided template
+   - Open a resource request issue using the [provided template](https://github.com/childmindresearch/neuromaps-prime/issues/new?template=resource_request.yaml)
    - Include any relevant details, including:
       - Resource description
       - Type (annotation, atlas, transform, or other)
@@ -35,7 +36,7 @@ We welcome contributions of new resources (annotations, atlases, transforms, etc
       - Access restrictions or licensing information
       - Any additional notes/caveats
    - Maintainers will review the request and reach out with any questions or next steps
-   - After upload, open a PR to add the resource to the appropriate YAML file(s)
+   - After upload, open a [PR](https://github.com/childmindresearch/neuromaps-prime/pulls) to add the resource to the appropriate YAML file(s)
 
 > [!NOTE]
 > When contributing a resource, please include where possible:
