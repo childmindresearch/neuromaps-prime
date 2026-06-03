@@ -4,17 +4,17 @@ NMT2Sym:
   surfaces:
     41k:
       sphere:
-        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sphere.rsl.gii
-        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sphere.rsl.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523df23e17e1124712cc2/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfcc9143f354902a8a/?view_only=b214f40525fe44b5bea3103478d08d0d
       midthickness:
-        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_midthickness.rsl.gii
-        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_midthickness.rsl.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dd4d366de13d71403f/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dd6846076e837137e8/?view_only=b214f40525fe44b5bea3103478d08d0d
       white:
-        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
-        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfa52f9bb389712be0/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfa52f9bb389712bdf/?view_only=b214f40525fe44b5bea3103478d08d0d
       inflated:
-        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
-        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfab76e18c73904626/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523df4d366de13d714041/?view_only=b214f40525fe44b5bea3103478d08d0d
   volumes:
     250um:
-      T1w: share/Inputs/NMT2Sym/src-NMT2Sym_res-0p25mm_T1w.nii
+      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523de8a846359933ec5a5/?view_only=b214f40525fe44b5bea3103478d08d0d

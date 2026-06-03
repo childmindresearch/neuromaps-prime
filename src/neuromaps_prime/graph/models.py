@@ -1,10 +1,15 @@
 """Models for resources in the neuromaps_prime graph."""
 
+import logging
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
+
+from neuromaps_prime.fetcher import download_and_validate
+
+_logger = logging.getLogger(__name__)
 
 
 class Resource(BaseModel):
@@ -13,33 +18,30 @@ class Resource(BaseModel):
     name: str
     description: str | None
     file_path: Path
+    uri: str | None = None
     references: Sequence[str | dict[str, str]] | None = None
     notes: Sequence[str] | None = None
 
-    @field_validator("file_path")
-    @classmethod
-    def validate_file_path(cls, v: Path) -> Path:
-        """Validate that the file exists at the given path.
-
-        Args:
-            v: The file path to validate.
-
-        Returns:
-            The validated file path.
-
-        Raises:
-            FileNotFoundError: If the file does not exist.
-        """
-        if not v.exists():
-            raise FileNotFoundError(f"File path does not exist: {v}")
-        return v
-
     def fetch(self) -> Path:
-        """Return the path to this resource's file.
+        """Return the path to this resource's file, downloading if necessary.
 
         Returns:
             Path to the resource file.
+
+        Raises:
+            FileNotFoundError: if file cannot be fetched
         """
+        if self.file_path.exists():
+            return self.file_path
+        if self.uri is None:
+            raise FileNotFoundError("File does not exist and cannot be fetched.")
+        if (local_file := Path(self.uri)).exists():
+            self.file_path = local_file
+        else:
+            _logger.info(f"Fetching {self.file_path.name} from remote server.")
+            download_and_validate(uri=self.uri, dest=self.file_path)
+            if not self.file_path.exists():
+                raise FileNotFoundError("File does not exist.")
         return self.file_path
 
     def __repr__(self) -> str:

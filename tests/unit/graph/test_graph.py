@@ -65,6 +65,7 @@ class TestNeuromapsGraph:
     def test_graph_build(self, graph: NeuromapsGraph) -> None:
         """Test graph initialization."""
         info = graph.utils.get_graph_info()
+        assert graph.data_dir.exists()
         assert info["num_nodes"] > 0
         assert info["num_edges"] >= 0
         assert info["num_surfaces"] > 0

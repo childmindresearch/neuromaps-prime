@@ -2,18 +2,13 @@
 
 from __future__ import annotations
 
-import logging
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import niwrap
 import pytest
 import yaml
-from styxpodman import PodmanRunner
 
 from neuromaps_prime.graph import NeuromapsGraph
-from neuromaps_prime.niwrap import resolve_runner
 from neuromaps_prime.resources import NEUROMAPSPRIME_GRAPH
 
 if TYPE_CHECKING:
@@ -28,51 +23,6 @@ def pytest_collection_modifyitems(items: Sequence[pytest.Item]) -> None:
         test_path = Path(item.fspath)
         for marker in markers & set(test_path.parts):
             item.add_marker(getattr(pytest.mark, marker))
-
-
-def pytest_addoption(parser: pytest.Parser) -> None:
-    """Add option(s) to pytest parser."""
-    parser.addoption(
-        "--runner",
-        action="store",
-        default="local",
-        help="Styx runner type to use: ['local', 'docker', 'singularity']",
-    )
-    parser.addoption(
-        "--data-dir",
-        action="store",
-        default=None,
-        help="Directory where test data is located.",
-    )
-
-
-@pytest.fixture(scope="session", autouse=True)
-def niwrap_runner(
-    request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory
-) -> niwrap.Runner:
-    """Globally set niwrap runner for the testing suite."""
-    # Set up niwrap runner
-    runner_type, runner_exec = resolve_runner(
-        request.config.getoption("--runner").lower()
-    )
-    match runner_type:
-        case "docker":
-            niwrap.use_docker(docker_executable=runner_exec)
-        case "podman":
-            niwrap.set_global_runner(
-                # UserID = 0 currently necessary for some containers used
-                runner=PodmanRunner(podman_executable=runner_exec, podman_user_id=0)
-            )
-        case "singularity":
-            niwrap.use_singularity(singularity_executable=runner_exec)
-        case _:
-            niwrap.use_local()
-    runner = niwrap.get_global_runner()
-    runner.data_dir = tmp_path_factory.mktemp(f"{os.urandom(8).hex()}")
-    # Set up logging for debugging
-    logger = logging.getLogger(runner.logger_name)
-    logger.setLevel(logging.DEBUG)
-    return runner
 
 
 def _mk(tmp_path: Path, name: str) -> str:
@@ -156,13 +106,9 @@ def _rewrite_edge_files(tmp_path: Path, edge: dict[str, Any]) -> None:
 
 
 @pytest.fixture
-def graph(tmp_path: Path, request: pytest.FixtureRequest) -> NeuromapsGraph:
+def graph(tmp_path: Path) -> NeuromapsGraph:
     """Create a graph fixture to use for tests."""
-    data_dir = request.config.getoption("--data-dir")
-    if data_dir is not None:
-        return NeuromapsGraph(runner="auto", data_dir=Path(data_dir).resolve())
-
-    graph = NeuromapsGraph(_testing=True)
+    graph = NeuromapsGraph(runner="auto", data_dir=tmp_path / ".cache", _testing=True)
 
     def _load_dict(paths: tuple[Path, ...]) -> list[dict[str, Any]]:
         return [yaml.safe_load(path.read_bytes()) for path in paths]

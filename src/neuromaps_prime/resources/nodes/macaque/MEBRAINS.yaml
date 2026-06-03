@@ -4,27 +4,21 @@ MEBRAINS:
   surfaces:
     101k:
       sphere:
-        left: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_sphere.surf.gii
-        right: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_sphere.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5237d6846076e8371377c/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5237faa1f78e1979035a0/?view_only=b214f40525fe44b5bea3103478d08d0d
       pial:
-        left: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_pial.surf.gii
-        right: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_pial.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5237f2882bdb2bc3ebe57/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5237fab76e18c73904530/?view_only=b214f40525fe44b5bea3103478d08d0d
       midthickness:
-        left: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-L_midthickness.surf.gii
-        right: share/Inputs/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_midthickness.surf.gii
-      white:
-        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.rsl.gii
-        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.rsl.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5237fe06110211c3ead50/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5237fcc9143f354902a02/?view_only=b214f40525fe44b5bea3103478d08d0d
       inflated:
-        left: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_inflated.rsl.gii
-        right: share/Inputs/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_inflated.rsl.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52388cc9143f354902a1b/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5237e8a846359933ec571/?view_only=b214f40525fe44b5bea3103478d08d0d
       annotation:
         BM:
-          left: resources/MEBRAINS/annotations/brain_masks/src-MEBRAINS_den-101k_hemi-L_desc-BM_annot.func.gii
-          right: resources/MEBRAINS/annotations/brain_masks/src-MEBRAINS_den-101k_hemi-R_desc-BM_annot.func.gii
-        SD:
-          left: resources/MEBRAINS/annotations/sulcal_depth/src-MEBRAINS_den-101k_hemi-L_desc-SD_annot.shape.gii
-          right: resources/MEBRAINS/annotations/sulcal_depth/src-MEBRAINS_den-101k_hemi-R_desc-SD_annot.shape.gii
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51ac406d0c8a912c30ff/?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51ab4572881301679a5b/?view_only=b214f40525fe44b5bea3103478d08d0d
   volumes:
     400um:
-      T1w: share/Inputs/MEBRAINS/src-MEBRAINS_res-0p40mm_T1w.nii
+      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523814d366de13d713ff6/?view_only=b214f40525fe44b5bea3103478d08d0d

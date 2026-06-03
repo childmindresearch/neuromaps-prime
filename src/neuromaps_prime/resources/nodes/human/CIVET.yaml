@@ -1,0 +1,55 @@
+# Surfaces sourced from neuromaps OSF
+# (https://osf.io/4mw3a)
+# Annotations are direct URL
+CIVET:
+  species: human
+  description: CIVET Human Template
+  surfaces:
+    41k:
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f366ae88a491b17ee7f2/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f36600e86708937eea00/?view_only=b214f40525fe44b5bea3103478d08d0d
+      midthickness:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f367ae88a491b17ee7f4/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3689b96bc757282a3e1/?view_only=b214f40525fe44b5bea3103478d08d0d
+      white:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3669b96bc757282a3dd/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f366bfa98ff448cc7572/?view_only=b214f40525fe44b5bea3103478d08d0d
+      inflated:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f0c9ae88a491b17ee5b6/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f366bfa98ff448cc7574/?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        RM_scalinghcp:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/613100104e5ee5021029a221
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/613100044e5ee5021929210c
+          references:
+          - https://doi.org/10.1126/science.aar2578
+          notes:
+          - Reardon 2018 scalinghcp
+        RM_scalingnih:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ffd5af610c0216dfe093
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ffe24e5ee5021829148a
+          references:
+          - https://doi.org/10.1126/science.aar2578
+          notes:
+          - Reardon 2018 RM_scalingnih
+        RM_scalingpnc:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ffedab8bca0225edc80c
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fff94e5ee502182914c1
+          references:
+          - https://doi.org/10.1126/science.aar2578
+          notes:
+          - Reardon 2018 RM_scalingpnc
+    164k:
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f348c2575abdbd829ac5/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3487ef401e8b5cc74d1/?view_only=b214f40525fe44b5bea3103478d08d0d
+      midthickness:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f348e9bdf105947ee536/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3689b96bc757282a3e1/?view_only=b214f40525fe44b5bea3103478d08d0d
+      white:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3489b96bc757282a3b8/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f345bfa98ff448cc7564/?view_only=b214f40525fe44b5bea3103478d08d0d
+      inflated:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f348ae88a491b17ee7d5/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f348bfa98ff448cc7569/?view_only=b214f40525fe44b5bea3103478d08d0d

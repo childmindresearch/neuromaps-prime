@@ -1,0 +1,24 @@
+NCBR:
+  species: chimpanzee
+  description: NCBR Chimpanzee Atlas
+  surfaces:
+    41k:
+      sphere:
+        left: share/Inputs/NCBR/src-NCBR_den-41k_hemi-L_sphere.surf.gii
+        right: share/Inputs/NCBR/src-NCBR_den-41k_hemi-R_sphere.surf.gii
+      white:
+        left: share/Inputs/NCBR/src-NCBR_den-41k_hemi-L_white.surf.gii
+        right: share/Inputs/NCBR/src-NCBR_den-41k_hemi-R_white.surf.gii
+    164k:
+      sphere:
+        left: share/Inputs/NCBR/src-NCBR_den-164k_hemi-L_sphere.surf.gii
+        right: share/Inputs/NCBR/src-NCBR_den-164k_hemi-R_sphere.surf.gii
+      midthickness:
+        left: share/Inputs/NCBR/src-NCBR_den-164k_hemi-L_midthickness.surf.gii
+        right: share/Inputs/NCBR/src-NCBR_den-164k_hemi-R_midthickness.surf.gii
+      white:
+        left: share/Inputs/NCBR/src-NCBR_den-164k_hemi-L_white.surf.gii
+        right: share/Inputs/NCBR/src-NCBR_den-164k_hemi-R_white.surf.gii
+  volumes:
+    400um:
+      T1w: share/Inputs/NCBR/src-NCBR_res-0p40mm_T1w.nii
