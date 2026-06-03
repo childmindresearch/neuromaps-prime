@@ -20,7 +20,7 @@ from neuromaps_prime.plotting import plot_graph
 
 
 # Configuration (EDIT this path before running)
-DATA_DIR = Path("/Users/janhavi.pillai/Desktop/projects/neuromaps-nhp-prep")
+DATA_DIR = Path("/path/to/nhp/data")
 
 graph = NeuromapsGraph(data_dir=DATA_DIR)
 
