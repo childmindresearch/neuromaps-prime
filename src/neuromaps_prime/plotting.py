@@ -331,7 +331,7 @@ def _plot_single_graph(
     ]
 
     ax.legend(handles=legend_elements, fontsize=font_size, loc=legend_loc)
-    plt.tight_layout()
+    plt.tight_layout(rect=legend_rect)
 
     _save_or_show(save_path)
 
