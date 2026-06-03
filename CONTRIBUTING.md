@@ -1,4 +1,4 @@
-# neuromaps-prime pull request guidelines
+# Neuromaps-PRIME contributing guidelines
 
 Pull requests are always welcome, and we appreciate any help you give. Note that a code of conduct applies to all spaces managed by the neuromaps-prime project, including issues and pull requests. Please see the [Code of Conduct](CODE_OF_CONDUCT.md) for details.
 
