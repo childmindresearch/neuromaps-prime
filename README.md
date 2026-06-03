@@ -2,7 +2,6 @@
 
 [![Build](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test.yaml?query=branch%3Amain)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/childmindresearch/neuromaps-prime/blob/main/LICENSE)
 [![pages](https://img.shields.io/badge/api-docs-blue)](https://childmindresearch.github.io/neuromaps-prime)
 
@@ -22,7 +21,15 @@ and specialized tools for NHP-specific analyses.
 
 ## Installation
 
-Get the newest development version via:
+To install the latest stable release version from PyPI, run:
+
+```sh
+pip install neuromaps-prime
+```
+
+Alternatively, if you want to use the newest development version, you can install it
+directly from the repository via:
+
 
 ```sh
 pip install git+https://github.com/childmindresearch/neuromaps-prime
