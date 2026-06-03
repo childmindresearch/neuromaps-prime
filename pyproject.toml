@@ -40,6 +40,7 @@ dev = [
   "types-requests>=2.33.0.20260503",
 ]
 docs = ["pdoc>=15.0.4"]
+tests = ["pandas>=3.0.3"]
 validate = ["check-jsonschema>=0.37.1"]
 
 [build-system]

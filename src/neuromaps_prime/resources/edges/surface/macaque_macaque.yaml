@@ -86,7 +86,7 @@
   to: Yerkes19
   surfaces:
     CIVET:
-      32k:
+      41k:
         midthickness:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bc8b422df79d9b8c824/?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bcaf44e0687016b9f2d/?view_only=b214f40525fe44b5bea3103478d08d0d
