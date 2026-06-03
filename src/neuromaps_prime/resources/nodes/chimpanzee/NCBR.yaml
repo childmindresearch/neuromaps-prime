@@ -4,21 +4,21 @@ NCBR:
   surfaces:
     41k:
       sphere:
-        left: share/Inputs/NCBR/src-NCBR_den-41k_hemi-L_sphere.surf.gii
-        right: share/Inputs/NCBR/src-NCBR_den-41k_hemi-R_sphere.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c17ef401e8b5cc761b/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c200e86708937eeabc/?view_only=b214f40525fe44b5bea3103478d08d0d
       white:
-        left: share/Inputs/NCBR/src-NCBR_den-41k_hemi-L_white.surf.gii
-        right: share/Inputs/NCBR/src-NCBR_den-41k_hemi-R_white.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c17a6372a22ecc76f2/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c2ae88a491b17ee8e4/?view_only=b214f40525fe44b5bea3103478d08d0d
     164k:
       sphere:
-        left: share/Inputs/NCBR/src-NCBR_den-164k_hemi-L_sphere.surf.gii
-        right: share/Inputs/NCBR/src-NCBR_den-164k_hemi-R_sphere.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c5ae88a491b17ee8e7/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c6686472f5c7cc6e52/?view_only=b214f40525fe44b5bea3103478d08d0d
       midthickness:
-        left: share/Inputs/NCBR/src-NCBR_den-164k_hemi-L_midthickness.surf.gii
-        right: share/Inputs/NCBR/src-NCBR_den-164k_hemi-R_midthickness.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c500e86708937eeabf/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c501ad20570d7eec20/?view_only=b214f40525fe44b5bea3103478d08d0d
       white:
-        left: share/Inputs/NCBR/src-NCBR_den-164k_hemi-L_white.surf.gii
-        right: share/Inputs/NCBR/src-NCBR_den-164k_hemi-R_white.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c5e9bdf105947ee71d/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c23e551fbafd8290e6/?view_only=b214f40525fe44b5bea3103478d08d0d
   volumes:
     400um:
-      T1w: share/Inputs/NCBR/src-NCBR_res-0p40mm_T1w.nii
+      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c67ef401e8b5cc761e/?view_only=b214f40525fe44b5bea3103478d08d0d
