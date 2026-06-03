@@ -4,17 +4,17 @@ D99:
   surfaces:
     41k:
       midthickness:
-        left: share/Inputs/D99/src-D99_den-41k_hemi-L_midthickness.surf.gii
-        right: share/Inputs/D99/src-D99_den-41k_hemi-R_midthickness.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5230323e17e1124712b0a/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303aa1f78e197903529/?view_only=b214f40525fe44b5bea3103478d08d0d
       pial:
-        left: share/Inputs/D99/src-D99_den-41k_hemi-L_pial.surf.gii
-        right: share/Inputs/D99/src-D99_den-41k_hemi-R_pial.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52300ab76e18c739044be/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52302c807054314902927/?view_only=b214f40525fe44b5bea3103478d08d0d
       sphere:
-        left: share/Inputs/D99/src-D99_den-41k_hemi-L_sphere.surf.gii
-        right: share/Inputs/D99/src-D99_den-41k_hemi-R_sphere.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303743de820043ead18/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303cd1f7a1773903ffc/?view_only=b214f40525fe44b5bea3103478d08d0d
       white:
-        left: share/Inputs/D99/src-D99_den-41k_hemi-L_white.surf.gii
-        right: share/Inputs/D99/src-D99_den-41k_hemi-R_white.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303cc9143f354902958/?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523022882bdb2bc3ebdee/?view_only=b214f40525fe44b5bea3103478d08d0d
   volumes:
     250um:
-      T1w: share/Inputs/D99/src-D99_res-0p25mm_T1w.nii
+      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52302a52f9bb3897129cf/?view_only=b214f40525fe44b5bea3103478d08d0d
