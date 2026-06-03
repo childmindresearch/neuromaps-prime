@@ -22,7 +22,9 @@ dependencies = [
   "numpy>=2.4.2",
   "pydantic>=2.12.3",
   "scipy>=1.17.0",
-  "styxpodman"
+  "styxpodman",
+  "requests>=2.33.1",
+  "platformdirs>=4.9.6"
 ]
 
 [dependency-groups]
@@ -34,7 +36,8 @@ dev = [
   "pytest>=9.0.3",
   "pytest-cov>=7.0.0",
   "ruff>=0.14.7",
-  "types-pyyaml>=6.0.12.20250915"
+  "types-pyyaml>=6.0.12.20250915",
+  "types-requests>=2.33.0.20260503"
 ]
 docs = ["pdoc>=15.0.4"]
 validate = ["check-jsonschema>=0.37.1"]

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -10,7 +12,6 @@ from neuromaps_prime.graph import models
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from pathlib import Path
 
 
 @pytest.fixture
@@ -107,15 +108,31 @@ class TestResources:
         obj = model_cls(
             name="test",
             description="testing description",
-            file_path=tmp_file,
+            uri=str(tmp_file),
+            file_path=Path("abc"),
             **extra_kwargs,
+        )
+        assert obj.file_path.name == "abc"
+        assert obj.fetch() == tmp_file
+        assert obj.file_path == tmp_file
+
+    def test_fetch_existing_file_path(self, tmp_file: Path) -> None:
+        """Test resource instantiation and fetching."""
+        obj = models.SurfaceAtlas(
+            name="test",
+            description="testing description",
+            space="Yerkes19",
+            density="32k",
+            hemisphere="left",
+            resource_type="surf_atlas",
+            file_path=tmp_file,
         )
         assert obj.file_path == tmp_file
         assert obj.fetch() == tmp_file
 
-    def test_missing_file(self) -> None:
+    def test_missing_file_no_uri(self) -> None:
         """Test missing file raises error."""
-        with pytest.raises(FileNotFoundError, match="File path does not exist"):
+        with pytest.raises(FileNotFoundError, match="cannot be fetched"):
             models.SurfaceAtlas(
                 name="invalid",
                 description="missing",
@@ -124,7 +141,26 @@ class TestResources:
                 density="32k",
                 hemisphere="left",
                 resource_type="SurfaceAtlas",
-            )
+            ).fetch()
+
+    @patch("neuromaps_prime.graph.models.download_and_validate")
+    def test_fetch_raises_if_download_fails(
+        self, mock_download: MagicMock, tmp_path: Path
+    ) -> None:
+        """Test fetch raises if download doesn't produce file."""
+        dest = tmp_path / "file.txt"
+        obj = models.SurfaceAnnotation(
+            name="test",
+            file_path=dest,
+            uri="https://files.osf.io/v1/resources/abcde",
+            space="Yerkes19",
+            density="32k",
+            hemisphere="left",
+            label="myelin",
+        )
+        mock_download.return_value = None
+        with pytest.raises(FileNotFoundError, match="does not exist"):
+            obj.fetch()
 
     def test_description_optional(self, tmp_file: Path) -> None:
         """Test that description defaults to None for annotation models."""

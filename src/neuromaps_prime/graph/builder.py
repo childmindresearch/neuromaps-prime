@@ -10,11 +10,11 @@ Intentionally stateless beyond the dependencies injected at construction:
 
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path  # noqa: TC003 (pydantic req'd)
 from typing import TYPE_CHECKING, Any, cast
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.graph.models import (
@@ -48,7 +48,7 @@ class GraphBuilder(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
     cache: GraphCache
-    data_dir: Path | None = Field(default=None)
+    data_dir: Path
 
     # ------------------------------------------------------------------ #
     # Public entry points                                                  #
@@ -201,12 +201,8 @@ class GraphBuilder(BaseModel):
     # Generic resource parsers                                             #
     # ------------------------------------------------------------------ #
 
-    def _resolve_path(self, path: str) -> Path:
-        """Prepend data_dir to path when set, otherwise return as-is."""
-        return (self.data_dir / path) if self.data_dir else Path(path)
-
     def _parse_surface_annotations(
-        self, prefix: str, space: str, density: str, hemispheres: dict[str, Any]
+        self, prefix: str, space: str, density: str, annots: dict[str, Any]
     ) -> list[SurfaceAnnotation]:
         """Parse annotation entries from a surface type block.
 
@@ -214,28 +210,31 @@ class GraphBuilder(BaseModel):
             prefix: Name prefix derived from space or source/target space pair.
             space: Space identifier applied to every annotation.
             density: Density key (e.g. ``"32k"``) shared by all entries in this block.
-            hemispheres: Dict keyed by label → {hemi: path, ...} with optional
+            annots: Dict keyed by label → {annot: left, ...} with optional
                 ``"references"`` and ``"notes"`` keys.
 
         Returns:
             List of :class:`SurfaceAnnotation` instances parsed from the block.
         """
         annotations = []
-        for label, value in hemispheres.items():
+        for annot, value in annots.items():
             # Grab references and notes once
             references = value.get("references")
             notes = value.get("notes")
             for hemi, path in value.items():
                 if hemi in ("notes", "references"):
                     continue
+                name = f"{prefix}_{density}_{hemi}_{annot}"
+                ext = "func.gii" if "PC" in annot else "label.gii"
                 annotations.append(
                     SurfaceAnnotation(
-                        name=f"{prefix}_{density}_{hemi}_{label}",
+                        name=name,
                         space=space,
-                        label=label,
+                        label=annot,
                         density=density,
                         hemisphere=hemi,
-                        file_path=self._resolve_path(path),
+                        uri=path,
+                        file_path=self.data_dir / f"{name}.{ext}",
                         references=references,
                         notes=notes,
                     )
@@ -262,8 +261,8 @@ class GraphBuilder(BaseModel):
             density: Density key (e.g. ``"32k"``) shared by all entries in this block.
             surf_type: Resource type string (e.g. ``"midthickness"``).
             hemispheres: Dict mapping hemisphere key to file path.
-            fixed_fields: Fields forwarded verbatim to every instance (e.g. space,
-                description).
+            fixed_fields: Dict of fields forwarded verbatim to every instance (e.g.
+                space, description).
             provider: Provider string injected for :class:`SurfaceTransform` entries;
                 empty string for atlases.
             transform_refs: References list attached to the enclosing transform block,
@@ -275,8 +274,9 @@ class GraphBuilder(BaseModel):
         extra = {"provider": provider} if cls is SurfaceTransform else {}
         return [
             cls(
-                name=f"{prefix}_{density}_{hemi}_{surf_type}",
-                file_path=self._resolve_path(path),
+                name=(name := f"{prefix}_{density}_{hemi}_{surf_type}"),
+                uri=path,
+                file_path=self.data_dir / f"{name}.surf.gii",
                 density=density,
                 hemisphere=hemi,  # type: ignore[arg-type]
                 resource_type=surf_type,
@@ -398,13 +398,15 @@ class GraphBuilder(BaseModel):
                 for vol_type, vol_value in types.items():
                     if vol_type == "annotation":
                         for annot_key, annot_dict in vol_value.items():
+                            name = f"{prefix}_{res}_{annot_key}.nii.gz"
                             annotations.append(
                                 VolumeAnnotation(
-                                    name=f"{prefix}_{res}_{annot_key}",
+                                    name=name,
                                     space=space,
                                     label=annot_key,
                                     resolution=res,
-                                    file_path=self._resolve_path(annot_dict.get("uri")),
+                                    uri=annot_dict.get("uri"),
+                                    file_path=self.data_dir / name,
                                     references=annot_dict.get("references"),
                                     notes=annot_dict.get("notes"),
                                 )
@@ -412,10 +414,12 @@ class GraphBuilder(BaseModel):
                         continue
 
                     extra = {"provider": provider} if is_transform else {}
+                    name = f"{prefix}_{res}_{vol_type}"
                     result.append(
                         cls(
-                            name=f"{prefix}_{res}_{vol_type}",
-                            file_path=self._resolve_path(vol_value),
+                            name=name,
+                            uri=vol_value,
+                            file_path=self.data_dir / name,
                             resolution=res,
                             resource_type=vol_type,
                             references=transform_refs,

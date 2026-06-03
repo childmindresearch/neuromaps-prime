@@ -51,24 +51,24 @@ Yerkes19:
         RM_auto_ampa:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc270229e9b9679cd4/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
-          notes: 
-            - AMPA receptor density, radioligand [³H]AMPA. Ionotropic glutamate receptor.
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
+          notes:
+          - AMPA receptor density, radioligand [³H]AMPA. Ionotropic glutamate receptor.
         RM_auto_cgp5:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc80941e7c8fa7ad63/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
           notes:
-            - GABA_B receptor density, radioligand [³H]CGP54626. Metabotropic inhibitory GABA receptor.
+          - GABA_B receptor density, radioligand [³H]CGP54626. Metabotropic inhibitory GABA receptor.
         RM_auto_damp:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52be7a752a710f2c2b4e/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
-          notes: 
-            - M3 muscarinic receptor density, radioligand [³H]4-DAMP. Cholinergic receptor.
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
+          notes:
+          - M3 muscarinic receptor density, radioligand [³H]4-DAMP. Cholinergic receptor.
         RM_auto_dpat:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd3625c9e6dc679aba/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
@@ -79,52 +79,52 @@ Yerkes19:
         RM_auto_dpmg:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd4572881301679ac1/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
-          notes: 
-            - D1 dopamine receptor density, radioligand [³H]SCH23390. Dopamine receptor.
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
+          notes:
+          - D1 dopamine receptor density, radioligand [³H]SCH23390. Dopamine receptor.
         RM_auto_flum:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc406d0c8a912c31b9/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
-          notes: 
-            - GABA_A/BZ receptor density, radioligand [³H]flumazenil. Benzodiazepine site of GABA_A receptor.
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
+          notes:
+          - GABA_A/BZ receptor density, radioligand [³H]flumazenil. Benzodiazepine site of GABA_A receptor.
         RM_auto_kain:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bdcd87cca253679b64/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
-          notes: 
-            - Kainate receptor density, radioligand [³H]kainate. Ionotropic glutamate receptor.
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
+          notes:
+          - Kainate receptor density, radioligand [³H]kainate. Ionotropic glutamate receptor.
         RM_auto_keta:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc1541aee377a7af41/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
-          notes: 
-            - 5-HT2A receptor density, radioligand [³H]ketanserin. Serotonin receptor.
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
+          notes:
+          - 5-HT2A receptor density, radioligand [³H]ketanserin. Serotonin receptor.
         RM_auto_mk80:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bdd0d28dc642a7aff8/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
-          notes: 
-            - NMDA receptor density, radioligand [³H]MK-801. Ionotropic glutamate receptor.
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
+          notes:
+          - NMDA receptor density, radioligand [³H]MK-801. Ionotropic glutamate receptor.
         RM_auto_musc:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd1541aee377a7af43/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
-          notes: 
-            - GABA_A receptor density, radioligand [³H]muscimol. Ionotropic inhibitory GABA receptor.
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
+          notes:
+          - GABA_A receptor density, radioligand [³H]muscimol. Ionotropic inhibitory GABA receptor.
         RM_auto_oxot:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bdcd87cca253679b68/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
-          notes: 
-            - M2 muscarinic receptor density, radioligand [³H]oxotremorine-M. Cholinergic receptor.
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
+          notes:
+          - M2 muscarinic receptor density, radioligand [³H]oxotremorine-M. Cholinergic receptor.
         RM_auto_pire:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52be406d0c8a912c31be/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
@@ -135,44 +135,44 @@ Yerkes19:
         RM_auto_praz:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd80941e7c8fa7ad68/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
-          notes: 
-            - α1-adrenergic receptor density, radioligand [³H]prazosin. Noradrenergic receptor.
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
+          notes:
+          - α1-adrenergic receptor density, radioligand [³H]prazosin. Noradrenergic receptor.
         RM_auto_uk14:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc3625c9e6dc679ab7/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1007/s00429-021-02437-y
-            - https://doi.org/10.1038/s41593-023-01351-2
-          notes: 
-            - α2-adrenergic receptor density, radioligand [³H]UK-14304. Noradrenergic receptor.
+          - https://doi.org/10.1007/s00429-021-02437-y
+          - https://doi.org/10.1038/s41593-023-01351-2
+          notes:
+          - α2-adrenergic receptor density, radioligand [³H]UK-14304. Noradrenergic receptor.
         MM:
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52947a752a710f2c2b26/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1073/pnas.1721653115
+          - https://doi.org/10.1073/pnas.1721653115
           notes:
-            - Myelin map (bias corrected). MacaqueYerkes19 v1.2.
+          - Myelin map (bias corrected). MacaqueYerkes19 v1.2.
         SMM:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527acd87cca253679b05/?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527b80941e7c8fa7ad2d/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1073/pnas.1721653115
+          - https://doi.org/10.1073/pnas.1721653115
           notes:
-            - Smoothed myelin map (bias corrected). MacaqueYerkes19 v1.2.
+          - Smoothed myelin map (bias corrected). MacaqueYerkes19 v1.2.
         CT:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d0d8bf292baf2c2d69/?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d07a752a710f2c2b5d/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1073/pnas.1721653115
+          - https://doi.org/10.1073/pnas.1721653115
           notes:
-            - Cortical thickness. MacaqueYerkes19 v1.2.
+          - Cortical thickness. MacaqueYerkes19 v1.2.
         CV:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52877a752a710f2c2b1c/?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52881541aee377a7af33/?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
-            - https://doi.org/10.1073/pnas.1721653115
+          - https://doi.org/10.1073/pnas.1721653115
           notes:
-            - Curvature. MacaqueYerkes19 v1.2.
+          - Curvature. MacaqueYerkes19 v1.2.
         PC_Yeo7Networks:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0/?view_only=b214f40525fe44b5bea3103478d08d0d
           notes:
