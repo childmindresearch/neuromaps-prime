@@ -264,12 +264,17 @@ def _plot_single_graph(
     save_path: Path | None,
     layout: str,
     colormap: str,
+    legend_rect: tuple[float, float, float, float],
+    legend_loc: str,
+    k: float,
+    iterations: int,
+    seed: int,
 ) -> None:
     """Plot either surface or volume transforms in a single plot."""
     _, ax = plt.subplots(1, 1, figsize=figsize)
 
     # Use optimized layout
-    pos = _get_optimized_layout(graph, layout)
+    pos = _get_optimized_layout(graph, layout, k, iterations, seed)
 
     # Get node colors by species
     node_colors, species_colors_map = _get_node_colors(graph, colormap)
@@ -325,8 +330,8 @@ def _plot_single_graph(
         for attr, color in edge_colors.items()
     ]
 
-    ax.legend(handles=legend_elements, fontsize=font_size, loc="upper right")
-    plt.tight_layout()
+    ax.legend(handles=legend_elements, fontsize=font_size, loc=legend_loc)
+    plt.tight_layout(rect=legend_rect)
 
     _save_or_show(save_path)
 
