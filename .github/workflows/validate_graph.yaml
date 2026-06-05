@@ -1,16 +1,18 @@
 name: Validate graph YAMLs
+permissions:
+  contents: read
 
 on:
   push:
     branches:
     - main
     paths:
-    - resources/**/*.yaml
+    - src/neuromaps_prime/resources/**/*.yaml
     - schemas/**/neuromaps_*.schema.json
     - .github/workflows/validate_graph.yaml
   pull_request:
     paths:
-    - resources/**/*.yaml
+    - src/neuromaps_prime/resources/**/*.yaml
     - schemas/**/neuromaps_*.schema.json
     - .github/workflows/validate_graph.yaml
 
@@ -47,5 +49,6 @@ jobs:
 
     - name: Validate URLs
       run: |
+        shopt -s globstar
         uv run --script scripts/validate_urls.py \
-          ${{ github.workspace }}/src/neuromaps_prime/resources/**/*.yaml
+          src/neuromaps_prime/resources/**/*.yaml
