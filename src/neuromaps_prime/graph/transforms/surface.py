@@ -258,20 +258,39 @@ class SurfaceTransformOps(BaseModel):
         )
         if target_surface is None:
             raise FileNotFoundError("Unable to find target surface.")
+
+        ribbon = {
+            surf_type: self.cache.require_surface_atlas(
+                space=target_space,
+                density=target_density,
+                hemisphere=hemisphere,
+                resource_type=surf_type,
+            ).fetch()
+            for surf_type in ("white", "pial")
+        }
+
         match transformer_type:
             case "label":
+                ribbon_surfs = workbench.label_to_volume_mapping_ribbon_constrained(
+                    inner_surf=ribbon["white"], outer_surf=ribbon["pial"]
+                )
                 return workbench.label_to_volume_mapping(
                     label=out_surface,
                     surface=target_surface.file_path,
                     volume_space=ref_volume,
                     volume_out=output_file_path,
+                    ribbon_constrained=ribbon_surfs,
                 ).volume_out
             case "metric":
+                ribbon_surfs = workbench.metric_to_volume_mapping_ribbon_constrained(
+                    inner_surf=ribbon["white"], outer_surf=ribbon["pial"]
+                )
                 return workbench.metric_to_volume_mapping(
                     metric=out_surface,
                     surface=target_surface.file_path,
                     volume_space=ref_volume,
                     volume_out=output_file_path,
+                    ribbon_constrained=ribbon_surfs,
                 ).volume_out
 
     # ------------------------------------------------------------------ #
