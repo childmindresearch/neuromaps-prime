@@ -27,3 +27,12 @@ Get the newest development version via:
 ```sh
 pip install git+https://github.com/childmindresearch/neuromaps-prime
 ```
+
+## Examples
+
+See the [`examples/`](examples/) directory for sample scripts:
+
+- [`example_graph.py`](examples/example_graph_init.py) — graph inspection and plotting
+- [`example_surface_transform.py`](examples/example_surface_transform.py) — surface-to-surface resampling and surface-to-volume projection
+- [`example_volume_transform.py`](examples/example_volume_transform.py) — volume-to-volume warping and volume-to-surface projection
+

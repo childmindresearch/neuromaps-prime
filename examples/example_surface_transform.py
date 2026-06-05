@@ -1,93 +1,109 @@
-"""Example script demonstrating how to use surface-to-surface transforms."""
+"""Example script demonstrating surface transformations.
+
+Covers:
+- Surface-to-surface resampling (label and metric)
+- Surface-to-volume projection
+
+Usage:
+
+Set DATA_DIR to the root of your neuromaps data directory, then run:
+
+    python examples/example_surface_transform.py
+"""
 
 from pathlib import Path
 
 from neuromaps_prime.graph import NeuromapsGraph
-from neuromaps_prime.plotting import plot_graph
 
-if __name__ == "__main__":
-    # Load the Neuromaps graph
+# Configuration (EDIT this path before running)
+DATA_DIR = Path("/path/to/data")
 
-    data_dir = Path("/home/bshrestha/projects/Tfunck/neuromaps-nhp-prep")
-    graph = NeuromapsGraph(data_dir=data_dir)
+SOURCE_SPACE = "CIVETNMT"
+TARGET_SPACE = "Yerkes19"
+HEMISPHERE = "right"
 
-    # Label resample without specifying densities (will use defaults)
-    source_space = "CIVETNMT"
-    target_space = "S1200"
-    hemisphere = "right"
-    input_file = data_dir / Path(
-        "share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-nomedialwall_dparc.label.gii"
-    )
-    output_file_path = str(
-        Path(__file__).parent / f"space-{target_space}_output_label.label.gii"
-    )
+# Load graph
+graph = NeuromapsGraph()
+print("Graph summary:")
+print(graph)
+print(graph.utils.get_graph_info())
 
-    label_output = graph.surface_to_surface_transformer(
-        transformer_type="label",
-        input_file=input_file,
-        source_space=source_space,
-        target_space=target_space,
-        hemisphere=hemisphere,
-        output_file_path=output_file_path,
-    )
+# ------------------------------------------------------------------ #
+# Surface-to-Surface Resampling                                      #
+# ------------------------------------------------------------------ #
 
-    if label_output is not None:
-        print(f"Transformed label saved at: {label_output}")
-    else:
-        print("Label surface-to-surface transformation failed.")
+# Label Resampling: resamples a parcellation label file from CIVETNMT -> Yerkes19 surface space.
+# Source density is specified explicitly; target density is auto-selected.
+label_input = DATA_DIR / "share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-nomedialwall_dparc.label.gii"
 
-    # see updated graph
-    surface_subgraph = graph.utils.get_subgraph("surface_to_surface")
-    plot_graph(
-        surface_subgraph,
-        graph_type="surface",
-        layout="kamada_kawai",
-        save_path=Path("examples/updated_neuromaps_surface.png"),
-    )
+label_result = graph.surface_to_surface_transformer(
+    transformer_type="label",
+    input_file=label_input,
+    source_space=SOURCE_SPACE,
+    target_space=TARGET_SPACE,
+    hemisphere=HEMISPHERE,
+    output_file_path=f"space-{TARGET_SPACE}_output_label.label.gii",
+)
 
-    # see new edge/transform added to graph
-    available_transforms = graph.search_surface_transforms(
-        source_space=source_space,
-        target_space=target_space,
-        hemisphere=hemisphere,
-    )
-    print(
-        f"Available surface-to-surface transforms after addition: "
-        f"{available_transforms}"
-    )
-    transform = graph.fetch_surface_to_surface_transform(
-        source=source_space,
-        target=target_space,
-        density="41k",
-        hemisphere=hemisphere,
-        resource_type="sphere",
-    )
+if label_result is not None:
+    print(f"Transformed label saved at: {label_result}")
+else:
+    print("Label surface-to-surface transformation failed.")
 
-    # Metric resample with source and target densities specified
-    source_space = "CIVETNMT"
-    target_space = "S1200"
-    source_density = "41k"
-    target_density = "10k"
-    hemisphere = "right"
 
-    input_file = data_dir / Path(
-        "share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-vaavg_midthickness.shape.gii"
-    )
-    output_file_path = str(
-        Path(__file__).parent / f"space-{target_space}_output_metric.shape.gii"
-    )
-    metric_output = graph.surface_to_surface_transformer(
-        transformer_type="metric",
-        input_file=input_file,
-        source_space=source_space,
-        target_space=target_space,
-        source_density=source_density,
-        target_density=target_density,
-        hemisphere=hemisphere,
-        output_file_path=output_file_path,
-    )
+# Metric Resampling: resamples a metric (shape) file from CIVETNMT -> Yerkes19 surface space.
+# Both source and target densities are specified explicitly.
+metric_input = DATA_DIR / "share/Inputs/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_desc-vaavg_midthickness.shape.gii"
 
-    if metric_output is not None:
-        print(f"Transformed metric saved at: {metric_output}")
-    else:
-        print("Metric surface-to-surface transformation failed.")
+metric_result = graph.surface_to_surface_transformer(
+    transformer_type="metric",
+    input_file=metric_input,
+    source_space=SOURCE_SPACE,
+    target_space=TARGET_SPACE,
+    source_density="41k",
+    target_density="10k",
+    hemisphere=HEMISPHERE,
+    output_file_path=f"space-{TARGET_SPACE}_output_metric.shape.gii",
+)
+
+if metric_result is not None:
+    print(f"Transformed metric saved at: {metric_result}")
+else:
+    print("Metric surface-to-surface transformation failed.")
+
+
+# ------------------------------------------------------------------ #
+# Surface-to-Volume Projection                                       #
+# ------------------------------------------------------------------ #
+# Two-stage pipeline:
+#   1. Resamples the metric from CIVETNMT -> Yerkes19 surface space (same as above)
+#   2. Projects the resampled surface into Yerkes19 volume space using ribbon-constrained mapping with white/pial surfaces.
+
+vol_ref = DATA_DIR / "share/Inputs/Yerkes19/src-Yerkes19_res-0p50mm_T1w.nii"
+
+vol_result = graph.surface_to_volume_transformer(
+    transformer_type="metric",
+    input_file=metric_input,
+    ref_volume=vol_ref,
+    source_space=SOURCE_SPACE,
+    target_space=TARGET_SPACE,
+    hemisphere=HEMISPHERE,
+    source_density="41k",
+    target_density="32k",
+    output_file_path=f"space-{TARGET_SPACE}_output_metric.nii.gz",
+)
+
+if vol_result is not None:
+    print(f"Surface-to-volume output: {vol_result}")
+else:
+    print("Surface-to-volume transformation failed.")
+
+
+# After running transforms, new edges are added to the graph automatically.
+# You can inspect what's now available between source and target spaces.
+available_transforms = graph.search_surface_transforms(
+    source_space=SOURCE_SPACE,
+    target_space=TARGET_SPACE,
+    hemisphere=HEMISPHERE,
+)
+print(f"Available transforms after run: {available_transforms}")
