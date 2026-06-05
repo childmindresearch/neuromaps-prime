@@ -161,6 +161,7 @@ def _extract_urls(node: Any, out: list[str]) -> None:
     """Recursively extract HTTP/HTTPS strings from an arbitrary YAML node.
 
     Uses DFS with a caller-supplied *out* buffer to avoid per-call allocations.
+    Skip keys named "references" or "notes"
 
     Args:
         node: A YAML value — may be a str, dict, list, or scalar.
@@ -170,7 +171,9 @@ def _extract_urls(node: Any, out: list[str]) -> None:
         if node.startswith(("http://", "https://")):
             out.append(node)
     elif isinstance(node, dict):
-        for v in node.values():
+        for k, v in node.items():
+            if k in ("references", "notes"):
+                continue
             _extract_urls(v, out)
     elif isinstance(node, list):
         for item in node:
