@@ -16,7 +16,7 @@ on:
 
 jobs:
   validate:
-    name: Validate graph YAML against schema
+    name: Validate graph YAML
     runs-on: ubuntu-latest
 
     steps:
