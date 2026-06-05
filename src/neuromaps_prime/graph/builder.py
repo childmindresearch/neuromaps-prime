@@ -398,7 +398,7 @@ class GraphBuilder(BaseModel):
                 for vol_type, vol_value in types.items():
                     if vol_type == "annotation":
                         for annot_key, annot_dict in vol_value.items():
-                            name = f"{prefix}_{res}_{annot_key}.nii.gz"
+                            name = f"{prefix}_{res}_{annot_key}"
                             annotations.append(
                                 VolumeAnnotation(
                                     name=name,
@@ -406,7 +406,7 @@ class GraphBuilder(BaseModel):
                                     label=annot_key,
                                     resolution=res,
                                     uri=annot_dict.get("uri"),
-                                    file_path=self.data_dir / name,
+                                    file_path=self.data_dir / f"{name}.nii.gz",
                                     references=annot_dict.get("references"),
                                     notes=annot_dict.get("notes"),
                                 )
@@ -419,7 +419,7 @@ class GraphBuilder(BaseModel):
                         cls(
                             name=name,
                             uri=vol_value,
-                            file_path=self.data_dir / name,
+                            file_path=self.data_dir / f"{name}.nii.gz",
                             resolution=res,
                             resource_type=vol_type,
                             references=transform_refs,
