@@ -44,3 +44,7 @@ jobs:
           -exec uv run --only-group validate check-jsonschema \
             --schemafile schemas/neuromaps_volume_edges.schema.json \
             --verbose {} +
+
+    - name: Validate URLs
+      run: |
+        uv run --script scripts/validate_urls.py src/neuromaps_prime/resources/**/*.yaml
