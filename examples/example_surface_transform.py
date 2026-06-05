@@ -16,14 +16,14 @@ from pathlib import Path
 from neuromaps_prime.graph import NeuromapsGraph
 
 # Configuration (EDIT this path before running)
-DATA_DIR = Path("/path/to/neuromaps-data")
+DATA_DIR = Path("/path/to/data")
 
 SOURCE_SPACE = "CIVETNMT"
 TARGET_SPACE = "Yerkes19"
 HEMISPHERE = "right"
 
 # Load graph
-graph = NeuromapsGraph(data_dir=DATA_DIR)
+graph = NeuromapsGraph()
 print("Graph summary:")
 print(graph)
 print(graph.utils.get_graph_info())
