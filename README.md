@@ -28,27 +28,7 @@ Get the newest development version via:
 pip install git+https://github.com/childmindresearch/neuromaps-prime
 ```
 
-## Usage
-```python
-from pathlib import Path
-from neuromaps_prime.graph import NeuromapsGraph
-
-DATA_DIR = Path("/path/to/data")
-
-graph = NeuromapsGraph()
-
-# Resample a metric GIFTI from one surface space to another
-output = graph.surface_to_surface_transformer(
-    transformer_type="metric",
-    input_file= DATA_DIR / "src-CIVETNMT_den-41k_hemi-R_desc-vaavg_midthickness.shape.gii",
-    source_space="CIVETNMT",
-    target_space="Yerkes19",
-    hemisphere="right",
-    source_density="41k",
-    target_density="32k",
-    output_file_path="space-Yerkes19_output_metric.shape.gii",
-)
-```
+## Examples
 
 See the [`examples/`](examples/) directory for sample scripts:
 

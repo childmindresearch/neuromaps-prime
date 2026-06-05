@@ -7,9 +7,7 @@ Covers:
 - Plotting full, surface-only, and volume-only graphs
 
 Usage:
-
-Set DATA_DIR to the root of your neuromaps data directory, then run:
-
+    
     python examples/example_graph_init.py
 """
 
@@ -19,10 +17,7 @@ from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.plotting import plot_graph
 
 
-# Configuration (EDIT this path before running)
-DATA_DIR = Path("/Users/janhavi.pillai/Desktop/projects/neuromaps-nhp-prep")
-
-graph = NeuromapsGraph(data_dir=DATA_DIR)
+graph = NeuromapsGraph()
 
 # Brief summary of graph
 print(graph)
