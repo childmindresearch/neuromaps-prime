@@ -35,7 +35,7 @@ _HEADERS: dict[str, str] = {
     "User-Agent": "url-validator/1.0",
     "Connection": "close",
 }
-_TIMEOUT: int = 10
+_TIMEOUT: int = 90
 _GET_RANGE_TRIGGER: frozenset[int] = frozenset({403, 405})
 
 log = logging.getLogger("url-validator")
