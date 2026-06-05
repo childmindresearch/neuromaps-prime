@@ -7,17 +7,17 @@ fsaverage:
   surfaces:
     10k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d101ad20570d7eeb1b/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d17ef401e8b5cc752d/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d101ad20570d7eeb1b?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d17ef401e8b5cc752d?view_only=b214f40525fe44b5bea3103478d08d0d
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d100e86708937eea7a/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d17ef401e8b5cc752e/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d100e86708937eea7a?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d17ef401e8b5cc752e?view_only=b214f40525fe44b5bea3103478d08d0d
       pial:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d1bfa98ff448cc75b5/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d1bfa98ff448cc75b6/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d1bfa98ff448cc75b5?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d1bfa98ff448cc75b6?view_only=b214f40525fe44b5bea3103478d08d0d
       inflated:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d1ae88a491b17ee845/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d19b96bc757282a455/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d1ae88a491b17ee845?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3d19b96bc757282a455?view_only=b214f40525fe44b5bea3103478d08d0d
       annotation:
         RM_genepc1:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c2290118f70b01fca797eb
@@ -29,17 +29,17 @@ fsaverage:
           - Abagen Gene PC1
     164k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3784a4fb9e964cc78b5/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f378ae88a491b17ee7fc/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3784a4fb9e964cc78b5?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f378ae88a491b17ee7fc?view_only=b214f40525fe44b5bea3103478d08d0d
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3797ef401e8b5cc74ed/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f345bfa98ff448cc7564/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3797ef401e8b5cc74ed?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f345bfa98ff448cc7564?view_only=b214f40525fe44b5bea3103478d08d0d
       pial:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f37801ad20570d7eeacd/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3797a6372a22ecc762c/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f37801ad20570d7eeacd?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3797a6372a22ecc762c?view_only=b214f40525fe44b5bea3103478d08d0d
       inflated:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3799b96bc757282a3f5/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f37800e86708937eea31/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3799b96bc757282a3f5?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f37800e86708937eea31?view_only=b214f40525fe44b5bea3103478d08d0d
       annotation:
         RM_az10419369:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543b0723a11190518c8a6

@@ -3,70 +3,70 @@
   volumes:
     RheMap:
       500um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4cc74ec6fad47d6b9a32/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4cc74ec6fad47d6b9a32?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: MEBRAINS
   to: D99
   volumes:
     RheMap:
       250um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4485b30df7012c7df93b/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4485b30df7012c7df93b?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: MEBRAINS
   to: NMT2Sym
   volumes:
     RheMap:
       250um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4a8fedf908b2217df529/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4a8fedf908b2217df529?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: D99
   to: MEBRAINS
   volumes:
     RheMap:
       400um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4784d4be03f6846ba1df/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4784d4be03f6846ba1df?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: D99
   to: NMT2Sym
   volumes:
     RheMap:
       250um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49cef44e0687016b9d7f/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49cef44e0687016b9d7f?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: D99
   to: Yerkes19
   volumes:
     RheMap:
       250um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4c241e78bf36907dfa17/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4c241e78bf36907dfa17?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: NMT2Sym
   to: MEBRAINS
   volumes:
     RheMap:
       400um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4801d4be03f6846ba1fc/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4801d4be03f6846ba1fc?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: NMT2Sym
   to: D99
   volumes:
     RheMap:
       250um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f45904cf949e3cd7df899/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f45904cf949e3cd7df899?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: NMT2Sym
   to: Yerkes19
   volumes:
     RheMap:
       250um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d4daa01d3aabe3935e6/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d4daa01d3aabe3935e6?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: Yerkes19
   to: MEBRAINS
   volumes:
     RheMap:
       400um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48b4f44e0687016b9d54/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48b4f44e0687016b9d54?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: Yerkes19
   to: D99
   volumes:
     RheMap:
       250um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f46b9c63a718cdfb8d1d2/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f46b9c63a718cdfb8d1d2?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: Yerkes19
   to: NMT2Sym
   volumes:
     RheMap:
       250um:
-        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b719b6fa812c2b8cc6d/?view_only=b214f40525fe44b5bea3103478d08d0d
+        composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b719b6fa812c2b8cc6d?view_only=b214f40525fe44b5bea3103478d08d0d
