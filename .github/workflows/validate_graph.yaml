@@ -47,4 +47,5 @@ jobs:
 
     - name: Validate URLs
       run: |
-        uv run --script scripts/validate_urls.py src/neuromaps_prime/resources/**/*.yaml
+        uv run --script scripts/validate_urls.py \
+          ${{ github.workspace }}/src/neuromaps_prime/resources/**/*.yaml
