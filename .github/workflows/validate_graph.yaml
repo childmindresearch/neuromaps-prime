@@ -1,22 +1,24 @@
 name: Validate graph YAMLs
+permissions:
+  contents: read
 
 on:
   push:
     branches:
     - main
     paths:
-    - resources/**/*.yaml
+    - src/neuromaps_prime/resources/**/*.yaml
     - schemas/**/neuromaps_*.schema.json
     - .github/workflows/validate_graph.yaml
   pull_request:
     paths:
-    - resources/**/*.yaml
+    - src/neuromaps_prime/resources/**/*.yaml
     - schemas/**/neuromaps_*.schema.json
     - .github/workflows/validate_graph.yaml
 
 jobs:
   validate:
-    name: Validate graph YAML against schema
+    name: Validate graph YAML
     runs-on: ubuntu-latest
 
     steps:
@@ -44,3 +46,9 @@ jobs:
           -exec uv run --only-group validate check-jsonschema \
             --schemafile schemas/neuromaps_volume_edges.schema.json \
             --verbose {} +
+
+    - name: Validate URLs
+      run: |
+        shopt -s globstar
+        uv run --script scripts/validate_urls.py \
+          src/neuromaps_prime/resources/**/*.yaml

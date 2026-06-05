@@ -4,180 +4,180 @@ Yerkes19:
   surfaces:
     10k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e4d366de13d713f48/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aab76e18c73904448/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e4d366de13d713f48?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aab76e18c73904448?view_only=b214f40525fe44b5bea3103478d08d0d
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226a4f3931c54c9047d7/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ba52f9bb38971293a/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226a4f3931c54c9047d7?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ba52f9bb38971293a?view_only=b214f40525fe44b5bea3103478d08d0d
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ca52f9bb38971293c/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226f49b4c2d6503ecb33/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ca52f9bb38971293c?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226f49b4c2d6503ecb33?view_only=b214f40525fe44b5bea3103478d08d0d
       pial:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e1e7b820217713409/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b49b4c2d6503ecb22/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e1e7b820217713409?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b49b4c2d6503ecb22?view_only=b214f40525fe44b5bea3103478d08d0d
       inflated:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522691e7b820217713402/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226d23e17e11247129bc/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522691e7b820217713402?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226d23e17e11247129bc?view_only=b214f40525fe44b5bea3103478d08d0d
       annotation:
         PC_Yeo7Networks:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a64572881301679aba/?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37a752a710f2c2b40/?view_only=b214f40525fe44b5bea3103478d08d0di
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a64572881301679aba?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37a752a710f2c2b40?view_only=b214f40525fe44b5bea3103478d08d0d
           notes:
           - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 10k surface density.
-          - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a680941e7c8fa7ad49/?view_only=b214f40525fe44b5bea3103478d08d0d'
-          - 'right lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a34572881301679ab8/?view_only=b214f40525fe44b5bea3103478d08d0d'
+          - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a680941e7c8fa7ad49?view_only=b214f40525fe44b5bea3103478d08d0d'
+          - 'right lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a34572881301679ab8?view_only=b214f40525fe44b5bea3103478d08d0d'
         PC_MarkovMonkey:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37da771710ca7abbd/?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a580941e7c8fa7ad47/?view_only=b214f40525fe44b5bea3103478d08d0di
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37da771710ca7abbd?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a580941e7c8fa7ad47?view_only=b214f40525fe44b5bea3103478d08d0d
           notes:
           - Markov monkey cortical parcellation, 10k surface density.
     32k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f54791541aee377a7b0c8/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aab76e18c73904446/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f54791541aee377a7b0c8?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aab76e18c73904446?view_only=b214f40525fe44b5bea3103478d08d0d
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ea52f9bb389712940/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aaa1f78e1979033b0/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ea52f9bb389712940?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aaa1f78e1979033b0?view_only=b214f40525fe44b5bea3103478d08d0d
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226d743de820043eac3b/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b6846076e8371364a/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226d743de820043eac3b?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b6846076e8371364a?view_only=b214f40525fe44b5bea3103478d08d0d
       pial:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226be06110211c3eac62/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ecd1f7a1773903f7a/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226be06110211c3eac62?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ecd1f7a1773903f7a?view_only=b214f40525fe44b5bea3103478d08d0d
       inflated:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e3a883e73df3eb152/?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b2882bdb2bc3ebcbd/?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e3a883e73df3eb152?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b2882bdb2bc3ebcbd?view_only=b214f40525fe44b5bea3103478d08d0d
       annotation:
         RM_auto_ampa:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc270229e9b9679cd4/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc270229e9b9679cd4?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - AMPA receptor density, radioligand [³H]AMPA. Ionotropic glutamate receptor.
         RM_auto_cgp5:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc80941e7c8fa7ad63/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc80941e7c8fa7ad63?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - GABA_B receptor density, radioligand [³H]CGP54626. Metabotropic inhibitory GABA receptor.
         RM_auto_damp:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52be7a752a710f2c2b4e/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52be7a752a710f2c2b4e?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - M3 muscarinic receptor density, radioligand [³H]4-DAMP. Cholinergic receptor.
         RM_auto_dpat:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd3625c9e6dc679aba/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd3625c9e6dc679aba?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - 5-HT1A receptor density, radioligand [³H]8-OH-DPAT (dpat). Serotonin receptor.
         RM_auto_dpmg:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd4572881301679ac1/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd4572881301679ac1?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - D1 dopamine receptor density, radioligand [³H]SCH23390. Dopamine receptor.
         RM_auto_flum:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc406d0c8a912c31b9/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc406d0c8a912c31b9?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - GABA_A/BZ receptor density, radioligand [³H]flumazenil. Benzodiazepine site of GABA_A receptor.
         RM_auto_kain:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bdcd87cca253679b64/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bdcd87cca253679b64?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - Kainate receptor density, radioligand [³H]kainate. Ionotropic glutamate receptor.
         RM_auto_keta:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc1541aee377a7af41/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc1541aee377a7af41?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - 5-HT2A receptor density, radioligand [³H]ketanserin. Serotonin receptor.
         RM_auto_mk80:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bdd0d28dc642a7aff8/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bdd0d28dc642a7aff8?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - NMDA receptor density, radioligand [³H]MK-801. Ionotropic glutamate receptor.
         RM_auto_musc:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd1541aee377a7af43/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd1541aee377a7af43?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - GABA_A receptor density, radioligand [³H]muscimol. Ionotropic inhibitory GABA receptor.
         RM_auto_oxot:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bdcd87cca253679b68/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bdcd87cca253679b68?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - M2 muscarinic receptor density, radioligand [³H]oxotremorine-M. Cholinergic receptor.
         RM_auto_pire:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52be406d0c8a912c31be/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52be406d0c8a912c31be?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - M1 muscarinic receptor density, radioligand [³H]pirenzepine. Cholinergic receptor.
         RM_auto_praz:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd80941e7c8fa7ad68/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bd80941e7c8fa7ad68?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - α1-adrenergic receptor density, radioligand [³H]prazosin. Noradrenergic receptor.
         RM_auto_uk14:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc3625c9e6dc679ab7/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52bc3625c9e6dc679ab7?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - α2-adrenergic receptor density, radioligand [³H]UK-14304. Noradrenergic receptor.
         MM:
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52947a752a710f2c2b26/?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52947a752a710f2c2b26?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1073/pnas.1721653115
           notes:
           - Myelin map (bias corrected). MacaqueYerkes19 v1.2.
         SMM:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527acd87cca253679b05/?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527b80941e7c8fa7ad2d/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527acd87cca253679b05?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527b80941e7c8fa7ad2d?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1073/pnas.1721653115
           notes:
           - Smoothed myelin map (bias corrected). MacaqueYerkes19 v1.2.
         CT:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d0d8bf292baf2c2d69/?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d07a752a710f2c2b5d/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d0d8bf292baf2c2d69?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d07a752a710f2c2b5d?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1073/pnas.1721653115
           notes:
           - Cortical thickness. MacaqueYerkes19 v1.2.
         CV:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52877a752a710f2c2b1c/?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52881541aee377a7af33/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52877a752a710f2c2b1c?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52881541aee377a7af33?view_only=b214f40525fe44b5bea3103478d08d0d
           references:
           - https://doi.org/10.1073/pnas.1721653115
           notes:
           - Curvature. MacaqueYerkes19 v1.2.
         PC_Yeo7Networks:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0/?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0?view_only=b214f40525fe44b5bea3103478d08d0d
           notes:
           - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 32k surface density.
-          - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a3d0d28dc642a7afe5/?view_only=b214f40525fe44b5bea3103478d08d0d'
+          - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a3d0d28dc642a7afe5?view_only=b214f40525fe44b5bea3103478d08d0d'
   volumes:
     500um:
-      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226eab76e18c7390444c/?view_only=b214f40525fe44b5bea3103478d08d0d
+      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226eab76e18c7390444c?view_only=b214f40525fe44b5bea3103478d08d0d
