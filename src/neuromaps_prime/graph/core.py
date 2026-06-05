@@ -636,12 +636,12 @@ class NeuromapsGraph(nx.MultiDiGraph):
             source_space: Source brain template space.
             target_space: Target brain template space.
             resolution: Target volume resolution (e.g. ``'2mm'``).
-            resource_type: Volume resource type (e.g. ``'composite'``).
+            resource_type: Volume transform resource type (e.g. ``'composite'``).
             output_file_path: Path for the warped output volume.
             interp: Interpolation method.
             interp_params: Optional interpolation parameters.
-            atlas_resource_type: Volume resource type for the reference atlas lookup
-                (default ``'T1w'``).
+            atlas_resource_type: Volume resource type for the reference atlas 
+                lookup (default ``'T1w'``).
             provider: Optional provider name. Falls back to the first
                 registered provider when ``None``.
 

@@ -71,12 +71,12 @@ class VolumeTransformOps(BaseModel):
             source_space: Source brain template space name.
             target_space: Target brain template space name.
             resolution: Target volume resolution (e.g. ``'1mm'``, ``'500um'``).
-            resource_type: Volume resource type (e.g. ``'composite'``).
+            resource_type: Volume transform resource type (e.g. ``'composite'``).
             output_file_path: Path for the warped output volume.
             interp: Interpolation method passed to the warp tool.
             interp_params: Optional additional interpolation parameters.
-            atlas_resource_type: Volume resource type for the reference atlas lookup
-                (default ``'T1w'``).
+            atlas_resource_type: Volume resource type for the reference atlas 
+                lookup (default ``'T1w'``).
             provider: Optional provider name. Falls back to the first
                 registered provider when ``None``.
 
