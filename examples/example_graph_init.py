@@ -20,7 +20,7 @@ from neuromaps_prime.plotting import plot_graph
 
 
 # Configuration (EDIT this path before running)
-DATA_DIR = Path("/path/to/nhp/data")
+DATA_DIR = Path("/Users/janhavi.pillai/Desktop/projects/neuromaps-nhp-prep")
 
 graph = NeuromapsGraph(data_dir=DATA_DIR)
 
@@ -37,7 +37,7 @@ for node in graph.nodes(data=False):
     print(f"  Species: {graph.get_node_data(node).species}")
 
 # Find and print paths between two nodes for different edge types
-source, target = "Yerkes19", "fsLR"
+source, target = "CIVETNMT", "Yerkes19"
 
 vol_path = graph.find_path(source, target, edge_type="volume_to_volume")
 print(f"Volume path {source} -> {target}: {vol_path}")
