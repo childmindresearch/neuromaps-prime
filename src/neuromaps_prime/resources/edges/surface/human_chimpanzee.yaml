@@ -4,11 +4,8 @@
     human_chimpanzee:
       164k:
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f5137ef401e8b5cc76a8?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f506bfa98ff448cc76a0?view_only=b214f40525fe44b5bea3103478d08d0d
-        white:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f507912b4551c17ee3fe?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f50ca576658b627ee412?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f53c00e86708937eeae1?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f543912b4551c17ee412?view_only=b214f40525fe44b5bea3103478d08d0d
 
 - from: fsaverage
   to: NCBR
@@ -16,5 +13,8 @@
     human_chimpanzee:
       164k:
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f53c00e86708937eeae1?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f543912b4551c17ee412?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f5137ef401e8b5cc76a8?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f506bfa98ff448cc76a0?view_only=b214f40525fe44b5bea3103478d08d0d
+        white:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f507912b4551c17ee3fe?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f50ca576658b627ee412?view_only=b214f40525fe44b5bea3103478d08d0d
