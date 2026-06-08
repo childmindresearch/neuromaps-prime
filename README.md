@@ -1,4 +1,4 @@
-# Neuromaps-PRIME <img src=".github/sticker.png" align="right" width="25%"/>
+# Neuromaps-PRIME <img src=".github/neuromaps_prime.svg" align="right" width="15%"/>
 
 [![Build](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test.yaml?query=branch%3Amain)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -35,4 +35,3 @@ See the [`examples/`](examples/) directory for sample scripts:
 - [`example_graph.py`](examples/example_graph_init.py) — graph inspection and plotting
 - [`example_surface_transform.py`](examples/example_surface_transform.py) — surface-to-surface resampling and surface-to-volume projection
 - [`example_volume_transform.py`](examples/example_volume_transform.py) — volume-to-volume warping and volume-to-surface projection
-
