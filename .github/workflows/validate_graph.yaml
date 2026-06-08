@@ -51,4 +51,5 @@ jobs:
       run: |
         shopt -s globstar
         uv run --script scripts/validate_urls.py \
-          src/neuromaps_prime/resources/**/*.yaml
+          src/neuromaps_prime/resources/**/*.yaml \
+          --workers 2
