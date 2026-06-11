@@ -22,7 +22,7 @@ and specialized tools for NHP-specific analyses.
 ## Data
 
 Data currently included in the Neuromaps-PRIME graph:
-<img src=".github/neuromaps-graph.svg" align="center" width="100%"/>
+<img src=".github/neuromaps-graph.svg" align="center" width="200%"/>
 
 ## Installation
 
