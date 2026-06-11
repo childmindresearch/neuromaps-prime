@@ -43,3 +43,9 @@ See the [`examples/`](examples/) directory for sample scripts:
 - [`example_surface_transform.py`](examples/example_surface_transform.py) — surface-to-surface resampling and surface-to-volume projection
 - [`example_volume_transform.py`](examples/example_volume_transform.py) — volume-to-volume warping and volume-to-surface projection
 - [`example_plot_interactive_graph.py`](examples/example_plot_interactive_graph.py) - generating an interactive HTML plot of the graph
+
+## Data
+
+Data currently included in the Neuromaps-PRIME graph:
+<img src=".github/neuromaps-graph.svg" align="center" width="100%"/>
+
