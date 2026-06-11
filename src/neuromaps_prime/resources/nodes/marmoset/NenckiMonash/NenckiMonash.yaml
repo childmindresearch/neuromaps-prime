@@ -8,3 +8,7 @@ NenckiMonash:
   volumes:
     005um:
       T1w: src-NenckiMonash_den005mm_hemi-R_T1w.nii
+      annotation:
+        atlas_labels: 
+          notes:
+          - src-NenckiMonash_desc-AT_annot.txt
