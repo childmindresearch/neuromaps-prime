@@ -1,0 +1,6 @@
+NenckiMonash:
+  species: marmoset
+  description: NenckiMonash Marmoset Atlas
+  volumes:
+    005um:
+      T1w: src-NenckiMonash_den005mm_hemi-R_T1w.nii
