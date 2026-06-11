@@ -1,0 +1,7 @@
+Nencki–Monash:
+  species: marmoset
+  description: Nencki-Monash Marmoset template
+  surfaces:
+    39k:
+      midthickness:
+        left: src-NenckiMonash_den-39k_hemi-L_midthickness.surf.gii
