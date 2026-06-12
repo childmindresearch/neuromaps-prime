@@ -4,10 +4,10 @@ NenckiMonash:
   surfaces:
     39k:
       midthickness:
-        left: src-NenckiMonash_den-39k_hemi-L_midthickness.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2ad36777f4a86d2148f4a5?view_only=b214f40525fe44b5bea3103478d08d0d
   volumes:
     005um:
-      T1w: src-NenckiMonash_den005mm_hemi-R_T1w.nii
+      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2ad258d23dad825f48f488?view_only=b214f40525fe44b5bea3103478d08d0d
       annotation:
         atlas_labels: 
           notes:
