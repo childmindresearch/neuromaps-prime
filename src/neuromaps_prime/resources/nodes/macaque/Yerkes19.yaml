@@ -91,7 +91,7 @@ Yerkes19:
           notes:
           - GABA_A/BZ receptor density, radioligand [³H]flumazenil. Benzodiazepine site of GABA_A receptor.
         RM_auto_kain:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ef5369bb2ad30a2cc??view_only=d3c6b547365d4e1f8095e928101ee4a5
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ef5369bb2ad30a2cc?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
