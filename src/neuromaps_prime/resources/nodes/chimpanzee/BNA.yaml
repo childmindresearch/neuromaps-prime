@@ -4,3 +4,8 @@ BNA:
   volumes:
     800um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bc735f8a943b96018bc02?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        atlas_labels:
+          notes:
+          - https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bd70d8f9ba94390742b08?view_only=b214f40525fe44b5bea3103478d08d0d
+          - https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/osfstorage/6a2bd70efbb648d395126154?view_only=b214f40525fe44b5bea3103478d08d0d
