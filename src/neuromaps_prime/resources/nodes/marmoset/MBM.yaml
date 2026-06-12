@@ -1,0 +1,20 @@
+MBM:
+  species: marmoset
+  description: MBM Marmoset template
+  volumes:
+    50um:
+      T2star: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c10ee838ee07b3d30a310?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        BM:
+          uri: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c092c5d7719ed1618bcc9?view_only=b214f40525fe44b5bea3103478d08d0d
+    80um:
+      T2: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c1cd9b0aa9808ba30a301?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        BM:
+          uri: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c092c5d7719ed1618bcc9?view_only=b214f40525fe44b5bea3103478d08d0d
+      T2star: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c1cda0881e00cc118bc88?view_only=b214f40525fe44b5bea3103478d08d0d
+    150um:
+      T2: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c0c98f0cc7c123318bbb6?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        BM:
+          uri: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c0f741dc445e36e18bc29?view_only=b214f40525fe44b5bea3103478d08d0d
