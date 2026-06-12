@@ -6,7 +6,7 @@ NenckiMonash:
       midthickness:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2ad36777f4a86d2148f4a5?view_only=b214f40525fe44b5bea3103478d08d0d
   volumes:
-    005um:
+    50um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2ad258d23dad825f48f488?view_only=b214f40525fe44b5bea3103478d08d0d
       annotation:
         atlas_labels: 
