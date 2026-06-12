@@ -8,3 +8,7 @@ NenckiMonash:
   volumes:
     005um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2ad258d23dad825f48f488?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        atlas_labels: 
+          notes:
+          - src-NenckiMonash_desc-AT_annot.txt
