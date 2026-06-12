@@ -1,0 +1,6 @@
+Yerkes29:
+  species: chimpanzee
+  description: Yerkes29 Chimpanzee Atlas
+  volumes:
+    800um:
+      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bcbb3d09fa484fe30a464?view_only=b214f40525fe44b5bea3103478d08d0d
