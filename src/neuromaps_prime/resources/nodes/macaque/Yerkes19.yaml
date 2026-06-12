@@ -49,98 +49,98 @@ Yerkes19:
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b2882bdb2bc3ebcbd?view_only=b214f40525fe44b5bea3103478d08d0d
       annotation:
         RM_auto_ampa:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ff5369bb2ad30a2d0?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ff5369bb2ad30a2d0?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - AMPA receptor density, radioligand [³H]AMPA. Ionotropic glutamate receptor.
         RM_auto_cgp5:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9f80b41cc57830a318?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9f80b41cc57830a318?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - GABA_B receptor density, radioligand [³H]CGP54626. Metabotropic inhibitory GABA receptor.
         RM_auto_damp:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa0c46daba5ba12608a?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa0c46daba5ba12608a?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - M3 muscarinic receptor density, radioligand [³H]4-DAMP. Cholinergic receptor.
         RM_auto_dpat:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa0f5369bb2ad30a2d4?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa0f5369bb2ad30a2d4?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - 5-HT1A receptor density, radioligand [³H]8-OH-DPAT (dpat). Serotonin receptor.
         RM_auto_dpmg:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ef5369bb2ad30a2c9?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ef5369bb2ad30a2c9?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - D1 dopamine receptor density, radioligand [³H]SCH23390. Dopamine receptor.
         RM_auto_flum:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa070b8eb4dc718bbce?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa070b8eb4dc718bbce?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - GABA_A/BZ receptor density, radioligand [³H]flumazenil. Benzodiazepine site of GABA_A receptor.
         RM_auto_kain:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ef5369bb2ad30a2cc??view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ef5369bb2ad30a2cc??view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - Kainate receptor density, radioligand [³H]kainate. Ionotropic glutamate receptor.
         RM_auto_keta:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9f19aff410e118bc73?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9f19aff410e118bc73?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - 5-HT2A receptor density, radioligand [³H]ketanserin. Serotonin receptor.
         RM_auto_mk80:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa080b41cc57830a31d?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa080b41cc57830a31d?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - NMDA receptor density, radioligand [³H]MK-801. Ionotropic glutamate receptor.
         RM_auto_musc:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa087cfdedaeb18bbf8?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa087cfdedaeb18bbf8?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - GABA_A receptor density, radioligand [³H]muscimol. Ionotropic inhibitory GABA receptor.
         RM_auto_oxot:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9d246d2a81ad1260bf?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9d246d2a81ad1260bf?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - M2 muscarinic receptor density, radioligand [³H]oxotremorine-M. Cholinergic receptor.
         RM_auto_pire:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ef5369bb2ad30a2cb?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ef5369bb2ad30a2cb?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - M1 muscarinic receptor density, radioligand [³H]pirenzepine. Cholinergic receptor.
         RM_auto_praz:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9d87cfdedaeb18bbf5?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9d87cfdedaeb18bbf5?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
           notes:
           - α1-adrenergic receptor density, radioligand [³H]prazosin. Noradrenergic receptor.
         RM_auto_uk14:
-          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9d70b8eb4dc718bbcb?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9d70b8eb4dc718bbcb?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1007/s00429-021-02437-y
           - https://doi.org/10.1038/s41593-023-01351-2
