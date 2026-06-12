@@ -1,0 +1,17 @@
+NCBR:
+  species: chimpanzee
+  description: Juna Chimpanzee Atlas
+  surfaces:
+    164k:
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c5ae88a491b17ee8e7?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c6686472f5c7cc6e52?view_only=b214f40525fe44b5bea3103478d08d0d
+      midthickness:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c500e86708937eeabf?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c501ad20570d7eec20?view_only=b214f40525fe44b5bea3103478d08d0d
+      white:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c5e9bdf105947ee71d?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c23e551fbafd8290e6?view_only=b214f40525fe44b5bea3103478d08d0d
+  volumes:
+    500um:
+      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c67ef401e8b5cc761e?view_only=b214f40525fe44b5bea3103478d08d0d
