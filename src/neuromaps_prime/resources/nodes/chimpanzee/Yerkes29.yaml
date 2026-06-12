@@ -1,6 +1,14 @@
 Yerkes29:
   species: chimpanzee
   description: Yerkes29 Chimpanzee Atlas
+  surfaces:
+    32k:
+      midthickness:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bd36edcc5f1dde330a2c4?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bd36d4758cbbc5730a449?view_only=b214f40525fe44b5bea3103478d08d0d
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bd36edf3e33e15d18bbb6?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bd36fe4000ddb7f1261e3?view_only=b214f40525fe44b5bea3103478d08d0d
   volumes:
     800um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bcbb3d09fa484fe30a464?view_only=b214f40525fe44b5bea3103478d08d0d
