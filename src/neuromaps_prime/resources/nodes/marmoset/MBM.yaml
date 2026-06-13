@@ -1,6 +1,11 @@
 MBM:
   species: marmoset
   description: MBM Marmoset template
+  surfaces:
+    38k: 
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d5798d9836c75278b86e2?view_only=b214f40525fe44b5bea3103478d08d0d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d574f2243b23cd8d3d56c?view_only=b214f40525fe44b5bea3103478d08d0d
   volumes:
     50um:
       T2star: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c10ee838ee07b3d30a310?view_only=b214f40525fe44b5bea3103478d08d0d
