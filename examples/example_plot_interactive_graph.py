@@ -11,6 +11,7 @@ color_lut = {
     'macaque': "#DEAC52",   # Amber
     'human': "#95B46A",  # Sage green
     'chimpanzee': "#C8D0D5",   # Slate gray
+    'marmoset': "#C8D0D5",   # Red
     'volume_to_volume': '#E08E9A', # Pink
     'surface_to_surface': '#80B2D4', # Blue
     'both': '#A28DC7' # Purple
