@@ -213,3 +213,6 @@ __marimo__/
 styx_tmp/
 _version.py
 .python-version
+
+# Interactive graph output
+examples/interactive_graph.html
