@@ -126,7 +126,7 @@ class TestNeuromapsGraph:
             name="surface_xfm_test",
             source_space=source,
             target_space=target,
-            density="32k",
+            density="41k",
             hemisphere="left",
             resource_type="midthickness",
             file_path=test_surf,
@@ -135,7 +135,7 @@ class TestNeuromapsGraph:
         )
         graph.add_transform(sf, graph.surface_to_surface_key)
         fetched = graph.fetch_surface_to_surface_transform(
-            source, target, "32k", "left", "midthickness"
+            source, target, "41k", "left", "midthickness"
         )
         assert fetched is sf
 
