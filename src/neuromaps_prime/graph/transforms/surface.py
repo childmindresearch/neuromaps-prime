@@ -29,6 +29,9 @@ from neuromaps_prime.transforms.utils import (
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+# Experimental transformations that should throw a warning; only need to list one way
+EXPERIMENTAL_XFMS = [["NMT2Sym", "MBM"]]
+
 
 class SurfaceTransformOps(BaseModel):
     """Surface-to-surface transformation operations.
@@ -338,6 +341,9 @@ class SurfaceTransformOps(BaseModel):
         if len(path) < 2:
             raise ValueError(f"No valid surface path from '{source}' to '{target}'")
 
+        # Throw experimental warnings if following transformations encountered
+        self._experimental_warn(paths=path, spaces=EXPERIMENTAL_XFMS)
+
         if len(path) == 2:
             return self.cache.get_surface_transform(
                 source=source,
@@ -625,12 +631,13 @@ class SurfaceTransformOps(BaseModel):
             fwd = sep + sep.join(space) + sep
             if fwd in sep_paths:
                 self._logger.warning(
-                    f"Experimental transformation found: {'->'.join(space)}"
+                    f"Experimental transformation found: {' -> '.join(space)}"
                 )
                 continue
 
             rev = sep + sep.join(reversed(space)) + sep
             if rev in sep_paths:
                 self._logger.warning(
-                    f"Experimental transformations found: {'->'.join(reversed(space))}",
+                    "Experimental transformations found: "
+                    f"{' -> '.join(reversed(space))}",
                 )
