@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from niwrap import workbench
 from pydantic import BaseModel, PrivateAttr
@@ -25,6 +25,9 @@ from neuromaps_prime.transforms.utils import (
     estimate_surface_density,
     validate_surface_file,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class SurfaceTransformOps(BaseModel):
@@ -603,3 +606,31 @@ class SurfaceTransformOps(BaseModel):
             f"sphere.surf.gii"
         )
         return str(parent / fname)
+
+    def _experimental_warn(
+        self, paths: list[str], spaces: Sequence[Sequence[str]] | None = None
+    ) -> None:
+        """Warn if experimental transforms (spaces) encountered in transform paths.
+
+        Args:
+            paths: Transform paths
+            spaces: Experimental transforms between spaces
+        """
+        if spaces is None:
+            return
+
+        sep = "\x00"
+        sep_paths = sep + sep.join(paths) + sep
+        for space in spaces:
+            fwd = sep + sep.join(space) + sep
+            if fwd in sep_paths:
+                self._logger.warning(
+                    f"Experimental transformation found: {'->'.join(space)}"
+                )
+                continue
+
+            rev = sep + sep.join(reversed(space)) + sep
+            if rev in sep_paths:
+                self._logger.warning(
+                    f"Experimental transformations found: {'->'.join(reversed(space))}",
+                )
