@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from niwrap import workbench
 from pydantic import BaseModel, PrivateAttr
@@ -25,6 +25,14 @@ from neuromaps_prime.transforms.utils import (
     estimate_surface_density,
     validate_surface_file,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+# Experimental transformations that should throw a warning; only need to list one way
+EXPERIMENTAL_XFMS: list[tuple[list[str], str | None]] = [
+    (["NMT2Sym", "MBM"], "macaque_marmoset")
+]
 
 
 class SurfaceTransformOps(BaseModel):
@@ -50,6 +58,7 @@ class SurfaceTransformOps(BaseModel):
     cache: GraphCache
     utils: GraphUtils
     surface_to_surface_key: str = "surface_to_surface"
+    experimental_xfms: list[tuple[list[str], str | None]] | None = EXPERIMENTAL_XFMS
     _logger: logging.Logger = PrivateAttr()
 
     def model_post_init(self, __context: Any) -> None:  # noqa: ANN401
@@ -335,6 +344,11 @@ class SurfaceTransformOps(BaseModel):
         if len(path) < 2:
             raise ValueError(f"No valid surface path from '{source}' to '{target}'")
 
+        # Throw experimental warnings if following transformations encountered
+        self._experimental_warn(
+            paths=path, spaces=self.experimental_xfms, provider=provider
+        )
+
         if len(path) == 2:
             return self.cache.get_surface_transform(
                 source=source,
@@ -603,3 +617,49 @@ class SurfaceTransformOps(BaseModel):
             f"sphere.surf.gii"
         )
         return str(parent / fname)
+
+    def _experimental_warn(
+        self,
+        paths: list[str],
+        *,
+        spaces: Sequence[tuple[Sequence[str], str | None]] | None = None,
+        provider: str | None = None,
+    ) -> None:
+        """Warn if any experimental transform space matches a transform path.
+
+        Args:
+            paths: Transform paths to check.
+            spaces: Experimental transform paths paired with an optional
+                provider. A space with provider ``None`` applies to all
+                providers.
+            provider: Provider to filter spaces by. ``None`` skips filtering.
+        """
+        if not spaces:
+            return
+
+        sep = "\x00"
+        sep_paths = f"{sep}{sep.join(paths)}{sep}"
+
+        for space, experimental_provider in spaces:
+            if (
+                provider is not None
+                and experimental_provider is not None
+                and experimental_provider != provider
+            ):
+                continue
+
+            space = tuple(space)
+            fwd = f"{sep}{sep.join(space)}{sep}"
+            if fwd in sep_paths:
+                self._logger.warning(
+                    "Experimental transformation found: %s",
+                    " -> ".join(space),
+                )
+                continue
+
+            rev = f"{sep}{sep.join(reversed(space))}{sep}"
+            if rev in sep_paths:
+                self._logger.warning(
+                    "Experimental transformation found: %s",
+                    " -> ".join(reversed(space)),
+                )
