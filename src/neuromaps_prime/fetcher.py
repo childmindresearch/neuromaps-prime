@@ -6,7 +6,11 @@ from urllib.parse import urlparse
 from neuromaps_prime import remote
 
 _STORAGES = {"osf": remote.OSFStorage(), "github": remote.GitHubStorage()}
-_HOST_MAP = {"osf.io": _STORAGES["osf"], "github.com": _STORAGES["github"]}
+_HOST_MAP = {
+    "osf.io": _STORAGES["osf"],
+    "github.com": _STORAGES["github"],
+    "raw.githubusercontent.com": _STORAGES["github"],
+}
 
 
 def id_storage(uri: str) -> str | None:

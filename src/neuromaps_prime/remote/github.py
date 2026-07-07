@@ -20,23 +20,25 @@ class GitHubFileMeta(BaseModel):
 _BLOB_RE = re.compile(
     r"github\.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)/blob/(?P<ref>[^/]+)/(?P<path>.+)"
 )
+_RAW_RE = re.compile(
+    r"raw\.githubusercontent\.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)/"
+    r"(?:refs/(?:tags|heads)/)?(?P<ref>[^/]+)/(?P<path>.+)"
+)
 
 
 class GitHubStorage(BaseModel):
     """Fetch file from public GitHub repo.
 
-    Blob URL provided would be similar to:
-
-    https://github.com/{owner}/{repo}/blob/{ref}/{path}
+    Handles both blob and raw urls.
     """
 
     chunk_size: int = 8192
 
     @staticmethod
     def _parse(url: str) -> tuple[str, str, str, str]:
-        m = _BLOB_RE.search(url)
+        m = _BLOB_RE.search(url) or _RAW_RE.search(url)
         if not m:
-            raise ValueError(f"Unrecognized GitHub blob URL: {url}")
+            raise ValueError(f"Unrecognized GitHub URL: {url}")
         return m["owner"], m["repo"], m["ref"], m["path"]
 
     def get_meta(self, url: str) -> GitHubFileMeta:
