@@ -40,7 +40,6 @@ dev = [
   "types-requests>=2.33.0.20260518"
 ]
 docs = ["pdoc>=15.0.4"]
-[dependency-groups]
 tests = [
   "pandas>=3.0.3",
   "neuromodes>=0.1.0",
