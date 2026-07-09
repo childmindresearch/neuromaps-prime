@@ -34,6 +34,7 @@ NHP_SPACES = [
     "CIVETNMT",
 ]
 
+
 def get_valid_spaces(
     graph: NeuromapsGraph,
 ) -> list[str]:
@@ -138,8 +139,8 @@ def test_surface_eigenmode_preservation(
         "Compare initial Yerkes19 eigenmode to final Yerkes19 eigenmode",
     )
 
-    eigvals_final = eigvals_original    # scalar values associated with each eigenmode
-    eigvecs_final = eigvecs_original    # actual spatial patterns on the surface
+    eigvals_final = eigvals_original  # scalar values associated with each eigenmode
+    eigvecs_final = eigvecs_original  # actual spatial patterns on the surface
 
     # check that the eigenmode results are numerically the same
     assert np.allclose(
