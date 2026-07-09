@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
+from neuromaps_prime import remote
 from neuromaps_prime.fetcher import download_and_validate, id_storage
 
 if TYPE_CHECKING:
@@ -16,9 +17,20 @@ if TYPE_CHECKING:
 class TestIDStorage:
     """Test suite for identifying storage location."""
 
-    def test_osf(self) -> None:
-        """Test downloading from osf storage."""
-        assert id_storage("https://osf.io/project") == "osf"
+    @pytest.mark.parametrize(
+        ("storage", "expected"),
+        [
+            ("https://osf.io/project", "osf"),
+            ("https://github.com/owner", "github"),
+            (
+                "https://raw.githubusercontent.com/owner/repo/refs/tags/v1.0/file.txt",
+                "github",
+            ),
+        ],
+    )
+    def test_valid(self, storage: str, expected: str) -> None:
+        """Test downloading from valid storage options."""
+        assert id_storage(storage) == expected
 
     def test_unknown(self) -> None:
         """Test None returned if unknown uri."""
@@ -37,11 +49,22 @@ class TestDownloadAndValidate:
         with pytest.raises(ValueError, match="Could not identify storage"):
             download_and_validate("https://google.com", tmp_path / "invalid.txt")
 
-    @patch("neuromaps_prime.fetcher.OSFStorage")
-    def test_osf_calls_download(self, mock_cls: MagicMock, tmp_path: Path) -> None:
-        """Test OSF download."""
-        mock_osf = mock_cls.return_value
-        mock_uri = "https://files.osf.io/v1/resources/abcde"
+    @pytest.mark.parametrize(
+        ("storage_cls", "mock_uri"),
+        [
+            (remote.OSFStorage, "https://files.osf.io/v1/resources/abcde"),
+            (remote.GitHubStorage, "https://github.com/owner/repo/blob/v1.0/file.txt"),
+            (
+                remote.GitHubStorage,
+                "https://raw.githubusercontent.com/owner/repo/refs/tags/v1.0/file.txt",
+            ),
+        ],
+    )
+    def test_valid_calls_download(
+        self, storage_cls: object, mock_uri: str, tmp_path: Path
+    ) -> None:
+        """Test valid download."""
         dest = tmp_path / "out.surf.gii"
-        download_and_validate(mock_uri, dest)
-        mock_osf.download.assert_called_once_with(mock_uri, dest)
+        with patch.object(storage_cls, "download") as mock_download:
+            download_and_validate(mock_uri, dest)
+        mock_download.assert_called_once_with(mock_uri, dest)
