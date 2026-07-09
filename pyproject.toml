@@ -24,7 +24,8 @@ dependencies = [
   "scipy>=1.17.0",
   "styxpodman",
   "requests>=2.34.2",
-  "platformdirs>=4.10.0"
+  "platformdirs>=4.10.0",
+  "neuromodes>=0.1.0",
 ]
 
 [dependency-groups]
