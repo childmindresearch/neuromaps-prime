@@ -14,14 +14,15 @@ The test evaluates whether the surface transformation cycle preserves eigenmodes
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-import networkx as nx
 import numpy as np
 
 from neuromaps_prime.graph import NeuromapsGraph
-from neuromodes.eigen import EigenSolver
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,6 @@ def get_valid_spaces(
     graph: NeuromapsGraph,
 ) -> list[str]:
     """Return NHP spaces with required surface resources."""
-
     valid = []
 
     for space in NHP_SPACES:
@@ -76,9 +76,9 @@ def compute_eigenmodes(
     surface: Path,
     *,
     num_modes: int = 100,
-):
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Compute surface eigenmodes using neuromodes."""
-
+    from neuromodes.eigen import EigenSolver
     solver = EigenSolver(
         str(surface),
     )
@@ -93,16 +93,13 @@ def compute_eigenmodes(
     )
 
 
-def test_surface_eigenmode_preservation(
-    tmp_path: Path,
-):
+def test_surface_eigenmode_preservation() -> None:
     """Validate Yerkes19 eigenmode preservation.
 
-    TODO:
+    Todo:
         Replace the placeholder final eigenmode with the eigenmode
         calculated after applying the full transform cycle.
     """
-
     logging.basicConfig(
         level=logging.INFO,
     )
