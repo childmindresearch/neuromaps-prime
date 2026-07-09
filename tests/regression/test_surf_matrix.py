@@ -441,7 +441,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         color="#0044AA",
         pad=10,
     )
-    plt.xlabel("Absolute igned distance error", labelpad=12)
+    plt.xlabel("Absolute signed distance error", labelpad=12)
     plt.ylabel("Vertex count", labelpad=12)
     fig4_caption = (
         "Figure 4. Distribution of vertex-wise absolute signed-distance errors"
