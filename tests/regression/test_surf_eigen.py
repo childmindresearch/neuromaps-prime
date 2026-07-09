@@ -79,6 +79,7 @@ def compute_eigenmodes(
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Compute surface eigenmodes using neuromodes."""
     from neuromodes.eigen import EigenSolver
+
     solver = EigenSolver(
         str(surface),
     )
