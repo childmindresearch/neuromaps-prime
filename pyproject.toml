@@ -25,7 +25,6 @@ dependencies = [
   "styxpodman",
   "requests>=2.34.2",
   "platformdirs>=4.10.0",
-  "neuromodes>=0.1.0",
 ]
 
 [dependency-groups]
@@ -41,7 +40,11 @@ dev = [
   "types-requests>=2.33.0.20260518"
 ]
 docs = ["pdoc>=15.0.4"]
-tests = ["pandas>=3.0.3"]
+[dependency-groups]
+tests = [
+  "pandas>=3.0.3",
+  "neuromodes>=0.1.0",
+]
 validate = ["check-jsonschema>=0.37.1"]
 
 [build-system]
