@@ -13,7 +13,12 @@ from pydantic import BaseModel
 
 from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.graph.metadata import format_reference
-from neuromaps_prime.graph.models import TransformMetadata, TransformResult
+from neuromaps_prime.graph.models import (
+    HopMetadataDict,
+    SpaceMetadataDict,
+    TransformMetadata,
+    TransformResult,
+)
 from neuromaps_prime.graph.transforms.surface import (
     SurfaceTransformOps,  # noqa: TC001 (pydantic req'd)
 )
@@ -22,7 +27,6 @@ from neuromaps_prime.transforms.utils import validate_volume_file
 from neuromaps_prime.transforms.volume import surface_project, vol_to_vol
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
     from pathlib import Path
 
 
@@ -125,7 +129,7 @@ class VolumeTransformOps(BaseModel):
         )
 
         # Collect per-hop metadata from the resolved transform
-        hop_meta = {
+        hop_meta: HopMetadataDict = {
             "source_space": transform.source_space,
             "target_space": transform.target_space,
             "provider": transform.provider,
@@ -236,7 +240,7 @@ class VolumeTransformOps(BaseModel):
 
     def _collect_space_metadata(
         self, space_path: list[str]
-    ) -> list[dict[str, Sequence[str]]] | None:
+    ) -> list[SpaceMetadataDict] | None:
         """Collect deduplicated node-level references for the spaces in *space_path*.
 
         Args:
@@ -247,7 +251,7 @@ class VolumeTransformOps(BaseModel):
             ``None`` when no space has references.
         """
         seen: set[str] = set()
-        result: list[dict[str, Sequence[str]]] = []
+        result: list[SpaceMetadataDict] = []
 
         for space_name in space_path:
             if space_name in seen:

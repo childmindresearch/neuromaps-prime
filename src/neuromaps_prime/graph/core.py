@@ -549,7 +549,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             the output path. Acts like a :class:`~pathlib.Path` when used
             without attribute access.
         """
-        return self.surface_ops.transform_surface(
+        result = self.surface_ops.transform_surface(
             transformer_type=transformer_type,
             input_file=input_file,
             source_space=source_space,
@@ -562,6 +562,14 @@ class NeuromapsGraph(nx.MultiDiGraph):
             add_edge=add_edge,
             provider=provider,
         )
+
+        # Print metadata summary if verbose
+        if self.runner_ctx.verbose >= 1:
+            from neuromaps_prime.graph.metadata import print_metadata_summary
+
+            print_metadata_summary(result)
+
+        return result
 
     def surface_to_volume_transformer(
         self,
@@ -604,7 +612,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             the output path. Acts like a :class:`~pathlib.Path` when used
             without attribute access.
         """
-        return self.surface_ops.transform_surface_to_volume(
+        result = self.surface_ops.transform_surface_to_volume(
             transformer_type=transformer_type,
             input_file=input_file,
             ref_volume=ref_volume,
@@ -617,7 +625,15 @@ class NeuromapsGraph(nx.MultiDiGraph):
             area_resource=area_resource,
             add_edge=add_edge,
             provider=provider,
-        )  # pragma: no cover
+        )
+
+        # Print metadata summary if verbose
+        if self.runner_ctx.verbose >= 1:
+            from neuromaps_prime.graph.metadata import print_metadata_summary
+
+            print_metadata_summary(result)
+
+        return result  # pragma: no cover
 
     def volume_to_volume_transformer(
         self,
@@ -654,7 +670,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             the output path. Acts like a :class:`~pathlib.Path` when used
             without attribute access.
         """
-        return self.volume_ops.transform_volume(
+        result = self.volume_ops.transform_volume(
             input_file=input_file,
             source_space=source_space,
             target_space=target_space,
@@ -666,6 +682,14 @@ class NeuromapsGraph(nx.MultiDiGraph):
             atlas_resource_type=atlas_resource_type,
             provider=provider,
         )
+
+        # Print metadata summary if verbose
+        if self.runner_ctx.verbose >= 1:
+            from neuromaps_prime.graph.metadata import print_metadata_summary
+
+            print_metadata_summary(result)
+
+        return result
 
     def volume_to_surface_transformer(
         self,
@@ -706,7 +730,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             the output path. Acts like a :class:`~pathlib.Path` when used
             without attribute access.
         """
-        return self.volume_ops.transform_volume_to_surface(
+        result = self.volume_ops.transform_volume_to_surface(
             transformer_type=transformer_type,
             input_file=input_file,
             source_space=source_space,
@@ -719,3 +743,11 @@ class NeuromapsGraph(nx.MultiDiGraph):
             add_edge=add_edge,
             provider=provider,
         )
+
+        # Print metadata summary if verbose
+        if self.runner_ctx.verbose >= 1:
+            from neuromaps_prime.graph.metadata import print_metadata_summary
+
+            print_metadata_summary(result)
+
+        return result

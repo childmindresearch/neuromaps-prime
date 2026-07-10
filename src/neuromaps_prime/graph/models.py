@@ -3,7 +3,7 @@
 import logging
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Literal
+from typing import Literal, TypedDict
 
 from pydantic import BaseModel, Field
 
@@ -151,6 +151,36 @@ class Edge(BaseModel):
         return f"\nEdge:\n\tsurfaces=[{surface_str}],\n\tvolumes=[{volume_str}]"
 
 
+class HopMetadataDict(TypedDict, total=False):
+    """Typed dict for per-hop transform metadata.
+
+    Keys:
+        source_space: Source space for this hop.
+        target_space: Target space for this hop.
+        provider: Provider name of the transform.
+        references: Formatted reference strings.
+        notes: Caveat/note strings.
+    """
+
+    source_space: str
+    target_space: str
+    provider: str
+    references: list[str]
+    notes: list[str]
+
+
+class SpaceMetadataDict(TypedDict, total=False):
+    """Typed dict for per-space node metadata.
+
+    Keys:
+        space: Space name.
+        references: Formatted reference strings for the space.
+    """
+
+    space: str
+    references: list[str]
+
+
 class TransformMetadata:
     """Encapsulates provenance metadata for a transform pipeline.
 
@@ -167,8 +197,8 @@ class TransformMetadata:
 
     def __init__(
         self,
-        transforms: Sequence[dict[str, Sequence[str]]] | None = None,
-        spaces: Sequence[dict[str, Sequence[str]]] | None = None,
+        transforms: Sequence[HopMetadataDict] | None = None,
+        spaces: Sequence[SpaceMetadataDict] | None = None,
     ) -> None:
         """Initialize TransformMetadata.
 

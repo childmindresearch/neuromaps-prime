@@ -25,7 +25,12 @@ from neuromaps_prime.graph import models
 from neuromaps_prime.graph.builder import GraphBuilder
 from neuromaps_prime.graph.cache import GraphCache
 from neuromaps_prime.graph.core import NeuromapsGraph
-from neuromaps_prime.graph.models import TransformMetadata, TransformResult
+from neuromaps_prime.graph.models import (
+    HopMetadataDict,
+    SpaceMetadataDict,
+    TransformMetadata,
+    TransformResult,
+)
 from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps
 from neuromaps_prime.graph.transforms.volume import VolumeTransformOps
 from neuromaps_prime.graph.utils import GraphUtils
@@ -34,7 +39,9 @@ __all__ = [
     "GraphBuilder",
     "GraphCache",
     "GraphUtils",
+    "HopMetadataDict",
     "NeuromapsGraph",
+    "SpaceMetadataDict",
     "SurfaceTransformOps",
     "TransformMetadata",
     "TransformResult",

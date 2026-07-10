@@ -16,6 +16,8 @@ from pydantic import BaseModel, PrivateAttr
 from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.graph.metadata import format_reference
 from neuromaps_prime.graph.models import (
+    HopMetadataDict,
+    SpaceMetadataDict,
     SurfaceTransform,
     TransformMetadata,
     TransformResult,
@@ -209,7 +211,7 @@ class SurfaceTransformOps(BaseModel):
             format_reference(raw) for raw in (sphere_transform.references or ())
         ]
         hop_notes = list(sphere_transform.notes) if sphere_transform.notes else []
-        hop_meta = {
+        hop_meta: HopMetadataDict = {
             "source_space": sphere_transform.source_space,
             "target_space": sphere_transform.target_space,
             "provider": sphere_transform.provider,
@@ -634,7 +636,7 @@ class SurfaceTransformOps(BaseModel):
         ).sphere_out
 
         # Build per-hop metadata from both transforms
-        hop1_meta = {
+        hop1_meta: HopMetadataDict = {
             "source_space": first_transform.source_space,
             "target_space": first_transform.target_space,
             "provider": first_transform.provider,
@@ -643,7 +645,7 @@ class SurfaceTransformOps(BaseModel):
             ],
             "notes": list(first_transform.notes) if first_transform.notes else [],
         }
-        hop2_meta = {
+        hop2_meta: HopMetadataDict = {
             "source_space": unproject_transform.source_space,
             "target_space": unproject_transform.target_space,
             "provider": unproject_transform.provider,
@@ -673,7 +675,7 @@ class SurfaceTransformOps(BaseModel):
 
     def _collect_space_metadata(
         self, space_path: list[str]
-    ) -> list[dict[str, Sequence[str]]] | None:
+    ) -> list[SpaceMetadataDict] | None:
         """Collect deduplicated node-level references for the spaces in *space_path*.
 
         Walks each space, extracts node data, and formats any attached
@@ -688,7 +690,7 @@ class SurfaceTransformOps(BaseModel):
             ``None`` when no space has references.
         """
         seen: set[str] = set()
-        result: list[dict[str, Sequence[str]]] = []
+        result: list[SpaceMetadataDict] = []
 
         for space_name in space_path:
             if space_name in seen:
