@@ -105,7 +105,7 @@ class TestSurfaceToSurfaceTransformer:
     def test_no_transform(
         self, mock_transformer: NeuromapsGraph, basic_params: BasicParams
     ) -> None:
-        """Test None returned if transform not found."""
+        """Test falsy result if transform not found."""
         mock_transformer.surface_ops.transform_surface.return_value = None
 
         with patch(
@@ -115,7 +115,8 @@ class TestSurfaceToSurfaceTransformer:
             out = mock_transformer.surface_to_surface_transformer(
                 transformer_type="metric", **basic_params._asdict()
             )
-            assert out is None
+            assert not out
+            assert out.path is None
 
     def test_fetch_surface_atlas_errors(
         self, mock_transformer: NeuromapsGraph, basic_params: BasicParams

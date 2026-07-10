@@ -24,6 +24,7 @@ from neuromaps_prime.graph.models import (
     SurfaceAnnotation,
     SurfaceAtlas,
     SurfaceTransform,
+    TransformResult,
     VolumeAnnotation,
     VolumeAtlas,
     VolumeTransform,
@@ -523,7 +524,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         *,
         add_edge: bool = True,
         provider: str | None = None,
-    ) -> Path | None:
+    ) -> TransformResult:
         """Resample a metric or label GIFTI from source_space to target_space.
 
         Args:
@@ -544,21 +545,24 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 registered provider when ``None``.
 
         Returns:
-            Path to the resampled output, or ``None`` if the transform could
-            not be resolved.
+            :class:`~neuromaps_prime.graph.models.TransformResult` containing
+            the output path. Acts like a :class:`~pathlib.Path` when used
+            without attribute access.
         """
-        return self.surface_ops.transform_surface(
-            transformer_type=transformer_type,
-            input_file=input_file,
-            source_space=source_space,
-            target_space=target_space,
-            hemisphere=hemisphere,
-            output_file_path=output_file_path,
-            source_density=source_density,
-            target_density=target_density,
-            area_resource=area_resource,
-            add_edge=add_edge,
-            provider=provider,
+        return TransformResult(
+            self.surface_ops.transform_surface(
+                transformer_type=transformer_type,
+                input_file=input_file,
+                source_space=source_space,
+                target_space=target_space,
+                hemisphere=hemisphere,
+                output_file_path=output_file_path,
+                source_density=source_density,
+                target_density=target_density,
+                area_resource=area_resource,
+                add_edge=add_edge,
+                provider=provider,
+            )
         )
 
     def surface_to_volume_transformer(
@@ -576,7 +580,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         *,
         add_edge: bool = True,
         provider: str | None = None,
-    ) -> Path | None:
+    ) -> TransformResult:
         """Project a volume to surface then resample to target_space.
 
         Args:
@@ -598,21 +602,25 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 registered provider when ``None``.
 
         Returns:
-            Path to the surface resampled to volume.
+            :class:`~neuromaps_prime.graph.models.TransformResult` containing
+            the output path. Acts like a :class:`~pathlib.Path` when used
+            without attribute access.
         """
-        return self.surface_ops.transform_surface_to_volume(  # pragma: no cover
-            transformer_type=transformer_type,
-            input_file=input_file,
-            ref_volume=ref_volume,
-            source_space=source_space,
-            target_space=target_space,
-            hemisphere=hemisphere,
-            output_file_path=output_file_path,
-            source_density=source_density,
-            target_density=target_density,
-            area_resource=area_resource,
-            add_edge=add_edge,
-            provider=provider,
+        return TransformResult(  # pragma: no cover
+            self.surface_ops.transform_surface_to_volume(
+                transformer_type=transformer_type,
+                input_file=input_file,
+                ref_volume=ref_volume,
+                source_space=source_space,
+                target_space=target_space,
+                hemisphere=hemisphere,
+                output_file_path=output_file_path,
+                source_density=source_density,
+                target_density=target_density,
+                area_resource=area_resource,
+                add_edge=add_edge,
+                provider=provider,
+            )
         )
 
     def volume_to_volume_transformer(
@@ -628,7 +636,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         atlas_resource_type: str = "T1w",
         *,
         provider: str | None = None,
-    ) -> Path:
+    ) -> TransformResult:
         """Warp a volume image from source_space to target_space.
 
         Args:
@@ -646,19 +654,23 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 registered provider when ``None``.
 
         Returns:
-            Path to the warped output volume.
+            :class:`~neuromaps_prime.graph.models.TransformResult` containing
+            the output path. Acts like a :class:`~pathlib.Path` when used
+            without attribute access.
         """
-        return self.volume_ops.transform_volume(
-            input_file=input_file,
-            source_space=source_space,
-            target_space=target_space,
-            resolution=resolution,
-            resource_type=resource_type,
-            output_file_path=output_file_path,
-            interp=interp,
-            interp_params=interp_params,
-            atlas_resource_type=atlas_resource_type,
-            provider=provider,
+        return TransformResult(
+            self.volume_ops.transform_volume(
+                input_file=input_file,
+                source_space=source_space,
+                target_space=target_space,
+                resolution=resolution,
+                resource_type=resource_type,
+                output_file_path=output_file_path,
+                interp=interp,
+                interp_params=interp_params,
+                atlas_resource_type=atlas_resource_type,
+                provider=provider,
+            )
         )
 
     def volume_to_surface_transformer(
@@ -675,7 +687,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         *,
         add_edge: bool = True,
         provider: str | None = None,
-    ) -> Path | None:
+    ) -> TransformResult:
         """Project a volume to surface then resample to target_space.
 
         Args:
@@ -696,19 +708,22 @@ class NeuromapsGraph(nx.MultiDiGraph):
                 registered provider when ``None``.
 
         Returns:
-            Path to the resampled output, or ``None`` if the transform could
-            not be resolved.
+            :class:`~neuromaps_prime.graph.models.TransformResult` containing
+            the output path. Acts like a :class:`~pathlib.Path` when used
+            without attribute access.
         """
-        return self.volume_ops.transform_volume_to_surface(
-            transformer_type=transformer_type,
-            input_file=input_file,
-            source_space=source_space,
-            target_space=target_space,
-            hemisphere=hemisphere,
-            output_file_path=output_file_path,
-            source_density=source_density,
-            target_density=target_density,
-            area_resource=area_resource,
-            add_edge=add_edge,
-            provider=provider,
+        return TransformResult(
+            self.volume_ops.transform_volume_to_surface(
+                transformer_type=transformer_type,
+                input_file=input_file,
+                source_space=source_space,
+                target_space=target_space,
+                hemisphere=hemisphere,
+                output_file_path=output_file_path,
+                source_density=source_density,
+                target_density=target_density,
+                area_resource=area_resource,
+                add_edge=add_edge,
+                provider=provider,
+            )
         )

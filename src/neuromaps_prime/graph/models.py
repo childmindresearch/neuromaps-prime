@@ -149,3 +149,100 @@ class Edge(BaseModel):
         surface_str = "\n".join(s.name for s in self.surface_transforms)
         volume_str = "\n".join(v.name for v in self.volume_transforms)
         return f"\nEdge:\n\tsurfaces=[{surface_str}],\n\tvolumes=[{volume_str}]"
+
+
+class TransformResult:
+    """Result of a transformation, including output path and metadata.
+
+    When used without attribute access—printing, f-strings, passing to
+    ``os.path.*`` or ``nibabel``—behaves like a :class:`~pathlib.Path`.
+    Access :attr:`references` and :attr:`notes` for transformation metadata.
+
+    Attributes:
+        path: Output file path, or ``None`` if the transform failed.
+        references: Combined citation strings for all transforms used,
+            or ``None`` if metadata collection was not requested.
+        notes: Caveats and warnings for all transforms used,
+            or ``None`` if metadata collection was not requested.
+    """
+
+    def __init__(
+        self,
+        output_path: Path | None = None,
+        references: Sequence[str] | None = None,
+        notes: Sequence[str] | None = None,
+    ) -> None:
+        """Initialize TransformResult.
+
+        Args:
+            output_path: Path to the output file, or ``None`` on failure.
+            references: Combined citation strings for all transforms used.
+            notes: Caveats and warnings for all transforms used.
+        """
+        self._output_path = output_path
+        self.path = output_path
+        self.references: Sequence[str] | None = references
+        self.notes: Sequence[str] | None = notes
+
+    # --- Path-like protocol ---
+
+    def __eq__(self, other: object) -> bool:
+        """Compare with :class:`~pathlib.Path` or another :class:`TransformResult`.
+
+        When comparing to a :class:`~pathlib.Path`, only the output path is
+        considered. When comparing to another :class:`TransformResult`, all
+        fields are compared.
+        """
+        if isinstance(other, TransformResult):
+            return (
+                self._output_path == other._output_path
+                and self.references == other.references
+                and self.notes == other.notes
+            )
+        return self._output_path == other
+
+    def __fspath__(self) -> str:
+        """Return the filesystem path string.
+
+        Raises:
+            TypeError: If the output path is ``None``.
+        """
+        if self._output_path is None:
+            raise TypeError("Cannot get filesystem path from None result")
+        return str(self._output_path)
+
+    def __bool__(self) -> bool:
+        """Return ``True`` if the transform succeeded (path is not ``None``)."""
+        return self._output_path is not None
+
+    def __str__(self) -> str:
+        """Return the output path string."""
+        return str(self._output_path) if self._output_path else "<None>"
+
+    def __repr__(self) -> str:
+        """Return the debug representation."""
+        return (
+            f"TransformResult(path={self._output_path!r}, "
+            f"refs={len(self.references) if self.references else 0}, "
+            f"notes={len(self.notes) if self.notes else 0})"
+        )
+
+    # --- Path method delegation (test compatibility) ---
+
+    def exists(self) -> bool:
+        """Delegate to :meth:`Path.exists`."""
+        return self._output_path.exists() if self._output_path else False
+
+    @property
+    def parent(self) -> Path | None:
+        """Parent directory of the output path."""
+        return self._output_path.parent if self._output_path else None
+
+    @property
+    def name(self) -> str:
+        """Basename of the output file."""
+        return self._output_path.name if self._output_path else ""
+
+    def is_file(self) -> bool:
+        """Delegate to :meth:`Path.is_file`."""
+        return self._output_path.is_file() if self._output_path else False
