@@ -42,6 +42,8 @@ class TestTwoHops:
             spec=models.SurfaceTransform,
             fetch=MagicMock(return_value=sphere_project_to),
             provider="RheMap",
+            references=None,
+            notes=None,
         )
         mid_atlas = MagicMock(
             spec=models.SurfaceAtlas,
@@ -51,6 +53,8 @@ class TestTwoHops:
             spec=models.SurfaceTransform,
             fetch=MagicMock(return_value=sphere_unproject_from),
             provider="RheMap",
+            references=None,
+            notes=None,
         )
         return {"first": first, "mid_atlas": mid_atlas, "second": second}
 
@@ -87,7 +91,7 @@ class TestTwoHops:
                 provider="RheMap",
             )
 
-        assert result == expected_out
+        assert result.path == expected_out
         assert not any("falling back" in r.message for r in caplog.records)
 
     def test_missing_first_transform_raises(
@@ -183,7 +187,12 @@ class TestTwoHops:
     ) -> None:
         """Warning emitted when first hop uses a different provider than requested."""
         expected_out = tmp_path / "out.surf.gii"
-        first = MagicMock(spec=models.SurfaceTransform, provider="CIVET")
+        first = MagicMock(
+            spec=models.SurfaceTransform,
+            provider="CIVET",
+            references=None,
+            notes=None,
+        )
         first.fetch.return_value = tmp_path / "sphere_in.surf.gii"
 
         ops.cache.get_surface_transform.return_value = mock_transforms["second"]
@@ -227,7 +236,12 @@ class TestTwoHops:
     ) -> None:
         """Warning emitted when second hop uses a different provider than requested."""
         expected_out = tmp_path / "out.surf.gii"
-        second = MagicMock(spec=models.SurfaceTransform, provider="CIVET")
+        second = MagicMock(
+            spec=models.SurfaceTransform,
+            provider="CIVET",
+            references=None,
+            notes=None,
+        )
         second.fetch.return_value = tmp_path / "sphere_unproject_from.surf.gii"
 
         ops.cache.get_surface_transform.return_value = second

@@ -52,7 +52,10 @@ class TestVolumeToVolumeTransformer:
         transform_file = tmp_path / "transform.nii.gz"
         transform_file.touch()
         return MagicMock(
-            spec=models.VolumeTransform, fetch=MagicMock(return_value=transform_file)
+            spec=models.VolumeTransform,
+            fetch=MagicMock(return_value=transform_file),
+            references=None,
+            notes=None,
         )
 
     @pytest.fixture

@@ -549,20 +549,18 @@ class NeuromapsGraph(nx.MultiDiGraph):
             the output path. Acts like a :class:`~pathlib.Path` when used
             without attribute access.
         """
-        return TransformResult(
-            self.surface_ops.transform_surface(
-                transformer_type=transformer_type,
-                input_file=input_file,
-                source_space=source_space,
-                target_space=target_space,
-                hemisphere=hemisphere,
-                output_file_path=output_file_path,
-                source_density=source_density,
-                target_density=target_density,
-                area_resource=area_resource,
-                add_edge=add_edge,
-                provider=provider,
-            )
+        return self.surface_ops.transform_surface(
+            transformer_type=transformer_type,
+            input_file=input_file,
+            source_space=source_space,
+            target_space=target_space,
+            hemisphere=hemisphere,
+            output_file_path=output_file_path,
+            source_density=source_density,
+            target_density=target_density,
+            area_resource=area_resource,
+            add_edge=add_edge,
+            provider=provider,
         )
 
     def surface_to_volume_transformer(
@@ -606,22 +604,20 @@ class NeuromapsGraph(nx.MultiDiGraph):
             the output path. Acts like a :class:`~pathlib.Path` when used
             without attribute access.
         """
-        return TransformResult(  # pragma: no cover
-            self.surface_ops.transform_surface_to_volume(
-                transformer_type=transformer_type,
-                input_file=input_file,
-                ref_volume=ref_volume,
-                source_space=source_space,
-                target_space=target_space,
-                hemisphere=hemisphere,
-                output_file_path=output_file_path,
-                source_density=source_density,
-                target_density=target_density,
-                area_resource=area_resource,
-                add_edge=add_edge,
-                provider=provider,
-            )
-        )
+        return self.surface_ops.transform_surface_to_volume(
+            transformer_type=transformer_type,
+            input_file=input_file,
+            ref_volume=ref_volume,
+            source_space=source_space,
+            target_space=target_space,
+            hemisphere=hemisphere,
+            output_file_path=output_file_path,
+            source_density=source_density,
+            target_density=target_density,
+            area_resource=area_resource,
+            add_edge=add_edge,
+            provider=provider,
+        )  # pragma: no cover
 
     def volume_to_volume_transformer(
         self,
@@ -658,19 +654,17 @@ class NeuromapsGraph(nx.MultiDiGraph):
             the output path. Acts like a :class:`~pathlib.Path` when used
             without attribute access.
         """
-        return TransformResult(
-            self.volume_ops.transform_volume(
-                input_file=input_file,
-                source_space=source_space,
-                target_space=target_space,
-                resolution=resolution,
-                resource_type=resource_type,
-                output_file_path=output_file_path,
-                interp=interp,
-                interp_params=interp_params,
-                atlas_resource_type=atlas_resource_type,
-                provider=provider,
-            )
+        return self.volume_ops.transform_volume(
+            input_file=input_file,
+            source_space=source_space,
+            target_space=target_space,
+            resolution=resolution,
+            resource_type=resource_type,
+            output_file_path=output_file_path,
+            interp=interp,
+            interp_params=interp_params,
+            atlas_resource_type=atlas_resource_type,
+            provider=provider,
         )
 
     def volume_to_surface_transformer(
@@ -712,18 +706,16 @@ class NeuromapsGraph(nx.MultiDiGraph):
             the output path. Acts like a :class:`~pathlib.Path` when used
             without attribute access.
         """
-        return TransformResult(
-            self.volume_ops.transform_volume_to_surface(
-                transformer_type=transformer_type,
-                input_file=input_file,
-                source_space=source_space,
-                target_space=target_space,
-                hemisphere=hemisphere,
-                output_file_path=output_file_path,
-                source_density=source_density,
-                target_density=target_density,
-                area_resource=area_resource,
-                add_edge=add_edge,
-                provider=provider,
-            )
+        return self.volume_ops.transform_volume_to_surface(
+            transformer_type=transformer_type,
+            input_file=input_file,
+            source_space=source_space,
+            target_space=target_space,
+            hemisphere=hemisphere,
+            output_file_path=output_file_path,
+            source_density=source_density,
+            target_density=target_density,
+            area_resource=area_resource,
+            add_edge=add_edge,
+            provider=provider,
         )

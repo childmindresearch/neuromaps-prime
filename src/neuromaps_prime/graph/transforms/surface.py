@@ -14,7 +14,8 @@ from niwrap import workbench
 from pydantic import BaseModel, PrivateAttr
 
 from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
-from neuromaps_prime.graph.models import SurfaceTransform
+from neuromaps_prime.graph.metadata import format_reference
+from neuromaps_prime.graph.models import SurfaceTransform, TransformResult
 from neuromaps_prime.graph.utils import GraphUtils  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.transforms.surface import (
     label_resample,
@@ -86,7 +87,7 @@ class SurfaceTransformOps(BaseModel):
         *,
         add_edge: bool = True,
         provider: str | None = None,
-    ) -> Path | None:
+    ) -> TransformResult:
         """Resample a metric or label GIFTI from source_space to target_space.
 
         Two-stage process:
@@ -112,8 +113,8 @@ class SurfaceTransformOps(BaseModel):
                 registered provider when ``None``.
 
         Returns:
-            Path to the resampled output file, or ``None`` if the sphere
-            transform could not be resolved.
+            :class:`TransformResult` containing the output path and
+            accumulated references/notes from the transform pipeline.
 
         Raises:
             ValueError: If transformer_type is invalid, or required surface
@@ -140,7 +141,7 @@ class SurfaceTransformOps(BaseModel):
             provider=provider,
         )
         if sphere_transform is None:
-            return None
+            return TransformResult()
 
         target_density = target_density or self.utils.find_highest_density(
             space=target_space
@@ -169,7 +170,7 @@ class SurfaceTransformOps(BaseModel):
 
         match transformer_type:
             case "label":
-                return label_resample(
+                output_path = label_resample(
                     input_file_path=input_file,
                     current_sphere=sphere_transform.fetch(),
                     new_sphere=new_sphere,
@@ -178,7 +179,7 @@ class SurfaceTransformOps(BaseModel):
                     output_file_path=output_file_path,
                 ).label_out
             case "metric":
-                return metric_resample(
+                output_path = metric_resample(
                     input_file_path=input_file,
                     current_sphere=sphere_transform.fetch(),
                     new_sphere=new_sphere,
@@ -186,6 +187,15 @@ class SurfaceTransformOps(BaseModel):
                     area_surfs={"current-area": current_area, "new-area": new_area},
                     output_file_path=output_file_path,
                 ).metric_out
+
+        return TransformResult(
+            output_path=output_path,
+            references=[
+                format_reference(raw) for raw in (sphere_transform.references or ())
+            ]
+            or None,
+            notes=list(sphere_transform.notes) if sphere_transform.notes else None,
+        )
 
     def transform_surface_to_volume(
         self,
@@ -202,7 +212,7 @@ class SurfaceTransformOps(BaseModel):
         *,
         add_edge: bool = True,
         provider: str | None = None,
-    ) -> Path:
+    ) -> TransformResult:
         """Resample from source to target on surface and transform to volume.
 
         Two-stage pipeline:
@@ -229,8 +239,8 @@ class SurfaceTransformOps(BaseModel):
                 registered provider when ``None``.
 
         Returns:
-            Path to the resampled output NIFTI, or ``None`` if the surface
-            transform could not be resolved.
+            :class:`TransformResult` containing the output path and
+            accumulated references/notes from the transform pipeline.
 
         Raises:
             ValueError: If transformer_type is invalid, or required surface
@@ -240,7 +250,7 @@ class SurfaceTransformOps(BaseModel):
         out_surface_fname = (
             "out.label.gii" if transformer_type == "label" else "out.shape.gii"
         )
-        out_surface = self.transform_surface(
+        surface_result = self.transform_surface(
             transformer_type=transformer_type,
             input_file=input_file,
             source_space=source_space,
@@ -253,7 +263,7 @@ class SurfaceTransformOps(BaseModel):
             add_edge=add_edge,
             provider=provider,
         )
-        if out_surface is None:
+        if not surface_result:
             raise FileNotFoundError("Unable to perform transformation to target space.")
 
         target_density = target_density or self.utils.find_highest_density(
@@ -283,8 +293,8 @@ class SurfaceTransformOps(BaseModel):
                 ribbon_surfs = workbench.label_to_volume_mapping_ribbon_constrained(
                     inner_surf=ribbon["white"], outer_surf=ribbon["pial"]
                 )
-                return workbench.label_to_volume_mapping(
-                    label=out_surface,
+                output_path = workbench.label_to_volume_mapping(
+                    label=surface_result.path,
                     surface=target_surface.file_path,
                     volume_space=ref_volume,
                     volume_out=output_file_path,
@@ -294,13 +304,19 @@ class SurfaceTransformOps(BaseModel):
                 ribbon_surfs = workbench.metric_to_volume_mapping_ribbon_constrained(
                     inner_surf=ribbon["white"], outer_surf=ribbon["pial"]
                 )
-                return workbench.metric_to_volume_mapping(
-                    metric=out_surface,
+                output_path = workbench.metric_to_volume_mapping(
+                    metric=surface_result.path,
                     surface=target_surface.file_path,
                     volume_space=ref_volume,
                     volume_out=output_file_path,
                     ribbon_constrained=ribbon_surfs,
                 ).volume_out
+
+        return TransformResult(
+            output_path=output_path,
+            references=surface_result.references,
+            notes=surface_result.notes,
+        )
 
     # ------------------------------------------------------------------ #
     # Sphere transform resolution                                          #
@@ -466,7 +482,7 @@ class SurfaceTransformOps(BaseModel):
             density=density,
             hemisphere=hemisphere,
         )
-        composed_path = self._two_hops(
+        composed_result = self._two_hops(
             source_space=path[hop_idx - 2],
             mid_space=path[hop_idx - 1],
             target_space=next_space,
@@ -476,6 +492,11 @@ class SurfaceTransformOps(BaseModel):
             first_transform=current_transform,
             provider=provider,
         )
+        if composed_result.path is None:
+            raise ValueError(
+                f"Failed to compose transform from '{path[hop_idx - 2]}' to "
+                f"'{next_space}'"
+            )
         new_transform = SurfaceTransform(
             name=f"{source}_to_{next_space}_{density}_{hemisphere}_sphere",
             description=f"Surface transform from '{source}' to '{next_space}'",
@@ -484,9 +505,11 @@ class SurfaceTransformOps(BaseModel):
             density=density,
             hemisphere=hemisphere,
             resource_type="sphere",
-            file_path=composed_path,
+            file_path=composed_result.path,
             weight=float(hop_idx),
             provider=provider or "",
+            references=composed_result.references,
+            notes=composed_result.notes,
         )
         if add_edge:
             self.cache.add_surface_transform(new_transform)
@@ -503,7 +526,7 @@ class SurfaceTransformOps(BaseModel):
         output_file_path: str,
         first_transform: SurfaceTransform | None = None,
         provider: str | None = None,
-    ) -> Path:
+    ) -> TransformResult:
         """Compose two sphere transforms via project-unproject through mid_space.
 
         Args:
@@ -519,7 +542,8 @@ class SurfaceTransformOps(BaseModel):
                 registered provider when ``None``.
 
         Returns:
-            Path to the composed output sphere file.
+            :class:`TransformResult` containing the composed output sphere
+            path and accumulated references/notes from both hops.
 
         Raises:
             ValueError: If any required transform or atlas is missing.
@@ -577,12 +601,31 @@ class SurfaceTransformOps(BaseModel):
             )
         sphere_unproject_from = unproject_transform.fetch()
 
-        return surface_sphere_project_unproject(
+        composed_path = surface_sphere_project_unproject(
             sphere_in=sphere_in,
             sphere_project_to=sphere_project_to,
             sphere_unproject_from=sphere_unproject_from,
             sphere_out=output_file_path,
         ).sphere_out
+
+        # Merge references and notes from both hops, formatting to strings
+        merged_refs = [
+            format_reference(raw)
+            for raw in [
+                *(first_transform.references or ()),
+                *(unproject_transform.references or ()),
+            ]
+        ]
+        merged_notes = [
+            *(first_transform.notes or ()),
+            *(unproject_transform.notes or ()),
+        ]
+
+        return TransformResult(
+            output_path=composed_path,
+            references=merged_refs or None,
+            notes=merged_notes or None,
+        )
 
     # ------------------------------------------------------------------ #
     # Private helpers                                                      #

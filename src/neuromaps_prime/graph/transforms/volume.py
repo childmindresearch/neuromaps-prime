@@ -12,6 +12,8 @@ from niwrap import workbench
 from pydantic import BaseModel
 
 from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
+from neuromaps_prime.graph.metadata import format_reference
+from neuromaps_prime.graph.models import TransformResult
 from neuromaps_prime.graph.transforms.surface import (
     SurfaceTransformOps,  # noqa: TC001 (pydantic req'd)
 )
@@ -63,7 +65,7 @@ class VolumeTransformOps(BaseModel):
         atlas_resource_type: str = "T1w",
         *,
         provider: str | None = None,
-    ) -> Path:
+    ) -> TransformResult:
         """Warp a volume image from source_space to target_space.
 
         Args:
@@ -81,7 +83,8 @@ class VolumeTransformOps(BaseModel):
                 registered provider when ``None``.
 
         Returns:
-            Path to the warped output volume.
+            :class:`TransformResult` containing the output path and
+            accumulated references/notes from the transform pipeline.
 
         Raises:
             FileNotFoundError: If input_file does not exist.
@@ -112,12 +115,19 @@ class VolumeTransformOps(BaseModel):
                 f"(resolution='{resolution}', resource_type='{atlas_resource_type}')"
             )
 
-        return vol_to_vol(
+        output_path = vol_to_vol(
             source=input_file,
             target=target_atlas.fetch(),
             out_fpath=output_file_path,
             interp=interp,
             interp_params=interp_params,
+        )
+
+        return TransformResult(
+            output_path=output_path,
+            references=[format_reference(raw) for raw in (transform.references or ())]
+            or None,
+            notes=list(transform.notes) if transform.notes else None,
         )
 
     # ------------------------------------------------------------------ #
@@ -138,7 +148,7 @@ class VolumeTransformOps(BaseModel):
         *,
         add_edge: bool = True,
         provider: str | None = None,
-    ) -> Path | None:
+    ) -> TransformResult:
         """Project a volume into surface space then resample to target_space.
 
         Two-stage pipeline:
@@ -163,8 +173,8 @@ class VolumeTransformOps(BaseModel):
                 registered provider when ``None``.
 
         Returns:
-            Path to the resampled output GIFTI, or ``None`` if the surface
-            transform could not be resolved.
+            :class:`TransformResult` containing the output path and
+            accumulated references/notes from the transform pipeline.
 
         Raises:
             FileNotFoundError: If input_file does not exist.
