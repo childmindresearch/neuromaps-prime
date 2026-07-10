@@ -523,6 +523,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         area_resource: str = "midthickness",
         *,
         add_edge: bool = True,
+        metadata_path: Path | None = None,
         provider: str | None = None,
     ) -> TransformResult:
         """Resample a metric or label GIFTI from source_space to target_space.
@@ -541,6 +542,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             area_resource: Surface type for area correction
                 (default ``'midthickness'``).
             add_edge: Whether to register composed transforms.
+            metadata_path: Optional path to write metadata to. Format is
+                inferred from the file extension (``.md`` or ``.json``).
             provider: Optional provider name. Falls back to the first
                 registered provider when ``None``.
 
@@ -569,6 +572,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
 
             print_metadata_summary(result)
 
+        if metadata_path and result:
+            result.save_metadata(metadata_path)
+
         return result
 
     def surface_to_volume_transformer(
@@ -585,6 +591,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         area_resource: str = "midthickness",
         *,
         add_edge: bool = True,
+        metadata_path: Path | None = None,
         provider: str | None = None,
     ) -> TransformResult:
         """Project a volume to surface then resample to target_space.
@@ -604,6 +611,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             area_resource: Surface type for area correction
                 (default ``'midthickness'``).
             add_edge: Whether to register composed transforms.
+            metadata_path: Optional path to write metadata to. Format is
+                inferred from the file extension (``.md`` or ``.json``).
             provider: Optional provider name. Falls back to the first
                 registered provider when ``None``.
 
@@ -633,6 +642,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
 
             print_metadata_summary(result)
 
+        if metadata_path and result:
+            result.save_metadata(metadata_path)
+
         return result  # pragma: no cover
 
     def volume_to_volume_transformer(
@@ -647,6 +659,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         interp_params: dict[str, Any] | None = None,
         atlas_resource_type: str = "T1w",
         *,
+        metadata_path: Path | None = None,
         provider: str | None = None,
     ) -> TransformResult:
         """Warp a volume image from source_space to target_space.
@@ -662,6 +675,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             interp_params: Optional interpolation parameters.
             atlas_resource_type: Volume resource type for the reference atlas
                 lookup (default ``'T1w'``).
+            metadata_path: Optional path to write metadata to. Format is
+                inferred from the file extension (``.md`` or ``.json``).
             provider: Optional provider name. Falls back to the first
                 registered provider when ``None``.
 
@@ -689,6 +704,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
 
             print_metadata_summary(result)
 
+        if metadata_path and result:
+            result.save_metadata(metadata_path)
+
         return result
 
     def volume_to_surface_transformer(
@@ -704,6 +722,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         area_resource: str = "midthickness",
         *,
         add_edge: bool = True,
+        metadata_path: Path | None = None,
         provider: str | None = None,
     ) -> TransformResult:
         """Project a volume to surface then resample to target_space.
@@ -722,6 +741,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             area_resource: Surface type for area correction
                 (default ``'midthickness'``).
             add_edge: Whether to register composed transforms.
+            metadata_path: Optional path to write metadata to. Format is
+                inferred from the file extension (``.md`` or ``.json``).
             provider: Optional provider name. Falls back to the first
                 registered provider when ``None``.
 
@@ -749,5 +770,8 @@ class NeuromapsGraph(nx.MultiDiGraph):
             from neuromaps_prime.graph.metadata import print_metadata_summary
 
             print_metadata_summary(result)
+
+        if metadata_path and result:
+            result.save_metadata(metadata_path)
 
         return result

@@ -469,3 +469,159 @@ class TestTransformResult:
         p = tmp_path / "out.nii"
         result = models.TransformResult(output_path=p)
         assert result == p
+
+
+class TestTransformResultSaveMetadata:
+    """Tests for TransformResult.save_metadata."""
+
+    def _make_result(self, tmp_path: Path) -> models.TransformResult:
+        """Create a TransformResult with sample metadata."""
+        meta = models.TransformMetadata(
+            transforms=[
+                {
+                    "source_space": "A",
+                    "target_space": "B",
+                    "provider": "RheMap",
+                    "references": ["Smith et al. 2020"],
+                    "notes": ["Test note"],
+                }
+            ],
+            spaces=[{"space": "A", "references": ["Space A citation"]}],
+        )
+        return models.TransformResult(output_path=tmp_path / "out.gii", metadata=meta)
+
+    def test_raises_value_error_when_path_is_none(self) -> None:
+        """save_metadata raises ValueError when output path is None."""
+        result = models.TransformResult()
+        with pytest.raises(ValueError, match="output path is None"):
+            result.save_metadata()
+
+    def test_raises_not_implemented_for_unsupported_extension(
+        self, tmp_path: Path
+    ) -> None:
+        """save_metadata raises NotImplementedError for unsupported extensions."""
+        result = self._make_result(tmp_path)
+        with pytest.raises(NotImplementedError, match="Unsupported file extension"):
+            result.save_metadata(metadata_path=tmp_path / "out.txt")
+
+    def test_default_creates_md_file(self, tmp_path: Path) -> None:
+        """By default, save_metadata creates a .md file."""
+        result = self._make_result(tmp_path)
+        meta_path = result.save_metadata()
+        assert meta_path == tmp_path / "out.gii.md"
+        assert meta_path.exists()
+
+    def test_md_contains_header_and_sections(self, tmp_path: Path) -> None:
+        """Markdown output contains transformation header, spaces, and transforms."""
+        result = self._make_result(tmp_path)
+        result.save_metadata()
+        content = (tmp_path / "out.gii.md").read_text()
+        assert "# Transformation:" in content
+        assert "A -> B" in content
+        assert "## Spaces" in content
+        assert "## Transforms" in content
+        assert "**References:**" in content
+        assert "**Caveats:**" in content
+
+    def test_md_contains_space_references(self, tmp_path: Path) -> None:
+        """Markdown output includes space-level references."""
+        result = self._make_result(tmp_path)
+        result.save_metadata()
+        content = (tmp_path / "out.gii.md").read_text()
+        assert "Space A citation" in content
+
+    def test_md_contains_hop_references_and_notes(self, tmp_path: Path) -> None:
+        """Markdown output includes hop-level references and notes."""
+        result = self._make_result(tmp_path)
+        result.save_metadata()
+        content = (tmp_path / "out.gii.md").read_text()
+        assert "Smith et al. 2020" in content
+        assert "Test note" in content
+
+    def test_md_contains_timestamp(self, tmp_path: Path) -> None:
+        """Markdown output includes a timestamp footer."""
+        result = self._make_result(tmp_path)
+        result.save_metadata()
+        content = (tmp_path / "out.gii.md").read_text()
+        assert "Generated at" in content
+
+    def test_json_file_creation(self, tmp_path: Path) -> None:
+        """save_metadata creates a .json file when extension is .json."""
+        result = self._make_result(tmp_path)
+        meta_path = result.save_metadata(metadata_path=tmp_path / "out.json")
+        assert meta_path == tmp_path / "out.json"
+        assert meta_path.exists()
+
+    def test_json_contains_expected_keys(self, tmp_path: Path) -> None:
+        """JSON output contains expected top-level keys."""
+        import json
+
+        result = self._make_result(tmp_path)
+        result.save_metadata(metadata_path=tmp_path / "out.json")
+        data = json.loads((tmp_path / "out.json").read_text())
+        assert "output_file" in data
+        assert "transform_path" in data
+        assert "spaces" in data
+        assert "transforms" in data
+        assert "timestamp" in data
+
+    def test_json_transform_path(self, tmp_path: Path) -> None:
+        """JSON transform_path is derived from hop metadata."""
+        import json
+
+        result = self._make_result(tmp_path)
+        result.save_metadata(metadata_path=tmp_path / "out.json")
+        data = json.loads((tmp_path / "out.json").read_text())
+        assert data["transform_path"] == ["A", "B"]
+
+    def test_json_spaces_content(self, tmp_path: Path) -> None:
+        """JSON spaces contain space-level references."""
+        import json
+
+        result = self._make_result(tmp_path)
+        result.save_metadata(metadata_path=tmp_path / "out.json")
+        data = json.loads((tmp_path / "out.json").read_text())
+        assert data["spaces"][0]["space"] == "A"
+        assert "Space A citation" in data["spaces"][0]["references"]
+
+    def test_json_transforms_content(self, tmp_path: Path) -> None:
+        """JSON transforms contain hop-level references and notes."""
+        import json
+
+        result = self._make_result(tmp_path)
+        result.save_metadata(metadata_path=tmp_path / "out.json")
+        data = json.loads((tmp_path / "out.json").read_text())
+        hop = data["transforms"][0]
+        assert hop["source_space"] == "A"
+        assert hop["target_space"] == "B"
+        assert hop["provider"] == "RheMap"
+        assert "Smith et al. 2020" in hop["references"]
+        assert "Test note" in hop["notes"]
+
+    def test_json_timestamp_is_iso_format(self, tmp_path: Path) -> None:
+        """JSON timestamp is ISO 8601 format."""
+        import json
+        from datetime import datetime
+
+        result = self._make_result(tmp_path)
+        result.save_metadata(metadata_path=tmp_path / "out.json")
+        data = json.loads((tmp_path / "out.json").read_text())
+        ts = data["timestamp"]
+        parsed = datetime.fromisoformat(ts)
+        assert parsed is not None
+
+    def test_returns_path_to_written_file(self, tmp_path: Path) -> None:
+        """save_metadata returns the path to the written file."""
+        result = self._make_result(tmp_path)
+        meta_path = result.save_metadata()
+        assert meta_path.exists()
+        assert meta_path.suffix == ".md"
+
+    def test_no_metadata_produces_minimal_output(self, tmp_path: Path) -> None:
+        """save_metadata with no metadata produces minimal output."""
+        result = models.TransformResult(output_path=tmp_path / "out.gii")
+        result.save_metadata()
+        content = (tmp_path / "out.gii.md").read_text()
+        assert "# Transformation:" in content
+        assert "## Spaces" not in content
+        assert "## Transforms" not in content

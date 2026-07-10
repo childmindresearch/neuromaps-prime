@@ -1,5 +1,7 @@
 """Models for resources in the neuromaps_prime graph."""
 
+import datetime
+import json
 import logging
 from collections.abc import Sequence
 from pathlib import Path
@@ -10,6 +12,17 @@ from pydantic import BaseModel, Field
 from neuromaps_prime.fetcher import download_and_validate
 
 _logger = logging.getLogger(__name__)
+
+
+class _SerializedEntry(TypedDict, total=False):
+    """TypedDict for serialized metadata entry (space or transform hop)."""
+
+    space: str
+    source_space: str
+    target_space: str
+    provider: str
+    references: list[str]
+    notes: list[str]
 
 
 class Resource(BaseModel):
@@ -334,3 +347,203 @@ class TransformResult:
     def is_file(self) -> bool:
         """Delegate to :meth:`Path.is_file`."""
         return self._output_path.is_file() if self._output_path else False
+
+    # --- Disk serialization ---
+
+    def save_metadata(
+        self,
+        metadata_path: Path | None = None,
+    ) -> Path:
+        """Save per-hop and node-level metadata to disk.
+
+        Format is inferred from the file extension:
+
+        - ``.md`` → Markdown (human-readable)
+        - ``.json`` → structured JSON
+
+        Args:
+            metadata_path: Destination file path. Defaults to
+                ``<output>.md``.
+
+        Returns:
+            Path to the written metadata file.
+
+        Raises:
+            ValueError: If the output path is ``None``.
+            NotImplementedError: If the file extension is not
+                ``.md`` or ``.json``.
+        """
+        if self._output_path is None:
+            raise ValueError("Cannot save metadata: output path is None")
+
+        if metadata_path is None:
+            metadata_path = Path(str(self.path) + ".md")
+
+        ext = metadata_path.suffix.lower()
+        if ext not in (".md", ".json"):
+            raise NotImplementedError(
+                f"Unsupported file extension '{ext}'. "
+                "Use '.md' for Markdown or '.json' for JSON."
+            )
+
+        spaces_out = self._serialize_spaces()
+        transforms_out = self._serialize_transforms()
+        transform_path = self._build_space_path()
+
+        if ext == ".json":
+            self._write_json(metadata_path, transform_path, spaces_out, transforms_out)
+        else:
+            content = self._format_markdown(transform_path, spaces_out, transforms_out)
+            metadata_path.write_text(content)
+
+        return metadata_path
+
+    def _serialize_spaces(
+        self,
+    ) -> list[_SerializedEntry] | None:
+        """Convert space metadata to serializable dicts."""
+        if self.metadata is None or not self.metadata.spaces:
+            return None
+        result: list[_SerializedEntry] = []
+        for space in self.metadata.spaces:
+            entry: _SerializedEntry = {}
+            name = space.get("space")
+            if name:
+                entry["space"] = name
+            refs = space.get("references")
+            if refs:
+                entry["references"] = list(refs)
+            result.append(entry)
+        return result
+
+    def _serialize_transforms(
+        self,
+    ) -> list[_SerializedEntry] | None:
+        """Convert transform hop metadata to serializable dicts."""
+        if self.metadata is None or not self.metadata.transforms:
+            return None
+        result: list[_SerializedEntry] = []
+        for hop in self.metadata.transforms:
+            entry: _SerializedEntry = {}
+            src = hop.get("source_space")
+            if src:
+                entry["source_space"] = src
+            tgt = hop.get("target_space")
+            if tgt:
+                entry["target_space"] = tgt
+            prov = hop.get("provider")
+            if prov:
+                entry["provider"] = prov
+            refs = hop.get("references")
+            if refs:
+                entry["references"] = list(refs)
+            notes = hop.get("notes")
+            if notes:
+                entry["notes"] = list(notes)
+            result.append(entry)
+        return result
+
+    def _build_space_path(self) -> list[str]:
+        """Extract ordered space sequence from hop metadata."""
+        if self.metadata is None or self.metadata.transforms is None:
+            return []
+        space_names: list[str] = []
+        for hop in self.metadata.transforms:
+            src = hop.get("source_space", "")
+            if src and (not space_names or space_names[-1] != src):
+                space_names.append(src)
+            tgt = hop.get("target_space", "")
+            if tgt and tgt not in space_names:
+                space_names.append(tgt)
+        return space_names
+
+    def _write_json(
+        self,
+        metadata_path: Path,
+        transform_path: list[str],
+        spaces: list[_SerializedEntry] | None,
+        transforms: list[_SerializedEntry] | None,
+    ) -> None:
+        """Write metadata as a JSON file."""
+        doc: dict[str, str | list[str] | list[_SerializedEntry]] = {
+            "output_file": str(self.path)
+        }
+        if transform_path:
+            doc["transform_path"] = transform_path
+        if spaces:
+            doc["spaces"] = spaces
+        if transforms:
+            doc["transforms"] = transforms
+        doc["timestamp"] = datetime.datetime.now(datetime.UTC).isoformat()
+        metadata_path.write_text(json.dumps(doc, indent=2) + "\n")
+
+    def _format_markdown(
+        self,
+        transform_path: list[str],
+        spaces: list[_SerializedEntry] | None,
+        transforms: list[_SerializedEntry] | None,
+    ) -> str:
+        """Build a Markdown representation of the metadata."""
+        lines: list[str] = []
+        self._write_header(lines, transform_path)
+        self._write_spaces_section(lines, spaces)
+        self._write_transforms_section(lines, transforms)
+        lines.append(
+            f"*Generated at {datetime.datetime.now(datetime.UTC).isoformat()}*"
+        )
+        lines.append("")
+        return "\n".join(lines)
+
+    def _write_header(self, lines: list[str], transform_path: list[str]) -> None:
+        """Write the Markdown transformation header."""
+        if transform_path:
+            header = " -> ".join(transform_path)
+        elif self._output_path:
+            header = str(self._output_path.name)
+        else:
+            header = "Transformation"
+        lines.append(f"# Transformation: {header}")
+        lines.append("")
+
+    def _write_spaces_section(
+        self, lines: list[str], spaces: list[_SerializedEntry] | None
+    ) -> None:
+        """Write the Markdown spaces section."""
+        if not spaces:
+            return
+        lines.append("## Spaces")
+        lines.append("")
+        for space in spaces:
+            space_name = space.get("space", "Unknown")
+            lines.append(f"### {space_name}")
+            lines.append("")
+            refs = space.get("references")
+            if refs:
+                lines.extend(f"- {r}" for r in refs)
+                lines.append("")
+
+    def _write_transforms_section(
+        self, lines: list[str], transforms: list[_SerializedEntry] | None
+    ) -> None:
+        """Write the Markdown transforms section."""
+        if not transforms:
+            return
+        lines.append("## Transforms")
+        lines.append("")
+        for hop in transforms:
+            src = hop.get("source_space", "?")
+            tgt = hop.get("target_space", "?")
+            prov = hop.get("provider", "")
+            prov_str = f" [{prov}]" if prov else ""
+            lines.append(f"### {src} -> {tgt}{prov_str}")
+            lines.append("")
+            refs = hop.get("references")
+            if refs:
+                lines.append("**References:**")
+                lines.extend(f"- {r}" for r in refs)
+                lines.append("")
+            notes = hop.get("notes")
+            if notes:
+                lines.append("**Caveats:**")
+                lines.extend(f"- {n}" for n in notes)
+                lines.append("")
