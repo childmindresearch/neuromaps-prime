@@ -14,6 +14,8 @@ brains, enabling comprehensive comparative analyses of brain organization. This 
 extends the neuromaps ecosystem to provide unified access to diverse NHP brain datasets
 and specialized tools for NHP-specific analyses.
 
+Neuromaps-PRIME is an extension of Neuromaps, which was only designed for human spaces. 
+
 ## Features
 
 - Robust transformation between NHP spaces (Yerkes19, NMT2, CIVETNMT, D99, MEBRAINS)
