@@ -151,38 +151,95 @@ class Edge(BaseModel):
         return f"\nEdge:\n\tsurfaces=[{surface_str}],\n\tvolumes=[{volume_str}]"
 
 
+class TransformMetadata:
+    """Encapsulates provenance metadata for a transform pipeline.
+
+    Groups per-hop transform metadata and per-space node-level references
+    so downstream consumers (terminal output, JSON writing) can distinguish
+    between transform-level and node-level provenance.
+
+    Attributes:
+        transforms: Per-hop metadata (source/target spaces, provider, refs,
+            notes). One dict per hop in the transformation chain.
+        spaces: Per-space node-level references, deduplicated across the
+            transformation path.
+    """
+
+    def __init__(
+        self,
+        transforms: Sequence[dict[str, Sequence[str]]] | None = None,
+        spaces: Sequence[dict[str, Sequence[str]]] | None = None,
+    ) -> None:
+        """Initialize TransformMetadata.
+
+        Args:
+            transforms: Per-hop metadata dicts.
+            spaces: Per-space node-level reference dicts.
+        """
+        self.transforms = transforms
+        self.spaces = spaces
+
+
 class TransformResult:
     """Result of a transformation, including output path and metadata.
 
     When used without attribute access—printing, f-strings, passing to
     ``os.path.*`` or ``nibabel``—behaves like a :class:`~pathlib.Path`.
-    Access :attr:`references` and :attr:`notes` for transformation metadata.
+    Access :attr:`metadata` for structured provenance, or the backward-
+    compatible :attr:`references` and :attr:`notes` properties for
+    flattened lists.
 
     Attributes:
         path: Output file path, or ``None`` if the transform failed.
-        references: Combined citation strings for all transforms used,
-            or ``None`` if metadata collection was not requested.
-        notes: Caveats and warnings for all transforms used,
-            or ``None`` if metadata collection was not requested.
+        metadata: Structured provenance (per-hop + per-space), or
+            ``None`` if no transform succeeded.
     """
 
     def __init__(
         self,
         output_path: Path | None = None,
-        references: Sequence[str] | None = None,
-        notes: Sequence[str] | None = None,
+        metadata: TransformMetadata | None = None,
     ) -> None:
         """Initialize TransformResult.
 
         Args:
             output_path: Path to the output file, or ``None`` on failure.
-            references: Combined citation strings for all transforms used.
-            notes: Caveats and warnings for all transforms used.
+            metadata: Structured provenance metadata, or ``None``.
         """
         self._output_path = output_path
         self.path = output_path
-        self.references: Sequence[str] | None = references
-        self.notes: Sequence[str] | None = notes
+        self.metadata = metadata
+
+    # --- Backward-compatible computed properties ---
+
+    @property
+    def references(self) -> list[str] | None:
+        """Flattened references from all spaces and hops.
+
+        Space-level references come first, then per-hop references.
+        Returns ``None`` when no metadata is attached.
+        """
+        if self.metadata is None:
+            return None
+        refs: list[str] = []
+        for space in self.metadata.spaces or ():
+            refs.extend(space.get("references") or ())  # type: ignore[arg-type]
+        for hop in self.metadata.transforms or ():
+            refs.extend(hop.get("references") or ())  # type: ignore[arg-type]
+        return refs or None
+
+    @property
+    def notes(self) -> list[str] | None:
+        """Flattened notes from all hops.
+
+        Returns ``None`` when no metadata is attached.
+        """
+        if self.metadata is None:
+            return None
+        notes: list[str] = []
+        for hop in self.metadata.transforms or ():
+            notes.extend(hop.get("notes") or ())  # type: ignore[arg-type]
+        return notes or None
 
     # --- Path-like protocol ---
 
@@ -196,8 +253,7 @@ class TransformResult:
         if isinstance(other, TransformResult):
             return (
                 self._output_path == other._output_path
-                and self.references == other.references
-                and self.notes == other.notes
+                and self.metadata == other.metadata
             )
         return self._output_path == other
 
@@ -221,10 +277,12 @@ class TransformResult:
 
     def __repr__(self) -> str:
         """Return the debug representation."""
+        meta = self.metadata
+        n_hops = len(meta.transforms) if meta and meta.transforms else 0
+        n_spaces = len(meta.spaces) if meta and meta.spaces else 0
         return (
             f"TransformResult(path={self._output_path!r}, "
-            f"refs={len(self.references) if self.references else 0}, "
-            f"notes={len(self.notes) if self.notes else 0})"
+            f"hops={n_hops}, spaces={n_spaces})"
         )
 
     # --- Path method delegation (test compatibility) ---

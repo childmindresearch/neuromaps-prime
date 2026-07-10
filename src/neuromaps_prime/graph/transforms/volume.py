@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.graph.metadata import format_reference
-from neuromaps_prime.graph.models import TransformResult
+from neuromaps_prime.graph.models import TransformMetadata, TransformResult
 from neuromaps_prime.graph.transforms.surface import (
     SurfaceTransformOps,  # noqa: TC001 (pydantic req'd)
 )
@@ -22,6 +22,7 @@ from neuromaps_prime.transforms.utils import validate_volume_file
 from neuromaps_prime.transforms.volume import surface_project, vol_to_vol
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from pathlib import Path
 
 
@@ -123,11 +124,23 @@ class VolumeTransformOps(BaseModel):
             interp_params=interp_params,
         )
 
+        # Collect per-hop metadata from the resolved transform
+        hop_meta = {
+            "source_space": transform.source_space,
+            "target_space": transform.target_space,
+            "provider": transform.provider,
+            "references": [
+                format_reference(raw) for raw in (transform.references or ())
+            ],
+            "notes": list(transform.notes) if transform.notes else [],
+        }
+
+        # Collect node-level metadata for source and target spaces
+        space_meta = self._collect_space_metadata([source_space, target_space])
+
         return TransformResult(
             output_path=output_path,
-            references=[format_reference(raw) for raw in (transform.references or ())]
-            or None,
-            notes=list(transform.notes) if transform.notes else None,
+            metadata=TransformMetadata(transforms=[hop_meta], spaces=space_meta),
         )
 
     # ------------------------------------------------------------------ #
@@ -220,6 +233,35 @@ class VolumeTransformOps(BaseModel):
     # ------------------------------------------------------------------ #
     # Private helpers                                                      #
     # ------------------------------------------------------------------ #
+
+    def _collect_space_metadata(
+        self, space_path: list[str]
+    ) -> list[dict[str, Sequence[str]]] | None:
+        """Collect deduplicated node-level references for the spaces in *space_path*.
+
+        Args:
+            space_path: Ordered list of space names in the transform path.
+
+        Returns:
+            A list of dicts keyed by ``"space"`` and ``"references"``, or
+            ``None`` when no space has references.
+        """
+        seen: set[str] = set()
+        result: list[dict[str, Sequence[str]]] = []
+
+        for space_name in space_path:
+            if space_name in seen:
+                continue
+            seen.add(space_name)
+
+            node_data = self.utils.get_node_data(space_name)
+            raw_refs = node_data.references or ()
+            formatted = [format_reference(r) for r in raw_refs]
+
+            if formatted:
+                result.append({"space": space_name, "references": formatted})
+
+        return result or None
 
     def _project_volume_to_surface(
         self,

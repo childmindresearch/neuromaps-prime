@@ -15,7 +15,11 @@ from pydantic import BaseModel, PrivateAttr
 
 from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.graph.metadata import format_reference
-from neuromaps_prime.graph.models import SurfaceTransform, TransformResult
+from neuromaps_prime.graph.models import (
+    SurfaceTransform,
+    TransformMetadata,
+    TransformResult,
+)
 from neuromaps_prime.graph.utils import GraphUtils  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.transforms.surface import (
     label_resample,
@@ -131,12 +135,24 @@ class SurfaceTransformOps(BaseModel):
 
         source_density = source_density or estimate_surface_density(input_file)
 
+        # Find path once — reused for transform resolution and space metadata
+        space_path = self.utils.find_path(
+            source=source_space,
+            target=target_space,
+            edge_type=self.surface_to_surface_key,
+        )
+        if len(space_path) < 2:
+            raise ValueError(
+                f"No valid surface path from '{source_space}' to '{target_space}'"
+            )
+
         sphere_transform = self._resolve_sphere_transform(
             source=source_space,
             target=target_space,
             density=source_density,
             hemisphere=hemisphere,
             output_file_path=output_file_path,
+            space_path=space_path,
             add_edge=add_edge,
             provider=provider,
         )
@@ -188,13 +204,25 @@ class SurfaceTransformOps(BaseModel):
                     output_file_path=output_file_path,
                 ).metric_out
 
+        # Collect per-hop metadata from the resolved transform
+        hop_refs = [
+            format_reference(raw) for raw in (sphere_transform.references or ())
+        ]
+        hop_notes = list(sphere_transform.notes) if sphere_transform.notes else []
+        hop_meta = {
+            "source_space": sphere_transform.source_space,
+            "target_space": sphere_transform.target_space,
+            "provider": sphere_transform.provider,
+            "references": hop_refs,
+            "notes": hop_notes,
+        }
+
+        # Collect node-level metadata for all spaces in the path
+        space_meta = self._collect_space_metadata(space_path)
+
         return TransformResult(
             output_path=output_path,
-            references=[
-                format_reference(raw) for raw in (sphere_transform.references or ())
-            ]
-            or None,
-            notes=list(sphere_transform.notes) if sphere_transform.notes else None,
+            metadata=TransformMetadata(transforms=[hop_meta], spaces=space_meta),
         )
 
     def transform_surface_to_volume(
@@ -312,10 +340,10 @@ class SurfaceTransformOps(BaseModel):
                     ribbon_constrained=ribbon_surfs,
                 ).volume_out
 
+        # Propagate metadata from the surface result, wrapping updated path
         return TransformResult(
             output_path=output_path,
-            references=surface_result.references,
-            notes=surface_result.notes,
+            metadata=surface_result.metadata,
         )
 
     # ------------------------------------------------------------------ #
@@ -329,6 +357,7 @@ class SurfaceTransformOps(BaseModel):
         density: str,
         hemisphere: Literal["left", "right"],
         output_file_path: str,
+        space_path: list[str],
         *,
         add_edge: bool = True,
         provider: str | None = None,
@@ -341,31 +370,27 @@ class SurfaceTransformOps(BaseModel):
             density: Surface mesh density.
             hemisphere: ``'left'`` or ``'right'``.
             output_file_path: Base path used for intermediate output files.
+            space_path: Pre-computed path from source to target.
             add_edge: Whether to register composed transforms.
             provider: Optional provider name. Falls back to the first
                 registered provider when ``None``.
 
         Returns:
-            Resolved :class:`SurfaceTransform`, or ``None`` if no path exists.
+            Resolved :class:`SurfaceTransform`, or ``None`` if no transform
+            exists for the path.
 
         Raises:
-            ValueError: If source and target are the same, or no path exists.
+            ValueError: If source and target are the same.
         """
         if source == target:
             raise ValueError(f"Source and target spaces are the same: '{source}'")
 
-        path = self.utils.find_path(
-            source=source, target=target, edge_type=self.surface_to_surface_key
-        )
-        if len(path) < 2:
-            raise ValueError(f"No valid surface path from '{source}' to '{target}'")
-
         # Throw experimental warnings if following transformations encountered
         self._experimental_warn(
-            paths=path, spaces=self.experimental_xfms, provider=provider
+            paths=space_path, spaces=self.experimental_xfms, provider=provider
         )
 
-        if len(path) == 2:
+        if len(space_path) == 2:
             return self.cache.get_surface_transform(
                 source=source,
                 target=target,
@@ -376,7 +401,7 @@ class SurfaceTransformOps(BaseModel):
             )
 
         return self._compose_multihop(
-            path=path,
+            path=space_path,
             density=density,
             hemisphere=hemisphere,
             output_file_path=output_file_path,
@@ -608,28 +633,76 @@ class SurfaceTransformOps(BaseModel):
             sphere_out=output_file_path,
         ).sphere_out
 
-        # Merge references and notes from both hops, formatting to strings
-        merged_refs = [
-            format_reference(raw)
-            for raw in [
-                *(first_transform.references or ()),
-                *(unproject_transform.references or ()),
-            ]
-        ]
-        merged_notes = [
-            *(first_transform.notes or ()),
-            *(unproject_transform.notes or ()),
-        ]
+        # Build per-hop metadata from both transforms
+        hop1_meta = {
+            "source_space": first_transform.source_space,
+            "target_space": first_transform.target_space,
+            "provider": first_transform.provider,
+            "references": [
+                format_reference(raw) for raw in (first_transform.references or ())
+            ],
+            "notes": list(first_transform.notes) if first_transform.notes else [],
+        }
+        hop2_meta = {
+            "source_space": unproject_transform.source_space,
+            "target_space": unproject_transform.target_space,
+            "provider": unproject_transform.provider,
+            "references": [
+                format_reference(raw) for raw in (unproject_transform.references or ())
+            ],
+            "notes": list(unproject_transform.notes)
+            if unproject_transform.notes
+            else [],
+        }
+
+        # Collect node-level metadata for all spaces involved
+        space_meta = self._collect_space_metadata(
+            [source_space, mid_space, target_space]
+        )
 
         return TransformResult(
             output_path=composed_path,
-            references=merged_refs or None,
-            notes=merged_notes or None,
+            metadata=TransformMetadata(
+                transforms=[hop1_meta, hop2_meta], spaces=space_meta
+            ),
         )
 
     # ------------------------------------------------------------------ #
     # Private helpers                                                      #
     # ------------------------------------------------------------------ #
+
+    def _collect_space_metadata(
+        self, space_path: list[str]
+    ) -> list[dict[str, Sequence[str]]] | None:
+        """Collect deduplicated node-level references for the spaces in *space_path*.
+
+        Walks each space, extracts node data, and formats any attached
+        references.  Shared intermediate spaces only contribute once
+        (deduplicated by space name).
+
+        Args:
+            space_path: Ordered list of space names in the transform path.
+
+        Returns:
+            A list of dicts keyed by ``"space"`` and ``"references"``, or
+            ``None`` when no space has references.
+        """
+        seen: set[str] = set()
+        result: list[dict[str, Sequence[str]]] = []
+
+        for space_name in space_path:
+            if space_name in seen:
+                continue
+            seen.add(space_name)
+
+            node_data = self.utils.get_node_data(space_name)
+            raw_refs = node_data.references or ()
+            formatted = [format_reference(r) for r in raw_refs]
+
+            if formatted:
+                result.append({"space": space_name, "references": formatted})
+
+        return result or None
 
     def _hop_output_path(
         self,

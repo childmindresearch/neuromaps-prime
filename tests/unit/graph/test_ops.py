@@ -41,6 +41,8 @@ class TestTwoHops:
         first = MagicMock(
             spec=models.SurfaceTransform,
             fetch=MagicMock(return_value=sphere_project_to),
+            source_space="A",
+            target_space="B",
             provider="RheMap",
             references=None,
             notes=None,
@@ -52,6 +54,8 @@ class TestTwoHops:
         second = MagicMock(
             spec=models.SurfaceTransform,
             fetch=MagicMock(return_value=sphere_unproject_from),
+            source_space="B",
+            target_space="C",
             provider="RheMap",
             references=None,
             notes=None,
@@ -189,6 +193,8 @@ class TestTwoHops:
         expected_out = tmp_path / "out.surf.gii"
         first = MagicMock(
             spec=models.SurfaceTransform,
+            source_space="A",
+            target_space="B",
             provider="CIVET",
             references=None,
             notes=None,
@@ -238,6 +244,8 @@ class TestTwoHops:
         expected_out = tmp_path / "out.surf.gii"
         second = MagicMock(
             spec=models.SurfaceTransform,
+            source_space="B",
+            target_space="C",
             provider="CIVET",
             references=None,
             notes=None,

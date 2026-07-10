@@ -54,6 +54,9 @@ class TestVolumeToVolumeTransformer:
         return MagicMock(
             spec=models.VolumeTransform,
             fetch=MagicMock(return_value=transform_file),
+            source_space="Yerkes19",
+            target_space="NMT2Sym",
+            provider="Test",
             references=None,
             notes=None,
         )

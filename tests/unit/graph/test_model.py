@@ -321,3 +321,151 @@ class TestEdge:
         edge = models.Edge()
         assert len(edge.surface_transforms) == 0
         assert len(edge.volume_transforms) == 0
+
+
+class TestTransformMetadata:
+    """Tests for TransformMetadata class."""
+
+    def test_init_defaults_to_none(self) -> None:
+        """TransformMetadata defaults to None for both attributes."""
+        meta = models.TransformMetadata()
+        assert meta.transforms is None
+        assert meta.spaces is None
+
+    def test_init_with_transforms(self) -> None:
+        """TransformMetadata stores transforms list."""
+        transforms = [
+            {
+                "source_space": "A",
+                "target_space": "B",
+                "provider": "RheMap",
+                "references": ["Smith et al. 2020"],
+                "notes": ["Note 1"],
+            }
+        ]
+        meta = models.TransformMetadata(transforms=transforms)
+        assert meta.transforms == transforms
+        assert meta.spaces is None
+
+    def test_init_with_spaces(self) -> None:
+        """TransformMetadata stores spaces list."""
+        spaces = [{"space": "A", "references": ["Space A citation"]}]
+        meta = models.TransformMetadata(spaces=spaces)
+        assert meta.spaces == spaces
+        assert meta.transforms is None
+
+    def test_init_with_both(self) -> None:
+        """TransformMetadata stores both transforms and spaces."""
+        transforms = [
+            {
+                "source_space": "A",
+                "target_space": "B",
+                "provider": "RheMap",
+                "references": ["Smith et al. 2020"],
+                "notes": ["Note 1"],
+            }
+        ]
+        spaces = [{"space": "A", "references": ["Space A citation"]}]
+        meta = models.TransformMetadata(transforms=transforms, spaces=spaces)
+        assert meta.transforms == transforms
+        assert meta.spaces == spaces
+
+
+class TestTransformResult:
+    """Tests for TransformResult class."""
+
+    def test_init_defaults(self) -> None:
+        """TransformResult defaults to None for path and metadata."""
+        result = models.TransformResult()
+        assert result.path is None
+        assert result.metadata is None
+
+    def test_backward_compat_references_empty(self) -> None:
+        """References property returns None when no metadata."""
+        result = models.TransformResult()
+        assert result.references is None
+
+    def test_backward_compat_notes_empty(self) -> None:
+        """Notes property returns None when no metadata."""
+        result = models.TransformResult()
+        assert result.notes is None
+
+    def test_backward_compat_references_flattens_spaces_and_hops(
+        self, tmp_path: Path
+    ) -> None:
+        """References property flattens space and hop references."""
+        meta = models.TransformMetadata(
+            transforms=[
+                {"references": ["Hop ref 1"]},
+                {"references": ["Hop ref 2"]},
+            ],
+            spaces=[
+                {"references": ["Space ref 1"]},
+            ],
+        )
+        result = models.TransformResult(output_path=tmp_path / "out.nii", metadata=meta)
+        assert result.references == ["Space ref 1", "Hop ref 1", "Hop ref 2"]
+
+    def test_backward_compat_notes_flattens_hops(self, tmp_path: Path) -> None:
+        """Notes property flattens hop notes."""
+        meta = models.TransformMetadata(
+            transforms=[
+                {"notes": ["Note 1"]},
+                {"notes": ["Note 2"]},
+            ],
+        )
+        result = models.TransformResult(output_path=tmp_path / "out.nii", metadata=meta)
+        assert result.notes == ["Note 1", "Note 2"]
+
+    def test_backward_compat_references_returns_none_when_empty(
+        self, tmp_path: Path
+    ) -> None:
+        """References returns None when all lists are empty."""
+        meta = models.TransformMetadata(transforms=[{"references": []}], spaces=[])
+        result = models.TransformResult(output_path=tmp_path / "out.nii", metadata=meta)
+        assert result.references is None
+
+    def test_backward_compat_notes_returns_none_when_empty(
+        self, tmp_path: Path
+    ) -> None:
+        """Notes returns None when all lists are empty."""
+        meta = models.TransformMetadata(transforms=[{"notes": []}])
+        result = models.TransformResult(output_path=tmp_path / "out.nii", metadata=meta)
+        assert result.notes is None
+
+    def test_repr_shows_hop_and_space_counts(self, tmp_path: Path) -> None:
+        """__repr__ shows hop count and space count."""
+        meta = models.TransformMetadata(
+            transforms=[{"references": []}, {"references": []}],
+            spaces=[{"references": []}, {"references": []}, {"references": []}],
+        )
+        result = models.TransformResult(output_path=tmp_path / "out.nii", metadata=meta)
+        r = repr(result)
+        assert "hops=2" in r
+        assert "spaces=3" in r
+
+    def test_repr_shows_zero_when_no_metadata(self, tmp_path: Path) -> None:
+        """__repr__ shows zero counts when no metadata."""
+        result = models.TransformResult(output_path=tmp_path / "out.nii")
+        r = repr(result)
+        assert "hops=0" in r
+        assert "spaces=0" in r
+
+    def test_eq_with_transform_result(self, tmp_path: Path) -> None:
+        """Equality compares path and metadata."""
+        meta = models.TransformMetadata(transforms=[{"references": ["Ref"]}], spaces=[])
+        result_a = models.TransformResult(
+            output_path=tmp_path / "out.nii", metadata=meta
+        )
+        result_b = models.TransformResult(
+            output_path=tmp_path / "out.nii", metadata=meta
+        )
+        result_c = models.TransformResult(output_path=tmp_path / "out.nii")
+        assert result_a == result_b
+        assert result_a != result_c
+
+    def test_eq_with_path(self, tmp_path: Path) -> None:
+        """Equality with Path only compares output path."""
+        p = tmp_path / "out.nii"
+        result = models.TransformResult(output_path=p)
+        assert result == p

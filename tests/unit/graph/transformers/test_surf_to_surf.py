@@ -167,28 +167,13 @@ class TestSurfaceToSurfaceTransformPrivate:
                 density="1k",
                 hemisphere="left",
                 output_file_path="same_target",
-                add_edge=False,
-            )
-
-    def test_no_valid_path(self, mock_graph: NeuromapsGraph) -> None:
-        """Test error raised if no valid path found."""
-        mock_graph.surface_ops.utils.find_path = MagicMock(return_value=["only_source"])
-        with pytest.raises(ValueError, match="No valid surface path from"):
-            mock_graph.surface_ops._resolve_sphere_transform(
-                source="NMT2Sym",
-                target="fsLR",
-                density="32k",
-                hemisphere="left",
-                output_file_path="no_path",
+                space_path=["A"],
                 add_edge=False,
             )
 
     def test_single_hop(self, mock_graph: NeuromapsGraph) -> None:
         """Test single-hop surface transformation."""
         mock_result = MagicMock(spec=models.SurfaceTransform)
-        mock_graph.surface_ops.utils.find_path = MagicMock(
-            return_value=["Yerkes19", "fsLR"]
-        )
         mock_graph.surface_ops.cache.get_surface_transform = MagicMock(
             return_value=mock_result
         )
@@ -198,6 +183,7 @@ class TestSurfaceToSurfaceTransformPrivate:
             density="32k",
             hemisphere="right",
             output_file_path="single_hop",
+            space_path=["Yerkes19", "fsLR"],
             add_edge=False,
         )
         mock_graph.surface_ops.cache.get_surface_transform.assert_called_once()
@@ -206,9 +192,6 @@ class TestSurfaceToSurfaceTransformPrivate:
     def test_multi_hop(self, mock_graph: NeuromapsGraph) -> None:
         """Test multi-hop path surface transformation."""
         mock_result = MagicMock(spec=models.SurfaceTransform)
-        mock_graph.surface_ops.utils.find_path = MagicMock(
-            return_value=["CIVETNMT", "Yerkes19", "fsLR"]
-        )
         mock_graph.surface_ops._compose_multihop = MagicMock(return_value=mock_result)
         out = mock_graph.surface_ops._resolve_sphere_transform(
             source="CIVETNMT",
@@ -216,6 +199,7 @@ class TestSurfaceToSurfaceTransformPrivate:
             density="32k",
             hemisphere="right",
             output_file_path="multi_hop",
+            space_path=["CIVETNMT", "Yerkes19", "fsLR"],
             add_edge=False,
         )
         mock_graph.surface_ops._compose_multihop.assert_called_once()
@@ -308,6 +292,9 @@ class TestSurfaceToSurfaceTransformPrivate:
         """Test two hop functionality."""
         first_xfm = MagicMock(
             spec=models.SurfaceTransform,
+            source_space="A",
+            target_space="B",
+            provider="RheMap",
             references=None,
             notes=None,
         )
@@ -320,6 +307,9 @@ class TestSurfaceToSurfaceTransformPrivate:
 
         target_xfm = MagicMock(
             spec=models.SurfaceTransform,
+            source_space="B",
+            target_space="C",
+            provider="RheMap",
             references=None,
             notes=None,
         )
@@ -379,6 +369,9 @@ class TestSurfaceToSurfaceTransformPrivate:
         """Test error raised when no mid atlas."""
         first_transform = MagicMock(
             spec=models.SurfaceTransform,
+            source_space="A",
+            target_space="B",
+            provider="RheMap",
             references=None,
             notes=None,
         )
@@ -402,6 +395,9 @@ class TestSurfaceToSurfaceTransformPrivate:
         """Test error raised when no target transformation."""
         first_transform = MagicMock(
             spec=models.SurfaceTransform,
+            source_space="A",
+            target_space="B",
+            provider="RheMap",
             references=None,
             notes=None,
         )
@@ -447,6 +443,7 @@ class TestTransformSurface:
         """Mock surface operations."""
         graph.surface_ops.cache = MagicMock()
         graph.surface_ops.utils = MagicMock()
+        graph.surface_ops.utils.find_path.return_value = ["fsLR", "MNI152"]
         graph.surface_ops._resolve_sphere_transform = MagicMock()
         return graph
 
@@ -475,7 +472,12 @@ class TestTransformSurface:
     ) -> None:
         """Metric and label paths call correct resample fn and return output path."""
         mock_ops.surface_ops._resolve_sphere_transform.return_value = MagicMock(
-            fetch=MagicMock(return_value=tmp_path / "sphere.surf.gii")
+            fetch=MagicMock(return_value=tmp_path / "sphere.surf.gii"),
+            source_space="fsLR",
+            target_space="MNI152",
+            provider="Test",
+            references=None,
+            notes=None,
         )
         mock_ops.surface_ops.cache.require_surface_atlas.return_value = MagicMock(
             fetch=MagicMock(return_value=tmp_path / "area.surf.gii")
@@ -499,7 +501,14 @@ class TestTransformSurface:
     ) -> None:
         """source_density=None triggers estimate_surface_density."""
         basic_params["source_density"] = None
-        mock_ops.surface_ops._resolve_sphere_transform.return_value = MagicMock()
+        mock_ops.surface_ops._resolve_sphere_transform.return_value = MagicMock(
+            fetch=MagicMock(return_value=tmp_path / "sphere.surf.gii"),
+            source_space="fsLR",
+            target_space="MNI152",
+            provider="Test",
+            references=None,
+            notes=None,
+        )
         mock_ops.surface_ops.cache.require_surface_atlas.return_value = MagicMock(
             fetch=MagicMock(return_value=tmp_path / "area.surf.gii")
         )
@@ -520,7 +529,14 @@ class TestTransformSurface:
     ) -> None:
         """target_density=None calls find_highest_density."""
         basic_params["target_density"] = None
-        mock_ops.surface_ops._resolve_sphere_transform.return_value = MagicMock()
+        mock_ops.surface_ops._resolve_sphere_transform.return_value = MagicMock(
+            fetch=MagicMock(return_value=tmp_path / "sphere.surf.gii"),
+            source_space="fsLR",
+            target_space="MNI152",
+            provider="Test",
+            references=None,
+            notes=None,
+        )
         mock_ops.surface_ops.utils.find_highest_density.return_value = "164k"
         mock_ops.surface_ops.cache.require_surface_atlas.return_value = MagicMock(
             fetch=MagicMock(return_value=tmp_path / "area.surf.gii")
