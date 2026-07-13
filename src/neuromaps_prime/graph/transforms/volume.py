@@ -15,7 +15,6 @@ from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'
 from neuromaps_prime.graph.metadata import format_reference
 from neuromaps_prime.graph.models import (
     HopMetadataDict,
-    SpaceMetadataDict,
     TransformMetadata,
     TransformResult,
 )
@@ -140,7 +139,7 @@ class VolumeTransformOps(BaseModel):
         }
 
         # Collect node-level metadata for source and target spaces
-        space_meta = self._collect_space_metadata([source_space, target_space])
+        space_meta = self.utils.collect_space_metadata([source_space, target_space])
 
         return TransformResult(
             output_path=output_path,
@@ -237,35 +236,6 @@ class VolumeTransformOps(BaseModel):
     # ------------------------------------------------------------------ #
     # Private helpers                                                      #
     # ------------------------------------------------------------------ #
-
-    def _collect_space_metadata(
-        self, space_path: list[str]
-    ) -> list[SpaceMetadataDict] | None:
-        """Collect deduplicated node-level references for the spaces in *space_path*.
-
-        Args:
-            space_path: Ordered list of space names in the transform path.
-
-        Returns:
-            A list of dicts keyed by ``"space"`` and ``"references"``, or
-            ``None`` when no space has references.
-        """
-        seen: set[str] = set()
-        result: list[SpaceMetadataDict] = []
-
-        for space_name in space_path:
-            if space_name in seen:
-                continue
-            seen.add(space_name)
-
-            node_data = self.utils.get_node_data(space_name)
-            raw_refs = node_data.references or ()
-            formatted = [format_reference(r) for r in raw_refs]
-
-            if formatted:
-                result.append({"space": space_name, "references": formatted})
-
-        return result or None
 
     def _project_volume_to_surface(
         self,

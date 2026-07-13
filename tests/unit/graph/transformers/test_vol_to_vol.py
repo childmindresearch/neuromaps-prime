@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from neuromaps_prime.graph import NeuromapsGraph, models
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class BasicParams(NamedTuple):
@@ -47,18 +50,12 @@ class TestVolumeToVolumeTransformer:
         )
 
     @pytest.fixture
-    def mock_volume_transform(self, tmp_path: Path) -> MagicMock:
+    def mock_volume_transform(
+        self, mock_volume_transform_factory: Callable[..., MagicMock]
+    ) -> MagicMock:
         """Create mock volume transform object."""
-        transform_file = tmp_path / "transform.nii.gz"
-        transform_file.touch()
-        return MagicMock(
-            spec=models.VolumeTransform,
-            fetch=MagicMock(return_value=transform_file),
-            source_space="Yerkes19",
-            target_space="NMT2Sym",
-            provider="Test",
-            references=None,
-            notes=None,
+        return mock_volume_transform_factory(
+            source_space="Yerkes19", target_space="NMT2Sym"
         )
 
     @pytest.fixture

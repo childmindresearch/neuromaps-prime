@@ -288,33 +288,20 @@ class TestSurfaceToSurfaceTransformPrivate:
         assert result.file_path == composed_path
         assert result.weight == 2.0
 
-    def test_two_hops(self, mock_graph: NeuromapsGraph, tmp_path: Path) -> None:
+    def test_two_hops(
+        self,
+        mock_graph: NeuromapsGraph,
+        mock_surface_transform_factory: MagicMock,
+        tmp_path: Path,
+    ) -> None:
         """Test two hop functionality."""
-        first_xfm = MagicMock(
-            spec=models.SurfaceTransform,
-            source_space="A",
-            target_space="B",
-            provider="RheMap",
-            references=None,
-            notes=None,
-        )
-        first_xfm.fetch.return_value = tmp_path / "sphere_in.surf.gii"
-        first_xfm.fetch.return_value.touch()
+        first_xfm = mock_surface_transform_factory(source_space="A", target_space="B")
 
         mid_atlas = MagicMock(spec=models.SurfaceAtlas)
         mid_atlas.fetch.return_value = tmp_path / "sphere_project.surf.gii"
         mid_atlas.fetch.return_value.touch()
 
-        target_xfm = MagicMock(
-            spec=models.SurfaceTransform,
-            source_space="B",
-            target_space="C",
-            provider="RheMap",
-            references=None,
-            notes=None,
-        )
-        target_xfm.fetch.return_value = tmp_path / "sphere_unproject.surf.gii"
-        target_xfm.fetch.return_value.touch()
+        target_xfm = mock_surface_transform_factory(source_space="B", target_space="C")
 
         output_path = tmp_path / "output_surf.gii"
         output_path.touch()
@@ -364,18 +351,12 @@ class TestSurfaceToSurfaceTransformPrivate:
             )
 
     def test_two_hops_no_mid_atlas(
-        self, mock_graph: NeuromapsGraph, tmp_path: Path
+        self, mock_graph: NeuromapsGraph, mock_surface_transform_factory: MagicMock
     ) -> None:
         """Test error raised when no mid atlas."""
-        first_transform = MagicMock(
-            spec=models.SurfaceTransform,
-            source_space="A",
-            target_space="B",
-            provider="RheMap",
-            references=None,
-            notes=None,
+        first_transform = mock_surface_transform_factory(
+            source_space="A", target_space="B"
         )
-        first_transform.fetch.return_value = tmp_path / "sphere_in.surf.gii"
         mock_graph.surface_ops.utils.find_common_density = MagicMock(return_value="41k")
         mock_graph.surface_ops.cache.get_surface_atlas = MagicMock(return_value=None)
         with pytest.raises(ValueError, match="No sphere atlas found for"):
@@ -390,18 +371,15 @@ class TestSurfaceToSurfaceTransformPrivate:
             )
 
     def test_two_hops_no_target_xfm(
-        self, mock_graph: NeuromapsGraph, tmp_path: Path
+        self,
+        mock_graph: NeuromapsGraph,
+        mock_surface_transform_factory: MagicMock,
+        tmp_path: Path,
     ) -> None:
         """Test error raised when no target transformation."""
-        first_transform = MagicMock(
-            spec=models.SurfaceTransform,
-            source_space="A",
-            target_space="B",
-            provider="RheMap",
-            references=None,
-            notes=None,
+        first_transform = mock_surface_transform_factory(
+            source_space="A", target_space="B"
         )
-        first_transform.fetch.return_value = tmp_path / "sphere_in.surf.gii"
         mid_atlas = MagicMock(spec=models.SurfaceAtlas)
         mid_atlas.fetch.return_value = tmp_path / "sphere_project.surf.gii"
 

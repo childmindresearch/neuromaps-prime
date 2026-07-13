@@ -10,6 +10,7 @@ from typing import Literal, TypedDict
 from pydantic import BaseModel, Field
 
 from neuromaps_prime.fetcher import download_and_validate
+from neuromaps_prime.graph.metadata import _build_space_path
 
 _logger = logging.getLogger(__name__)
 
@@ -219,8 +220,8 @@ class TransformMetadata:
             transforms: Per-hop metadata dicts.
             spaces: Per-space node-level reference dicts.
         """
-        self.transforms = transforms
-        self.spaces = spaces
+        self.transforms = list(transforms) if transforms is not None else None
+        self.spaces = list(spaces) if spaces is not None else None
 
 
 class TransformResult:
@@ -447,15 +448,7 @@ class TransformResult:
         """Extract ordered space sequence from hop metadata."""
         if self.metadata is None or self.metadata.transforms is None:
             return []
-        space_names: list[str] = []
-        for hop in self.metadata.transforms:
-            src = hop.get("source_space", "")
-            if src and (not space_names or space_names[-1] != src):
-                space_names.append(src)
-            tgt = hop.get("target_space", "")
-            if tgt and tgt not in space_names:
-                space_names.append(tgt)
-        return space_names
+        return _build_space_path(self.metadata.transforms)
 
     def _write_json(
         self,

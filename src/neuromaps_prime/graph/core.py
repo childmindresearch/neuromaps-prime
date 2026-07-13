@@ -18,6 +18,7 @@ from platformdirs import user_cache_dir
 
 from neuromaps_prime.graph.builder import GraphBuilder
 from neuromaps_prime.graph.cache import GraphCache
+from neuromaps_prime.graph.metadata import print_metadata_summary
 from neuromaps_prime.graph.models import (
     Edge,
     Node,
@@ -510,6 +511,11 @@ class NeuromapsGraph(nx.MultiDiGraph):
     # Transformers                                                         #
     # ------------------------------------------------------------------ #
 
+    def _print_metadata_if_verbose(self, result: TransformResult) -> None:
+        """Print a grouped metadata summary when verbosity is ≥ 1."""
+        if self.runner_ctx.verbose >= 1:
+            print_metadata_summary(result)
+
     def surface_to_surface_transformer(
         self,
         transformer_type: Literal["metric", "label"],
@@ -567,10 +573,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         )
 
         # Print metadata summary if verbose
-        if self.runner_ctx.verbose >= 1:
-            from neuromaps_prime.graph.metadata import print_metadata_summary
-
-            print_metadata_summary(result)
+        self._print_metadata_if_verbose(result)
 
         if metadata_path and result:
             result.save_metadata(metadata_path)
@@ -637,10 +640,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         )
 
         # Print metadata summary if verbose
-        if self.runner_ctx.verbose >= 1:
-            from neuromaps_prime.graph.metadata import print_metadata_summary
-
-            print_metadata_summary(result)
+        self._print_metadata_if_verbose(result)
 
         if metadata_path and result:
             result.save_metadata(metadata_path)
@@ -699,10 +699,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         )
 
         # Print metadata summary if verbose
-        if self.runner_ctx.verbose >= 1:
-            from neuromaps_prime.graph.metadata import print_metadata_summary
-
-            print_metadata_summary(result)
+        self._print_metadata_if_verbose(result)
 
         if metadata_path and result:
             result.save_metadata(metadata_path)
@@ -766,10 +763,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
         )
 
         # Print metadata summary if verbose
-        if self.runner_ctx.verbose >= 1:
-            from neuromaps_prime.graph.metadata import print_metadata_summary
-
-            print_metadata_summary(result)
+        self._print_metadata_if_verbose(result)
 
         if metadata_path and result:
             result.save_metadata(metadata_path)
