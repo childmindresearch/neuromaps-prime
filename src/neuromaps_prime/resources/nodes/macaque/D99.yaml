@@ -20,19 +20,19 @@ D99:
     250um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52302a52f9bb3897129cf?view_only=b214f40525fe44b5bea3103478d08d0d
       annotation:
-        AT:
+        PC:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f510c80941e7c8fa7abf3?view_only=b214f40525fe44b5bea3103478d08d0d
           notes:
             - 'lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f510b7da771710ca7aa44?view_only=b214f40525fe44b5bea3103478d08d0d'
-        AT_sym:
+        PC_sym:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f510a270229e9b9679c4d?view_only=b214f40525fe44b5bea3103478d08d0d
           notes:
             - Symmetrized/mirrored variant of the D99 v2.0 atlas.
-        AT_hemi_R:
+        PC_hemi_R:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f510c45728813016799d7?view_only=b214f40525fe44b5bea3103478d08d0d
           notes:
             - Right-hemisphere-only subset of the D99 v2.0 atlas.
-        AT_seg_cortical:
+        PC_seg_cortical:
           notes:
             - 'cortical-only lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f510acd87cca2536799ee?view_only=b214f40525fe44b5bea3103478d08d0d'
         TPL:
