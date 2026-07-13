@@ -1,4 +1,4 @@
-"""Shared fixtures for transformer unit tests.
+"""Shared fixtures for graph unit tests.
 
 Provides factory fixtures that construct MagicMock instances with the
 standard transform attributes (source_space, target_space, provider,

@@ -453,12 +453,17 @@ class TestTransformResult:
 
     def test_eq_with_transform_result(self, tmp_path: Path) -> None:
         """Equality compares path and metadata."""
-        meta = models.TransformMetadata(transforms=[{"references": ["Ref"]}], spaces=[])
+        meta_a = models.TransformMetadata(
+            transforms=[{"references": ["Ref"]}], spaces=[]
+        )
+        meta_b = models.TransformMetadata(
+            transforms=[{"references": ["Ref"]}], spaces=[]
+        )
         result_a = models.TransformResult(
-            output_path=tmp_path / "out.nii", metadata=meta
+            output_path=tmp_path / "out.nii", metadata=meta_a
         )
         result_b = models.TransformResult(
-            output_path=tmp_path / "out.nii", metadata=meta
+            output_path=tmp_path / "out.nii", metadata=meta_b
         )
         result_c = models.TransformResult(output_path=tmp_path / "out.nii")
         assert result_a == result_b
@@ -469,6 +474,22 @@ class TestTransformResult:
         p = tmp_path / "out.nii"
         result = models.TransformResult(output_path=p)
         assert result == p
+
+    def test_fspath_delegates_to_path(self, tmp_path: Path) -> None:
+        """os.fspath() returns the output path string."""
+        import os
+
+        p = tmp_path / "out.gii"
+        result = models.TransformResult(output_path=p)
+        assert os.fspath(result) == str(p)
+
+    def test_fspath_raises_when_none(self) -> None:
+        """os.fspath() raises TypeError when output path is None."""
+        import os
+
+        result = models.TransformResult()
+        with pytest.raises(TypeError, match="Cannot get filesystem path"):
+            os.fspath(result)
 
 
 class TestTransformResultSaveMetadata:

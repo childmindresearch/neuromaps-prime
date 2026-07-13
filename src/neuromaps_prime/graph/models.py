@@ -223,6 +223,12 @@ class TransformMetadata:
         self.transforms = list(transforms) if transforms is not None else None
         self.spaces = list(spaces) if spaces is not None else None
 
+    def __eq__(self, other: object) -> bool:
+        """Compare two TransformMetadata instances by value."""
+        if not isinstance(other, TransformMetadata):
+            return NotImplemented
+        return self.transforms == other.transforms and self.spaces == other.spaces
+
 
 class TransformResult:
     """Result of a transformation, including output path and metadata.
@@ -267,9 +273,9 @@ class TransformResult:
             return None
         refs: list[str] = []
         for space in self.metadata.spaces or ():
-            refs.extend(space.get("references") or ())  # type: ignore[arg-type]
+            refs.extend(space.get("references", ()))
         for hop in self.metadata.transforms or ():
-            refs.extend(hop.get("references") or ())  # type: ignore[arg-type]
+            refs.extend(hop.get("references", ()))
         return refs or None
 
     @property
@@ -282,7 +288,7 @@ class TransformResult:
             return None
         notes: list[str] = []
         for hop in self.metadata.transforms or ():
-            notes.extend(hop.get("notes") or ())  # type: ignore[arg-type]
+            notes.extend(hop.get("notes", ()))
         return notes or None
 
     # --- Path-like protocol ---

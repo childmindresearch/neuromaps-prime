@@ -538,3 +538,12 @@ class TestTransformSurface:
         assert not result
         assert result.path is None
         mock_ops.surface_ops.cache.require_surface_atlas.assert_not_called()
+
+    def test_no_valid_path(self, mock_ops: NeuromapsGraph, basic_params: dict) -> None:
+        """Raises ValueError when find_path returns fewer than two spaces."""
+        mock_ops.surface_ops.utils.find_path.return_value = ["fsLR"]
+        with pytest.raises(ValueError, match="No valid surface path"):
+            mock_ops.surface_ops.transform_surface(
+                transformer_type="metric", **basic_params
+            )
+        mock_ops.surface_ops._resolve_sphere_transform.assert_not_called()
