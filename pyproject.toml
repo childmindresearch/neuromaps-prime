@@ -73,7 +73,6 @@ omit = [
 ]
 
 [tool.deptry.per_rule_ignores]
-DEP002 = ["scipy"]  # ignore defined dependency thats not used
 
 [tool.mypy]
 exclude = ['tests']

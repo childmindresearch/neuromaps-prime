@@ -6,4 +6,6 @@ graph-agnostic: functions accept NumPy arrays and file paths, and any
 integration with the brain-map graph happens externally.
 """
 
-__all__ = []
+from neuromaps_prime.analysis.stats import efficient_pearsonr
+
+__all__ = ["efficient_pearsonr"]
