@@ -1,7 +1,5 @@
 """Brain template space graph and transformation pipeline.
 
-Public API
-----------
 The primary entry point is :class:`NeuromapsGraph`. The submodule classes
 are exported for typing, testing, and advanced use cases (e.g. injecting a
 custom cache or ops instance).

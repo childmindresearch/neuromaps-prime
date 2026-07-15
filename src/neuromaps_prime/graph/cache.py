@@ -41,25 +41,18 @@ class GraphCache(BaseModel):
     multi-hop transforms at runtime.
 
     Attributes:
-    ----------
-    surface_atlas:
-        Maps ``(space, density, hemisphere, resource_type)`` to a
-        :class:`SurfaceAtlas`.
-    surface_transform:
-        Maps ``(source, target, density, hemisphere, resource_type, provider)`` to a
-        :class:`SurfaceTransform`.
-    surface_annotation:
-        Maps ``(space, label, density, hemisphere)`` to a
-        :class:`SurfaceAnnotation`.
-    volume_atlas:
-        Maps ``(space, resolution, resource_type)`` to a
-        :class:`VolumeAtlas`.
-    volume_transform:
-        Maps ``(source, target, resolution, resource_type, provider)`` to a
-        :class:`VolumeTransform`.
-    volume_annotation:
-        Maps ``(space, label, resolution)`` to a
-        :class:`VolumeAnnotation`.
+        surface_atlas: Maps ``(space, density, hemisphere, resource_type)`` to a
+            :class:`SurfaceAtlas`.
+        surface_transform: Maps ``(source, target, density, hemisphere,
+            resource_type, provider)`` to a :class:`SurfaceTransform`.
+        surface_annotation: Maps ``(space, label, density, hemisphere)`` to a
+            :class:`SurfaceAnnotation`.
+        volume_atlas: Maps ``(space, resolution, resource_type)`` to a
+            :class:`VolumeAtlas`.
+        volume_transform: Maps ``(source, target, resolution, resource_type,
+            provider)`` to a :class:`VolumeTransform`.
+        volume_annotation: Maps ``(space, label, resolution)`` to a
+            :class:`VolumeAnnotation`.
     """
 
     model_config = {"arbitrary_types_allowed": True}

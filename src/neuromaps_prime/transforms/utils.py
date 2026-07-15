@@ -10,7 +10,7 @@ def estimate_surface_density(surface_file: Path) -> str:
     """Return density string of GIFTI surface based on vertex count.
 
     Args:
-    surface_file: Path to the input GIFTI surface file.
+        surface_file: Path to the input GIFTI surface file.
 
     Returns:
         Density string (e.g., '32k', '10k').

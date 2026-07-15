@@ -43,14 +43,12 @@ class SurfaceTransformOps(BaseModel):
     cache and graph via the injected helpers.
 
     Attributes:
-    ----------
-    cache:
-        The :class:`GraphCache` instance — used for all resource lookups and
-        receives newly composed transforms.
-    utils:
-        The :class:`GraphUtils` instance for path-finding and density helpers.
-    surface_to_surface_key:
-        Edge key used for surface-to-surface edges in the graph.
+        cache: The :class:`GraphCache` instance — used for all resource lookups
+            and receives newly composed transforms.
+        utils: The :class:`GraphUtils` instance for path-finding and density
+            helpers.
+        surface_to_surface_key: Edge key used for surface-to-surface edges in
+            the graph.
     """
 
     model_config = {"arbitrary_types_allowed": True}
