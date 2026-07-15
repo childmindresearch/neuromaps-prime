@@ -139,7 +139,9 @@ def _hierarchical_multipartite_layout(
         if n_nodes == 1:
             x_positions = [0]
         else:
-            x_positions = np.linspace(-n_nodes / 2, n_nodes / 2, n_nodes).tolist()
+            x_positions = np.linspace(
+                -n_nodes / 2, n_nodes / 2, n_nodes, dtype=int
+            ).tolist()
 
         for j, node in enumerate(nodes):
             pos[node] = (x_positions[j], y_offset)
