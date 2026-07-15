@@ -17,7 +17,9 @@ class NeuromapsPrimeYAML(NamedTuple):
     """Path to default Neuromaps-PRIME graph resources.
 
     Attributes:
-        yaml: Default graph framework for neuromaps-prime.
+        nodes: Paths to node definition YAML files.
+        surface_edges: Paths to surface edge definition YAML files.
+        volume_edges: Paths to volume edge definition YAML files.
     """
 
     nodes: tuple[Path, ...]

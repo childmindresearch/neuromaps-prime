@@ -37,12 +37,10 @@ class GraphBuilder(BaseModel):
     """Parses YAML/dict definitions and populates a graph and its cache.
 
     Attributes:
-    ----------
-    cache:
-        The :class:`GraphCache` instance that will be populated during build.
-    data_dir:
-        Optional root directory prepended to all relative file paths found in
-        the YAML. When ``None``, paths are used as-is.
+        cache: The :class:`GraphCache` instance that will be populated during
+            build.
+        data_dir: Optional root directory prepended to all relative file paths
+            found in the YAML. When ``None``, paths are used as-is.
     """
 
     model_config = {"arbitrary_types_allowed": True}

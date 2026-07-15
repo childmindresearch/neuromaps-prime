@@ -27,16 +27,13 @@ class VolumeTransformOps(BaseModel):
     """Volume-to-volume and volume-to-surface transformation operations.
 
     Attributes:
-    ----------
-    cache:
-        The :class:`GraphCache` instance used for all resource lookups.
-    utils:
-        The :class:`GraphUtils` instance for validation and density helpers.
-    surface_ops:
-        The :class:`SurfaceTransformOps` instance for the surface stage of
-        volume-to-surface transformations.
-    volume_to_volume_key:
-        Edge key used for volume-to-volume edges in the graph.
+        cache: The :class:`GraphCache` instance used for all resource lookups.
+        utils: The :class:`GraphUtils` instance for validation and density
+            helpers.
+        surface_ops: The :class:`SurfaceTransformOps` instance for the surface
+            stage of volume-to-surface transformations.
+        volume_to_volume_key: Edge key used for volume-to-volume edges in the
+            graph.
     """
 
     model_config = {"arbitrary_types_allowed": True}

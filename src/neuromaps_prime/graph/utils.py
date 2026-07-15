@@ -19,11 +19,8 @@ class GraphUtils(BaseModel):
     """Graph traversal, validation, and introspection utilities.
 
     Attributes:
-    ----------
-    graph:
-        The underlying NetworkX :class:`~networkx.MultiDiGraph`.
-    cache:
-        The :class:`GraphCache` instance used for resource lookups.
+        graph: The underlying NetworkX :class:`~networkx.MultiDiGraph`.
+        cache: The :class:`GraphCache` instance used for resource lookups.
     """
 
     model_config = {"arbitrary_types_allowed": True}
