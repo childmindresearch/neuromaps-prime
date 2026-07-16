@@ -12,14 +12,3 @@ CIVETNMT:
       white:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522eda52f9bb3897129b8?view_only=b214f40525fe44b5bea3103478d08d0d
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522ec4f3931c54c90480e?view_only=b214f40525fe44b5bea3103478d08d0d
-      annotation:
-        PC_hemi_L:
-          notes:
-            - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f508f406d0c8a912c2f4b?view_only=b214f40525fe44b5bea3103478d08d0d'
-        PC_CHARM_scale_3:
-          notes:
-            - 'CHARM atlas scale 3 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f509d1c9eacbdd92c2ac3?view_only=b214f40525fe44b5bea3103478d08d0d'
-        PC_CHARM_scale_4:
-          notes:
-            - 'CHARM atlas scale 4 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f5096406d0c8a912c2f51?view_only=b214f40525fe44b5bea3103478d08d0d'
-

@@ -18,8 +18,7 @@ NMT2Sym:
       annotation:
         SD:
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f5213cd87cca253679ac7?view_only=b214f40525fe44b5bea3103478d08d0d
-          notes: 
-            - Sulcal depth map (hemi-R)
+
   volumes:
     250um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523de8a846359933ec5a5?view_only=b214f40525fe44b5bea3103478d08d0d
