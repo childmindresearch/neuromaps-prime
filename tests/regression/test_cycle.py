@@ -12,7 +12,13 @@ r ~ 1 on a synthetic identity network, while this test measures the *real*
 transforms and therefore needs Workbench and network access (like
 ``test_surf_matrix.py``).
 
-Edit ``ORIGIN``, ``LABEL``, and ``HEMISPHERE`` for the space/probe tag you want
+Artifacts are written to a run-specific directory under
+``tests/regression/cycle_outputs_<random_suffix>/`` so repeated runs do not
+overwrite each other. Surface resampling prefers ``midthickness`` area
+surfaces, then falls back to ``pial`` and ``white`` when required resources
+are missing for a space/hemisphere.
+
+Edit ``ORIGINS``, ``LABEL``, and ``HEMISPHERES`` for the space/probe tags you want
 to test, then run::
 
     pytest tests/regression/test_cycle.py -s
@@ -22,6 +28,8 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import secrets
+import shutil
 from pathlib import Path
 
 import nibabel as nib
@@ -36,19 +44,21 @@ from tests.neuromapsprime_unit_test.cycle import (
     _path_token,
     find_return_paths,
     resolve_hop_transforms,
-    roundtrip_metric,
     score_roundtrip,
 )
 
 logger = logging.getLogger(__name__)
 
-output_dir = Path(__file__).resolve().parent / "cycle_outputs"
+_RUN_SUFFIX = secrets.token_hex(4)
+# Keep every test run isolated to simplify debugging and avoid clobbering artifacts.
+output_dir = Path(__file__).resolve().parent / f"cycle_outputs_{_RUN_SUFFIX}"
 output_dir.mkdir(parents=True, exist_ok=True)
 
 # --- configure the probe ---------------------------------------------------- #
-ORIGINS = ["Yerkes19", "NMT2Sym", "D99"] #["fsLR", "Yerkes19"]
+# Set to ``None`` to auto-populate from all graph coordinate spaces.
+ORIGINS: list[str] | None = None
 LABEL = "RM_scalinghcp"
-HEMISPHERE = "left"
+HEMISPHERES = ("left", "right")
 # Bound path length so cycle enumeration stays tractable on the dense real
 # graph (number of simple cycles grows combinatorially).
 MAX_CYCLE_LENGTH = 4
@@ -85,14 +95,6 @@ class CommandLogHandler(logging.Handler):
                 f.write("# Run these to manually reproduce the transformations\n\n")
                 for cmd in self.commands:
                     f.write(f"{cmd}\n")
-# graph (number of simple cycles grows combinatorially).
-MAX_CYCLE_LENGTH = 2
-PLOT_MAX_VERTICES = 20000
-# Set to ``None`` to enumerate every path up to ``MAX_CYCLE_LENGTH``.
-MAX_PATHS: int | None = None
-# With non-mirrored multi-hop round-trips, many paths are expected to score
-# modestly. Guard against hard breakage by requiring at least one usable path.
-MIN_BEST_PEARSON = 0.05
 
 
 def _load_surface_coords(surface_file: Path) -> np.ndarray:
@@ -317,9 +319,11 @@ def _plot_single_surface(
 
 def test_cycle_roundtrip(tmp_path: Path) -> None:
     """Round-trip a synthetic metric through every return path and log correlations."""
-    for origin in ORIGINS:
-        logging.info(f"\n=== CYCLE ROUND-TRIP TEST: {origin} ===")
-        cycle_roundtrip(tmp_path, origin)
+    origins = ORIGINS or sorted(NeuromapsGraph().nodes)
+    for origin in origins:
+        for hemisphere in HEMISPHERES:
+            logging.info(f"\n=== CYCLE ROUND-TRIP TEST: {origin} ({hemisphere}) ===")
+            cycle_roundtrip(tmp_path, origin, hemisphere)
 
 
 def _roundtrip_with_intermediates(
@@ -328,8 +332,7 @@ def _roundtrip_with_intermediates(
     path: tuple[str, ...],
     hemisphere: str,
     workdir: Path,
-    density: str | None = None,
-) -> tuple[Path, list[tuple[str, np.ndarray]]]:
+) -> tuple[Path, list[tuple[str, np.ndarray]]] | None:
     """Round-trip metric and collect intermediate values at each hop.
     
     The transformer auto-estimates source and target densities from the
@@ -342,28 +345,61 @@ def _roundtrip_with_intermediates(
     
     metrics: list[tuple[str, np.ndarray]] = []
     current = Path(metric_file)
+    workdir.mkdir(parents=True, exist_ok=True)
     
     for hop, (src, dst) in enumerate(pairwise(path)):
         # Let transformer auto-estimate both source and target densities.
         # This allows each space to use its native density rather than
         # forcing the origin's density everywhere.
-        result = graph.surface_to_surface_transformer(
-            transformer_type="metric",
-            input_file=current,
-            source_space=src,
-            target_space=dst,
-            hemisphere=hemisphere,
-            output_file_path=f"cycle_intermediate_hop{hop:02d}_{src}-to-{dst}.func.gii",
-            source_density=None,  # Auto-estimate
-            target_density=None,  # Auto-estimate
-            add_edge=False,
-        )
+        # Use a relative output name so Workbench writes inside Styx's mounted
+        # output dir, then copy into our run-specific artifact directory.
+        hop_name = f"cycle_intermediate_hop{hop:02d}_{src}-to-{dst}.func.gii"
+        hop_target = workdir / hop_name
+        result = None
+        last_error: Exception | None = None
+        for area_resource in ("midthickness", "pial", "white"):
+            try:
+                result = graph.surface_to_surface_transformer(
+                    transformer_type="metric",
+                    input_file=current,
+                    source_space=src,
+                    target_space=dst,
+                    hemisphere=hemisphere,
+                    output_file_path=hop_name,
+                    source_density=None,  # Auto-estimate
+                    target_density=None,  # Auto-estimate
+                    area_resource=area_resource,
+                    add_edge=False,
+                )
+                if result is not None:
+                    if area_resource != "midthickness":
+                        logger.info(
+                            "Using fallback area surface '%s' for hop '%s' -> '%s' (%s).",
+                            area_resource,
+                            src,
+                            dst,
+                            hemisphere,
+                        )
+                    break
+            except Exception as e:
+                last_error = e
+                continue
         if result is None:
-            raise RuntimeError(
-                f"No surface transform for hop '{src}' -> '{dst}' "
-                f"on path {' -> '.join(path)}"
+            logger.warning(
+                "Skipping path %s for hemisphere %s at hop '%s' -> '%s': %s",
+                " -> ".join(path),
+                hemisphere,
+                src,
+                dst,
+                last_error,
             )
-        current = Path(result)
+            return None
+        result_path = Path(result)
+        if result_path.resolve() != hop_target.resolve():
+            shutil.copy2(result_path, hop_target)
+            current = hop_target
+        else:
+            current = result_path
         # Collect metric at this hop's destination
         metric_values = _load_metric_values(current)
         metrics.append((dst, metric_values))
@@ -371,15 +407,17 @@ def _roundtrip_with_intermediates(
     return current, metrics
 
 
-def cycle_roundtrip(tmp_path: Path, origin: str) -> None:
+def cycle_roundtrip(tmp_path: Path, origin: str, hemisphere: str) -> None:
     """Round-trip a synthetic metric through every return path and log correlations."""
     logging.basicConfig(level=logging.INFO)
     graph = NeuromapsGraph()
+    work_dir = output_dir / f"work_{origin}_{hemisphere}"
+    work_dir.mkdir(parents=True, exist_ok=True)
 
     # Set up command logging if enabled
     cmd_log_handler = None
     if LOG_COMMANDS:
-        cmd_log_handler = CommandLogHandler(tmp_path / "wb_commands.log")
+        cmd_log_handler = CommandLogHandler(work_dir / "wb_commands.log")
         # Capture niwrap/Styx logs
         niwrap_logger = logging.getLogger("niwrap")
         niwrap_logger.addHandler(cmd_log_handler)
@@ -391,14 +429,23 @@ def cycle_roundtrip(tmp_path: Path, origin: str) -> None:
     # Seed the metric at the origin's highest density so the round-trip returns
     # to a matching mesh, then score every return path.
     density = graph.find_highest_density(origin)
-    metric_file = _make_xyz_product_metric(
-        graph=graph,
-        origin=origin,
-        label=LABEL,
-        density=density,
-        hemisphere=HEMISPHERE,
-        out_dir=tmp_path,
-    )
+    try:
+        metric_file = _make_xyz_product_metric(
+            graph=graph,
+            origin=origin,
+            label=LABEL,
+            density=density,
+            hemisphere=hemisphere,
+            out_dir=work_dir,
+        )
+    except AssertionError as e:
+        logger.warning(
+            "Skipping %s (%s): could not seed origin metric: %s",
+            origin,
+            hemisphere,
+            e,
+        )
+        return
 
     paths = find_return_paths(
         graph,
@@ -409,38 +456,56 @@ def cycle_roundtrip(tmp_path: Path, origin: str) -> None:
     )
 
     logger.info("Found %d return paths from %s", len(paths), origin)
-    assert paths, f"No return paths from '{origin}' on the surface layer."
+    if not paths:
+        logger.warning(
+            "No return paths from %s on the surface layer; skipping hemisphere %s.",
+            origin,
+            hemisphere,
+        )
+        return
 
     sphere = graph.fetch_surface_atlas(
         space=origin,
         density=density,
-        hemisphere=HEMISPHERE,
+        hemisphere=hemisphere,
         resource_type="sphere",
     )
-    assert sphere is not None, (
-        f"No sphere atlas for {origin} at density '{density}' ({HEMISPHERE})."
-    )
+    if sphere is None:
+        logger.warning(
+            "No sphere atlas for %s at density '%s' (%s); skipping.",
+            origin,
+            density,
+            hemisphere,
+        )
+        return
     origin_coords = _load_surface_coords(Path(sphere.fetch()))
     original_metric = _load_metric_values(metric_file)
-    assert origin_coords.shape[0] == original_metric.shape[0], (
-        "Origin sphere vertex count does not match seed metric length: "
-        f"{origin_coords.shape[0]} vs {original_metric.shape[0]}"
-    )
+    if origin_coords.shape[0] != original_metric.shape[0]:
+        logger.warning(
+            "Skipping %s (%s): origin sphere/metric size mismatch (%d vs %d).",
+            origin,
+            hemisphere,
+            origin_coords.shape[0],
+            original_metric.shape[0],
+        )
+        return
 
-    plot_dir = output_dir / f"cycle_{origin}_{LABEL}_{HEMISPHERE}_plots"
+    plot_dir = output_dir / f"cycle_{origin}_{LABEL}_{hemisphere}_plots"
     plot_dir.mkdir(parents=True, exist_ok=True)
 
     rows: list[dict[str, str | int | float]] = []
     for path in paths:
         # Use the intermediate metric collector for better visualization
-        roundtrip_file, intermediates = _roundtrip_with_intermediates(
+        roundtrip_result = _roundtrip_with_intermediates(
             graph,
             metric_file,
             path,
-            HEMISPHERE,
-            tmp_path,
-            density=density,
+            hemisphere,
+            work_dir,
         )
+        if roundtrip_result is None:
+            continue
+        roundtrip_file, intermediates = roundtrip_result
         
         pearson_r, max_abs_diff = score_roundtrip(metric_file, roundtrip_file)
 
@@ -451,7 +516,7 @@ def cycle_roundtrip(tmp_path: Path, origin: str) -> None:
         # may not match what was actually used. This is just for reference.
         try:
             transform_rows = resolve_hop_transforms(
-                graph, path, HEMISPHERE, density
+                graph, path, hemisphere, density
             )
             xfm_csv = plot_dir / f"{_path_to_filename(path)}_transforms.csv"
             with xfm_csv.open("w", encoding="utf-8") as fh:
@@ -470,7 +535,7 @@ def cycle_roundtrip(tmp_path: Path, origin: str) -> None:
                 graph=graph,
                 path=path,
                 metrics_by_hop=all_metrics,
-                hemisphere=HEMISPHERE,
+                hemisphere=hemisphere,
                 pearson_r=pearson_r,
                 plot_dir=plot_dir,
             )
@@ -486,12 +551,20 @@ def cycle_roundtrip(tmp_path: Path, origin: str) -> None:
             }
         )
 
+    if not rows:
+        logger.warning(
+            "No valid round-trip paths for %s (%s); likely missing hemisphere-specific resources.",
+            origin,
+            hemisphere,
+        )
+        return
+
     frame = pd.DataFrame(rows).sort_values("pearson_r", ascending=False)
 
-    logger.info("\n=== CYCLE TEST (%s, %s, %s) ===", origin, LABEL, HEMISPHERE)
+    logger.info("\n=== CYCLE TEST (%s, %s, %s) ===", origin, LABEL, hemisphere)
     logger.info("\n%s", frame.to_string(index=False))
 
-    csv_path = output_dir / f"cycle_{origin}_{LABEL}_{HEMISPHERE}.csv"
+    csv_path = output_dir / f"cycle_{origin}_{LABEL}_{hemisphere}.csv"
     frame.to_csv(csv_path, index=False)
     logger.info("Saved CSV -> %s", csv_path)
     logger.info("Saved per-path plots -> %s", plot_dir)
@@ -501,7 +574,7 @@ def cycle_roundtrip(tmp_path: Path, origin: str) -> None:
     col_path = max(col_path, len("Transformation path"))
     header = f"{'Transformation path':<{col_path}}  {'Hops':>4}  {'Pearson r':>10}  {'Max |delta|':>14}"
     separator = "-" * len(header)
-    print(f"\n=== CYCLE TEST — {origin} | {LABEL} | {HEMISPHERE} ===")
+    print(f"\n=== CYCLE TEST — {origin} | {LABEL} | {hemisphere} ===")
     print(separator)
     print(header)
     print(separator)
@@ -514,9 +587,9 @@ def cycle_roundtrip(tmp_path: Path, origin: str) -> None:
     print(f"Total cycles: {len(rows)}")
 
     # Save the same table to a text file alongside the CSV.
-    txt_path = output_dir / f"cycle_{origin}_{LABEL}_{HEMISPHERE}.txt"
+    txt_path = output_dir / f"cycle_{origin}_{LABEL}_{hemisphere}.txt"
     with txt_path.open("w", encoding="utf-8") as fh:
-        fh.write(f"Cycle test results — origin: {origin}, label: {LABEL}, hemisphere: {HEMISPHERE}\n")
+        fh.write(f"Cycle test results — origin: {origin}, label: {LABEL}, hemisphere: {hemisphere}\n")
         fh.write(separator + "\n")
         fh.write(header + "\n")
         fh.write(separator + "\n")

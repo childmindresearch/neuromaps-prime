@@ -902,6 +902,19 @@ wheels = [
 ]
 
 [[package]]
+name = "matplotlib-surface-plotting"
+version = "0.14"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "nibabel" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d3/00/0d0c33489128c5d84c8ac55985c380310e843f17524c739bced4afabdf31/matplotlib_surface_plotting-0.14.tar.gz", hash = "sha256:b01f21309e82223d3d12921a54658529dc2b1781f7696818ec1fae8fe6046795", size = 15557, upload-time = "2025-07-25T09:13:02.929Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/48/a8/f43a1fe6cc79261397996e8969794d844a9a70a402cf23806e9af30dc71c/matplotlib_surface_plotting-0.14-py3-none-any.whl", hash = "sha256:3292bbe211bc37acc91938b78d738d0749465ef04072f71f3f69276b246d3597", size = 14629, upload-time = "2025-07-25T09:13:01.812Z" },
+]
+
+[[package]]
 name = "mypy"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1006,6 +1019,7 @@ docs = [
     { name = "pdoc" },
 ]
 tests = [
+    { name = "matplotlib-surface-plotting" },
     { name = "pandas" },
 ]
 validate = [
@@ -1040,7 +1054,10 @@ dev = [
     { name = "types-requests", specifier = ">=2.33.0.20260518" },
 ]
 docs = [{ name = "pdoc", specifier = ">=15.0.4" }]
-tests = [{ name = "pandas", specifier = ">=3.0.3" }]
+tests = [
+    { name = "matplotlib-surface-plotting", specifier = ">=0.1.0" },
+    { name = "pandas", specifier = ">=3.0.3" },
+]
 validate = [{ name = "check-jsonschema", specifier = ">=0.37.1" }]
 
 [[package]]
@@ -2151,7 +2168,7 @@ resolution-markers = [
     "python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" } },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/7a/97/5a3609c4f8d58b039179648e62dd220f89864f56f7357f5d4f45c29eb2cc/scipy-1.17.1.tar.gz", hash = "sha256:95d8e012d8cb8816c226aef832200b1d45109ed4464303e997c5b13122b297c0", size = 30573822, upload-time = "2026-02-23T00:26:24.851Z" }
 wheels = [
@@ -2233,7 +2250,7 @@ resolution-markers = [
     "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "numpy", version = "2.5.1", source = { registry = "https://pypi.org/simple" } },
+    { name = "numpy", version = "2.5.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a7/25/c2700dfaf6442b4effaa91af24ebce5dc9d31bb4a69706313aae70d72cd0/scipy-1.18.0.tar.gz", hash = "sha256:67b2ad2ad54c72ca6d04975a9b2df8c3638c34ddd5b28738e94fc2b57929d378", size = 30774447, upload-time = "2026-06-19T15:01:43.456Z" }
 wheels = [
