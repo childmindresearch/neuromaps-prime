@@ -178,7 +178,7 @@ def efficient_pearsonr(
         n_obs = np.sum(np.logical_not(np.isnan(corr)), axis=0)
         corr = np.nansum(corr, axis=0)
     else:
-        n_obs = len(a)
+        n_obs = a.shape[0]
         corr = np.sum(corr, axis=0)
     corr = np.squeeze(np.clip(corr / (n_obs - 1), -1.0, 1.0))
 
