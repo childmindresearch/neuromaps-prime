@@ -1,7 +1,7 @@
 - from: NCBR
   to: fsaverage
   surfaces:
-    human_chimpanzee:
+    CIVET:
       164k:
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f53c00e86708937eeae1?view_only=b214f40525fe44b5bea3103478d08d0d
@@ -10,7 +10,7 @@
 - from: fsaverage
   to: NCBR
   surfaces:
-    human_chimpanzee:
+    CIVET:
       164k:
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f5137ef401e8b5cc76a8?view_only=b214f40525fe44b5bea3103478d08d0d
