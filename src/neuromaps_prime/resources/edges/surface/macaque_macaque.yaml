@@ -61,6 +61,11 @@
 - from: D99
   to: MEBRAINS
   surfaces:
+    RheMAPSurf_standard:
+      168k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.D99-to-MEBRAINS.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.D99-to-MEBRAINS.sphere.reg.surf.gii
     CIVET:
       41k:
         midthickness:
@@ -73,6 +78,11 @@
 - from: D99
   to: NMT2Sym
   surfaces:
+    RheMAPSurf_standard:
+      168k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.D99-to-NMTv2.0-sym.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.D99-to-NMTv2.0-sym.sphere.reg.surf.gii
     CIVET:
       41k:
         midthickness:
@@ -85,6 +95,11 @@
 - from: D99
   to: Yerkes19
   surfaces:
+    RheMAPSurf_standard:
+      168k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.D99-to-YRK.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.D99-to-YRK.sphere.reg.surf.gii
     CIVET:
       41k:
         midthickness:
@@ -109,6 +124,11 @@
 - from: MEBRAINS
   to: D99
   surfaces:
+    RheMAPSurf_standard:
+      101k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.MEBRAINS-to-D99.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.MEBRAINS-to-D99.sphere.reg.surf.gii
     CIVET:
       101k:
         midthickness:
@@ -121,6 +141,11 @@
 - from: MEBRAINS
   to: NMT2Sym
   surfaces:
+    RheMAPSurf_standard:
+      101k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.MEBRAINS-to-NMTv2.0-sym.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.MEBRAINS-to-NMTv2.0-sym.sphere.reg.surf.gii
     CIVET:
       101k:
         midthickness:
@@ -133,6 +158,11 @@
 - from: MEBRAINS
   to: Yerkes19
   surfaces:
+    RheMAPSurf_standard:
+      101k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.MEBRAINS-to-YRK.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.MEBRAINS-to-YRK.sphere.reg.surf.gii
     CIVET:
       101k:
         midthickness:
@@ -157,6 +187,11 @@
 - from: NMT2Sym
   to: D99
   surfaces:
+    RheMAPSurf_standard:
+      41k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.NMTv2.0-sym-to-D99.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.NMTv2.0-sym-to-D99.sphere.reg.surf.gii
     CIVET:
       41k:
         midthickness:
@@ -169,6 +204,11 @@
 - from: NMT2Sym
   to: MEBRAINS
   surfaces:
+    RheMAPSurf_standard:
+      41k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.NMTv2.0-sym-to-MEBRAINS.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.NMTv2.0-sym-to-MEBRAINS.sphere.reg.surf.gii
     CIVET:
       41k:
         midthickness:
@@ -181,6 +221,11 @@
 - from: NMT2Sym
   to: Yerkes19
   surfaces:
+    RheMAPSurf_standard:
+      41k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.NMTv2.0-sym-to-YRK.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.NMTv2.0-sym-to-YRK.sphere.reg.surf.gii
     CIVET:
       41k:
         midthickness:
@@ -205,6 +250,11 @@
 - from: Yerkes19
   to: D99
   surfaces:
+    RheMAPSurf_standard:
+      32k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.YRK-to-D99.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.YRK-to-D99.sphere.reg.surf.gii
     CIVET:
       32k:
         midthickness:
@@ -217,6 +267,11 @@
 - from: Yerkes19
   to: MEBRAINS
   surfaces:
+    RheMAPSurf_standard:
+      32k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.YRK-to-MEBRAINS.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.YRK-to-MEBRAINS.sphere.reg.surf.gii
     CIVET:
       32k:
         midthickness:
@@ -229,6 +284,11 @@
 - from: Yerkes19
   to: NMT2Sym
   surfaces:
+    RheMAPSurf_standard:
+      32k:
+        sphere:
+          left: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/lh.YRK-to-NMTv2.0-sym.sphere.reg.surf.gii
+          right: https://github.com/HumanBrainED/RheMAP-Surf/blob/main/deformation_spheres/standard_alignment/rh.YRK-to-NMTv2.0-sym.sphere.reg.surf.gii
     CIVET:
       32k:
         midthickness:
