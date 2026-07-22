@@ -6,6 +6,8 @@
         midthickness:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bcad9519da6c24b1261c3?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bcad8e3d38d166630a3a6?view_only=b214f40525fe44b5bea3103478d08d0d
+      references:
+      - https://doi.org/10.1016/j.ynirp.2026.100360
 
 - from: Yerkes29
   to: NCBR
@@ -15,3 +17,5 @@
         midthickness:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bcab1bb263e177e30a376?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bcaa9e3d38d166630a399?view_only=b214f40525fe44b5bea3103478d08d0d
+      references:
+      - https://doi.org/10.1016/j.ynirp.2026.100360
