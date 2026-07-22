@@ -1,7 +1,7 @@
 - from: CIVET
   to: fsLR
   surfaces:
-    neuromaps:
+    Neuromaps:
       41k:
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1700c4e0d5737206829c59?view_only=b214f40525fe44b5bea3103478d08d0d
@@ -16,7 +16,7 @@
 - from: CIVET
   to: fsaverage
   surfaces:
-    neuromaps:
+    Neuromaps:
       41k:
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17033581dec3a3edfdfb6b?view_only=b214f40525fe44b5bea3103478d08d0d
@@ -31,7 +31,7 @@
 - from: fsLR
   to: fsaverage
   surfaces:
-    neuromaps:
+    Neuromaps:
       32k:
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17044383ffd4e634cc6e33?view_only=b214f40525fe44b5bea3103478d08d0d
