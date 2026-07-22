@@ -52,7 +52,7 @@ def _get_edges(faces: ArrayLike) -> np.ndarray:
     return np.sort(faces[:, [0, 1, 1, 2, 2, 0]].reshape((-1, 2)), axis=1)
 
 
-def get_directed_edges(
+def _get_directed_edges(
     vertices: ArrayLike, faces: ArrayLike
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute unique mesh edges and their Euclidean lengths.
@@ -82,7 +82,7 @@ def get_directed_edges(
     return edges, weights
 
 
-def get_indirect_edges(
+def _get_indirect_edges(
     vertices: ArrayLike, faces: ArrayLike
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute indirect edges and approximated geodesic distances.
@@ -116,7 +116,7 @@ def get_indirect_edges(
     """
     vertices = np.asarray(vertices)
     faces = np.asarray(faces)
-    triangles = np.stack(list(get_shared_triangles(faces).values()), axis=0)
+    triangles = np.stack(list(_get_shared_triangles(faces).values()), axis=0)
     indirect_edges = triangles[..., -1]
 
     v0, v1, opp = vertices[triangles].transpose(2, 3, 0, 1)
@@ -133,11 +133,8 @@ def get_indirect_edges(
     return indirect_edges, weights
 
 
-def point_in_triangle(
-    point: ArrayLike,
-    triangle: ArrayLike,
-    *,
-    return_pdist: bool = True,
+def _point_in_triangle(
+    point: ArrayLike, triangle: ArrayLike, *, return_pdist: bool = True
 ) -> tuple[bool, np.float64 | None]:
     """Test whether a 3-D point lies inside a triangular face.
 
@@ -200,14 +197,14 @@ def which_triangle(point: ArrayLike, triangles: ArrayLike) -> int | None:
     best = None
     best_dist = np.inf
     for i, tri in enumerate(triangles):
-        inside, pdist = point_in_triangle(point, tri)
+        inside, pdist = _point_in_triangle(point, tri)
         if inside and pdist is not None and pdist < best_dist:
             best = i
             best_dist = pdist
     return best
 
 
-def get_shared_triangles(faces: ArrayLike) -> dict[tuple[int, int], np.ndarray]:
+def _get_shared_triangles(faces: ArrayLike) -> dict[tuple[int, int], np.ndarray]:
     """Build a lookup from shared edges to adjacent triangle vertex triplets.
 
     In a watertight triangular mesh every internal edge belongs to exactly
@@ -276,9 +273,7 @@ def get_shared_triangles(faces: ArrayLike) -> dict[tuple[int, int], np.ndarray]:
 
 
 def make_surf_graph(
-    vertices: ArrayLike,
-    faces: ArrayLike,
-    mask: ArrayLike | None = None,
+    vertices: ArrayLike, faces: ArrayLike, mask: ArrayLike | None = None
 ) -> csr_matrix:
     """Build a sparse adjacency graph from a triangular surface mesh.
 
@@ -317,8 +312,8 @@ def make_surf_graph(
                 f"of vertices ({len(mask)} != {len(vertices)})"
             )
 
-    direct_edges, direct_weights = get_directed_edges(vertices, faces)
-    indirect_edges, indirect_weights = get_indirect_edges(vertices, faces)
+    direct_edges, direct_weights = _get_directed_edges(vertices, faces)
+    indirect_edges, indirect_weights = _get_indirect_edges(vertices, faces)
     edges = np.vstack([direct_edges, indirect_edges])
     weights = np.concatenate([direct_weights, indirect_weights])
 
