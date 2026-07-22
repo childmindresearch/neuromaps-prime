@@ -1,7 +1,7 @@
 - from: MBM
   to: NMT2Sym
   surfaces:
-    macaque_marmoset:
+    NeuromapsPRIME:
       38k:
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d58850be3e9c9a24bf3e4?view_only=b214f40525fe44b5bea3103478d08d0d
