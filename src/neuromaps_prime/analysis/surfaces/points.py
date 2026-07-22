@@ -16,7 +16,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from scipy import sparse
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import dijkstra
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
@@ -278,7 +279,7 @@ def make_surf_graph(
     vertices: ArrayLike,
     faces: ArrayLike,
     mask: ArrayLike | None = None,
-) -> sparse.csr_matrix:
+) -> csr_matrix:
     """Build a sparse adjacency graph from a triangular surface mesh.
 
     Combines direct edges (shared between two vertices of a face) with
@@ -326,7 +327,53 @@ def make_surf_graph(
         keep = ~np.any(np.isin(edges, excluded), axis=1)
         edges, weights = edges[keep], weights[keep]
 
-    return sparse.csr_matrix(
+    return csr_matrix(
         (weights, (edges[:, 0], edges[:, 1])),
         shape=(len(vertices), len(vertices)),
     )
+
+
+def _geodesic_parcel_centroid(
+    vertices: ArrayLike, faces: ArrayLike, inds: ArrayLike
+) -> np.ndarray:
+    """Find the geodesic centroid vertex within a parcel.
+
+    Builds a surface mesh graph restricted to the parcel's vertices,
+    computes all-pairs shortest-path distances via Dijkstra, then
+    returns the vertex with the minimum mean distance to all other
+    vertices in the parcel.  This is the graph-theoretic *median* of
+    the parcel, analogous to a 1-median facility location problem.
+
+    The graph is constructed by masking out all vertices outside the
+    parcel, which removes edges touching those vertices and leaves only
+    the parcel's internal connectivity.
+
+    Args:
+        vertices: Array of shape ``(n_vertices, 3)`` containing the
+            3-D coordinates of every mesh vertex.
+        faces: Array of shape ``(n_faces, 3)`` where each row contains
+            vertex indices that define a triangular face.
+        inds: 1-D array of vertex indices belonging to the parcel.
+
+    Returns:
+        Array of shape ``(3,)`` with the 3-D coordinates of the centroid
+        vertex.
+
+    Raises:
+        ValueError: If *inds* is empty.
+    """
+    vertices = np.asarray(vertices)
+    faces = np.asarray(faces)
+    inds = np.asarray(inds)
+
+    if inds.size == 0:
+        raise ValueError("Parcel vertex indices (inds) are empty")
+
+    mask = np.ones(len(vertices), dtype=bool)
+    mask[inds] = False
+
+    mat = make_surf_graph(vertices, faces, mask)
+    dist_matrix = dijkstra(mat, directed=False, indices=inds)[:, inds]
+    centroid_idx = int(dist_matrix.mean(axis=1).argmin())
+
+    return vertices[inds[centroid_idx]]
