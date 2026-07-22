@@ -16,9 +16,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
+from scipy import sparse
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
+
+__all__ = ["make_surf_graph"]
 
 
 def _get_edges(faces: ArrayLike) -> np.ndarray:
@@ -269,3 +272,61 @@ def get_shared_triangles(faces: ArrayLike) -> dict[tuple[int, int], np.ndarray]:
     triplets[:, :, 2] = opposite
 
     return dict(zip(map(tuple, shared_edges), triplets, strict=True))
+
+
+def make_surf_graph(
+    vertices: ArrayLike,
+    faces: ArrayLike,
+    mask: ArrayLike | None = None,
+) -> sparse.csr_matrix:
+    """Build a sparse adjacency graph from a triangular surface mesh.
+
+    Combines direct edges (shared between two vertices of a face) with
+    indirect edges (connecting opposite vertices of adjacent triangles)
+    into a single sparse matrix.  Edge weights are the Euclidean length
+    of direct edges and the approximated geodesic distance of indirect
+    edges.  The resulting graph is suitable for Dijkstra-based shortest-
+    path distance computation on the surface.
+
+    Args:
+        vertices: Array of shape ``(n_vertices, 3)`` containing the
+            3-D coordinates of every mesh vertex.
+        faces: Array of shape ``(n_faces, 3)`` where each row contains
+            vertex indices that define a triangular face.
+        mask: Boolean array of shape ``(n_vertices,)``. If provided,
+            edges touching any ``True`` vertex are excluded from the
+            graph.
+
+    Returns:
+        A sparse CSR matrix of shape ``(n_vertices, n_vertices)`` where
+        non-zero entries are the edge weights between connected vertices.
+
+    Raises:
+        ValueError: If *mask* is provided and has a different length
+            than *vertices*.
+    """
+    vertices = np.asarray(vertices)
+    faces = np.asarray(faces)
+
+    if mask is not None:
+        mask = np.asarray(mask)
+        if len(mask) != len(vertices):
+            raise ValueError(
+                "Supplied mask and vertices array have different number "
+                f"of vertices ({len(mask)} != {len(vertices)})"
+            )
+
+    direct_edges, direct_weights = get_directed_edges(vertices, faces)
+    indirect_edges, indirect_weights = get_indirect_edges(vertices, faces)
+    edges = np.vstack([direct_edges, indirect_edges])
+    weights = np.concatenate([direct_weights, indirect_weights])
+
+    if mask is not None:
+        (excluded,) = np.where(mask)
+        keep = ~np.any(np.isin(edges, excluded), axis=1)
+        edges, weights = edges[keep], weights[keep]
+
+    return sparse.csr_matrix(
+        (weights, (edges[:, 0], edges[:, 1])),
+        shape=(len(vertices), len(vertices)),
+    )
