@@ -1,6 +1,10 @@
 CIVETNMT:
   species: macaque
   description: CIVET Non-human Primate Template
+  references:
+  - citation: Lepage, C., et al. 2017. Organization for Human Brain Mapping
+    doi: 10.1016/j.neuroimage.2020.117622
+    url: https://www.sciencedirect.com/science/article/pii/S1053811920311071
   surfaces:
     41k:
       sphere:

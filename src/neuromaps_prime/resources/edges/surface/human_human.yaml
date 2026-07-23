@@ -11,7 +11,9 @@
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1700c56d01f8af2c829920?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1700c6346bfaa8ef809d16?view_only=b214f40525fe44b5bea3103478d08d0d
       references:
-      - https://doi.org/10.1038/s41592-022-01625-w
+      - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
+        doi: 10.1038/s41592-022-01625-w
+        url: https://www.nature.com/articles/s41592-022-01625-w
 
 - from: CIVET
   to: fsaverage
@@ -26,7 +28,9 @@
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17033788c420c552cc6f0e?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a170336a9eebf8f0f82902d?view_only=b214f40525fe44b5bea3103478d08d0d
       references:
-      - https://doi.org/10.1038/s41592-022-01625-w
+      - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
+        doi: 10.1038/s41592-022-01625-w
+        url: https://www.nature.com/articles/s41592-022-01625-w
 
 - from: fsLR
   to: fsaverage
@@ -37,4 +41,6 @@
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17044383ffd4e634cc6e33?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1704435720fc8dbacc710f?view_only=b214f40525fe44b5bea3103478d08d0d
       references:
-      - https://doi.org/10.1038/s41592-022-01625-w
+      - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
+        doi: 10.1038/s41592-022-01625-w
+        url: https://www.nature.com/articles/s41592-022-01625-w

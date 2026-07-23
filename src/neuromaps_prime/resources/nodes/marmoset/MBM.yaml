@@ -1,6 +1,10 @@
 MBM:
   species: marmoset
   description: MBM Marmoset template
+  references:
+    - citation: Liu, C., et al. 2021. NeuroImage. 226:117620.
+      doi: 10.1016/j.neuroimage.2020.117620
+      url: https://www.sciencedirect.com/science/article/pii/S1053811920311058?via%3Dihub
   surfaces:
     38k: 
       sphere:
