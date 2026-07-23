@@ -9,4 +9,4 @@ operations that require surface topology.
 
 from neuromaps_prime.analysis.surfaces.points import make_surf_graph
 
-__all__ = ["make_surf_graph"]
+__all__ = ["get_surface_distance", "make_surf_graph"]
