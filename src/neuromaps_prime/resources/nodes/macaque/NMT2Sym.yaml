@@ -1,6 +1,10 @@
 NMT2Sym:
   species: macaque
   description: NMT v2 Symmetric Macaque Template
+  references:
+    - citation: Seidlitz J, et al. 2018. Neuroimage. 170:121–131.
+      doi: 10.1016/j.neuron.2017.11.039
+      url: https://pubmed.ncbi.nlm.nih.gov/29276055/
   surfaces:
     41k:
       sphere:

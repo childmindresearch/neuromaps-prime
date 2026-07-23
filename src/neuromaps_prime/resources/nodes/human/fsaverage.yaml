@@ -4,6 +4,9 @@
 fsaverage:
   species: human
   description: fsaverage Human Template
+  references:
+  - citation: Fischl, B, et al. 1999. Human Brain Mapping, 8(4):272–284
+    url: https://pubmed.ncbi.nlm.nih.gov/10619420/
   surfaces:
     10k:
       sphere:

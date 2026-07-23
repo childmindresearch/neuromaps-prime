@@ -1,6 +1,10 @@
 fsLR:
   species: human
   description: HCP S1200 fsLR Human Atlas
+  references:
+  - citation: Van Essen, DC, et al. 2012. Cerebral Cortex. 22(10), 2241–2262.
+    doi: 10.1093/cercor/bhr291
+    url: https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
   surfaces:
     10k:
       # 10K surfaces all use https://github.com/TingsterX/alignment_macaque-human
