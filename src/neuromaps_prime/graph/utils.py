@@ -6,13 +6,17 @@ utilities that operate on the NetworkX graph structure.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import networkx as nx
 from pydantic import BaseModel
 
 from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
+from neuromaps_prime.graph.metadata import format_reference
 from neuromaps_prime.transforms.utils import _get_density_key
+
+if TYPE_CHECKING:
+    from neuromaps_prime.graph.models import SpaceMetadataDict
 
 
 class GraphUtils(BaseModel):
@@ -168,6 +172,39 @@ class GraphUtils(BaseModel):
                 f"Availble nodes: {sorted(self.graph.nodes)}"
             )
             raise ValueError(msg) from e
+
+    def collect_space_metadata(
+        self, space_path: list[str]
+    ) -> list[SpaceMetadataDict] | None:
+        """Collect deduplicated node-level references for the spaces in *space_path*.
+
+        Walks each space, extracts node data, and formats any attached
+        references.  Shared intermediate spaces only contribute once
+        (deduplicated by space name).
+
+        Args:
+            space_path: Ordered list of space names in the transform path.
+
+        Returns:
+            A list of dicts keyed by ``"space"`` and ``"references"``, or
+            ``None`` when no space has references.
+        """
+        seen: set[str] = set()
+        result: list[SpaceMetadataDict] = []
+
+        for space_name in space_path:
+            if space_name in seen:
+                continue
+            seen.add(space_name)
+
+            node_data = self.get_node_data(space_name)
+            raw_refs = node_data.references or ()
+            formatted = [format_reference(r) for r in raw_refs]
+
+            if formatted:
+                result.append({"space": space_name, "references": formatted})
+
+        return result or None
 
     def get_graph_info(self) -> dict[str, int]:
         """Return a summary of the graph structure.

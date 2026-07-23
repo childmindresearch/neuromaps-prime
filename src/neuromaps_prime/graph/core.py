@@ -18,12 +18,14 @@ from platformdirs import user_cache_dir
 
 from neuromaps_prime.graph.builder import GraphBuilder
 from neuromaps_prime.graph.cache import GraphCache
+from neuromaps_prime.graph.metadata import print_metadata_summary
 from neuromaps_prime.graph.models import (
     Edge,
     Node,
     SurfaceAnnotation,
     SurfaceAtlas,
     SurfaceTransform,
+    TransformResult,
     VolumeAnnotation,
     VolumeAtlas,
     VolumeTransform,
@@ -509,6 +511,11 @@ class NeuromapsGraph(nx.MultiDiGraph):
     # Transformers                                                         #
     # ------------------------------------------------------------------ #
 
+    def _print_metadata_if_verbose(self, result: TransformResult) -> None:
+        """Print a grouped metadata summary when verbosity is ≥ 1."""
+        if self.runner_ctx.verbose >= 1:
+            print_metadata_summary(result)
+
     def surface_to_surface_transformer(
         self,
         transformer_type: Literal["metric", "label"],
@@ -522,8 +529,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
         area_resource: str = "midthickness",
         *,
         add_edge: bool = True,
+        metadata_path: Path | None = None,
         provider: str | None = None,
-    ) -> Path | None:
+    ) -> TransformResult:
         """Resample a metric or label GIFTI from source_space to target_space.
 
         Args:
@@ -540,14 +548,17 @@ class NeuromapsGraph(nx.MultiDiGraph):
             area_resource: Surface type for area correction
                 (default ``'midthickness'``).
             add_edge: Whether to register composed transforms.
+            metadata_path: Optional path to write metadata to. Format is
+                inferred from the file extension (``.md`` or ``.json``).
             provider: Optional provider name. Falls back to the first
                 registered provider when ``None``.
 
         Returns:
-            Path to the resampled output, or ``None`` if the transform could
-            not be resolved.
+            :class:`~neuromaps_prime.graph.models.TransformResult` containing
+            the output path. Acts like a :class:`~pathlib.Path` when used
+            without attribute access.
         """
-        return self.surface_ops.transform_surface(
+        result = self.surface_ops.transform_surface(
             transformer_type=transformer_type,
             input_file=input_file,
             source_space=source_space,
@@ -560,6 +571,14 @@ class NeuromapsGraph(nx.MultiDiGraph):
             add_edge=add_edge,
             provider=provider,
         )
+
+        # Print metadata summary if verbose
+        self._print_metadata_if_verbose(result)
+
+        if metadata_path and result:
+            result.save_metadata(metadata_path)
+
+        return result
 
     def surface_to_volume_transformer(
         self,
@@ -575,8 +594,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
         area_resource: str = "midthickness",
         *,
         add_edge: bool = True,
+        metadata_path: Path | None = None,
         provider: str | None = None,
-    ) -> Path | None:
+    ) -> TransformResult:
         """Project a volume to surface then resample to target_space.
 
         Args:
@@ -594,13 +614,17 @@ class NeuromapsGraph(nx.MultiDiGraph):
             area_resource: Surface type for area correction
                 (default ``'midthickness'``).
             add_edge: Whether to register composed transforms.
+            metadata_path: Optional path to write metadata to. Format is
+                inferred from the file extension (``.md`` or ``.json``).
             provider: Optional provider name. Falls back to the first
                 registered provider when ``None``.
 
         Returns:
-            Path to the surface resampled to volume.
+            :class:`~neuromaps_prime.graph.models.TransformResult` containing
+            the output path. Acts like a :class:`~pathlib.Path` when used
+            without attribute access.
         """
-        return self.surface_ops.transform_surface_to_volume(  # pragma: no cover
+        result = self.surface_ops.transform_surface_to_volume(
             transformer_type=transformer_type,
             input_file=input_file,
             ref_volume=ref_volume,
@@ -615,6 +639,14 @@ class NeuromapsGraph(nx.MultiDiGraph):
             provider=provider,
         )
 
+        # Print metadata summary if verbose
+        self._print_metadata_if_verbose(result)
+
+        if metadata_path and result:
+            result.save_metadata(metadata_path)
+
+        return result  # pragma: no cover
+
     def volume_to_volume_transformer(
         self,
         input_file: Path,
@@ -627,8 +659,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
         interp_params: dict[str, Any] | None = None,
         atlas_resource_type: str = "T1w",
         *,
+        metadata_path: Path | None = None,
         provider: str | None = None,
-    ) -> Path:
+    ) -> TransformResult:
         """Warp a volume image from source_space to target_space.
 
         Args:
@@ -642,13 +675,17 @@ class NeuromapsGraph(nx.MultiDiGraph):
             interp_params: Optional interpolation parameters.
             atlas_resource_type: Volume resource type for the reference atlas
                 lookup (default ``'T1w'``).
+            metadata_path: Optional path to write metadata to. Format is
+                inferred from the file extension (``.md`` or ``.json``).
             provider: Optional provider name. Falls back to the first
                 registered provider when ``None``.
 
         Returns:
-            Path to the warped output volume.
+            :class:`~neuromaps_prime.graph.models.TransformResult` containing
+            the output path. Acts like a :class:`~pathlib.Path` when used
+            without attribute access.
         """
-        return self.volume_ops.transform_volume(
+        result = self.volume_ops.transform_volume(
             input_file=input_file,
             source_space=source_space,
             target_space=target_space,
@@ -660,6 +697,14 @@ class NeuromapsGraph(nx.MultiDiGraph):
             atlas_resource_type=atlas_resource_type,
             provider=provider,
         )
+
+        # Print metadata summary if verbose
+        self._print_metadata_if_verbose(result)
+
+        if metadata_path and result:
+            result.save_metadata(metadata_path)
+
+        return result
 
     def volume_to_surface_transformer(
         self,
@@ -674,8 +719,9 @@ class NeuromapsGraph(nx.MultiDiGraph):
         area_resource: str = "midthickness",
         *,
         add_edge: bool = True,
+        metadata_path: Path | None = None,
         provider: str | None = None,
-    ) -> Path | None:
+    ) -> TransformResult:
         """Project a volume to surface then resample to target_space.
 
         Args:
@@ -692,14 +738,17 @@ class NeuromapsGraph(nx.MultiDiGraph):
             area_resource: Surface type for area correction
                 (default ``'midthickness'``).
             add_edge: Whether to register composed transforms.
+            metadata_path: Optional path to write metadata to. Format is
+                inferred from the file extension (``.md`` or ``.json``).
             provider: Optional provider name. Falls back to the first
                 registered provider when ``None``.
 
         Returns:
-            Path to the resampled output, or ``None`` if the transform could
-            not be resolved.
+            :class:`~neuromaps_prime.graph.models.TransformResult` containing
+            the output path. Acts like a :class:`~pathlib.Path` when used
+            without attribute access.
         """
-        return self.volume_ops.transform_volume_to_surface(
+        result = self.volume_ops.transform_volume_to_surface(
             transformer_type=transformer_type,
             input_file=input_file,
             source_space=source_space,
@@ -712,3 +761,11 @@ class NeuromapsGraph(nx.MultiDiGraph):
             add_edge=add_edge,
             provider=provider,
         )
+
+        # Print metadata summary if verbose
+        self._print_metadata_if_verbose(result)
+
+        if metadata_path and result:
+            result.save_metadata(metadata_path)
+
+        return result
