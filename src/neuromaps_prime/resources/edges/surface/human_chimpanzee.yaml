@@ -7,7 +7,9 @@
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f53c00e86708937eeae1?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f543912b4551c17ee412?view_only=b214f40525fe44b5bea3103478d08d0d
       references:
-      - https://doi.org/10.1016/j.ynirp.2026.100360
+      - citation: Lepage, C., et al. 2026. NeuroImage Reports. 6(3):100360.
+        doi: 10.1016/j.ynirp.2026.100360
+        url: https://www.sciencedirect.com/science/article/pii/S2666956026000437?via%3Dihub
 
 - from: fsaverage
   to: NCBR
@@ -18,4 +20,6 @@
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f5137ef401e8b5cc76a8?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f506bfa98ff448cc76a0?view_only=b214f40525fe44b5bea3103478d08d0d
       references:
-      - https://doi.org/10.1016/j.ynirp.2026.100360
+      - citation: Lepage, C., et al. 2026. NeuroImage Reports. 6(3):100360.
+        doi: 10.1016/j.ynirp.2026.100360
+        url: https://www.sciencedirect.com/science/article/pii/S2666956026000437?via%3Dihub
