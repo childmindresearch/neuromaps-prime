@@ -1,6 +1,10 @@
 D99:
   species: macaque
   description: D99 Macaque Atlas
+  references:
+  - citation: Saleem KS, et al. 2021. Neuroimage. 245:118759.
+    doi: 10.1016/j.neuroimage.2021.118759
+    url: https://pubmed.ncbi.nlm.nih.gov/34838750/
   surfaces:
     41k:
       midthickness:

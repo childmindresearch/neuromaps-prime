@@ -17,7 +17,9 @@
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b989b6fa812c2b8cc7a?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b99f44e0687016b9f1b?view_only=b214f40525fe44b5bea3103478d08d0d
       references:
-      - https://doi.org/10.1016/j.neuroimage.2020.117346
+      - citation: Xu, T., et al. 2021. NeuroImage. 226:117346.
+        doi: 10.1016/j.neuroimage.2020.117346
+        url: https://www.sciencedirect.com/science/article/pii/S1053811920308326?via%3Dihub
 
 - from: fsLR
   to: Yerkes19
@@ -38,4 +40,6 @@
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d531e78bf36907dfa59?view_only=b214f40525fe44b5bea3103478d08d0d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d35e81de16f937df3c9?view_only=b214f40525fe44b5bea3103478d08d0d
       references:
-      - https://doi.org/10.1016/j.neuroimage.2020.117346
+      - citation: Xu, T., et al. 2021. NeuroImage. 226:117346.
+        doi: 10.1016/j.neuroimage.2020.117346
+        url: https://www.sciencedirect.com/science/article/pii/S1053811920308326?via%3Dihub
