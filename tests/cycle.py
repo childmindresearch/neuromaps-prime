@@ -311,9 +311,7 @@ def roundtrip_metric(
     path_token = _path_token(path)
 
     for hop, (src, dst) in enumerate(pairwise(path)):
-        out_name = (
-            f"cycle_{path_token}_hop{hop:02d}_{src}-to-{dst}.func.gii"
-        )
+        out_name = f"cycle_{path_token}_hop{hop:02d}_{src}-to-{dst}.func.gii"
 
         result = graph.surface_to_surface_transformer(
             transformer_type="metric",
