@@ -317,9 +317,7 @@ def roundtrip_metric(
             source_space=src,
             target_space=dst,
             hemisphere=hemisphere,
-            # Keep output path relative so dockerized wb_command writes inside
-            # its mounted output directory instead of an unmapped host path.
-            output_file_path=workdir / out_name,
+            output_file_path=out_name,
             source_density=density,
             target_density=density,
             add_edge=add_edge,
@@ -329,7 +327,7 @@ def roundtrip_metric(
                 f"No surface transform for hop '{src}' -> '{dst}' "
                 f"on path {' -> '.join(path)}"
             )
-        current = Path(result)
+        current = Path(workdir) / out_name
     return current
 
 
