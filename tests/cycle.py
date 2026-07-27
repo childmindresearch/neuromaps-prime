@@ -405,7 +405,6 @@ def run_cycle_test(
     paths: list[tuple[str, ...]] | None = None,
 ) -> list[CycleResult]:
     """Round-trip ``metric_file`` around every return path from ``origin``."""
-
     results: list[CycleResult] = []
 
     if paths is None:
