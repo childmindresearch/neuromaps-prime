@@ -3,22 +3,35 @@
 These tests validate cycle traversal and round-trip transformation behavior
 using a small synthetic three-node graph.
 
-The graph consists of nodes A, B, and C connected by rotational transforms.
-Forward edges rotate the sphere by +120 degrees and reverse edges rotate by
--120 degrees. Therefore, every closed path returns to the original coordinate
-system:
+The synthetic graph contains three spaces (A, B, and C) connected by known
+rotational surface transformations. Forward edges rotate the sphere by
++120 degrees and reverse edges rotate by -120 degrees. Therefore, all closed
+paths return to the original coordinate system:
 
     A → B → A          (+120 - 120)       = identity
     A → C → A          (-120 + 120)       = identity
     A → B → C → A      (+120 + 120 +120)  = identity
     A → C → B → A      (-120 -120 -120)   = identity
 
-A synthetic vertex-wise metric is transformed around each cycle. Since every
-cycle represents an identity transformation, the resulting metric should match
-the original metric with near-perfect correlation.
+A synthetic vertex-wise metric is transformed around each cycle. Since each
+cycle represents an identity transformation, the round-tripped metric should
+match the original metric with near-perfect correlation.
 
-The test replaces the Workbench metric resampling dependency with a lightweight
-numpy implementation so the tests remain fast, deterministic, and isolated.
+The Workbench metric resampling dependency is replaced with a lightweight
+numpy implementation. This keeps the tests fast, deterministic, and isolated
+from external software dependencies.
+
+These tests validate the cycle-testing machinery itself. End-to-end accuracy
+of real surface transformations is evaluated separately in the regression
+test suite using real templates and Workbench resampling.
+
+Run with::
+
+    pytest tests/unit/graph/unit_test_cycle.py -v -s
+
+Run only the metric preservation test::
+
+    pytest tests/unit/graph/unit_test_cycle.py::test_closed_cycles_preserve_metric -v -s
 """
 
 from __future__ import annotations
@@ -34,6 +47,11 @@ from scipy.spatial import ConvexHull, cKDTree
 
 from neuromaps_prime.graph import NeuromapsGraph
 from tests.cycle import find_return_paths, run_cycle_test
+
+
+# -------------------------------------------------------------------------
+# Test parameters
+# -------------------------------------------------------------------------
 
 N_VERTICES = 642
 DENSITY = "1k"
@@ -67,7 +85,7 @@ def _fibonacci_sphere(n: int) -> np.ndarray:
 
 
 def _rotation_x(degrees: float) -> np.ndarray:
-    """Return a rotation matrix around the x-axis."""
+    """Create a rotation matrix around the x-axis."""
     theta = np.deg2rad(degrees)
 
     return np.array(
@@ -105,7 +123,10 @@ def _save_surface(
     nib.save(image, path)
 
 
-def _save_metric(path: Path, metric: np.ndarray) -> None:
+def _save_metric(
+    path: Path,
+    metric: np.ndarray,
+) -> None:
     """Save a vertex-wise metric as a GIFTI functional file."""
     image = GiftiImage()
 
@@ -120,7 +141,7 @@ def _save_metric(path: Path, metric: np.ndarray) -> None:
 
 
 def _load_vertices(path: Path | str) -> np.ndarray:
-    """Load surface coordinates from a GIFTI surface."""
+    """Load vertex coordinates from a GIFTI surface."""
     image = nib.load(str(path))
 
     for array in image.darrays:
