@@ -35,7 +35,6 @@ from scipy.spatial import ConvexHull, cKDTree
 from neuromaps_prime.graph import NeuromapsGraph
 from tests.cycle import find_return_paths, run_cycle_test
 
-
 N_VERTICES = 642
 DENSITY = "1k"
 HEMISPHERE = "left"
@@ -371,7 +370,10 @@ def test_find_return_paths_rejects_unknown_node(
     """Invalid graph origins raise a clear error."""
     graph, _ = rotation_network
 
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="not in the 'surface_to_surface' layer",
+    ):
         find_return_paths(graph, "unknown")
 
 
