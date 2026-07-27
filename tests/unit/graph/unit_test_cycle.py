@@ -1,4 +1,4 @@
-"""Unit test for the cycle-test machinery (``tests/regression/cycle.py``).
+"""Unit test for the cycle-test machinery (``tests/cycle.py``).
 
 The deployed cycle test round-trips a metric through every return path in the
 graph and correlates the result against the original. To trust that number we
@@ -27,7 +27,7 @@ To keep the test hermetic and fast (no ``wb_command``, no downloads), the single
 ``wb_command`` call inside the transformer (``metric_resample``) is monkeypatched
 with a vectorized barycentric resampler. Everything else -- graph construction,
 cache lookups, path enumeration, per-hop plumbing, correlation -- is the real
-production code from ``NeuromapsGraph`` and ``tests/regression/cycle.py``.
+production code from ``NeuromapsGraph`` and ``tests/cycle.py``.
 """
 
 from __future__ import annotations
@@ -42,7 +42,7 @@ from nibabel.gifti import GiftiDataArray, GiftiImage
 from scipy.spatial import ConvexHull, cKDTree
 
 from neuromaps_prime.graph import NeuromapsGraph
-from tests.regression.cycle import find_return_paths, run_cycle_test
+from tests.cycle import find_return_paths, run_cycle_test
 
 # A small sphere keeps the unit test well under a second while still exercising
 # genuine interpolation (a Fibonacci layout has no rotational symmetry, so a
