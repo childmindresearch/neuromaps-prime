@@ -6,8 +6,8 @@ round-trip. High correlation means the transforms on that path compose close to
 the identity; lower correlation flags lower-quality paths.
 
 This is the deployed counterpart to the hermetic unit test in
-``tests/unit/test_cycle.py``. Both call the same machinery in
-``tests/regression/cycle.py``; the unit test proves that machinery returns
+``tests/unit/graph/_unittest_cycle.py``. Both call the same machinery in
+``tests/cycle.py``; the unit test proves that machinery returns
 r ~ 1 on a synthetic identity network, while this test measures the *real*
 transforms and therefore needs Workbench and network access (like
 ``test_surf_matrix.py``).
@@ -15,7 +15,7 @@ transforms and therefore needs Workbench and network access (like
 Edit ``ORIGIN``, ``LABEL``, and ``HEMISPHERE`` for the space/annotation you want
 to probe, then run::
 
-    pytest tests/regression/test_cycle.py -s
+    pytest tests/regression/regression_test_cycle.py -s
 """
 
 from __future__ import annotations
@@ -24,9 +24,9 @@ import logging
 from pathlib import Path
 
 import pandas as pd
+from tests.cycle import find_return_paths, run_cycle_test
 
 from neuromaps_prime.graph import NeuromapsGraph
-from tests.regression.cycle import find_return_paths, run_cycle_test
 
 logger = logging.getLogger(__name__)
 
