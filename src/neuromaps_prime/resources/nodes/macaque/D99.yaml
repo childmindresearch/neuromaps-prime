@@ -5,6 +5,9 @@ D99:
   - citation: Saleem KS, et al. 2021. Neuroimage. 245:118759.
     doi: 10.1016/j.neuroimage.2021.118759
     url: https://pubmed.ncbi.nlm.nih.gov/34838750/
+  - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+    doi: 10.5281/zenodo.15642801
+    url: https://zenodo.org/records/15642801
   surfaces:
     41k:
       midthickness:
