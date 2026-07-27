@@ -319,7 +319,7 @@ def roundtrip_metric(
             hemisphere=hemisphere,
             # Keep output path relative so dockerized wb_command writes inside
             # its mounted output directory instead of an unmapped host path.
-            output_file_path=out_name,
+            output_file_path=workdir / out_name,
             source_density=density,
             target_density=density,
             add_edge=add_edge,
@@ -364,7 +364,9 @@ def score_roundtrip(
         )
     finite_mask = np.isfinite(original) & np.isfinite(roundtrip)
     if np.any(finite_mask):
-        max_abs_diff = float(np.max(np.abs(original[finite_mask] - roundtrip[finite_mask])))
+        max_abs_diff = float(
+            np.max(np.abs(original[finite_mask] - roundtrip[finite_mask]))
+        )
     else:
         max_abs_diff = float("nan")
 
@@ -448,7 +450,9 @@ def run_cycle_test(
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with output_path.open("w", encoding="utf-8") as fh:
-            fh.write(f"Cycle test results — origin: {origin}, hemisphere: {hemisphere}\n")
+            fh.write(
+                f"Cycle test results — origin: {origin}, hemisphere: {hemisphere}\n"
+            )
             fh.write(separator + "\n")
             fh.write(header + "\n")
             fh.write(separator + "\n")
