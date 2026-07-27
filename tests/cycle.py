@@ -44,7 +44,7 @@ SURFACE_EDGE = "surface_to_surface"
 
 
 def resolve_hop_transforms(
-    graph: "NeuromapsGraph",
+    graph: NeuromapsGraph,
     path: tuple[str, ...],
     hemisphere: Literal["left", "right"],
     density: str,
@@ -121,7 +121,7 @@ def resolve_hop_transforms(
 
 def _path_token(path: tuple[str, ...]) -> str:
     """Return a short deterministic token for a traversal path."""
-    digest = hashlib.sha1("->".join(path).encode("utf-8")).hexdigest()[:12]
+    digest = hashlib.sha256("->".join(path).encode("utf-8")).hexdigest()[:12]
     return f"{path[0]}_{path[-1]}_{len(path) - 1}h_{digest}"
 
 
@@ -148,7 +148,7 @@ class CycleResult:
         return " -> ".join(self.path)
 
 
-def find_return_paths(
+def find_return_paths(  # noqa: C901
     graph: NeuromapsGraph,
     origin: str,
     edge_type: str = SURFACE_EDGE,
@@ -437,13 +437,19 @@ def run_cycle_test(
     # Print summary table to stdout.
     header = f"{'Transformation path':<50}  {'Pearson r':>10}  {'Max |delta|':>14}"
     separator = "-" * len(header)
-    print(separator)
-    print(header)
-    print(separator)
+    logger.info(separator)
+    logger.info(header)
+
     for r in results:
-        print(f"{r.label:<50}  {r.pearson_r:>10.6f}  {r.max_abs_diff:>14.3e}")
-    print(separator)
-    print(f"Total cycles: {len(results)}")
+        logger.info(
+            "%-50s  %10.6f  %14.3e",
+            r.label,
+            r.pearson_r,
+            r.max_abs_diff,
+        )
+
+    logger.info(separator)
+    logger.info("Total cycles: %d", len(results))
 
     # Optionally save the same summary to a text file.
     if output_file is not None:

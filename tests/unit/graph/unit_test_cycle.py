@@ -51,6 +51,9 @@ N_VERTICES = 642
 DENSITY = f"{round(N_VERTICES / 1000)}k"  # -> "1k"
 HEMISPHERE = "left"
 
+OUTPUT_DIR = Path(__file__).parent / "output"
+OUTPUT_DIR.mkdir(exist_ok=True)
+
 
 # --------------------------------------------------------------------------- #
 # Geometry / GIFTI helpers                                                     #
@@ -311,12 +314,12 @@ def test_find_return_paths_unknown_origin(
 
 @pytest.mark.usefixtures("patch_resample")
 def test_all_cycles_recover_identity(
-    rotation_network: tuple[NeuromapsGraph, Path], tmp_path: Path
+    rotation_network: tuple[NeuromapsGraph, Path],
 ) -> None:
     """Because +/-120 degree cycles compose to identity, every r is ~1."""
     graph, metric_file = rotation_network
     results = run_cycle_test(
-        graph, "A", metric_file, HEMISPHERE, tmp_path, density=DENSITY
+        graph, "A", metric_file, HEMISPHERE, OUTPUT_DIR, density=DENSITY
     )
 
     assert {r.path for r in results} == EXPECTED_PATHS
@@ -341,7 +344,7 @@ def test_corrupted_edge_breaks_only_paths_through_it(tmp_path: Path) -> None:
     results = {
         r.path: r.pearson_r
         for r in run_cycle_test(
-            graph, "A", metric_file, HEMISPHERE, tmp_path, density=DENSITY
+            graph, "A", metric_file, HEMISPHERE, OUTPUT_DIR, density=DENSITY
         )
     }
 
