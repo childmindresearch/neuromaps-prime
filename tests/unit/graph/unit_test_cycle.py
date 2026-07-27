@@ -48,7 +48,6 @@ from scipy.spatial import ConvexHull, cKDTree
 from neuromaps_prime.graph import NeuromapsGraph
 from tests.cycle import find_return_paths, run_cycle_test
 
-
 # -------------------------------------------------------------------------
 # Test parameters
 # -------------------------------------------------------------------------
