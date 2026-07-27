@@ -34,10 +34,9 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-
-from neuromaps_prime.graph import NeuromapsGraph
 from tests.cycle import find_return_paths, run_cycle_test
 
+from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
 
