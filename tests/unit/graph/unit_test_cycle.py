@@ -219,6 +219,7 @@ def _fake_metric_resample(
 # Fixtures
 # -------------------------------------------------------------------------
 
+
 @pytest.fixture
 def output_dir(tmp_path: Path) -> Path:
     """Directory for storing cycle test outputs."""
@@ -226,6 +227,7 @@ def output_dir(tmp_path: Path) -> Path:
     directory.mkdir()
 
     return directory
+
 
 @pytest.fixture
 def patch_metric_resample(
