@@ -3,21 +3,31 @@
 This test validates end-to-end transformation accuracy on the real
 NeuromapsPrime graph using available surface transformations.
 
-A surface annotation is initialized in an origin template space, transformed
-through valid return paths in the surface transformation graph, and compared
-against the original annotation after returning to the starting space.
+A real surface annotation is initialized in an origin template space,
+propagated through every executable complete return path in the surface
+transformation graph, and compared with the original annotation after
+returning to the starting space.
 
 The unit cycle tests validate the cycle-testing machinery using a synthetic
-identity graph. This regression test extends that validation to real surface
-transformations and detects future changes that affect transformation accuracy.
+identity graph. This regression test extends that validation to real
+transformations and detects future changes that affect transformation
+accuracy.
 
-Metrics recorded for each cycle include:
-- Pearson correlation between the original and round-tripped annotation.
-- Maximum absolute difference between original and transformed metrics.
+Only cycles with all required surface resources available are evaluated.
+This prevents failures caused by graph paths that exist logically but cannot
+be executed due to missing template densities or surface resources.
+
+Metrics recorded for each transformation cycle include:
+- Pearson correlation between original and round-tripped annotation.
+- Maximum absolute difference between original and round-tripped values.
 - Number of transformations in the cycle.
 
-Additional domain-specific metrics (e.g., eigenmode preservation) can be added
-as regression criteria as additional validation targets are implemented.
+Regression criteria:
+- Minimum Pearson correlation preserves spatial pattern.
+- Maximum absolute difference detects numerical transformation errors.
+
+Future domain-specific metrics (e.g., eigenmode preservation) can be added as
+additional regression criteria.
 
 To test another template or annotation, update ``ORIGIN``, ``LABEL``, and
 ``HEMISPHERE`` below.
@@ -34,24 +44,30 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-from tests.cycle import find_return_paths, run_cycle_test
 
 from neuromaps_prime.graph import NeuromapsGraph
+from tests.cycle import find_return_paths, run_cycle_test
+
 
 logger = logging.getLogger(__name__)
 
 
 # -------------------------------------------------------------------------
-# Test parameters
+# Regression parameters
 # -------------------------------------------------------------------------
 
-# Start with spaces containing available surface transformations.
+# Start with spaces containing available RheMAP surface transformations.
 ORIGIN = "Yerkes19"
 LABEL = "RM_auto_ampa"
 HEMISPHERE = "left"
 
-# Limit cycle enumeration to keep runtime tractable as the graph grows.
-MAX_CYCLE_LENGTH = 4
+# Regression thresholds.
+#
+# Pearson correlation measures preservation of the spatial pattern.
+MIN_PEARSON_R = 0.95
+
+# Maximum vertex-wise numerical deviation allowed after round-trip.
+MAX_ABS_DIFF = 0.1
 
 
 # -------------------------------------------------------------------------
@@ -60,18 +76,67 @@ MAX_CYCLE_LENGTH = 4
 
 
 @pytest.fixture
+def graph() -> NeuromapsGraph:
+    """Create a Neuromaps graph for regression testing."""
+    return NeuromapsGraph()
+
+
+@pytest.fixture
 def output_dir() -> Path:
     """Directory for storing cycle regression outputs."""
     directory = Path(__file__).resolve().parent / "cycle_outputs"
-    directory.mkdir(parents=True, exist_ok=True)
+    directory.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
     return directory
 
 
-@pytest.fixture
-def graph() -> NeuromapsGraph:
-    """Create a Neuromaps graph for regression testing."""
-    return NeuromapsGraph()
+# -------------------------------------------------------------------------
+# Helpers
+# -------------------------------------------------------------------------
+
+
+def _valid_cycle_paths(
+    graph: NeuromapsGraph,
+    paths: list[tuple[str, ...]],
+    density: str,
+    hemisphere: str,
+) -> list[tuple[str, ...]]:
+    """Return cycles that have all required surface resources.
+
+    Graph connectivity does not guarantee that every transformation can be
+    executed. A cycle is considered valid only if every source and target
+    space has the required sphere surface available at the requested density.
+    """
+    valid_paths = []
+
+    for path in paths:
+        valid = True
+
+        for source, target in zip(path[:-1], path[1:]):
+            try:
+                graph._cache.require_surface_atlas(
+                    source,
+                    density,
+                    hemisphere,
+                    "sphere",
+                )
+                graph._cache.require_surface_atlas(
+                    target,
+                    density,
+                    hemisphere,
+                    "sphere",
+                )
+            except ValueError:
+                valid = False
+                break
+
+        if valid:
+            valid_paths.append(path)
+
+    return valid_paths
 
 
 # -------------------------------------------------------------------------
@@ -83,12 +148,13 @@ def test_surface_transform_cycles(
     graph: NeuromapsGraph,
     output_dir: Path,
 ) -> None:
-    """Validate preservation through complete surface transformation cycles.
+    """Validate preservation through complete executable transformation cycles.
 
-    A real surface annotation is propagated through all return paths from the
-    origin space and compared with the original data after returning to that
-    space. Successful transformations should preserve the annotation with high
-    correlation.
+    A real annotation is propagated through every executable closed
+    transformation path originating from the selected template space.
+
+    Each round-trip returns to the original space, where the transformed
+    annotation is compared against the input annotation.
     """
     logging.basicConfig(level=logging.INFO)
 
@@ -102,25 +168,40 @@ def test_surface_transform_cycles(
     )
 
     assert annotation is not None, (
-        f"Missing annotation '{LABEL}' for {ORIGIN} ({HEMISPHERE}, density={density})."
+        f"Missing annotation '{LABEL}' for {ORIGIN} "
+        f"({HEMISPHERE}, density={density})."
     )
 
     metric_file = Path(annotation.fetch())
 
-    return_paths = find_return_paths(
+    # Find all graph cycles.
+    all_paths = find_return_paths(
         graph,
         ORIGIN,
-        max_length=MAX_CYCLE_LENGTH,
+    )
+
+    assert all_paths, (
+        f"No return paths found from '{ORIGIN}' "
+        "in the surface transformation graph."
+    )
+
+    # Remove cycles that cannot be executed due to missing surface resources.
+    valid_paths = _valid_cycle_paths(
+        graph,
+        all_paths,
+        density,
+        HEMISPHERE,
     )
 
     logger.info(
-        "Testing %d transformation cycles from %s",
-        len(return_paths),
+        "Testing %d/%d executable transformation cycles from %s",
+        len(valid_paths),
+        len(all_paths),
         ORIGIN,
     )
 
-    assert return_paths, (
-        f"No return paths found from '{ORIGIN}' in the surface transformation graph."
+    assert valid_paths, (
+        f"No executable transformation cycles found from '{ORIGIN}'."
     )
 
     cycle_results = run_cycle_test(
@@ -130,8 +211,10 @@ def test_surface_transform_cycles(
         HEMISPHERE,
         output_dir,
         density=density,
-        max_length=MAX_CYCLE_LENGTH,
+        paths=valid_paths,
     )
+
+    assert cycle_results, "No cycle results were generated."
 
     frame = pd.DataFrame(
         {
@@ -154,14 +237,37 @@ def test_surface_transform_cycles(
         frame.to_string(index=False),
     )
 
-    output_file = output_dir / f"cycle_{ORIGIN}_{LABEL}_{HEMISPHERE}.csv"
-    frame.to_csv(output_file, index=False)
+    output_file = (
+        output_dir
+        / f"cycle_{ORIGIN}_{LABEL}_{HEMISPHERE}.csv"
+    )
 
-    logger.info("Saved cycle metrics: %s", output_file)
+    frame.to_csv(
+        output_file,
+        index=False,
+    )
 
-    # Regression threshold: round-tripped annotations should remain correlated.
-    # Thresholds can be adjusted for known lossy transformations.
-    assert (frame["pearson_r"] > 0.5).all(), (
-        "Surface transformation cycle failed: at least one path "
-        f"had poor preservation. See {output_file}."
+    logger.info(
+        "Saved cycle regression metrics: %s",
+        output_file,
+    )
+
+    failed_correlation = frame[
+        frame["pearson_r"] < MIN_PEARSON_R
+    ]
+
+    assert failed_correlation.empty, (
+        "Surface transformation cycle regression failed: "
+        f"Pearson correlation below {MIN_PEARSON_R}. "
+        f"See {output_file}."
+    )
+
+    failed_error = frame[
+        frame["max_abs_diff"] > MAX_ABS_DIFF
+    ]
+
+    assert failed_error.empty, (
+        "Surface transformation cycle regression failed: "
+        f"maximum absolute difference exceeded {MAX_ABS_DIFF}. "
+        f"See {output_file}."
     )
