@@ -40,14 +40,14 @@ Run with::
 from __future__ import annotations
 
 import logging
+from itertools import pairwise
 from pathlib import Path
 
 import pandas as pd
 import pytest
-
-from neuromaps_prime.graph import NeuromapsGraph
 from tests.cycle import find_return_paths, run_cycle_test
 
+from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +115,7 @@ def _valid_cycle_paths(
     for path in paths:
         valid = True
 
-        for source, target in zip(path[:-1], path[1:]):
+        for source, target in pairwise(path):
             try:
                 graph._cache.require_surface_atlas(
                     source,
