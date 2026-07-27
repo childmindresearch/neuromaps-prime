@@ -1,21 +1,30 @@
-"""Cycle regression test on the real graph.
+"""Regression test for surface transformation cycle accuracy.
 
-Round-trips a real surface annotation around every return path from an origin
-space and reports the Pearson correlation between the original metric and each
-round-trip. High correlation means the transforms on that path compose close to
-the identity; lower correlation flags lower-quality paths.
+This test validates end-to-end transformation accuracy on the real
+NeuromapsPrime graph using available surface transformations.
 
-This is the deployed counterpart to the hermetic unit test in
-``tests/unit/graph/_unittest_cycle.py``. Both call the same machinery in
-``tests/cycle.py``; the unit test proves that machinery returns
-r ~ 1 on a synthetic identity network, while this test measures the *real*
-transforms and therefore needs Workbench and network access (like
-``test_surf_matrix.py``).
+A surface annotation is initialized in an origin template space, transformed
+through valid return paths in the surface transformation graph, and compared
+against the original annotation after returning to the starting space.
 
-Edit ``ORIGIN``, ``LABEL``, and ``HEMISPHERE`` for the space/annotation you want
-to probe, then run::
+The unit cycle tests validate the cycle-testing machinery using a synthetic
+identity graph. This regression test extends that validation to real surface
+transformations and detects future changes that affect transformation accuracy.
 
-    pytest tests/regression/regression_test_cycle.py -s
+Metrics recorded for each cycle include:
+- Pearson correlation between the original and round-tripped annotation.
+- Maximum absolute difference between original and transformed metrics.
+- Number of transformations in the cycle.
+
+Additional domain-specific metrics (e.g., eigenmode preservation) can be added
+as regression criteria as additional validation targets are implemented.
+
+To test another template or annotation, update ``ORIGIN``, ``LABEL``, and
+``HEMISPHERE`` below.
+
+Run with::
+
+    pytest tests/regression/regression_test_cycle.py -v -s
 """
 
 from __future__ import annotations
@@ -24,77 +33,141 @@ import logging
 from pathlib import Path
 
 import pandas as pd
-from tests.cycle import find_return_paths, run_cycle_test
+import pytest
 
 from neuromaps_prime.graph import NeuromapsGraph
+from tests.cycle import find_return_paths, run_cycle_test
+
 
 logger = logging.getLogger(__name__)
 
-output_dir = Path(__file__).resolve().parent / "cycle_outputs"
-output_dir.mkdir(parents=True, exist_ok=True)
 
-# --- configure the probe ---------------------------------------------------- #
-ORIGIN = "fsLR"
-LABEL = "RM_scalinghcp"
+# -------------------------------------------------------------------------
+# Test parameters
+# -------------------------------------------------------------------------
+
+# Start with spaces containing available surface transformations.
+ORIGIN = "Yerkes19"
+LABEL = "RM_auto_ampa"
 HEMISPHERE = "left"
-# Bound path length so cycle enumeration stays tractable on the dense real
-# graph (number of simple cycles grows combinatorially).
+
+# Limit cycle enumeration to keep runtime tractable as the graph grows.
 MAX_CYCLE_LENGTH = 4
 
 
-def test_cycle_roundtrip(tmp_path: Path) -> None:
-    """Round-trip an annotation through every return path and log correlations."""
-    logging.basicConfig(level=logging.INFO)
-    graph = NeuromapsGraph()
+# -------------------------------------------------------------------------
+# Fixtures
+# -------------------------------------------------------------------------
 
-    # Seed the metric at the origin's highest density so the round-trip returns
-    # to a matching mesh, then score every return path.
+
+@pytest.fixture
+def output_dir() -> Path:
+    """Directory for storing cycle regression outputs."""
+    directory = Path(__file__).resolve().parent / "cycle_outputs"
+    directory.mkdir(parents=True, exist_ok=True)
+
+    return directory
+
+
+@pytest.fixture
+def graph() -> NeuromapsGraph:
+    """Create a Neuromaps graph for regression testing."""
+    return NeuromapsGraph()
+
+
+# -------------------------------------------------------------------------
+# Tests
+# -------------------------------------------------------------------------
+
+
+def test_surface_transform_cycles(
+    graph: NeuromapsGraph,
+    output_dir: Path,
+) -> None:
+    """Validate preservation through complete surface transformation cycles.
+
+    A real surface annotation is propagated through all return paths from the
+    origin space and compared with the original data after returning to that
+    space. Successful transformations should preserve the annotation with high
+    correlation.
+    """
+    logging.basicConfig(level=logging.INFO)
+
     density = graph.find_highest_density(ORIGIN)
+
     annotation = graph.fetch_surface_annotation(
-        space=ORIGIN, label=LABEL, density=density, hemisphere=HEMISPHERE
+        space=ORIGIN,
+        label=LABEL,
+        density=density,
+        hemisphere=HEMISPHERE,
     )
+
     assert annotation is not None, (
-        f"No annotation '{LABEL}' for {ORIGIN} at density '{density}'. "
-        "Pick an origin/label that exists in the node YAMLs."
+        f"Missing annotation '{LABEL}' for {ORIGIN} "
+        f"({HEMISPHERE}, density={density})."
     )
+
     metric_file = Path(annotation.fetch())
 
-    paths = find_return_paths(graph, ORIGIN, max_length=MAX_CYCLE_LENGTH)
-    logger.info("Found %d return paths from %s", len(paths), ORIGIN)
-    assert paths, f"No return paths from '{ORIGIN}' on the surface layer."
+    return_paths = find_return_paths(
+        graph,
+        ORIGIN,
+        max_length=MAX_CYCLE_LENGTH,
+    )
 
-    results = run_cycle_test(
+    logger.info(
+        "Testing %d transformation cycles from %s",
+        len(return_paths),
+        ORIGIN,
+    )
+
+    assert return_paths, (
+        f"No return paths found from '{ORIGIN}' "
+        "in the surface transformation graph."
+    )
+
+    cycle_results = run_cycle_test(
         graph,
         ORIGIN,
         metric_file,
         HEMISPHERE,
-        tmp_path,
+        output_dir,
+        density=density,
         max_length=MAX_CYCLE_LENGTH,
     )
 
     frame = pd.DataFrame(
-        [
-            {
-                "path": r.label,
-                "n_hops": len(r.path) - 1,
-                "pearson_r": r.pearson_r,
-                "max_abs_diff": r.max_abs_diff,
-            }
-            for r in results
-        ]
-    ).sort_values("pearson_r", ascending=False)
+        {
+            "path": result.label,
+            "n_hops": len(result.path) - 1,
+            "pearson_r": result.pearson_r,
+            "max_abs_diff": result.max_abs_diff,
+        }
+        for result in cycle_results
+    ).sort_values(
+        "pearson_r",
+        ascending=False,
+    )
 
-    logger.info("\n=== CYCLE TEST (%s, %s, %s) ===", ORIGIN, LABEL, HEMISPHERE)
-    logger.info("\n%s", frame.to_string(index=False))
+    logger.info(
+        "\n=== Surface Cycle Regression: %s (%s, %s) ===\n%s",
+        ORIGIN,
+        LABEL,
+        HEMISPHERE,
+        frame.to_string(index=False),
+    )
 
-    csv_path = output_dir / f"cycle_{ORIGIN}_{LABEL}_{HEMISPHERE}.csv"
-    frame.to_csv(csv_path, index=False)
-    logger.info("Saved CSV -> %s", csv_path)
+    output_file = (
+        output_dir
+        / f"cycle_{ORIGIN}_{LABEL}_{HEMISPHERE}.csv"
+    )
+    frame.to_csv(output_file, index=False)
 
-    # A metric round-tripped to its own space and back should stay correlated
-    # with itself; a hard failure here indicates a broken or misdirected
-    # transform rather than mere registration error.
+    logger.info("Saved cycle metrics: %s", output_file)
+
+    # Regression threshold: round-tripped annotations should remain correlated.
+    # Thresholds can be adjusted for known lossy transformations.
     assert (frame["pearson_r"] > 0.5).all(), (
-        "At least one return path lost nearly all correlation - inspect the "
-        f"transforms on the low-scoring paths in {csv_path}."
+        "Surface transformation cycle failed: at least one path "
+        f"had poor preservation. See {output_file}."
     )
