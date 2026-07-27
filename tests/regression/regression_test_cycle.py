@@ -103,8 +103,7 @@ def test_surface_transform_cycles(
     )
 
     assert annotation is not None, (
-        f"Missing annotation '{LABEL}' for {ORIGIN} "
-        f"({HEMISPHERE}, density={density})."
+        f"Missing annotation '{LABEL}' for {ORIGIN} ({HEMISPHERE}, density={density})."
     )
 
     metric_file = Path(annotation.fetch())
@@ -122,8 +121,7 @@ def test_surface_transform_cycles(
     )
 
     assert return_paths, (
-        f"No return paths found from '{ORIGIN}' "
-        "in the surface transformation graph."
+        f"No return paths found from '{ORIGIN}' in the surface transformation graph."
     )
 
     cycle_results = run_cycle_test(
@@ -157,10 +155,7 @@ def test_surface_transform_cycles(
         frame.to_string(index=False),
     )
 
-    output_file = (
-        output_dir
-        / f"cycle_{ORIGIN}_{LABEL}_{HEMISPHERE}.csv"
-    )
+    output_file = output_dir / f"cycle_{ORIGIN}_{LABEL}_{HEMISPHERE}.csv"
     frame.to_csv(output_file, index=False)
 
     logger.info("Saved cycle metrics: %s", output_file)
