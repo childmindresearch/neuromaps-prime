@@ -399,39 +399,40 @@ def run_cycle_test(
     density: str | None = None,
     max_length: int | None = None,
     output_file: str | Path | None = None,
+    paths: list[tuple[str, ...]] | None = None,
 ) -> list[CycleResult]:
-    """Round-trip ``metric_file`` around every return path from ``origin``.
+    """Round-trip ``metric_file`` around every return path from ``origin``."""
 
-    Args:
-        graph: Populated :class:`~neuromaps_prime.graph.NeuromapsGraph`.
-        origin: Space the metric starts from and must return to.
-        metric_file: Seed metric GIFTI defined on the origin space.
-        hemisphere: ``'left'`` or ``'right'``.
-        workdir: Directory for intermediate metric files.
-        density: Fixed mesh density for every hop, or ``None`` to let the
-            transformer choose per hop (see :func:`roundtrip_metric`).
-        max_length: Optional cap on path length passed to
-            :func:`find_return_paths`.
-        output_file: Optional path to a text file where the results summary
-            will be saved. When ``None`` no file is written.
-
-    Returns:
-        One :class:`CycleResult` per return path, in enumeration order.
-    """
     results: list[CycleResult] = []
-    for path in find_return_paths(graph, origin, max_length=max_length):
+
+    if paths is None:
+        paths = find_return_paths(
+            graph,
+            origin,
+            max_length=max_length,
+        )
+
+    for path in paths:
         roundtrip = roundtrip_metric(
-            graph, metric_file, path, hemisphere, workdir, density=density
+            graph,
+            metric_file,
+            path,
+            hemisphere,
+            workdir,
+            density=density,
         )
-        pearson_r, max_abs_diff = score_roundtrip(metric_file, roundtrip)
-        logger.info(
-            "cycle %s: r=%.6f max|delta|=%.3e",
-            " -> ".join(path),
-            pearson_r,
-            max_abs_diff,
+
+        pearson_r, max_abs_diff = score_roundtrip(
+            metric_file,
+            roundtrip,
         )
+
         results.append(
-            CycleResult(path=path, pearson_r=pearson_r, max_abs_diff=max_abs_diff)
+            CycleResult(
+                path=path,
+                pearson_r=pearson_r,
+                max_abs_diff=max_abs_diff,
+            )
         )
 
     # Print summary table to stdout.
