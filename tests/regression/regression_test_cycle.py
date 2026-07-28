@@ -387,6 +387,5 @@ def test_surface_transform_cycles(
 
     if messages:
         pytest.fail(
-            "\n\n".join(messages)
-            + f"\n\nSee {output_file} for complete results."
+            "\n\n".join(messages) + f"\n\nSee {output_file} for complete results."
         )
