@@ -218,4 +218,4 @@ _version.py
 examples/interactive_graph.html
 
 # Test generated files
-tests/unit/output/
+tests/*/output/
