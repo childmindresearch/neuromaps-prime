@@ -84,7 +84,7 @@ def graph() -> NeuromapsGraph:
 @pytest.fixture
 def output_dir() -> Path:
     """Directory for storing cycle regression outputs."""
-    directory = Path(__file__).resolve().parent / "cycle_outputs"
+    directory = Path(__file__).resolve().parent / "output/cycle_outputs"
     directory.mkdir(
         parents=True,
         exist_ok=True,
@@ -137,6 +137,117 @@ def _valid_cycle_paths(
             valid_paths.append(path)
 
     return valid_paths
+
+def _save_cycle_figure(
+    frame: pd.DataFrame,
+    output_dir: Path,
+) -> Path:
+    """Save summary plots for cycle regression metrics."""
+    import matplotlib.pyplot as plt
+
+    figure_path = output_dir / "cycle_summary.png"
+
+    frame = frame.sort_values(
+        "pearson_r",
+        ascending=False,
+    )
+
+    fig, axes = plt.subplots(
+        2,
+        1,
+        figsize=(max(8, len(frame) * 0.7), 8),
+        sharex=True,
+    )
+
+    # ------------------------------------------------------------------
+    # Pearson correlation
+    # ------------------------------------------------------------------
+
+    pearson_colors = [
+        "#2a9d8f" if value >= MIN_PEARSON_R else "#e76f51"
+        for value in frame["pearson_r"]
+    ]
+
+    axes[0].bar(
+        range(len(frame)),
+        frame["pearson_r"],
+        color=pearson_colors,
+    )
+
+    axes[0].axhline(
+        MIN_PEARSON_R,
+        color="red",
+        linestyle="--",
+        linewidth=1,
+        label=f"Threshold ({MIN_PEARSON_R})",
+    )
+
+    axes[0].axhline(
+        1.0,
+        color="grey",
+        linestyle=":",
+        linewidth=1,
+    )
+
+    axes[0].set_ylim(
+        0.0,
+        1.01,
+    )
+
+    axes[0].set_ylabel("Pearson r")
+    axes[0].set_title(
+        f"{ORIGIN} cycle regression\n{LABEL} ({HEMISPHERE})",
+        fontweight="bold",
+    )
+    axes[0].legend()
+
+    # ------------------------------------------------------------------
+    # Maximum absolute difference
+    # ------------------------------------------------------------------
+
+    error_colors = [
+        "#2a9d8f" if value <= MAX_ABS_DIFF else "#e76f51"
+        for value in frame["max_abs_diff"]
+    ]
+
+    axes[1].bar(
+        range(len(frame)),
+        frame["max_abs_diff"],
+        color=error_colors,
+    )
+
+    axes[1].axhline(
+        MAX_ABS_DIFF,
+        color="red",
+        linestyle="--",
+        linewidth=1,
+        label=f"Threshold ({MAX_ABS_DIFF})",
+    )
+
+    axes[1].set_ylabel("Maximum absolute difference")
+    axes[1].set_xlabel("Transformation cycle")
+    axes[1].legend()
+
+    axes[1].set_xticks(range(len(frame)))
+    axes[1].set_xticklabels(
+        frame["path"],
+        rotation=35,
+        ha="right",
+        fontsize=8,
+    )
+
+    fig.tight_layout()
+
+    fig.savefig(
+        figure_path,
+        dpi=150,
+    )
+
+    plt.close(fig)
+
+    return figure_path
+
+
 
 
 # -------------------------------------------------------------------------
@@ -244,6 +355,21 @@ def test_surface_transform_cycles(
         "Saved cycle regression metrics: %s",
         output_file,
     )
+
+    try:
+        figure_file = _save_cycle_figure(
+            frame,
+            output_dir,
+        )
+
+        logger.info(
+            "Saved cycle regression figure: %s",
+            figure_file,
+        )
+    except ImportError:
+        logger.info(
+            "matplotlib not installed - skipping regression figure."
+        )
 
     failed_correlation = frame[frame["pearson_r"] < MIN_PEARSON_R]
 
