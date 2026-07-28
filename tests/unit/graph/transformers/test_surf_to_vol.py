@@ -8,6 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from neuromaps_prime.graph.models import TransformResult
+
 if TYPE_CHECKING:
     from collections.abc import Callable
     from typing import Literal
@@ -84,7 +86,9 @@ class TestTransformSurfaceToVolume:
         expected_ext = "label.gii" if transformer_type == "label" else "shape.gii"
         out_surface = tmp_path / f"out.{expected_ext}"
 
-        mock_ops.surface_ops.transform_surface.return_value = out_surface
+        mock_ops.surface_ops.transform_surface.return_value = TransformResult(
+            output_path=out_surface
+        )
         mock_ops.surface_ops.cache.get_surface_atlas.side_effect = (
             self.make_atlas_side_effect(tmp_path)
         )
@@ -112,7 +116,9 @@ class TestTransformSurfaceToVolume:
     ) -> None:
         """Test target_density fallback to highest available when None."""
         params = basic_params._replace(target_density=None)
-        mock_ops.surface_ops.transform_surface.return_value = tmp_path / "out.shape.gii"
+        mock_ops.surface_ops.transform_surface.return_value = TransformResult(
+            output_path=tmp_path / "out.shape.gii"
+        )
         mock_ops.surface_ops.utils.find_highest_density.return_value = "164k"
         mock_ops.surface_ops.cache.get_surface_atlas.side_effect = (
             self.make_atlas_side_effect(tmp_path)
@@ -140,7 +146,7 @@ class TestTransformSurfaceToVolume:
         self, mock_ops: NeuromapsGraph, basic_params: BasicParams
     ) -> None:
         """FileNotFoundError raised when the intermediate surface transform fails."""
-        mock_ops.surface_ops.transform_surface.return_value = None
+        mock_ops.surface_ops.transform_surface.return_value = TransformResult()
 
         with pytest.raises(FileNotFoundError, match="Unable to perform transformation"):
             mock_ops.surface_ops.transform_surface_to_volume(
@@ -151,7 +157,9 @@ class TestTransformSurfaceToVolume:
         self, mock_ops: NeuromapsGraph, basic_params: BasicParams, tmp_path: Path
     ) -> None:
         """FileNotFoundError raised when target surface atlas cannot be found."""
-        mock_ops.surface_ops.transform_surface.return_value = tmp_path / "out.shape.gii"
+        mock_ops.surface_ops.transform_surface.return_value = TransformResult(
+            output_path=tmp_path / "out.shape.gii"
+        )
         mock_ops.surface_ops.cache.get_surface_atlas.return_value = None
 
         with pytest.raises(FileNotFoundError, match="Unable to find target surface"):
