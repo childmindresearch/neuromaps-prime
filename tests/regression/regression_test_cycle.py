@@ -138,6 +138,7 @@ def _valid_cycle_paths(
 
     return valid_paths
 
+
 def _save_cycle_figure(
     frame: pd.DataFrame,
     output_dir: Path,
@@ -246,8 +247,6 @@ def _save_cycle_figure(
     plt.close(fig)
 
     return figure_path
-
-
 
 
 # -------------------------------------------------------------------------
@@ -367,22 +366,27 @@ def test_surface_transform_cycles(
             figure_file,
         )
     except ImportError:
-        logger.info(
-            "matplotlib not installed - skipping regression figure."
-        )
+        logger.info("matplotlib not installed - skipping regression figure.")
 
     failed_correlation = frame[frame["pearson_r"] < MIN_PEARSON_R]
-
-    assert failed_correlation.empty, (
-        "Surface transformation cycle regression failed: "
-        f"Pearson correlation below {MIN_PEARSON_R}. "
-        f"See {output_file}."
-    )
-
     failed_error = frame[frame["max_abs_diff"] > MAX_ABS_DIFF]
 
-    assert failed_error.empty, (
-        "Surface transformation cycle regression failed: "
-        f"maximum absolute difference exceeded {MAX_ABS_DIFF}. "
-        f"See {output_file}."
-    )
+    messages = []
+
+    if not failed_correlation.empty:
+        messages.append(
+            "Cycles below Pearson threshold:\n"
+            + failed_correlation.to_string(index=False)
+        )
+
+    if not failed_error.empty:
+        messages.append(
+            "Cycles above max-abs-diff threshold:\n"
+            + failed_error.to_string(index=False)
+        )
+
+    if messages:
+        pytest.fail(
+            "\n\n".join(messages)
+            + f"\n\nSee {output_file} for complete results."
+        )
