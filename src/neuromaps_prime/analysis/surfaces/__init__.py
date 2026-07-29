@@ -7,9 +7,10 @@ space-agnostic statistics in :mod:`neuromaps_prime.analysis.stats` with
 operations that require surface topology.
 """
 
+from neuromaps_prime.analysis.surfaces import nulls
 from neuromaps_prime.analysis.surfaces.points import (
     get_surface_distance,
     make_surf_graph,
 )
 
-__all__ = ["get_surface_distance", "make_surf_graph"]
+__all__ = ["get_surface_distance", "make_surf_graph", "nulls"]
