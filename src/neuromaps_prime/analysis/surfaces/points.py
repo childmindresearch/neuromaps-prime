@@ -15,12 +15,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import nibabel as nib
 import numpy as np
 from joblib import Parallel, delayed
 from scipy import ndimage
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
+
+from neuromaps_prime.analysis.images import load_gifti, relabel_gifti
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -31,7 +32,7 @@ if TYPE_CHECKING:
 __all__ = ["get_surface_distance", "make_surf_graph"]
 
 # Default parcellations to ignore
-_PARC_IGNORE = frozenset(
+PARC_IGNORE = frozenset(
     {
         "unknown",
         "corpuscallosum",
@@ -394,78 +395,6 @@ def _geodesic_parcel_centroid(
     return vertices[inds[centroid_idx]]
 
 
-def _load_gifti(surface: str | Path) -> nib.GiftiImage:
-    """Load a GIFTI surface or label file.
-
-    Args:
-        surface: Path to a GIFTI file (``.gii``, ``.func.gii``, etc.).
-
-    Returns:
-        A ``nibabel.GiftiImage`` instance.
-
-    Raises:
-        ValueError: If the loaded image is not a GiftiImage.
-    """
-    img = nib.load(surface)
-    if not isinstance(img, nib.GiftiImage):
-        raise ValueError(f"Expected to load Gifti surface for: {surface}")
-    return img
-
-
-def _relabel_gifti(
-    parcellation: str | Path,
-    background: Iterable[str] | None = None,
-) -> nib.GiftiImage:
-    """Relabel a GIFTI parcellation so that label indices are consecutive.
-
-    Loads the parcellation file, zeroes out any background labels found in
-    the label table, then remaps the remaining indices to consecutive
-    integers starting at ``1``.  Returns a new ``GiftiImage`` with an
-    updated data array and label table.
-
-    Args:
-        parcellation: Path to a single GIFTI parcellation file.
-        background: Iterable of label names to treat as background and
-            zero out. Defaults to ``_PARC_IGNORE``.
-
-    Returns:
-        A ``GiftiImage`` instance with consecutive label indices and an
-        updated label table.
-    """
-    img = _load_gifti(parcellation)
-    data = img.agg_data().copy()
-    labels = img.labeltable.labels
-    lut = {v: k for k, v in img.labeltable.get_labels_as_dict().items()}
-
-    if background is None:
-        background = _PARC_IGNORE
-
-    # Zero out background labels
-    if len(labels) > 0:
-        for val in background:
-            idx = lut.get(val)
-            if idx is None:
-                continue
-            data[data == idx] = 0
-            labels = [f for f in labels if f.key != idx]
-
-    # Remap to consecutive indices starting at 1
-    data = np.unique(data, return_inverse=True)[-1]
-    new_labels = []
-    if len(labels) > 0:
-        for n, lab in enumerate(labels, start=1):
-            lab.key = n
-            new_labels.append(lab)
-
-    # Build updated GIFTI image
-    darr = nib.gifti.GiftiDataArray(
-        data, intent="NIFTI_INTENT_LABEL", datatype="NIFTI_TYPE_INT32"
-    )
-    labeltable = nib.gifti.GiftiLabelTable()
-    labeltable.labels = new_labels
-    return nib.GiftiImage(darrays=[darr], labeltable=labeltable)
-
-
 def _get_graph_distance(
     vertex: int,
     graph: csr_matrix,
@@ -515,7 +444,7 @@ def get_surface_distance(
     parcellation: str | Path | None = None,
     medial: str | Path | None = None,
     medial_labels: Iterable[str] | None = None,
-    drop: Iterable[str] = _PARC_IGNORE,
+    drop: Iterable[str] = PARC_IGNORE,
     n_proc: int = 1,
 ) -> np.ndarray:
     """Compute a geodesic distance matrix on a cortical surface.
@@ -538,7 +467,7 @@ def get_surface_distance(
             labels present in both *drop* and *medial_labels* are
             dropped.
         drop: Iterable of label names to exclude from the graph.
-            Defaults to ``_PARC_IGNORE``.
+            Defaults to ``PARC_IGNORE``.
         n_proc: Number of parallel workers for Dijkstra computation.
 
     Returns:
@@ -551,14 +480,14 @@ def get_surface_distance(
     if medial_labels is not None:
         drop = set(drop) & set(medial_labels)
 
-    vert, faces = _load_gifti(surface).agg_data()
+    vert, faces = load_gifti(surface).agg_data()
     n_vert = vert.shape[0]
     labels, mask = None, np.zeros(n_vert, dtype=bool)
 
     if medial is not None:
-        mask = _load_gifti(medial).agg_data().astype(bool)
+        mask = load_gifti(medial).agg_data().astype(bool)
     if parcellation is not None:
-        parcellation_img = _relabel_gifti(parcellation, background=drop)
+        parcellation_img = relabel_gifti(parcellation, background=drop)
         labels = parcellation_img.agg_data()
         mask[labels == 0] = True
 
