@@ -10,7 +10,7 @@ any meaningful signal.  This module provides the weight-matrix building
 block used by the higher-level Burt2018 surrogate pipeline.
 
 Adapted from the neuromaps codebase
-(https://github.com/netneurolab/neuromaps/blob/main/neuromaps/nulls/burt.py).
+(https://github.com/netneurolab/neuromaps/blob/ffcc2e0f657943ce00a1b6a968396f32250e495c/neuromaps/nulls/burt.py).
 """
 
 from __future__ import annotations

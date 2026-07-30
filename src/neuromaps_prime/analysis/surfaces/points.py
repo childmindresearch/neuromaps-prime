@@ -8,7 +8,7 @@ topology to support spatial operations that have no CTF or workbench
 equivalent (e.g., Dijkstra-based shortest-path distance on a surface).
 
 Adapted from the neuromaps codebase
-(https://github.com/netneurolab/neuromaps/blob/main/neuromaps/points.py).
+(https://github.com/netneurolab/neuromaps/blob/ffcc2e0f657943ce00a1b6a968396f32250e495c/neuromaps/points.py).
 """
 
 from __future__ import annotations
