@@ -12,7 +12,19 @@ from pathlib import Path
 import nibabel as nib
 import numpy as np
 
-from neuromaps_prime.analysis.surfaces.points import PARC_IGNORE
+# Default parcellation labels to ignore (unknown regions, medial wall, etc.)
+PARC_IGNORE = frozenset(
+    {
+        "unknown",
+        "corpuscallosum",
+        "Background+FreeSurfer_Defined_Medial_Wall",
+        "???",
+        "Unknown",
+        "Medial_wall",
+        "Medial wall",
+        "medial_wall",
+    }
+)
 
 
 def load_gifti(surface: str | Path) -> nib.GiftiImage:

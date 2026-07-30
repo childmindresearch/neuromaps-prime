@@ -21,7 +21,7 @@ from scipy import ndimage
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
 
-from neuromaps_prime.analysis.images import load_gifti, relabel_gifti
+from neuromaps_prime.analysis.images import PARC_IGNORE, load_gifti, relabel_gifti
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -30,20 +30,6 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 __all__ = ["get_surface_distance", "make_surf_graph"]
-
-# Default parcellations to ignore
-PARC_IGNORE = frozenset(
-    {
-        "unknown",
-        "corpuscallosum",
-        "Background+FreeSurfer_Defined_Medial_Wall",
-        "???",
-        "Unknown",
-        "Medial_wall",
-        "Medial wall",
-        "medial_wall",
-    }
-)
 
 
 def _get_edges(faces: ArrayLike) -> np.ndarray:
