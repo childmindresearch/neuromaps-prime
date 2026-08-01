@@ -28,7 +28,7 @@ jobs:
           --verbose tests
     - name: Coverage comment
       if: github.event_name == 'pull_request'
-      uses: MishaKav/pytest-coverage-comment@v1
+      uses: MishaKav/pytest-coverage-comment@v1.10.0
       with:
         pytest-xml-coverage-path: ./coverage.xml
         junitxml-path: ./pytest.xml
