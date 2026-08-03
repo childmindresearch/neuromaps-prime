@@ -29,7 +29,7 @@ import logging
 from dataclasses import dataclass
 from itertools import pairwise
 from pathlib import Path
-from typing import Literal
+from typing import Literal, NamedTuple
 
 import networkx as nx
 import nibabel as nib
@@ -45,7 +45,7 @@ def resolve_hop_transforms(
     hemisphere: Literal["left", "right"],
     density: str,
     edge_type: str = NeuromapsGraph.surface_to_surface_key,
-) -> list[tuple[str, str, str, Path]]:
+) -> list[HopTransform]:
     """Return the actual sphere transform file for every direct graph edge used.
 
     Each hop ``(src, dst)`` in cycle_path may itself span multiple edges
@@ -111,7 +111,14 @@ def resolve_hop_transforms(
                         hemisphere,
                     )
             if transform is not None:
-                rows.append((hop_src, hop_dst, density_used, transform.file_path))
+                rows.append(
+                    HopTransform(
+                        source_space=hop_src,
+                        target_space=hop_dst,
+                        density_used=density_used,
+                        file_path=transform.file_path,
+                    )
+                )
     return rows
 
 
@@ -120,6 +127,13 @@ def _path_token(path: tuple[str, ...]) -> str:
     digest = hashlib.sha256("->".join(path).encode("utf-8")).hexdigest()[:12]
     return f"{path[0]}_{path[-1]}_{len(path) - 1}h_{digest}"
 
+class HopTransform(NamedTuple):
+    """Sphere transform used for a single graph edge."""
+
+    source_space: str
+    target_space: str
+    density_used: str
+    file_path: Path
 
 @dataclass(frozen=True)
 class CycleResult:
