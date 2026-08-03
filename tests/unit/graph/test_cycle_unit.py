@@ -46,7 +46,7 @@ from nibabel.gifti import GiftiDataArray, GiftiImage
 from scipy.spatial import ConvexHull, cKDTree
 
 from neuromaps_prime.graph import NeuromapsGraph
-from tests.cycle import find_return_paths, run_cycle_test, load_metric
+from tests.cycle import find_return_paths, load_metric, run_cycle_test
 
 # -------------------------------------------------------------------------
 # Test parameters
@@ -213,8 +213,8 @@ def _fake_metric_resample(
     input_file_path: str | Path,
     current_sphere: str | Path,
     new_sphere: str | Path,
-    method: None,
-    area_surfs: None,
+    _method: None,
+    _area_surfs: None,
     output_file_path: str,
 ) -> SimpleNamespace:
     """Mock Workbench metric resampling for isolated unit testing."""

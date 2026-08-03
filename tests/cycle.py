@@ -29,21 +29,24 @@ import logging
 from dataclasses import dataclass
 from itertools import pairwise
 from pathlib import Path
-from typing import Literal, NamedTuple
+from typing import TYPE_CHECKING, Literal, NamedTuple
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 import networkx as nx
 import nibabel as nib
 import numpy as np
 
 from neuromaps_prime.graph import NeuromapsGraph
+
 logger = logging.getLogger(__name__)
 
 
 def _path_token(path: tuple[str, ...]) -> str:
     """Generate a deterministic token for a cycle path."""
-    return hashlib.sha256(
-        "->".join(path).encode()
-    ).hexdigest()
+    return hashlib.sha256("->".join(path).encode()).hexdigest()
+
 
 class HopTransform(NamedTuple):
     """Sphere transform used for a single graph edge."""
@@ -52,6 +55,7 @@ class HopTransform(NamedTuple):
     target_space: str
     density_used: str
     file_path: Path
+
 
 @dataclass(frozen=True)
 class CycleResult:
@@ -76,7 +80,61 @@ class CycleResult:
         return " -> ".join(self.path)
 
 
-def find_return_paths(  # noqa: C901
+def _iter_roundtrip_paths(
+    subgraph: nx.DiGraph,
+    origin: str,
+    max_length: int,
+) -> Iterator[tuple[str, ...]]:
+    """Yield bounded two-leg round-trip paths from an origin node."""
+    turn_nodes = sorted(n for n in subgraph.nodes if n != origin)
+
+    for turn in turn_nodes:
+        for outbound in sorted(
+            nx.all_simple_paths(
+                subgraph,
+                source=origin,
+                target=turn,
+                cutoff=max_length - 1,
+            )
+        ):
+            out_hops = len(outbound) - 1
+            if out_hops < 1:
+                continue
+
+            remaining = max_length - out_hops
+            if remaining < 1:
+                continue
+
+            for inbound in sorted(
+                nx.all_simple_paths(
+                    subgraph,
+                    source=turn,
+                    target=origin,
+                    cutoff=remaining,
+                )
+            ):
+                in_hops = len(inbound) - 1
+                total_hops = out_hops + in_hops
+
+                if total_hops < 2 or total_hops > max_length:
+                    continue
+
+                roundtrip = tuple(outbound + inbound[1:])
+
+                counts: dict[str, int] = {}
+                for node in roundtrip:
+                    counts[node] = counts.get(node, 0) + 1
+
+                if counts.get(origin, 0) != 2:
+                    continue
+
+                if any(node != origin and count > 2 for node, count in counts.items()):
+                    continue
+
+                yield roundtrip
+
+
+def find_return_paths(
     graph: NeuromapsGraph,
     origin: str,
     edge_type: str = NeuromapsGraph.surface_to_surface_key,
@@ -121,9 +179,10 @@ def find_return_paths(  # noqa: C901
         ValueError: If ``origin`` is not a node in the graph.
     """
     subgraph = graph.utils.get_subgraph(edge_type)
-    if max_length is None:
+
+    if allow_revisits and max_length is None:
         raise ValueError("max_length is required when allow_revisits=True")
-    
+
     if origin not in subgraph:
         raise ValueError(
             f"Origin space '{origin}' is not in the '{edge_type}' layer. "
@@ -141,55 +200,23 @@ def find_return_paths(  # noqa: C901
             paths.append(tuple(rotated))
         return sorted(paths, key=lambda p: (len(p), p))
 
-    # Enumerate bounded round-trips built from two simple directed legs.
-    found: set[tuple[str, ...]] = set()
-    # Turning node cannot be origin, otherwise round-trip is length 0.
-    turn_nodes = [n for n in subgraph.nodes if n != origin]
-    for turn in turn_nodes:
-        # Outbound path: origin -> ... -> turn
-        for outbound in nx.all_simple_paths(
-            subgraph,
-            source=origin,
-            target=turn,
-            cutoff=max_length - 1,
-        ):
-            out_hops = len(outbound) - 1
-            if out_hops < 1:
-                continue
+    paths: set[tuple[str, ...]] = set()
 
-            remaining = max_length - out_hops
-            if remaining < 1:
-                continue
+    for path in _iter_roundtrip_paths(
+        subgraph,
+        origin,
+        max_length,
+    ):
+        paths.add(path)
 
-            # Return path: turn -> ... -> origin
-            for inbound in nx.all_simple_paths(
-                subgraph,
-                source=turn,
-                target=origin,
-                cutoff=remaining,
-            ):
-                in_hops = len(inbound) - 1
-                total_hops = out_hops + in_hops
-                if total_hops < 2 or total_hops > max_length:
-                    continue
+        if max_paths is not None and len(paths) >= max_paths:
+            break
 
-                # Stitch by dropping duplicated turning node.
-                roundtrip = tuple(outbound + inbound[1:])
+    ordered = sorted(paths, key=lambda p: (len(p), p))
 
-                # Enforce "once per leg" / "at most twice overall" semantics.
-                counts: dict[str, int] = {}
-                for node in roundtrip:
-                    counts[node] = counts.get(node, 0) + 1
-                if counts.get(origin, 0) != 2:
-                    continue
-                if any(node != origin and count > 2 for node, count in counts.items()):
-                    continue
-
-                found.add(roundtrip)
-
-    ordered = sorted(found, key=lambda p: (len(p), p))
     if max_paths is not None:
         return ordered[:max_paths]
+
     return ordered
 
 
