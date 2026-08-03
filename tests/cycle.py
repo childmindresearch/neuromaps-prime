@@ -162,14 +162,16 @@ def find_return_paths(
         origin: Space the metric starts from and must return to.
         edge_type: Edge key to traverse (``'surface_to_surface'`` or
             ``'volume_to_volume'``).
-        max_length: Optional cap on the number of edges in a path. ``None``
-            enumerates all simple cycles, which grows combinatorially on dense
-            graphs; bound it on the real graph. Required when
-            ``allow_revisits=True``.
-        allow_revisits: If ``True``, enumerate two-leg round-trips (outbound +
-            return simple paths) up to ``max_length``.
-        max_paths: Optional cap on number of returned paths. Useful with
-            ``allow_revisits=True`` to avoid combinatorial blow-up.
+        max_length: Optional cap on the number of edges in a path. NetworkX
+            represents paths as node sequences, so this corresponds to
+            ``len(path) - 1``. Required when ``allow_revisits=True``.
+        allow_revisits: If ``True``, enumerate two-leg round-trips composed of an
+            outbound simple path and a return simple path. Nodes may appear once
+            per leg (so the origin appears at the start and end of the returned
+            path, and intermediate nodes may appear twice overall). A finite
+            ``max_length`` is required to prevent unbounded enumeration.
+        max_paths: Optional cap on the number of return paths generated. This
+            limits the number of paths, not the number of edges.
 
     Returns:
         Return paths sorted by length then lexicographically, e.g.
