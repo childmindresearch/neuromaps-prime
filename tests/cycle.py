@@ -307,10 +307,10 @@ def score_roundtrip(
         Tuple of the Pearson correlation and the maximum absolute vertex-wise
         difference between the two metrics.
 
-        Pearson correlation is undefined when either metric is constant
-        (zero variance). For cycle-test sanity checks we return ``1.0`` when
-        both constant vectors are equal (treating matching NaNs as equal) and
-        ``0.0`` otherwise.
+        Pearson correlation is undefined when either metric is constant or when
+        there are fewer than two finite values. These cases return ``1.0`` only
+        when a valid finite comparison supports equality; otherwise ``0.0`` is
+        returned.
 
     Raises:
         ValueError: If the two metrics have different vertex counts (which means
@@ -337,9 +337,16 @@ def score_roundtrip(
         )
         max_abs_diff = float("nan")
 
+    finite_count = np.count_nonzero(finite_mask)
     vectors_equal = bool(np.allclose(original, roundtrip, equal_nan=True))
-    if np.count_nonzero(finite_mask) < 2:
-        pearson_r = 1.0 if vectors_equal else 0.0
+
+    if finite_count < 2:
+        warnings.warn(
+            "Fewer than two finite values available to compute Pearson correlation.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        pearson_r = 1.0 if finite_count > 0 and vectors_equal else 0.0
         return pearson_r, max_abs_diff
 
     original_finite = original[finite_mask]
