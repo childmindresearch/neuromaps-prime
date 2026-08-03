@@ -40,9 +40,10 @@ logger = logging.getLogger(__name__)
 
 
 def _path_token(path: tuple[str, ...]) -> str:
-    """Return a short deterministic token for a traversal path."""
-    digest = hashlib.sha256("->".join(path).encode("utf-8")).hexdigest()[:12]
-    return f"{path[0]}_{path[-1]}_{len(path) - 1}h_{digest}"
+    """Generate a deterministic token for a cycle path."""
+    return hashlib.sha256(
+        "->".join(path).encode()
+    ).hexdigest()
 
 class HopTransform(NamedTuple):
     """Sphere transform used for a single graph edge."""
