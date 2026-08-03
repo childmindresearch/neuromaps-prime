@@ -29,18 +29,14 @@ import logging
 from dataclasses import dataclass
 from itertools import pairwise
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 import networkx as nx
 import nibabel as nib
 import numpy as np
 
-if TYPE_CHECKING:
-    from neuromaps_prime.graph import NeuromapsGraph
-
+from neuromaps_prime.graph import NeuromapsGraph
 logger = logging.getLogger(__name__)
-
-SURFACE_EDGE = "surface_to_surface"
 
 
 def resolve_hop_transforms(
@@ -48,7 +44,7 @@ def resolve_hop_transforms(
     cycle_path: tuple[str, ...],
     hemisphere: Literal["left", "right"],
     density: str,
-    edge_type: str = SURFACE_EDGE,
+    edge_type: str = NeuromapsGraph.surface_to_surface_key,
 ) -> list[tuple[str, str, str, Path]]:
     """Return the actual sphere transform file for every direct graph edge used.
 
@@ -151,7 +147,7 @@ class CycleResult:
 def find_return_paths(  # noqa: C901
     graph: NeuromapsGraph,
     origin: str,
-    edge_type: str = SURFACE_EDGE,
+    edge_type: str = NeuromapsGraph.surface_to_surface_key,
     *,
     max_length: int | None = None,
     allow_revisits: bool = False,
