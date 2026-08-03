@@ -121,6 +121,9 @@ def find_return_paths(  # noqa: C901
         ValueError: If ``origin`` is not a node in the graph.
     """
     subgraph = graph.utils.get_subgraph(edge_type)
+    if max_length is None:
+        raise ValueError("max_length is required when allow_revisits=True")
+    
     if origin not in subgraph:
         raise ValueError(
             f"Origin space '{origin}' is not in the '{edge_type}' layer. "
@@ -137,9 +140,6 @@ def find_return_paths(  # noqa: C901
             rotated = cycle[start:] + cycle[:start] + [origin]
             paths.append(tuple(rotated))
         return sorted(paths, key=lambda p: (len(p), p))
-
-    if max_length is None:
-        raise ValueError("max_length is required when allow_revisits=True")
 
     # Enumerate bounded round-trips built from two simple directed legs.
     found: set[tuple[str, ...]] = set()
