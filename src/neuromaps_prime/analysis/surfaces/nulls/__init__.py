@@ -7,5 +7,22 @@ null distributions for statistical inference on brain surfaces.
 """
 
 from neuromaps_prime.analysis.surfaces.nulls import burt, spins
+from neuromaps_prime.analysis.surfaces.nulls.nulls import (
+    alexander_bloch,
+    baum,
+    burt2018,
+    cornblath,
+    hungarian,
+    vasa,
+)
 
-__all__ = ["burt", "spins"]
+__all__ = [
+    "alexander_bloch",
+    "baum",
+    "burt",
+    "burt2018",
+    "cornblath",
+    "hungarian",
+    "spins",
+    "vasa",
+]
