@@ -196,7 +196,7 @@ def find_return_paths(  # noqa: C901
 def load_metric(metric_file: str | Path) -> np.ndarray:
     """Load the first data array of a metric GIFTI as a 1-D float array."""
     return np.asarray(
-        nib.load(str(metric_file)).darrays[0].data,
+        nib.load(metric_file).darrays[0].data,
         dtype=np.float64,
     )
 
