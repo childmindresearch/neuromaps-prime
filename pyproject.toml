@@ -41,8 +41,7 @@ dev = [
 ]
 docs = ["pdoc>=15.0.4"]
 tests = [
-  "pandas>=3.0.3",
-  "matplotlib-surface-plotting>=0.1.0"
+  "pandas>=3.0.3"
 ]
 validate = ["check-jsonschema>=0.37.1"]
 
