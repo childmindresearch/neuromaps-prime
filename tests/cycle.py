@@ -37,6 +37,7 @@ if TYPE_CHECKING:
 import networkx as nx
 import nibabel as nib
 import numpy as np
+import warnings
 
 from neuromaps_prime.graph import NeuromapsGraph
 
@@ -328,6 +329,12 @@ def score_roundtrip(
             np.max(np.abs(original[finite_mask] - roundtrip[finite_mask]))
         )
     else:
+        warnings.warn(
+            "Round-trip metric contains no finite values; "
+            "max absolute difference is undefined.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
         max_abs_diff = float("nan")
 
     vectors_equal = bool(np.allclose(original, roundtrip, equal_nan=True))
