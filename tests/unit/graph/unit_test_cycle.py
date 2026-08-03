@@ -218,8 +218,8 @@ def _fake_metric_resample(
     input_file_path: str | Path,
     current_sphere: str | Path,
     new_sphere: str | Path,
-    method: str,  # noqa: ARG001
-    area_surfs: dict,  # noqa: ARG001
+    method: None,
+    area_surfs: None,
     output_file_path: str,
 ) -> SimpleNamespace:
     """Mock Workbench metric resampling for isolated unit testing."""
