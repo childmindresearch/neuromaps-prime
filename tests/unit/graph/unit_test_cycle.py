@@ -63,6 +63,8 @@ EXPECTED_CYCLES = {
     ("A", "C", "B", "A"),
 }
 
+DENOM = 1e-18
+
 
 # -------------------------------------------------------------------------
 # Synthetic geometry helpers
@@ -194,10 +196,11 @@ def _resample_metric(
     d20 = np.einsum("ij,ij->i", v2, v0)
     d21 = np.einsum("ij,ij->i", v2, v1)
 
+    # prevent division by near-zero values
     denominator = d00 * d11 - d01 * d01
     denominator = np.where(
-        np.abs(denominator) < 1e-18,
-        1e-18,
+        np.abs(denominator) < DENOM,
+        DENOM,
         denominator,
     )
 
