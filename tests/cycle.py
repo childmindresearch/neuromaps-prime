@@ -45,16 +45,16 @@ SURFACE_EDGE = "surface_to_surface"
 
 def resolve_hop_transforms(
     graph: NeuromapsGraph,
-    path: tuple[str, ...],
+    cycle_path: tuple[str, ...],
     hemisphere: Literal["left", "right"],
     density: str,
     edge_type: str = SURFACE_EDGE,
 ) -> list[tuple[str, str, str, Path]]:
     """Return the actual sphere transform file for every direct graph edge used.
 
-    Each *logical* hop ``(src, dst)`` in *path* may itself span multiple edges
+    Each hop ``(src, dst)`` in cycle_path may itself span multiple edges
     inside the graph (if there is no direct registration).  This function
-    expands every logical hop into its shortest internal edge sequence and
+    expands every hop into its shortest internal edge sequence and
     looks up the on-disk transform file for each direct edge, giving a
     complete audit trail of which files were used.
 
@@ -65,7 +65,7 @@ def resolve_hop_transforms(
 
     Args:
         graph: Populated :class:`~neuromaps_prime.graph.NeuromapsGraph`.
-        path: Cycle path, e.g. ``('A', 'B', 'C', 'A')``.
+        cycle_path: Cycle path, e.g. ``('A', 'B', 'C', 'A')``.
         hemisphere: ``'left'`` or ``'right'``.
         density: Preferred surface mesh density for the lookup.
         edge_type: Graph edge layer to traverse (default ``'surface_to_surface'``).
@@ -75,7 +75,7 @@ def resolve_hop_transforms(
         tuples, one per direct graph edge, in traversal order.
     """
     rows: list[tuple[str, str, str, Path]] = []
-    for src, dst in pairwise(path):
+    for src, dst in pairwise(cycle_path):
         internal_path = graph.surface_ops.utils.find_path(src, dst, edge_type)
         for hop_src, hop_dst in pairwise(internal_path):
             # Try exact density first.
