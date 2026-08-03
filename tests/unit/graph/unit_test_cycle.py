@@ -46,7 +46,7 @@ from nibabel.gifti import GiftiDataArray, GiftiImage
 from scipy.spatial import ConvexHull, cKDTree
 
 from neuromaps_prime.graph import NeuromapsGraph
-from tests.cycle import find_return_paths, run_cycle_test
+from tests.cycle import find_return_paths, run_cycle_test, load_metric
 
 # -------------------------------------------------------------------------
 # Test parameters
@@ -63,7 +63,7 @@ EXPECTED_CYCLES = {
     ("A", "C", "B", "A"),
 }
 
-DENOM = 1e-18
+DENOM = 0.00000000001
 
 
 # -------------------------------------------------------------------------
@@ -152,14 +152,6 @@ def _load_vertices(path: Path | str) -> np.ndarray:
     raise ValueError(f"No vertices found in {path}")
 
 
-def _load_metric(path: Path | str) -> np.ndarray:
-    """Load a vertex-wise metric from a GIFTI functional file."""
-    return np.asarray(
-        nib.load(str(path)).darrays[0].data,
-        dtype=float,
-    )
-
-
 # -------------------------------------------------------------------------
 # Resampling mock
 # -------------------------------------------------------------------------
@@ -227,7 +219,7 @@ def _fake_metric_resample(
 ) -> SimpleNamespace:
     """Mock Workbench metric resampling for isolated unit testing."""
     result = _resample_metric(
-        _load_metric(input_file_path),
+        load_metric(input_file_path),
         _load_vertices(current_sphere),
         _load_vertices(new_sphere),
     )

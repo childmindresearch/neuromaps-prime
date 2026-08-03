@@ -275,9 +275,12 @@ def find_return_paths(  # noqa: C901
     return ordered
 
 
-def _load_metric(metric_file: str | Path) -> np.ndarray:
+def load_metric(metric_file: str | Path) -> np.ndarray:
     """Load the first data array of a metric GIFTI as a 1-D float array."""
-    return np.asarray(nib.load(str(metric_file)).darrays[0].data, dtype=np.float64)
+    return np.asarray(
+        nib.load(str(metric_file)).darrays[0].data,
+        dtype=np.float64,
+    )
 
 
 def roundtrip_metric(
@@ -365,8 +368,8 @@ def score_roundtrip(
         ValueError: If the two metrics have different vertex counts (which means
             the metric did not return to the origin mesh).
     """
-    original = _load_metric(original_file)
-    roundtrip = _load_metric(roundtrip_file)
+    original = load_metric(original_file)
+    roundtrip = load_metric(roundtrip_file)
     if original.shape != roundtrip.shape:
         raise ValueError(
             "Round-tripped metric did not return to the origin mesh: "
