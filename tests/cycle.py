@@ -392,40 +392,50 @@ def run_cycle_test(
             CycleResult(path=path, pearson_r=pearson_r, max_abs_diff=max_abs_diff)
         )
 
-    # Print summary table to stdout.
-    header = f"{'Transformation path':<50}  {'Pearson r':>10}  {'Max |delta|':>14}"
-    separator = "-" * len(header)
-    logger.info(separator)
-    logger.info(header)
+    summary = _format_cycle_summary(results, origin, hemisphere)
 
-    for r in results:
-        logger.info(
-            "%-50s  %10.6f  %14.3e",
-            r.label,
-            r.pearson_r,
-            r.max_abs_diff,
-        )
+    for line in summary.splitlines():
+        logger.info(line)
 
-    logger.info(separator)
-    logger.info("Total cycles: %d", len(results))
-
-    # Optionally save the same summary to a text file.
     if output_file is not None:
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        with output_path.open("w", encoding="utf-8") as fh:
-            fh.write(
-                f"Cycle test results — origin: {origin}, hemisphere: {hemisphere}\n"
-            )
-            fh.write(separator + "\n")
-            fh.write(header + "\n")
-            fh.write(separator + "\n")
-            for r in results:
-                fh.write(
-                    f"{r.label:<50}  {r.pearson_r:>10.6f}  {r.max_abs_diff:>14.3e}\n"
-                )
-            fh.write(separator + "\n")
-            fh.write(f"Total cycles: {len(results)}\n")
+
+        output_path.write_text(
+            summary + "\n",
+            encoding="utf-8",
+        )
+
         logger.info("Cycle test results saved to %s", output_path)
 
     return results
+
+def _format_cycle_summary(
+    results: list[CycleResult],
+    origin: str,
+    hemisphere: str,
+) -> str:
+    """Format cycle results as a summary table."""
+    header = f"{'Transformation path':<50}  {'Pearson r':>10}  {'Max |delta|':>14}"
+    separator = "-" * len(header)
+
+    lines = [
+        f"Cycle test results — origin: {origin}, hemisphere: {hemisphere}",
+        separator,
+        header,
+        separator,
+    ]
+
+    lines.extend(
+        f"{r.label:<50}  {r.pearson_r:>10.6f}  {r.max_abs_diff:>14.3e}"
+        for r in results
+    )
+
+    lines.extend(
+        [
+            separator,
+            f"Total cycles: {len(results)}",
+        ]
+    )
+
+    return "\n".join(lines)
