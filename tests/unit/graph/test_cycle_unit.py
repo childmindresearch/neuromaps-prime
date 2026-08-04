@@ -241,6 +241,7 @@ def _fake_metric_resample(
 # Fixtures
 # -------------------------------------------------------------------------
 
+
 @pytest.fixture
 def rotation_graph(tmp_path: Path) -> NeuromapsGraph:
     """Create a three-node graph with known identity cycles."""
@@ -329,6 +330,7 @@ def rotation_graph(tmp_path: Path) -> NeuromapsGraph:
 
     return graph
 
+
 @pytest.fixture
 def rotation_metric(tmp_path: Path) -> Path:
     vertices = _fibonacci_sphere(N_VERTICES)
@@ -337,6 +339,7 @@ def rotation_metric(tmp_path: Path) -> Path:
     _save_metric(metric, vertices.sum(axis=1))
 
     return metric
+
 
 @pytest.fixture
 def patch_metric_resample(
@@ -449,10 +452,12 @@ def test_find_return_paths_returns_expected_cycles(
     rotation_graph: tuple[NeuromapsGraph, Path],
 ) -> None:
     """Return all simple closed paths from the synthetic graph."""
-    graph = rotation_graph                  # retrieve graph
-    paths = find_return_paths(graph, "A")   # find every cycle originating from A
+    graph = rotation_graph  # retrieve graph
+    paths = find_return_paths(graph, "A")  # find every cycle originating from A
 
-    assert set(paths) == EXPECTED_CYCLES    # validate that cycles are present, regardless of order
+    assert (
+        set(paths) == EXPECTED_CYCLES
+    )  # validate that cycles are present, regardless of order
 
 
 def test_find_return_paths_respects_length_limit(
