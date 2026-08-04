@@ -34,10 +34,11 @@ from typing import TYPE_CHECKING, Literal, NamedTuple
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+import warnings
+
 import networkx as nx
 import nibabel as nib
 import numpy as np
-import warnings
 
 from neuromaps_prime.graph import NeuromapsGraph
 
