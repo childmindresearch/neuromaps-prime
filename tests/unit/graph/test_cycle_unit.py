@@ -235,15 +235,102 @@ def _fake_metric_resample(
 # Fixtures
 # -------------------------------------------------------------------------
 
+@pytest.fixture
+def rotation_graph(tmp_path: Path) -> NeuromapsGraph:
+    """Create a three-node graph with known identity cycles."""
+    vertices = _fibonacci_sphere(N_VERTICES)
+    triangles = ConvexHull(vertices).simplices
+
+    sphere = tmp_path / "sphere.surf.gii"
+    _save_surface(sphere, vertices, triangles)
+
+    rotations = {
+        ("A", "B"): 120,
+        ("B", "C"): 120,
+        ("C", "A"): 120,
+        ("B", "A"): -120,
+        ("C", "B"): -120,
+        ("A", "C"): -120,
+    }
+
+    edges = []
+
+    for (source, target), angle in rotations.items():
+        transformed = (_rotation_x(angle) @ vertices.T).T
+
+        edge_surface = tmp_path / f"{source}_{target}.surf.gii"
+
+        _save_surface(
+            edge_surface,
+            transformed,
+            triangles,
+        )
+
+        edges.append(
+            {
+                "from": source,
+                "to": target,
+                "surfaces": {
+                    "synthetic": {
+                        DENSITY: {
+                            "sphere": {
+                                "left": str(edge_surface),
+                                "right": str(edge_surface),
+                            }
+                        }
+                    }
+                },
+            }
+        )
+
+    def node(name: str) -> dict:
+        return {
+            name: {
+                "surfaces": {
+                    DENSITY: {
+                        "sphere": {
+                            "left": str(sphere),
+                            "right": str(sphere),
+                        },
+                        "midthickness": {
+                            "left": str(sphere),
+                            "right": str(sphere),
+                        },
+                    }
+                }
+            }
+        }
+
+    graph = NeuromapsGraph(
+        runner="local",
+        data_dir=tmp_path / "cache",
+        _testing=True,
+    )
+
+    graph._builder.build_from_dict(
+        graph,
+        {
+            "nodes": [node("A"), node("B"), node("C")],
+            "edges": {
+                "surface_to_surface": edges,
+                "volume_to_volume": [],
+            },
+        },
+    )
+
+    metric = tmp_path / "metric.func.gii"
+    _save_metric(metric, vertices.sum(axis=1))
+
+    return graph
 
 @pytest.fixture
-def output_dir(tmp_path: Path) -> Path:
-    """Directory for storing cycle test outputs."""
-    directory = tmp_path / "output"
-    directory.mkdir()
+def rotation_metric(tmp_path: Path) -> Path:
+    vertices = _fibonacci_sphere(N_VERTICES)
 
-    return directory
+    metric = tmp_path / "metric.func.gii"
+    _save_metric(metric, vertices.sum(axis=1))
 
+    return metric
 
 @pytest.fixture
 def patch_metric_resample(
@@ -353,23 +440,22 @@ def rotation_network(
 
 
 def test_find_return_paths_returns_expected_cycles(
-    rotation_network: tuple[NeuromapsGraph, Path],
+    rotation_graph: tuple[NeuromapsGraph, Path],
 ) -> None:
     """Return all simple closed paths from the synthetic graph."""
-    graph, _ = rotation_network             # retrieve graph
+    graph, _ = rotation_graph             # retrieve graph
     paths = find_return_paths(graph, "A")   # find every cycle originating from A
-    
+
     assert set(paths) == EXPECTED_CYCLES    # validate that cycles are present, regardless of order
 
 
 def test_find_return_paths_respects_length_limit(
-    rotation_network: tuple[NeuromapsGraph, Path],
+    rotation_graph: NeuromapsGraph,
 ) -> None:
     """Only cycles within the requested hop limit are returned."""
-    graph, _ = rotation_network
 
     paths = find_return_paths(
-        graph,
+        rotation_graph,
         "A",
         max_length=2,
     )
@@ -381,32 +467,36 @@ def test_find_return_paths_respects_length_limit(
 
 
 def test_find_return_paths_rejects_unknown_node(
-    rotation_network: tuple[NeuromapsGraph, Path],
+    rotation_graph: NeuromapsGraph,
 ) -> None:
     """Invalid graph origins raise a clear error."""
-    graph, _ = rotation_network
 
     with pytest.raises(
         ValueError,
         match="not in the 'surface_to_surface' layer",
     ):
-        find_return_paths(graph, "unknown")
+        find_return_paths(rotation_graph, "unknown")
 
 
 @pytest.mark.usefixtures("patch_metric_resample")
 def test_closed_cycles_preserve_metric(
-    rotation_network: tuple[NeuromapsGraph, Path],
-    output_dir: Path,
+    rotation_graph,
+    rotation_metric,
+    tmp_path,
 ) -> None:
     """A closed transformation cycle preserves the input metric."""
-    graph, metric = rotation_network
+    graph = rotation_graph
+    metric = rotation_metric
+
+    workdir = tmp_path / "output"
+    workdir.mkdir()
 
     results = run_cycle_test(
         graph,
         "A",
         metric,
         HEMISPHERE,
-        output_dir,
+        workdir,
         density=DENSITY,
     )
 
