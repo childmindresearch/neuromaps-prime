@@ -16,7 +16,7 @@ Run with::
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import nibabel as nib
 import numpy as np
@@ -29,6 +29,9 @@ from tests.cycle import (
 )
 
 from neuromaps_prime.graph import NeuromapsGraph
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 HEMISPHERE = "left"
 ORIGIN = "D99"
