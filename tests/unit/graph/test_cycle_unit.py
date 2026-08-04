@@ -364,7 +364,7 @@ def rotation_metric(tmp_path: Path) -> Path:
     propagated through transformation cycles and compared against the original
     metric after round-trip resampling.
 
-    Returns
+    Returns:
     -------
     Path
         Path to the saved GIFTI functional metric file.
@@ -412,8 +412,8 @@ def test_find_return_paths_returns_expected_cycles(
 def test_find_return_paths_respects_length_limit(
     rotation_graph: NeuromapsGraph,
 ) -> None:
-    """Restrict returned cycles according to the maximum allowed path length.  
-    
+    """Restrict returned cycles according to the maximum allowed path length.
+
     Only cycles within the requested hop limit are returned.
     """
     paths = find_return_paths(

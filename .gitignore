@@ -216,6 +216,3 @@ _version.py
 
 # Interactive graph output
 examples/interactive_graph.html
-
-# Test generated files
-tests/**/output/
