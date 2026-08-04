@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import nibabel as nib
 import numpy as np
 import pytest
+from tests.unit.analysis.helpers import _make_gifti_parc, _make_gifti_surface
 
 from neuromaps_prime.analysis.surfaces import points
 
@@ -29,32 +30,6 @@ square_vertices = np.array(
     dtype=np.float32,
 )
 square_faces = np.array([[0, 1, 2], [1, 3, 2]], dtype=np.int32)
-
-
-def _make_gifti_surface(coords: np.ndarray, faces: np.ndarray, path: Path) -> None:
-    """Write a GIFTI surface file."""
-    ptarr = nib.gifti.GiftiDataArray(
-        coords.astype(np.float32), intent="NIFTI_INTENT_POINTSET"
-    )
-    tris = nib.gifti.GiftiDataArray(faces, intent="NIFTI_INTENT_TRIANGLE")
-    nib.GiftiImage(darrays=[ptarr, tris]).to_filename(path)
-
-
-def _make_gifti_parc(
-    data: np.ndarray,
-    labels: list[tuple[int, str]],
-    path: Path,
-) -> None:
-    """Write a GIFTI parcellation file."""
-    darr = nib.gifti.GiftiDataArray(
-        data.astype(np.int32), intent="NIFTI_INTENT_LABEL", datatype="NIFTI_TYPE_INT32"
-    )
-    lt = nib.gifti.GiftiLabelTable()
-    for key, name in labels:
-        lbl = nib.gifti.GiftiLabel(key=key)
-        lbl.label = name
-        lt.labels.append(lbl)
-    nib.GiftiImage(darrays=[darr], labeltable=lt).to_filename(path)
 
 
 @pytest.fixture(scope="module")
