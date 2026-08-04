@@ -1,25 +1,30 @@
-"""Cycle test: round-trip a surface metric through every return path.
+"""Utilities for evaluating cyclic surface transformations.
 
-A *return path* (or *cycle*) is a simple path that starts and ends at the same
-space, e.g. ``A -> B -> A`` or ``A -> B -> C -> A``. If every surface transform
-along the path were perfect, a metric carried around the path would map back
-onto itself exactly. In practice each resampling step introduces error, so the
-Pearson correlation between the original metric and its round-trip is a proxy
-for the *combined* quality of the transforms traversed on that path.
+A cycle (or return path) is a path through the surface transformation graph
+that starts and ends at the same space, for example ``A -> B -> A`` or
+``A -> B -> C -> A``. A vertex-wise metric propagated around such a path should
+return to its original representation if all traversed transformations are
+perfectly invertible. In practice, each resampling step introduces numerical
+error, so the agreement between the original and round-tripped metric provides
+a measure of accumulated cycle error.
 
-The cycle test therefore:
+This module provides reusable machinery to:
 
-1. enumerates every simple return path from an origin space over the
-   surface-to-surface layer of the graph;
-2. carries a seed metric hop-by-hop around each path back to the origin;
-3. correlates the round-tripped metric against the original.
+1. enumerate return paths through a graph's surface transformation layer;
+2. propagate a seed metric through each transformation hop;
+3. compare the returned metric against the original using Pearson correlation
+   and maximum vertex-wise absolute difference.
 
-This module holds the reusable machinery (enumeration, round-trip, scoring) so
-that the deployed regression test and its unit test exercise *the same code*.
-The unit test (``tests/unit/test_cycle.py``) validates this machinery on a
-synthetic three-node network whose transforms are pure ``+/-120`` degree
-rotations, for which the ground-truth answer is known: every return path is the
-identity, so every correlation must be ~1.
+The cycle evaluation operates on complete transformation paths rather than
+individual edges, allowing errors introduced across multiple transforms and
+resampling operations to be assessed together.
+
+The unit tests exercise this machinery using a synthetic three-space graph with
+known rotational transforms. Because the synthetic transformations compose to
+identity, all closed paths are expected to return the input metric with near
+perfect agreement. Production regression tests use real surface templates and
+transformations to evaluate accumulated errors in realistic transformation
+networks.
 """
 
 from __future__ import annotations
@@ -46,30 +51,26 @@ logger = logging.getLogger(__name__)
 
 
 def _path_token(path: tuple[str, ...]) -> str:
-    """Generate a deterministic token for a cycle path."""
+    """Create a deterministic identifier for intermediate cycle outputs.
+
+    The token is derived from the ordered sequence of spaces in the path so
+    that different cycles produce unique, reproducible output filenames.
+    """
     return hashlib.sha256("->".join(path).encode()).hexdigest()
-
-
-class HopTransform(NamedTuple):
-    """Sphere transform used for a single graph edge."""
-
-    source_space: str
-    target_space: str
-    density_used: str
-    file_path: Path
 
 
 @dataclass(frozen=True)
 class CycleResult:
-    """Outcome of round-tripping a metric around one return path.
+    """Outcome of round-tripping a metric through one return path.
 
     Attributes:
-        path: Ordered space names, starting and ending at the origin space.
-        pearson_r: Pearson correlation between the original metric and its
-            round-trip. Approaches ``1.0`` as the traversed transforms approach
-            a perfect identity.
-        max_abs_diff: Largest absolute vertex-wise difference between the
-            original and round-tripped metric.
+        path: Ordered sequence of spaces traversed, including the starting space at
+            both the beginning and end.
+        pearson_r: Pearson correlation between the original metric and the
+            round-tripped metric. Higher values indicate stronger preservation of
+            the metric's spatial pattern.
+        max_abs_diff: Maximum absolute vertex-wise difference between the original
+            and round-tripped metric.
     """
 
     path: tuple[str, ...]
@@ -145,12 +146,16 @@ def find_return_paths(
     allow_revisits: bool = False,
     max_paths: int | None = None,
 ) -> list[tuple[str, ...]]:
-    """Enumerate every simple return path ``origin -> ... -> origin``.
+    """Enumerate return paths from an origin space through a graph layer.
 
-    Traversal is restricted to a single edge layer (surface-to-surface by
-    default) so that the cycle test scores one transform modality at a time.
-    By default this enumerates directed simple cycles (no repeated interior
-    nodes), rotated so that they start and end at ``origin``.
+    A return path is any directed path that begins and ends at ``origin``.
+    By default, this returns directed simple cycles with no repeated interior
+    nodes. When ``allow_revisits=True``, paths are instead constructed from two
+    simple directed legs: an outbound path and a return path. This permits a node
+    to be visited once in each direction while preventing unrestricted graph walks.
+
+    Traversal is restricted to a single graph edge layer so that cycle evaluation
+    measures one transformation modality at a time.
 
     When ``allow_revisits=True``, this instead enumerates round-trips composed
     of two directed simple legs: an outbound simple path from ``origin`` to a
@@ -225,7 +230,11 @@ def find_return_paths(
 
 
 def load_metric(metric_file: str | Path) -> np.ndarray:
-    """Load the first data array of a metric GIFTI as a 1-D float array."""
+    """Load a GIFTI metric as a one-dimensional floating-point array.
+
+    The first data array is returned as a NumPy array for comparison and
+    resampling during cycle evaluation.
+    """
     return np.asarray(
         nib.load(metric_file).darrays[0].data,
         dtype=np.float64,
@@ -242,12 +251,14 @@ def roundtrip_metric(
     density: str | None = None,
     add_edge: bool = False,
 ) -> Path:
-    """Carry a metric hop-by-hop along ``path``, returning the final file.
+    """Propagate a metric through each hop in a return path.
 
-    Every consecutive pair in ``path`` is a direct edge, so each hop is a
-    single-hop resample performed by the production transformer
-    (:meth:`NeuromapsGraph.surface_to_surface_transformer`). The output of one
-    hop becomes the input of the next.
+    Each consecutive pair of spaces defines one surface transformation. The output
+    metric from one hop becomes the input metric for the next until the metric has
+    returned to the starting space.
+
+    This function uses the production surface transformer so cycle tests exercise
+    the same transformation machinery used by real workflows.
 
     Args:
         graph: Populated :class:`~neuromaps_prime.graph.NeuromapsGraph`.
@@ -299,6 +310,13 @@ def score_roundtrip(
     original_file: str | Path, roundtrip_file: str | Path
 ) -> tuple[float, float]:
     """Return ``(pearson_r, max_abs_diff)`` for an original vs round-tripped metric.
+
+    Computes Pearson correlation to measure preservation of the metric's
+    spatial pattern and maximum absolute difference to measure vertex-wise
+    numerical error.
+
+    Metrics with insufficient finite values or zero variance are handled
+    explicitly because Pearson correlation is undefined in those cases.
 
     Args:
         original_file: The seed metric on the origin space.
@@ -375,7 +393,12 @@ def run_cycle_test(
     max_length: int | None = None,
     output_file: str | Path | None = None,
 ) -> list[CycleResult]:
-    """Round-trip ``metric_file`` around every return path from ``origin``.
+    """Evaluate metric preservation across all return paths from an origin.
+
+    For each return path, the metric is propagated through every transformation
+    hop, returned to the origin space, and compared against the original metric.
+    Results are collected as :class:`CycleResult` objects containing both pattern
+    preservation and numerical error metrics.
 
     Args:
         graph: Populated :class:`~neuromaps_prime.graph.NeuromapsGraph`.
@@ -433,7 +456,7 @@ def _format_cycle_summary(
     origin: str,
     hemisphere: str,
 ) -> str:
-    """Format cycle results as a summary table."""
+    """Create a human-readable summary table of cycle evaluation results."""
     header = f"{'Transformation path':<50}  {'Pearson r':>10}  {'Max |delta|':>14}"
     separator = "-" * len(header)
 
