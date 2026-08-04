@@ -6,7 +6,7 @@ utilities that operate on the NetworkX graph structure.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx
 from pydantic import BaseModel
