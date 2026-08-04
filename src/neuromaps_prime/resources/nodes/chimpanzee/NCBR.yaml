@@ -1,6 +1,10 @@
 NCBR:
   species: chimpanzee
   description: NCBR Chimpanzee Atlas
+  references:
+  - citation: Lepage C, et al. 2026. NeuroImage Reports. 6:100360.
+    doi: 10.1016/j.ynirp.2026.100360
+    url: https://www.sciencedirect.com/science/article/pii/S2666956026000437
   surfaces:
     41k:
       sphere:
