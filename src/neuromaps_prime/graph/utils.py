@@ -6,7 +6,7 @@ utilities that operate on the NetworkX graph structure.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 import networkx as nx
 from pydantic import BaseModel
@@ -143,6 +143,46 @@ class GraphUtils(BaseModel):
         if not densities:
             raise ValueError(f"No surface atlases found for space '{space}'.")
         return max(densities, key=_get_density_key)
+    
+    def find_transform_densities(
+        self,
+        source_space: str,
+        target_space: str,
+        hemisphere: Literal["left", "right"],
+        resource_type: str = "sphere",
+    ) -> tuple[str, str]:
+        """Return compatible source/target densities for a surface transform.
+
+        The returned densities are guaranteed to exist for both the transform
+        resources and the target atlas.
+        """
+        transforms = self.cache.get_surface_transforms(
+            source=source_space,
+            target=target_space,
+            hemisphere=hemisphere,
+            resource_type=resource_type,
+        )
+
+        if not transforms:
+            raise ValueError(
+                f"No {resource_type} transform found from "
+                f"{source_space!r} to {target_space!r}."
+            )
+
+        for transform in transforms:
+            atlas = self.cache.get_surface_atlas(
+                space=target_space,
+                density=transform.density,
+                hemisphere=hemisphere,
+                resource_type=resource_type,
+            )
+            if atlas is not None:
+                return transform.density, transform.density
+
+        raise ValueError(
+            f"No compatible densities found for "
+            f"{source_space!r} -> {target_space!r}."
+        )
 
     # ------------------------------------------------------------------ #
     # Introspection                                                        #

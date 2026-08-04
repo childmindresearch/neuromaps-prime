@@ -45,7 +45,11 @@ import networkx as nx
 import nibabel as nib
 import numpy as np
 
+from nibabel.gifti import GiftiDataArray, GiftiImage
+
 from neuromaps_prime.graph import NeuromapsGraph
+
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -479,3 +483,45 @@ def _format_cycle_summary(
     )
 
     return "\n".join(lines)
+
+def save_synthetic_metric(
+    path: Path,
+    n_vertices: int,
+) -> None:
+    """Create a deterministic synthetic metric."""
+    metric = np.linspace(
+        0,
+        1,
+        n_vertices,
+        dtype=np.float32,
+    )
+
+    image = GiftiImage()
+    image.add_gifti_data_array(GiftiDataArray(metric))
+
+    nib.save(image, path)
+
+def get_vertex_count(
+    graph: NeuromapsGraph,
+    space: str,
+    density: str,
+    hemisphere: Literal["left", "right"],
+) -> int:
+    """Return the number of vertices in a surface atlas."""
+    atlas = graph.fetch_surface_atlas(
+        space=space,
+        density=density,
+        hemisphere=hemisphere,
+        resource_type="sphere",
+    )
+
+    if atlas is None:
+        raise ValueError(
+            f"No sphere atlas found for {space} "
+            f"(density={density}, hemisphere={hemisphere})."
+        )
+
+    image = nib.load(atlas.file_path)
+
+    return image.darrays[0].data.shape[0]
+
