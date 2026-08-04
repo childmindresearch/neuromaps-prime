@@ -220,14 +220,14 @@ class TestLoadGifti:
 
     def test_returns_gifti(self, surf_gifti_path: Path) -> None:
         """Verify loading a valid GIFTI file returns a GiftiImage."""
-        assert isinstance(points._load_gifti(surf_gifti_path), nib.GiftiImage)
+        assert isinstance(points.load_gifti(surf_gifti_path), nib.GiftiImage)
 
     def test_wrong_type_raises(self, tmp_path: Path) -> None:
         """Verify loading a non-GIFTI file raises ValueError."""
         nii_path = tmp_path / "dummy.nii.gz"
         nib.Nifti1Image(np.zeros((2, 2, 2)), np.eye(4)).to_filename(str(nii_path))
         with pytest.raises(ValueError, match="Gifti"):
-            points._load_gifti(nii_path)
+            points.load_gifti(nii_path)
 
 
 class TestRelabelGifti:
@@ -235,7 +235,7 @@ class TestRelabelGifti:
 
     def test_consecutive(self, parc_gifti_path: Path) -> None:
         """Verify output labels are remapped to consecutive indices."""
-        unique = np.unique(points._relabel_gifti(parc_gifti_path).agg_data())
+        unique = np.unique(points.relabel_gifti(parc_gifti_path).agg_data())
         np.testing.assert_array_equal(unique, [0, 1])
 
     def test_background_zeroed(self, tmp_path_factory: pytest.TempPathFactory) -> None:
@@ -246,7 +246,7 @@ class TestRelabelGifti:
             labels=[(1, "Cortex"), (2, "unknown"), (3, "Stem")],
             path=p,
         )
-        data = points._relabel_gifti(p).agg_data()
+        data = points.relabel_gifti(p).agg_data()
         assert data[1] == 0
         np.testing.assert_array_equal(np.unique(data[data > 0]), [1, 2])
 
