@@ -16,22 +16,19 @@ Run with::
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import nibabel as nib
 import numpy as np
 import pytest
 from nibabel.gifti import GiftiDataArray, GiftiImage
+
+from neuromaps_prime.graph import NeuromapsGraph
 from tests.cycle import (
     find_return_paths,
     roundtrip_metric,
     score_roundtrip,
 )
-
-if TYPE_CHECKING:
-    from pathlib import Path
-
-from neuromaps_prime.graph import NeuromapsGraph
 
 HEMISPHERE = "left"
 ORIGIN = "D99"
@@ -108,7 +105,11 @@ def test_real_multihop_surface_transforms(
     )
 
     # Select a cycle containing multiple transformations.
-    path = next(path for path in paths if len(path) > 3)
+    path = next(
+        path
+        for path in paths
+        if len(path) > 3
+    )
 
     output = roundtrip_metric(
         graph,
@@ -133,7 +134,11 @@ def test_real_transform_preserves_metric_properties(
         max_length=4,
     )
 
-    path = next(path for path in paths if len(path) > 3)
+    path = next(
+        path
+        for path in paths
+        if len(path) > 3
+    )
 
     roundtrip = roundtrip_metric(
         graph,
