@@ -27,11 +27,11 @@ test suite using real templates and Workbench resampling.
 
 Run with::
 
-    pytest tests/unit/graph/unit_test_cycle.py -v -s
+    pytest tests/unit/graph/test_cycle_unit.py -v -s
 
 Run only the metric preservation test::
 
-    pytest tests/unit/graph/unit_test_cycle.py::test_closed_cycles_preserve_metric -v -s
+    pytest tests/unit/graph/test_cycle_unit.py::test_closed_cycles_preserve_metric -v -s
 """
 
 from __future__ import annotations

@@ -426,6 +426,7 @@ def run_cycle_test(
 
     return results
 
+
 def _format_cycle_summary(
     results: list[CycleResult],
     origin: str,
@@ -443,8 +444,7 @@ def _format_cycle_summary(
     ]
 
     lines.extend(
-        f"{r.label:<50}  {r.pearson_r:>10.6f}  {r.max_abs_diff:>14.3e}"
-        for r in results
+        f"{r.label:<50}  {r.pearson_r:>10.6f}  {r.max_abs_diff:>14.3e}" for r in results
     )
 
     lines.extend(
