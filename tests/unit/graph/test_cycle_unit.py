@@ -218,7 +218,6 @@ def _fake_metric_resample(
     output_file_path: str,
 ) -> SimpleNamespace:
     """Mock Workbench metric resampling for isolated unit testing."""
-
     # required by workbench but not needed here
     del method
     del area_surfs
@@ -333,6 +332,15 @@ def rotation_graph(tmp_path: Path) -> NeuromapsGraph:
 
 @pytest.fixture
 def rotation_metric(tmp_path: Path) -> Path:
+    """Create a synthetic vertex-wise metric for cycle testing.
+
+    The metric is generated from the coordinates of a Fibonacci sphere by
+    summing the x, y, and z coordinates for each vertex. This produces a
+    deterministic spatial pattern that can be transformed through the
+    synthetic surface cycles and compared against the original metric.
+
+    The metric is saved as a GIFTI functional file and returned as its path.
+    """
     vertices = _fibonacci_sphere(N_VERTICES)
 
     metric = tmp_path / "metric.func.gii"
@@ -464,7 +472,6 @@ def test_find_return_paths_respects_length_limit(
     rotation_graph: NeuromapsGraph,
 ) -> None:
     """Only cycles within the requested hop limit are returned."""
-
     paths = find_return_paths(
         rotation_graph,
         "A",
@@ -481,7 +488,6 @@ def test_find_return_paths_rejects_unknown_node(
     rotation_graph: NeuromapsGraph,
 ) -> None:
     """Invalid graph origins raise a clear error."""
-
     with pytest.raises(
         ValueError,
         match="not in the 'surface_to_surface' layer",
@@ -491,9 +497,9 @@ def test_find_return_paths_rejects_unknown_node(
 
 @pytest.mark.usefixtures("patch_metric_resample")
 def test_closed_cycles_preserve_metric(
-    rotation_graph,
-    rotation_metric,
-    tmp_path,
+    rotation_graph: NeuromapsGraph,
+    rotation_metric: Path,
+    tmp_path: Path,
 ) -> None:
     """A closed transformation cycle preserves the input metric."""
     graph = rotation_graph
