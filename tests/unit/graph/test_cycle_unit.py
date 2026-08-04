@@ -356,11 +356,10 @@ def test_find_return_paths_returns_expected_cycles(
     rotation_network: tuple[NeuromapsGraph, Path],
 ) -> None:
     """Return all simple closed paths from the synthetic graph."""
-    graph, _ = rotation_network
-
-    paths = find_return_paths(graph, "A")
-
-    assert set(paths) == EXPECTED_CYCLES
+    graph, _ = rotation_network             # retrieve graph
+    paths = find_return_paths(graph, "A")   # find every cycle originating from A
+    
+    assert set(paths) == EXPECTED_CYCLES    # validate that cycles are present, regardless of order
 
 
 def test_find_return_paths_respects_length_limit(
