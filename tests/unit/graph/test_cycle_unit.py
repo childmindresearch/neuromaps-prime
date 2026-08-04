@@ -5,7 +5,7 @@ surface transformation cycles using a controlled synthetic graph.
 
 The synthetic graph contains three spaces (A, B, and C) connected by known
 rotational surface transformations. Forward edges apply +120 degree rotations
-around the x-axis, while reverse edges apply -120 degree rotations. 
+around the x-axis, while reverse edges apply -120 degree rotations.
 
     A → B → A          (+120 - 120)       = origin
     A → C → A          (-120 + 120)       = origin
@@ -476,6 +476,7 @@ def test_closed_cycles_preserve_metric(
 
     for result in results:
         assert result.pearson_r > 0.999
+
 
 def test_concatenated_transform_matches_direct_transform(
     rotation_graph: NeuromapsGraph,
