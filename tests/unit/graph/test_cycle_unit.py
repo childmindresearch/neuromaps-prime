@@ -46,7 +46,13 @@ from nibabel.gifti import GiftiDataArray, GiftiImage
 from scipy.spatial import ConvexHull, cKDTree
 
 from neuromaps_prime.graph import NeuromapsGraph
-from tests.cycle import find_return_paths, load_metric, run_cycle_test
+from tests.cycle import (
+    find_return_paths,
+    load_metric,
+    roundtrip_metric,
+    run_cycle_test,
+    score_roundtrip,
+)
 
 # -------------------------------------------------------------------------
 # Test parameters
@@ -470,3 +476,51 @@ def test_closed_cycles_preserve_metric(
 
     for result in results:
         assert result.pearson_r > 0.999
+
+def test_concatenated_transform_matches_direct_transform(
+    rotation_graph: NeuromapsGraph,
+    rotation_metric: Path,
+    tmp_path: Path,
+) -> None:
+    """A composed transform matches the equivalent direct transform.
+
+    The synthetic graph contains both a direct A → C transformation and an
+    indirect A → B → C route. Since the transforms are constructed from known
+    rotations, concatenating the intermediate transforms should produce the
+    same result as applying the direct transform.
+
+    This validates transform composition independently of cycle closure.
+    """
+    graph = rotation_graph
+    metric = rotation_metric
+
+    workdir = tmp_path / "output"
+    workdir.mkdir()
+
+    # Transform metric directly from A to C.
+    direct = roundtrip_metric(
+        graph,
+        metric,
+        ("A", "C"),
+        HEMISPHERE,
+        workdir,
+        density=DENSITY,
+    )
+
+    # Transform metric through the intermediate space B.
+    concatenated = roundtrip_metric(
+        graph,
+        metric,
+        ("A", "B", "C"),
+        HEMISPHERE,
+        workdir,
+        density=DENSITY,
+    )
+
+    pearson_r, max_abs_diff = score_roundtrip(
+        direct,
+        concatenated,
+    )
+
+    assert pearson_r > 0.999
+    assert max_abs_diff < 1e-5
