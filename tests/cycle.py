@@ -485,6 +485,7 @@ def _format_cycle_summary(
 
     return "\n".join(lines)
 
+
 def save_synthetic_metric(
     path: Path,
     n_vertices: int,
@@ -501,6 +502,7 @@ def save_synthetic_metric(
     image.add_gifti_data_array(GiftiDataArray(metric))
 
     nib.save(image, path)
+
 
 def get_vertex_count(
     graph: NeuromapsGraph,
@@ -525,4 +527,3 @@ def get_vertex_count(
     image = nib.load(atlas.file_path)
 
     return image.darrays[0].data.shape[0]
-
