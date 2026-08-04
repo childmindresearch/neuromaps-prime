@@ -147,7 +147,7 @@ class GraphUtils(BaseModel):
         if not densities:
             raise ValueError(f"No surface atlases found for space '{space}'.")
         return max(densities, key=_get_density_key)
-    
+
     def find_transform_densities(
         self,
         source_space: str,
@@ -184,8 +184,7 @@ class GraphUtils(BaseModel):
                 return transform.density, transform.density
 
         raise ValueError(
-            f"No compatible densities found for "
-            f"{source_space!r} -> {target_space!r}."
+            f"No compatible densities found for {source_space!r} -> {target_space!r}."
         )
 
     # ------------------------------------------------------------------ #
