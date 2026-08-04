@@ -5,13 +5,12 @@ surface transformation cycles using a controlled synthetic graph.
 
 The synthetic graph contains three spaces (A, B, and C) connected by known
 rotational surface transformations. Forward edges apply +120 degree rotations
-around the x-axis, while reverse edges apply -120 degree rotations. The
-available closed paths from node A therefore compose to identity rotations:
+around the x-axis, while reverse edges apply -120 degree rotations. 
 
-    A → B → A          (+120 - 120)       = identity
-    A → C → A          (-120 + 120)       = identity
-    A → B → C → A      (+120 + 120 +120)  = identity
-    A → C → B → A      (-120 -120 -120)   = identity
+    A → B → A          (+120 - 120)       = origin
+    A → C → A          (-120 + 120)       = origin
+    A → B → C → A      (+120 + 120 +120)  = origin
+    A → C → B → A      (-120 -120 -120)   = origin
 
 A deterministic vertex-wise synthetic metric is propagated through each
 cycle. Because each closed path represents an identity transformation, the
