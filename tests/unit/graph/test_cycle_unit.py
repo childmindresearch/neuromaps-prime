@@ -213,11 +213,13 @@ def _fake_metric_resample(
     input_file_path: str | Path,
     current_sphere: str | Path,
     new_sphere: str | Path,
-    _method: None,
-    _area_surfs: None,
+    method: str,
+    area_surfs: dict[str, str | Path],
     output_file_path: str,
 ) -> SimpleNamespace:
     """Mock Workbench metric resampling for isolated unit testing."""
+    del method
+    del area_surfs
     result = _resample_metric(
         load_metric(input_file_path),
         _load_vertices(current_sphere),
