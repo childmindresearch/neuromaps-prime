@@ -477,7 +477,7 @@ def test_closed_cycles_preserve_metric(
     for result in results:
         assert result.pearson_r > 0.999
 
-
+@pytest.mark.usefixtures("patch_metric_resample")
 def test_concatenated_transform_matches_direct_transform(
     rotation_graph: NeuromapsGraph,
     rotation_metric: Path,
