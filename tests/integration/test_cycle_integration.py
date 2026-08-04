@@ -22,13 +22,13 @@ import nibabel as nib
 import numpy as np
 import pytest
 from nibabel.gifti import GiftiDataArray, GiftiImage
-
-from neuromaps_prime.graph import NeuromapsGraph
 from tests.cycle import (
     find_return_paths,
     roundtrip_metric,
     score_roundtrip,
 )
+
+from neuromaps_prime.graph import NeuromapsGraph
 
 HEMISPHERE = "left"
 ORIGIN = "D99"
