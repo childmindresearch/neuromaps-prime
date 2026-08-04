@@ -44,12 +44,9 @@ import warnings
 import networkx as nx
 import nibabel as nib
 import numpy as np
-
 from nibabel.gifti import GiftiDataArray, GiftiImage
 
 from neuromaps_prime.graph import NeuromapsGraph
-
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
