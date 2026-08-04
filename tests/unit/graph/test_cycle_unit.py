@@ -1,29 +1,30 @@
-"""Unit tests for cyclic surface transformations.
+"""Unit tests for cyclic surface transformation utilities.
 
-These tests validate cycle traversal and round-trip transformation behavior
-using a small synthetic three-node graph.
+These tests validate graph traversal and round-trip metric preservation for
+surface transformation cycles using a controlled synthetic graph.
 
 The synthetic graph contains three spaces (A, B, and C) connected by known
-rotational surface transformations. Forward edges rotate the sphere by
-+120 degrees and reverse edges rotate by -120 degrees. Therefore, all closed
-paths return to the original coordinate system:
+rotational surface transformations. Forward edges apply +120 degree rotations
+around the x-axis, while reverse edges apply -120 degree rotations. The
+available closed paths from node A therefore compose to identity rotations:
 
     A → B → A          (+120 - 120)       = identity
     A → C → A          (-120 + 120)       = identity
     A → B → C → A      (+120 + 120 +120)  = identity
     A → C → B → A      (-120 -120 -120)   = identity
 
-A synthetic vertex-wise metric is transformed around each cycle. Since each
-cycle represents an identity transformation, the round-tripped metric should
-match the original metric with near-perfect correlation.
+A deterministic vertex-wise synthetic metric is propagated through each
+cycle. Because each closed path represents an identity transformation, the
+round-tripped metric should remain highly correlated with the original metric.
 
-The Workbench metric resampling dependency is replaced with a lightweight
-numpy implementation. This keeps the tests fast, deterministic, and isolated
-from external software dependencies.
+The tests replace Workbench metric resampling with a lightweight numpy-based
+implementation to keep execution fast, deterministic, and independent of
+external neuroimaging software. This implementation provides only the
+resampling behavior required to exercise the cycle-testing code.
 
-These tests validate the cycle-testing machinery itself. End-to-end accuracy
-of real surface transformations is evaluated separately in the regression
-test suite using real templates and Workbench resampling.
+These tests validate the cycle traversal and evaluation framework itself.
+Accuracy of real surface transformations is evaluated separately in the
+regression test suite using real templates and Workbench-based resampling.
 
 Run with::
 
@@ -72,7 +73,11 @@ DENOM = 0.00000000001
 
 
 def _fibonacci_sphere(n: int) -> np.ndarray:
-    """Generate approximately uniform points on a unit sphere."""
+    """Generate approximately uniformly distributed points on a unit sphere.
+
+    The generated vertices provide deterministic synthetic surface geometry
+    for constructing test spheres and vertex-wise metrics.
+    """
     indices = np.arange(n) + 0.5
 
     phi = np.arccos(1 - 2 * indices / n)
@@ -86,7 +91,14 @@ def _fibonacci_sphere(n: int) -> np.ndarray:
 
 
 def _rotation_x(degrees: float) -> np.ndarray:
-    """Create a rotation matrix around the x-axis."""
+    """Create a 3D rotation matrix around the x-axis.
+
+    Parameters
+    ----------
+    degrees
+        Rotation angle in degrees. Positive and negative values are used to
+        create forward and reverse synthetic surface transformations.
+    """
     theta = np.deg2rad(degrees)
 
     return np.array(
@@ -162,10 +174,12 @@ def _resample_metric(
     source_vertices: np.ndarray,
     target_vertices: np.ndarray,
 ) -> np.ndarray:
-    """Approximate barycentric metric resampling using nearest vertices.
+    """Resample a vertex-wise metric using a lightweight barycentric approximation.
 
-    This provides a lightweight replacement for Workbench resampling while
-    preserving the behavior needed for cycle testing.
+    The three nearest source vertices are used to estimate interpolation
+    weights for each target vertex. This approximates the behavior needed for
+    testing metric propagation through surface transformation cycles without
+    requiring Workbench.
     """
     _, indices = cKDTree(source_vertices).query(
         target_vertices,
@@ -217,7 +231,12 @@ def _fake_metric_resample(
     area_surfs: dict[str, str | Path],
     output_file_path: str,
 ) -> SimpleNamespace:
-    """Mock Workbench metric resampling for isolated unit testing."""
+    """Mock Workbench metric resampling for isolated cycle tests.
+
+    Loads the input metric, applies the numpy-based resampling approximation
+    between synthetic sphere geometries, writes the resulting GIFTI metric,
+    and returns an object matching the interface expected from Workbench.
+    """
     # required by workbench but not needed here
     del method
     del area_surfs
@@ -243,7 +262,13 @@ def _fake_metric_resample(
 
 @pytest.fixture
 def rotation_graph(tmp_path: Path) -> NeuromapsGraph:
-    """Create a three-node graph with known identity cycles."""
+    """Create a synthetic graph containing identity surface cycles.
+
+    The graph contains three spaces (A, B, and C) with forward and reverse
+    rotational surface transformations. Each closed path starting at A
+    composes to an identity rotation, allowing cycle traversal logic to be
+    tested independently of real template transformations.
+    """
     vertices = _fibonacci_sphere(N_VERTICES)
     triangles = ConvexHull(vertices).simplices
 
@@ -332,14 +357,17 @@ def rotation_graph(tmp_path: Path) -> NeuromapsGraph:
 
 @pytest.fixture
 def rotation_metric(tmp_path: Path) -> Path:
-    """Create a synthetic vertex-wise metric for cycle testing.
+    """Create a deterministic synthetic vertex-wise metric.
 
-    The metric is generated from the coordinates of a Fibonacci sphere by
-    summing the x, y, and z coordinates for each vertex. This produces a
-    deterministic spatial pattern that can be transformed through the
-    synthetic surface cycles and compared against the original metric.
+    The metric is generated by summing the x, y, and z coordinates of the
+    synthetic sphere vertices. This produces a spatial pattern that can be
+    propagated through transformation cycles and compared against the original
+    metric after round-trip resampling.
 
-    The metric is saved as a GIFTI functional file and returned as its path.
+    Returns
+    -------
+    Path
+        Path to the saved GIFTI functional metric file.
     """
     vertices = _fibonacci_sphere(N_VERTICES)
 
@@ -353,102 +381,15 @@ def rotation_metric(tmp_path: Path) -> Path:
 def patch_metric_resample(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Replace Workbench resampling with the numpy test implementation."""
+    """Replace Workbench metric resampling with the numpy test implementation.
+
+    This isolates cycle testing from external Workbench dependencies while
+    preserving the expected resampling function interface.
+    """
     monkeypatch.setattr(
         "neuromaps_prime.graph.transforms.surface.metric_resample",
         _fake_metric_resample,
     )
-
-
-@pytest.fixture
-def rotation_network(
-    tmp_path: Path,
-) -> tuple[NeuromapsGraph, Path]:
-    """Create a three-node graph with known identity cycles."""
-    vertices = _fibonacci_sphere(N_VERTICES)
-    triangles = ConvexHull(vertices).simplices
-
-    sphere = tmp_path / "sphere.surf.gii"
-    _save_surface(sphere, vertices, triangles)
-
-    rotations = {
-        ("A", "B"): 120,
-        ("B", "C"): 120,
-        ("C", "A"): 120,
-        ("B", "A"): -120,
-        ("C", "B"): -120,
-        ("A", "C"): -120,
-    }
-
-    edges = []
-
-    for (source, target), angle in rotations.items():
-        transformed = (_rotation_x(angle) @ vertices.T).T
-
-        edge_surface = tmp_path / f"{source}_{target}.surf.gii"
-
-        _save_surface(
-            edge_surface,
-            transformed,
-            triangles,
-        )
-
-        edges.append(
-            {
-                "from": source,
-                "to": target,
-                "surfaces": {
-                    "synthetic": {
-                        DENSITY: {
-                            "sphere": {
-                                "left": str(edge_surface),
-                                "right": str(edge_surface),
-                            }
-                        }
-                    }
-                },
-            }
-        )
-
-    def node(name: str) -> dict:
-        return {
-            name: {
-                "surfaces": {
-                    DENSITY: {
-                        "sphere": {
-                            "left": str(sphere),
-                            "right": str(sphere),
-                        },
-                        "midthickness": {
-                            "left": str(sphere),
-                            "right": str(sphere),
-                        },
-                    }
-                }
-            }
-        }
-
-    graph = NeuromapsGraph(
-        runner="local",
-        data_dir=tmp_path / "cache",
-        _testing=True,
-    )
-
-    graph._builder.build_from_dict(
-        graph,
-        {
-            "nodes": [node("A"), node("B"), node("C")],
-            "edges": {
-                "surface_to_surface": edges,
-                "volume_to_volume": [],
-            },
-        },
-    )
-
-    metric = tmp_path / "metric.func.gii"
-    _save_metric(metric, vertices.sum(axis=1))
-
-    return graph, metric
 
 
 # -------------------------------------------------------------------------
@@ -459,7 +400,7 @@ def rotation_network(
 def test_find_return_paths_returns_expected_cycles(
     rotation_graph: tuple[NeuromapsGraph, Path],
 ) -> None:
-    """Return all simple closed paths from the synthetic graph."""
+    """Find all simple closed paths originating from the synthetic graph node A."""
     graph = rotation_graph  # retrieve graph
     paths = find_return_paths(graph, "A")  # find every cycle originating from A
 
@@ -471,7 +412,10 @@ def test_find_return_paths_returns_expected_cycles(
 def test_find_return_paths_respects_length_limit(
     rotation_graph: NeuromapsGraph,
 ) -> None:
-    """Only cycles within the requested hop limit are returned."""
+    """Restrict returned cycles according to the maximum allowed path length.  
+    
+    Only cycles within the requested hop limit are returned.
+    """
     paths = find_return_paths(
         rotation_graph,
         "A",
@@ -487,7 +431,7 @@ def test_find_return_paths_respects_length_limit(
 def test_find_return_paths_rejects_unknown_node(
     rotation_graph: NeuromapsGraph,
 ) -> None:
-    """Invalid graph origins raise a clear error."""
+    """Raise an error when the graph origin node does not exist."""
     with pytest.raises(
         ValueError,
         match="not in the 'surface_to_surface' layer",
@@ -501,7 +445,13 @@ def test_closed_cycles_preserve_metric(
     rotation_metric: Path,
     tmp_path: Path,
 ) -> None:
-    """A closed transformation cycle preserves the input metric."""
+    """Verify that identity transformation cycles preserve a vertex-wise metric.
+
+    Each discovered cycle propagates the synthetic metric through the surface
+    transformations and back to the starting space. Since the synthetic
+    transformations compose to identity, the returned metric should closely
+    match the original metric.
+    """
     graph = rotation_graph
     metric = rotation_metric
 
