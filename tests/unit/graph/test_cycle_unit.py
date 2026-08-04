@@ -218,16 +218,22 @@ def _fake_metric_resample(
     output_file_path: str,
 ) -> SimpleNamespace:
     """Mock Workbench metric resampling for isolated unit testing."""
+
+    # required by workbench but not needed here
     del method
     del area_surfs
+
+    # load input and resample from current sphere to new sphere
     result = _resample_metric(
         load_metric(input_file_path),
         _load_vertices(current_sphere),
         _load_vertices(new_sphere),
     )
 
+    # write resampled metric to the expected output path expected
     _save_metric(Path(output_file_path), result)
 
+    # expose path to the newly created metric file like workbench would
     return SimpleNamespace(metric_out=Path(output_file_path))
 
 
@@ -443,7 +449,7 @@ def test_find_return_paths_returns_expected_cycles(
     rotation_graph: tuple[NeuromapsGraph, Path],
 ) -> None:
     """Return all simple closed paths from the synthetic graph."""
-    graph, _ = rotation_graph             # retrieve graph
+    graph = rotation_graph                  # retrieve graph
     paths = find_return_paths(graph, "A")   # find every cycle originating from A
 
     assert set(paths) == EXPECTED_CYCLES    # validate that cycles are present, regardless of order
