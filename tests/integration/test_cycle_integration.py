@@ -44,8 +44,8 @@ def graph() -> NeuromapsGraph:
 def real_data_metric(
     graph: NeuromapsGraph,
     tmp_path: Path,
-) -> Path:
-    """Create a metric from the a real atlas surface."""
+) -> tuple[Path, str]:
+    """Create a metric from a real atlas surface."""
     density = graph.find_highest_density(ORIGIN)
 
     sphere = graph.fetch_surface_atlas(
@@ -56,12 +56,13 @@ def real_data_metric(
     )
 
     assert sphere is not None
+    assert sphere.file_path.exists()
 
     coords = nib.load(str(sphere.file_path)).darrays[0].data
 
     metric = coords.sum(axis=1).astype(np.float32)
 
-    output = tmp_path / f"{ORIGIN}_metric.func.gii"
+    output = tmp_path / f"{ORIGIN}_{density}_metric.func.gii"
 
     nib.save(
         GiftiImage(
@@ -72,7 +73,45 @@ def real_data_metric(
         output,
     )
 
-    return output
+    return output, density
+
+
+def find_executable_cycle(
+    graph: NeuromapsGraph,
+    metric: Path,
+    tmp_path: Path,
+) -> tuple[str, ...]:
+    """Find a real cycle that can execute all transformations.
+
+    Graph cycles do not necessarily correspond to executable workflows because
+    individual edges may lack the resources required for a specific density.
+    Try available cycles until one successfully completes all transformation
+    hops.
+    """
+    paths = find_return_paths(
+        graph,
+        ORIGIN,
+        max_length=4,
+    )
+
+    for path in paths:
+        if len(path) <= 3:
+            continue
+
+        try:
+            roundtrip_metric(
+                graph,
+                metric,
+                path,
+                HEMISPHERE,
+                tmp_path,
+            )
+        except RuntimeError:
+            continue
+
+        return path
+
+    raise RuntimeError("No executable surface transformation cycle found.")
 
 
 def test_real_graph_contains_return_paths(
@@ -94,26 +133,21 @@ def test_real_graph_contains_return_paths(
 
 def test_real_multihop_surface_transforms(
     graph: NeuromapsGraph,
-    real_data_metric: Path,
+    real_data_metric: tuple[Path, str],
     tmp_path: Path,
 ) -> None:
     """Verify real multi-hop surface transformations execute."""
-    paths = find_return_paths(
-        graph,
-        ORIGIN,
-        max_length=4,
-    )
+    metric, _ = real_data_metric
 
-    # Select a cycle containing multiple transformations.
-    path = next(
-        path
-        for path in paths
-        if len(path) > 3
+    path = find_executable_cycle(
+        graph,
+        metric,
+        tmp_path,
     )
 
     output = roundtrip_metric(
         graph,
-        real_data_metric,
+        metric,
         path,
         HEMISPHERE,
         tmp_path,
@@ -124,32 +158,28 @@ def test_real_multihop_surface_transforms(
 
 def test_real_transform_preserves_metric_properties(
     graph: NeuromapsGraph,
-    real_data_metric: Path,
+    real_data_metric: tuple[Path, str],
     tmp_path: Path,
 ) -> None:
     """Verify round-trip transformations preserve metric structure."""
-    paths = find_return_paths(
-        graph,
-        ORIGIN,
-        max_length=4,
-    )
+    metric, _ = real_data_metric
 
-    path = next(
-        path
-        for path in paths
-        if len(path) > 3
+    path = find_executable_cycle(
+        graph,
+        metric,
+        tmp_path,
     )
 
     roundtrip = roundtrip_metric(
         graph,
-        real_data_metric,
+        metric,
         path,
         HEMISPHERE,
         tmp_path,
     )
 
     pearson_r, max_abs_diff = score_roundtrip(
-        real_data_metric,
+        metric,
         roundtrip,
     )
 

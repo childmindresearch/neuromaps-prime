@@ -301,12 +301,13 @@ def roundtrip_metric(
             target_density=density,
             add_edge=add_edge,
         )
-        if result is None:
+        if result is None or result.path is None:
             raise RuntimeError(
                 f"No surface transform for hop '{src}' -> '{dst}' "
                 f"on path {' -> '.join(path)}"
             )
-        current = Path(result)
+
+        current = Path(result.path)
     return current
 
 
