@@ -16,12 +16,6 @@ if TYPE_CHECKING:
 
 # Fixtures
 @pytest.fixture(scope="module")
-def rng() -> Generator:
-    """Deterministic random number generator."""
-    return np.random.default_rng(12345)
-
-
-@pytest.fixture(scope="module")
 def random_vectors(rng: Generator) -> np.ndarray:
     """Random vectors for correlation testing."""
     return rng.normal(size=(2, 100))
@@ -188,15 +182,13 @@ class TestComputeMetric:
 class TestPermutationIndices:
     """Tests for _permutation_indices()."""
 
-    def test_shape(self) -> None:
+    def test_shape(self, rng: Generator) -> None:
         """Verify permutation index array has expected shape."""
-        rng = np.random.default_rng(0)
         idx = stats._permutation_indices(rng, n_perm=20, n_obs=7)
         assert idx.shape == (20, 7)
 
-    def test_every_row_is_permutation(self) -> None:
+    def test_every_row_is_permutation(self, rng: Generator) -> None:
         """Verify each row contains valid permutation of indices."""
-        rng = np.random.default_rng(0)
         idx = stats._permutation_indices(rng, n_perm=20, n_obs=7)
         expected = np.arange(7)
         for row in idx:
