@@ -12,7 +12,7 @@ import nibabel as nib
 import numpy as np
 from numpy.typing import ArrayLike
 
-from neuromaps_prime.analysis.images import PARC_IGNORE, load_gifti
+from neuromaps_prime.analysis.images import PARC_IGNORE, load_gifti, relabel_gifti
 from neuromaps_prime.analysis.surfaces.nulls.burt import batch_surrogates
 from neuromaps_prime.analysis.surfaces.nulls.spins import (
     _get_parcel_centroids,
@@ -507,6 +507,7 @@ def burt2018(
     n_hemis = len(surfaces_list)
     shift = np.abs(np.nanmin(data_array)) + 0.1
     surrogates = np.full((len(data_array), n_perm), np.nan, dtype=float)
+    parcel_offset = 0
 
     for hemi, surf in enumerate(surfaces_list):
         hparc_path = (
@@ -515,10 +516,13 @@ def burt2018(
             else None
         )
         if hparc_path is not None:
-            vertex_labels = load_gifti(hparc_path).agg_data()
+            parc_img = relabel_gifti(hparc_path)
+            vertex_labels = parc_img.agg_data()
             parc_labels = np.trim_zeros(np.unique(vertex_labels)) - 1
-            hdata = data_array[parc_labels]
-            idx = parc_labels
+            # relabel_gifti makes labels per-hemisphere 1-indexed, so offset
+            idx = parc_labels + parcel_offset
+            hdata = data_array[idx]
+            parcel_offset += len(parc_labels)
         elif n_hemis == 1:
             hdata = data_array
             idx = np.arange(len(data_array))

@@ -262,7 +262,7 @@ def _assign_coordinates(
         dist, col = spatial.KDTree(rotated).query(coor, 1)
         return col, dist
     if method == "vasa":
-        dist = spatial.distance_matrix(coor, rotated)
+        dist = spatial.distance.cdist(coor, rotated)
         col = np.zeros(n, dtype=np.int32)
         costs = np.empty(n)
         for _ in range(n):
@@ -276,7 +276,7 @@ def _assign_coordinates(
     # certain parcels having higher cost (relativa to 'vasa'), but total
     # cost should always be lower
     if method == "hungarian":
-        dist = spatial.distance_matrix(coor, rotated)
+        dist = spatial.distance.cdist(coor, rotated)
         row, col = optimize.linear_sum_assignment(dist)
         costs = np.empty(n)
         costs[row] = dist[row, col]
@@ -397,7 +397,7 @@ def _max_overlap(vals: np.ndarray) -> int:
     vals, counts = np.unique(vals[vals > 0], return_counts=True)
     try:
         return int(vals[counts.argmax()]) - 1
-    except IndexError:
+    except (IndexError, ValueError):
         return -1
 
 
@@ -481,10 +481,8 @@ def spin_parcels(
     if spins is None:
         centroid_list = []
         hemi_list = []
-        for hemi, (surf, parc) in enumerate(
-            zip(surfaces_list, parcellation_list, strict=True)
-        ):
-            centroids = get_parcel_centroids(surf, parcellation=parc, method=method)
+        for hemi, surf in enumerate(surfaces_list):
+            centroids = get_parcel_centroids(surf, method=method)
             centroid_list.append(centroids)
             hemi_list.append(np.full(len(centroids), hemi, dtype=np.int8))
         centroid_coords = np.vstack(centroid_list)
@@ -572,7 +570,7 @@ def parcels_to_vertices(
             not match the size of *data*.
     """
     data = np.asarray(data, dtype=float)
-    data = np.atleast_2d(data)
+    data = np.vstack(data)
     parcellation_list = _to_hemisphere_list(parcellation)
     labels = np.hstack([load_gifti(parc).agg_data() for parc in parcellation_list])
     return _project_parcels_to_verts(data, labels)
@@ -716,36 +714,22 @@ def spin_data(
         )
 
     data = np.asarray(data, dtype=float)
-    data_2d = np.atleast_2d(data)
+    data_2d = np.vstack(data) if data.ndim == 1 else data[..., np.newaxis]
 
     # Load parcellation images once; reuse data + labeltables
     label_img_list = [load_gifti(parc) for parc in parcellation_list]
     label_list = [img.agg_data() for img in label_img_list]
-    labeltable_list = [img.labeltable.get_labels_as_dict() for img in label_img_list]
     combined_labels = np.hstack(label_list)
     parcel_values = np.unique(combined_labels)
     parcel_mask = parcel_values != 0
 
-    vertex_data = np.hstack(
-        [_project_parcels_to_verts(data_2d, label) for label in label_list]
-    )
+    vertex_data = _project_parcels_to_verts(data_2d, combined_labels)
 
     if spins is None:
-        surface_list = [load_gifti(surf).agg_data() for surf in surfaces_list]
-
         centroid_list = []
         hemi_list = []
-        for hemi, ((vert, faces), label, labeltable) in enumerate(
-            zip(surface_list, label_list, labeltable_list, strict=True)
-        ):
-            centroids = _get_parcel_centroids(
-                vert,
-                faces,
-                label,
-                method=method,
-                drop=PARC_IGNORE,
-                labeltable=labeltable,
-            )
+        for hemi, surf in enumerate(surfaces_list):
+            centroids = get_parcel_centroids(surf, method=method)
             centroid_list.append(centroids)
             hemi_list.append(np.full(len(centroids), hemi, dtype=np.int8))
         centroid_coords = np.vstack(centroid_list)
@@ -772,7 +756,7 @@ def spin_data(
             f"spin array length ({len(spin_arr)})"
         )
 
-    spun = np.zeros((int(parcel_mask.sum()), len(spin_arr)), dtype=float)
+    spun = np.zeros((int(parcel_mask.sum()), spin_arr.shape[1]), dtype=float)
     for spin_idx in range(n_rotate):
         _logger.info("Reducing vertices to parcels: %5d/%d", spin_idx, n_rotate)
         rotated = vertex_data[spin_arr[:, spin_idx]]

@@ -273,7 +273,7 @@ def _get_shared_triangles(faces: ArrayLike) -> dict[tuple[int, int], np.ndarray]
         opposite[:, col] = tri[np.arange(n), opp_pos]
 
     triplets = np.empty((n, 2, 3), dtype=faces.dtype)
-    triplets[:, :, :2] = shared_edges
+    triplets[:, :, :2] = shared_edges[:, None, :]
     triplets[:, :, 2] = opposite
 
     return dict(zip(map(tuple, shared_edges), triplets, strict=True))
