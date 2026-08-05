@@ -570,7 +570,7 @@ def parcels_to_vertices(
             not match the size of *data*.
     """
     data = np.asarray(data, dtype=float)
-    data = np.vstack(data)
+    data = data[..., np.newaxis] if data.ndim == 1 else data
     parcellation_list = _to_hemisphere_list(parcellation)
     labels = np.hstack([load_gifti(parc).agg_data() for parc in parcellation_list])
     return _project_parcels_to_verts(data, labels)
@@ -714,7 +714,7 @@ def spin_data(
         )
 
     data = np.asarray(data, dtype=float)
-    data_2d = np.vstack(data) if data.ndim == 1 else data[..., np.newaxis]
+    data_2d = data[..., np.newaxis] if data.ndim == 1 else data
 
     # Load parcellation images once; reuse data + labeltables
     label_img_list = [load_gifti(parc) for parc in parcellation_list]
