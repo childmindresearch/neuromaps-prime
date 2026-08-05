@@ -42,10 +42,9 @@ pip install git+https://github.com/childmindresearch/neuromaps-prime
 
 ## Examples
 
-See the [`examples/`](examples/) directory for sample scripts:
+See the [`examples/`](https://github.com/childmindresearch/neuromaps-prime/tree/main/examples) directory for sample scripts:
 
-- [`example_graph_init.py`](examples/example_graph_init.py) — graph inspection and plotting
-- [`example_surface_transform.py`](examples/example_surface_transform.py) — surface-to-surface resampling and surface-to-volume projection
-- [`example_volume_transform.py`](examples/example_volume_transform.py) — volume-to-volume warping and volume-to-surface projection
-- [`example_plot_interactive_graph.py`](examples/example_plot_interactive_graph.py) - generating an interactive HTML plot of the graph
-
+- [`example_graph_init.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_graph_init.py) — graph inspection and plotting
+- [`example_surface_transform.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_surface_transform.py) — surface-to-surface resampling and surface-to-volume projection
+- [`example_volume_transform.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_volume_transform.py) — volume-to-volume warping and volume-to-surface projection
+- [`example_plot_interactive_graph.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_plot_interactive_graph.py) - generating an interactive HTML plot of the graph
