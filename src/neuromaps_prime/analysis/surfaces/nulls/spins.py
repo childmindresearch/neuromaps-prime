@@ -145,7 +145,7 @@ def get_parcel_centroids(
             to all other vertices in the parcel (slower).
             Default is ``'surface'``.
         drop: Iterable of label names to skip.  Defaults to
-            :data:`~neuromaps_prime.analysis.surfaces.points.PARC_IGNORE`
+            :data:`~neuromaps_prime.analysis.images.PARC_IGNORE`
             which excludes unknown and medial-wall regions.
 
     Returns:
