@@ -5,10 +5,6 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/childmindresearch/neuromaps-prime/blob/main/LICENSE)
 [![pages](https://img.shields.io/badge/api-docs-blue)](https://childmindresearch.github.io/neuromaps-prime)
 
-> [!Important]
-> This project is currently in active development. The API is subject to breaking
-> changes without notice.
-
 The `neuromaps-prime` toolbox integrates multiscale, multimodal annotations across NHP
 brains, enabling comprehensive comparative analyses of brain organization. This package
 extends the neuromaps ecosystem to provide unified access to diverse NHP brain datasets
