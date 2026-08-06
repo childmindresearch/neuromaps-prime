@@ -30,26 +30,15 @@ def _chk2_asarray(
     *,
     axis: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray, int]:
-    """Validate and convert two input sequences into NumPy arrays.
-
-    When *axis* is ``None``, both inputs are flattened to 1-D and the
-    output axis is set to ``0``.  Otherwise the inputs are kept in their
-    original shape.  Scalar-like inputs are always promoted to at least
-    1-D arrays.
-
-    This function was part of the (now removed) private API of scipy
-    (https://github.com/scipy/scipy/pull/23088).
+    """Convert two inputs into 1-D NumPy arrays.
 
     Args:
-        a: First input array or array-like object.
-        b: Second input array or array-like object.
-        axis: Axis along which to operate.  If ``None`` (default), both
-            inputs are flattened.
+        a: First array-like.
+        b: Second array-like.
+        axis: If ``None``, flatten both inputs; otherwise preserve shape.
 
     Returns:
-        A tuple of ``(a, b, out_axis)`` where both arrays are at least
-        1-D and ``out_axis`` is the axis to pass to downstream
-        operations.
+        ``(a, b, out_axis)`` where both arrays are at least 1-D.
 
     Note:
         Lifted from the neuromaps codebase
@@ -82,63 +71,32 @@ def efficient_pearsonr(
     nan_policy: _NAN_POLICY_TYPE = "propagate",
     return_pval: bool = True,
 ) -> tuple[np.ndarray | float, np.ndarray | float | None]:
-    """Compute column-wise Pearson correlation and two-tailed p-values.
+    """Column-wise Pearson correlation and two-tailed p-values.
 
-    Computes Pearson's *r* between each pair of matching columns in *a*
-    and *b*.  Single-column inputs are returned as scalars (0-D arrays);
-    multi-column inputs return 1-D arrays.
+    Single-column inputs return scalars; multi-column inputs return
+    1-D arrays.
 
     Args:
-        a: Sample observations. Must have the same number of rows as *b*.
-        b: Sample observations. Must have the same number of rows as *a*.
-            The number of columns must match *a*, or be broadcastable.
-        ddof: Delta degrees-of-freedom applied to the standard deviation
-            in the z-score normalization step. Default is ``1``
-            (unbiased estimator).
-        nan_policy: How to handle NaN values in the inputs.
-
-            - ``'propagate'``: return NaN wherever a NaN appears in
-              either input.
-            - ``'raise'``: raise ``ValueError`` if either input contains
-              NaN.
-            - ``'omit'``: ignore NaN entries when computing means,
-              standard deviations, and correlations.
-
-            Default is ``'propagate'``.
-        return_pval: Whether to compute and return two-tailed p-values.
-            Default is ``True``. When ``False``, the second element of
-            the returned tuple is ``None``.
+        a: Sample observations. Same row count as *b*.
+        b: Sample observations. Same row count as *a*.
+        ddof: Delta degrees-of-freedom for standard deviation.
+        nan_policy: ``'propagate'``, ``'raise'``, or ``'omit'``.
+        return_pval: Compute two-tailed p-values.
 
     Returns:
-        A tuple ``(corr, pval)`` where:
-
-            corr: Pearson correlation coefficient for each column pair,
-                clipped to ``[-1, 1]`` to guard against floating-point
-                drift. Returned as ``np.nan`` when either input is empty.
-            pval: Two-tailed p-values computed via the regularized
-                incomplete beta function. Returned as ``None`` when
-                *return_pval* is ``False``. Returned as ``np.nan`` when
-                either input is empty.
+        ``(corr, pval)`` — Pearson's *r* clipped to ``[-1, 1]``, and
+        p-values from the regularized incomplete beta function
+        (or ``None`` if *return_pval* is ``False``).
 
     Raises:
-        ValueError: If *a* and *b* have different numbers of rows, if
-            *nan_policy* is ``'raise'`` and either input contains NaN,
-            or if *nan_policy* is not one of the recognized values.
+        ValueError: On row count mismatch, unrecognized *nan_policy*,
+        or NaN input with ``'raise'`` policy.
 
     Note:
-        The correlation is computed as::
-
-            corr = sum(zscore(a) * zscore(b), axis=0) / (n - 1)
-
-        where *zscore* centres and normalizes each column using the
-        sample mean and standard deviation (corrected by *ddof*).  The
-        p-value is derived from the relationship between Pearson's *r*
-        and the beta distribution.
-
-        When *nan_policy* is ``'omit'``, both arrays are masked at
-        positions where **either** contains NaN, and per-column
-        observation counts are used in the denominator and p-value
-        calculation.
+        Computed as ``sum(zscore(a) * zscore(b), axis=0) / (n - 1)``.
+        When *nan_policy* is ``'omit'``, arrays are masked where
+        **either** contains NaN and per-column observation counts are
+        used in the denominator.
     """
     if nan_policy not in _NAN_POLICY:
         raise ValueError(f'Value for nan_policy "{nan_policy}" not allowed')
