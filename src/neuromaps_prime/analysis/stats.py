@@ -6,7 +6,7 @@ null-distribution metrics over pairs of neuroimaging maps.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, NamedTuple, get_args
+from typing import TYPE_CHECKING, Literal, NamedTuple, TypeGuard, get_args
 
 import numpy as np
 from scipy import special
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
     from numpy.typing import ArrayLike
 
-__all__ = ["PermResult", "efficient_pearsonr", "permtest_metric"]
+__all__ = ["PermResult", "compare_images", "efficient_pearsonr", "permtest_metric"]
 
 _METRIC_TYPE = Literal["pearsonr", "spearmanr"]
 _NAN_POLICY_TYPE = Literal["propagate", "raise", "omit"]
@@ -286,6 +286,13 @@ class PermResult(NamedTuple):
     nulls: np.ndarray | float | None = None
 
 
+def _is_callable_metric(
+    m: _METRIC_TYPE | Callable,
+) -> TypeGuard[Callable]:
+    """Return True if *m* is a callable metric rather than a string literal."""
+    return callable(m)
+
+
 def permtest_metric(
     a: ArrayLike,
     b: ArrayLike,
@@ -297,56 +304,35 @@ def permtest_metric(
     nan_policy: _NAN_POLICY_TYPE = "propagate",
     return_nulls: bool = False,
 ) -> PermResult:
-    """Computes a non-parametric p-value for the similarity of `a` and `b`.
+    """Non-parametric p-value for the similarity of *a* and *b*.
 
-    Calculates a two-tailed p-value for the hypothesis that samples `a`
-    and `b` are related, using a permutation test: `a` is repeatedly
-    shuffled and re-correlated with `b` to build an empirical null
-    distribution, against which the observed statistic is compared.
+    Shuffles *a* repeatedly to build an empirical null distribution
+    against which the observed similarity is compared.
 
     Args:
-        a: First sample of observations, shape (N,).
-        b: Second sample of observations, shape (N,). Must have the
-            same length as `a`.
-        metric: Similarity metric used to compare `a` and `b`. One of
-            'pearsonr', 'spearmanr', or a callable accepting two inputs
-            and returning a single similarity value. Default 'pearsonr'.
-        n_perm: Number of permutations to evaluate. Unless `a` and `b`
-            are very small this approximates a randomization test via
-            Monte Carlo simulation. Ignored if `nulls` is provided.
-            Default 1000.
-        seed: Seed for random number generation. Set to `None` for
-            nondeterministic behavior. Default 0.
-        nulls: Precomputed null array used in place of shuffled `a` to
-            compute the null distribution of correlations, shape
-            `(N, P)`. Must have the same length as `a` and `b`.
-            Providing this overrides `n_perm`. When not specified, a
-            standard permutation is used to shuffle `a`. Default None.
-        nan_policy: How to handle NaN values in the inputs. One of
-            'propagate' (return NaN), 'raise' (raise an error), or
-            'omit' (ignore NaN values in the calculation). Default
-            'propagate'.
-        return_nulls: Whether to also return the null distribution of
-            similarity metrics. Default False.
+        a: First sample, shape ``(N,)``.
+        b: Second sample, shape ``(N,)``.
+        metric: ``'pearsonr'``, ``'spearmanr'``, or a callable.
+        n_perm: Number of permutations. Ignored if *nulls* is provided.
+        seed: RNG seed; ``None`` for non-deterministic behavior.
+        nulls: Precomputed null array, shape ``(N, P)``. Overrides
+            *n_perm* when provided.
+        nan_policy: How to handle NaN values.
+        return_nulls: Include the null distribution in the result.
 
     Returns:
-        A `PermResult` named tuple with fields:
-
-            similarity: The observed similarity metric.
-            pvalue: Two-tailed non-parametric p-value(s). The smallest
-                value this can take is `1 / (n_perm + 1)`.
-            nulls: Null distribution of similarity metrics, shape
-                `(n_perm,)`. `None` unless `return_nulls` is True.
-
-        If either input is empty, returns
-        ``PermResult(similarity=np.nan, pvalue=np.nan, nulls=np.nan)``.
+        :class:`PermResult` with the observed similarity, p-value,
+        and optionally the null distribution.
 
     Raises:
-        ValueError: If `nan_policy` is not a recognized value, if `a`
-            and `b` have different lengths, or if a callable `metric`
-            returns an unsupported type.
+        ValueError: If *nan_policy* is unrecognized, *a* and *b* have
+            different lengths, or a callable *metric* returns an
+            unsupported type.
+
+    Note:
+        Adapted from the neuromaps codebase
+        (https://github.com/netneurolab/neuromaps/blob/ffcc2e0f657943ce00a1b6a968396f32250e495c/neuromaps/stats.py#L102).
     """
-    # Catch invalid NaN policy early
     if nan_policy not in _NAN_POLICY:
         raise ValueError(f'Value for nan_policy "{nan_policy}" not allowed')
 
@@ -357,7 +343,6 @@ def permtest_metric(
     if a.size == 0 or b.size == 0:
         return PermResult(similarity=np.nan, pvalue=np.nan, nulls=np.nan)
 
-    _is_callable_metric = callable(metric)
     corr, a, b = _compute_metric(a, b, metric=metric, nan_policy=nan_policy)
 
     if nulls is not None:
@@ -370,11 +355,11 @@ def permtest_metric(
     rng = np.random.default_rng(seed)
     perm_idx = _permutation_indices(rng, n_perm, len(a)) if nulls is None else None
 
-    if _is_callable_metric:
+    if _is_callable_metric(metric):
         null_dist = _null_distribution_callable(
             a,
             b,
-            metric=metric,  # type: ignore[arg-type] # non-string metric
+            metric=metric,
             perm_idx=perm_idx,
             nulls=nulls,
             n_perm=n_perm,
@@ -392,3 +377,122 @@ def permtest_metric(
     if return_nulls:
         return PermResult(similarity=corr, pvalue=pvals, nulls=null_dist)
     return PermResult(similarity=corr, pvalue=pvals)
+
+
+def _make_compare_mask(
+    src: np.ndarray,
+    trg: np.ndarray,
+    *,
+    ignore_zero: bool,
+    nan_policy: _NAN_POLICY_TYPE,
+) -> np.ndarray:
+    """Build a boolean mask of valid (non-zero, non-NaN) elements for comparison.
+
+    Returns ``True`` for elements that should be **kept**.
+    """
+    nan_mask = np.isnan(src) | np.isnan(trg)
+    if nan_policy == "raise" and np.any(nan_mask):
+        raise ValueError("Inputs contain NaN values")
+
+    if ignore_zero:
+        zero_mask = np.isclose(src, 0) | np.isclose(trg, 0)
+    else:
+        zero_mask = np.zeros(len(src), dtype=bool)
+
+    if nan_policy == "omit":
+        return ~zero_mask & ~nan_mask
+    # "propagate" or "raise" — only exclude zeros
+    return ~zero_mask
+
+
+def _compute_observed(
+    src: np.ndarray,
+    trg: np.ndarray,
+    metric: _METRIC_TYPE | Callable,
+) -> np.ndarray | float:
+    """Compute the observed similarity metric between two masked arrays."""
+    if _is_callable_metric(metric):
+        return metric(src, trg)
+    if metric == "spearmanr":
+        src, trg = sstats.rankdata(src), sstats.rankdata(trg)
+    corr, _ = efficient_pearsonr(src, trg, return_pval=False)
+    return corr
+
+
+def compare_images(
+    src: ArrayLike,
+    trg: ArrayLike,
+    *,
+    metric: _METRIC_TYPE | Callable = "pearsonr",
+    ignore_zero: bool = True,
+    nulls: ArrayLike | None = None,
+    nan_policy: _NAN_POLICY_TYPE = "omit",
+    return_nulls: bool = False,
+) -> PermResult:
+    """Compare two maps and return a similarity metric.
+
+    Masks out zero and/or NaN elements, computes *metric*, and when
+    *nulls* is provided returns a non-parametric p-value via
+    :func:`permtest_metric`.
+
+    Args:
+        src: First map, shape ``(N,)``.
+        trg: Second map, shape ``(N,)``.
+        metric: ``'pearsonr'``, ``'spearmanr'``, or a callable.
+        ignore_zero: Exclude near-zero elements. Default ``True``.
+        nulls: Precomputed null data, shape ``(N, P)``. If ``None``,
+            returns ``np.nan`` for the p-value.
+        nan_policy: How to handle NaN values. Default ``'omit'``.
+        return_nulls: Include the null distribution in the result.
+
+    Returns:
+        :class:`PermResult` with the observed similarity and p-value.
+
+    Raises:
+        ValueError: If *nan_policy* is unrecognized, *src* and *trg*
+            have different lengths, or ``return_nulls`` is ``True``
+            without providing *nulls*.
+
+    Note:
+        Adapted from the neuromaps codebase
+        (https://github.com/netneurolab/neuromaps/blob/ffcc2e0f657943ce00a1b6a968396f32250e495c/neuromaps/stats.py#L14).
+    """
+    if return_nulls and nulls is None:
+        raise ValueError("`return_nulls` cannot be True when `nulls` is None.")
+    if nan_policy not in _NAN_POLICY:
+        raise ValueError(f'Value for nan_policy "{nan_policy}" not allowed')
+
+    if _is_callable_metric(metric):
+        if not np.isscalar(metric([1, 1], [1, 1])):
+            raise ValueError(
+                "Provided callable `metric` must accept two inputs and return "
+                "a single scalar value."
+            )
+    elif metric not in ("pearsonr", "spearmanr"):
+        raise ValueError(
+            f"Expected 'pearsonr', 'spearmanr', or a callable — got: {metric!r}"
+        )
+
+    src = np.asarray(src)
+    trg = np.asarray(trg)
+
+    if len(src) != len(trg):
+        raise ValueError(f"Arrays are not the same length ({len(src)} != {len(trg)})")
+
+    mask = _make_compare_mask(src, trg, ignore_zero=ignore_zero, nan_policy=nan_policy)
+    src_m, trg_m = src[mask], trg[mask]
+
+    if src_m.size == 0 or trg_m.size == 0:
+        return PermResult(similarity=np.nan, pvalue=np.nan)
+
+    if nulls is not None:
+        null_arr = np.asarray(nulls)[mask]
+        return permtest_metric(
+            src_m,
+            trg_m,
+            metric=metric,
+            nulls=null_arr,
+            nan_policy=nan_policy,
+            return_nulls=return_nulls,
+        )
+    return PermResult(similarity=_compute_observed(src_m, trg_m, metric), pvalue=np.nan)
