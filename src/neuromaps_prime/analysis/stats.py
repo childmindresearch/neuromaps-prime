@@ -6,7 +6,7 @@ null-distribution metrics over pairs of neuroimaging maps.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, get_args
+from typing import TYPE_CHECKING, Literal, NamedTuple, get_args
 
 import numpy as np
 from scipy import special
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
     from numpy.typing import ArrayLike
 
-__all__ = ["efficient_pearsonr", "permtest_metric"]
+__all__ = ["PermResult", "efficient_pearsonr", "permtest_metric"]
 
 _METRIC_TYPE = Literal["pearsonr", "spearmanr"]
 _NAN_POLICY_TYPE = Literal["propagate", "raise", "omit"]
@@ -266,6 +266,26 @@ def _null_distribution_pearsonr(
     return null_dist
 
 
+class PermResult(NamedTuple):
+    """Result of a permutation-based similarity test.
+
+    Attributes:
+        similarity: Observed similarity metric between the two input maps.
+            May be a scalar (single comparison) or an array (multiple
+            comparisons).
+        pvalue: Two-tailed non-parametric p-value estimated from the null
+            distribution. The smallest achievable value is
+            ``1 / (n_perm + 1)``.
+        nulls: Null distribution of similarity metrics obtained under
+            permutation, shape ``(n_perm,)``. Present only when
+            *return_nulls* is ``True``; otherwise ``None``.
+    """
+
+    similarity: np.ndarray | float
+    pvalue: np.ndarray | float
+    nulls: np.ndarray | float | None = None
+
+
 def permtest_metric(
     a: ArrayLike,
     b: ArrayLike,
@@ -276,7 +296,7 @@ def permtest_metric(
     nulls: ArrayLike | None = None,
     nan_policy: _NAN_POLICY_TYPE = "propagate",
     return_nulls: bool = False,
-) -> tuple[np.ndarray | float, np.ndarray | float, np.ndarray | float | None]:
+) -> PermResult:
     """Computes a non-parametric p-value for the similarity of `a` and `b`.
 
     Calculates a two-tailed p-value for the hypothesis that samples `a`
@@ -310,15 +330,16 @@ def permtest_metric(
             similarity metrics. Default False.
 
     Returns:
-        A tuple `(corr, pvals, null_dist)` where:
+        A `PermResult` named tuple with fields:
 
-            corr: The observed similarity metric.
-            pvals: Two-tailed non-parametric p-value(s). The smallest
+            similarity: The observed similarity metric.
+            pvalue: Two-tailed non-parametric p-value(s). The smallest
                 value this can take is `1 / (n_perm + 1)`.
-            null_dist: Null distribution of similarity metrics, shape
+            nulls: Null distribution of similarity metrics, shape
                 `(n_perm,)`. `None` unless `return_nulls` is True.
 
-        Returns `(np.nan, np.nan)` if either input is empty.
+        If either input is empty, returns
+        ``PermResult(similarity=np.nan, pvalue=np.nan, nulls=np.nan)``.
 
     Raises:
         ValueError: If `nan_policy` is not a recognized value, if `a`
@@ -334,7 +355,7 @@ def permtest_metric(
         raise ValueError("Provided arrays do not have same length")
 
     if a.size == 0 or b.size == 0:
-        return np.nan, np.nan, np.nan
+        return PermResult(similarity=np.nan, pvalue=np.nan, nulls=np.nan)
 
     _is_callable_metric = callable(metric)
     corr, a, b = _compute_metric(a, b, metric=metric, nan_policy=nan_policy)
@@ -369,5 +390,5 @@ def permtest_metric(
     pvals = permutations / (n_perm + 1)
 
     if return_nulls:
-        return corr, pvals, null_dist
-    return corr, pvals, None
+        return PermResult(similarity=corr, pvalue=pvals, nulls=null_dist)
+    return PermResult(similarity=corr, pvalue=pvals)
