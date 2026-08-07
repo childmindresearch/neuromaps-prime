@@ -415,7 +415,6 @@ def test_find_return_paths_returns_all_simple_cycles(
     rotation_graph: NeuromapsGraph,
 ) -> None:
     """Return all simple directed cycles containing the origin space."""
-
     paths = find_return_paths(
         rotation_graph,
         "A",
