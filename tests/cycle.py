@@ -44,6 +44,7 @@ import nibabel as nib
 import numpy as np
 
 from neuromaps_prime.graph import NeuromapsGraph
+from nibabel.nifti1 import intent_codes
 
 logger = logging.getLogger(__name__)
 
@@ -245,10 +246,12 @@ def load_metric(metric_file: str | Path) -> np.ndarray:
 
     data_array = img.darrays[0]
 
-    if data_array.intent not in {
-        "NIFTI_INTENT_SHAPE",
-        "NIFTI_INTENT_NONE",
-    }:
+    allowed_intents = {
+        int(intent_codes["NIFTI_INTENT_NONE"]),
+        int(intent_codes["NIFTI_INTENT_SHAPE"]),
+    }
+
+    if int(data_array.intent) not in allowed_intents:
         raise ValueError(
             f"Expected metric GIFTI intent, got '{data_array.intent}'"
         )
