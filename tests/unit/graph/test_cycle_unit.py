@@ -405,28 +405,27 @@ def patch_metric_resample(
 def test_find_return_paths_returns_expected_cycles(
     rotation_graph: NeuromapsGraph,
 ) -> None:
-    """Find all simple closed paths originating from the synthetic graph node A."""
+    """Find all simple directed cycles containing the synthetic graph node A."""
     paths = find_return_paths(rotation_graph, "A")
 
     assert set(paths) == EXPECTED_CYCLES
 
 
-def test_find_return_paths_respects_length_limit(
+def test_find_return_paths_returns_all_simple_cycles(
     rotation_graph: NeuromapsGraph,
 ) -> None:
-    """Restrict returned cycles according to the maximum allowed path length.
+    """Return all simple directed cycles containing the origin space."""
 
-    Only cycles within the requested hop limit are returned.
-    """
     paths = find_return_paths(
         rotation_graph,
         "A",
-        max_length=2,
     )
 
     assert set(paths) == {
         ("A", "B", "A"),
         ("A", "C", "A"),
+        ("A", "B", "C", "A"),
+        ("A", "C", "B", "A"),
     }
 
 
