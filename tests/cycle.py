@@ -1,12 +1,12 @@
 """Utilities for evaluating cyclic surface transformations.
 
-A cycle (or return path) is a simple directed cycle through the surface
-transformation graph that starts and ends at the same space, for example
-`A -> B -> A` or `A -> B -> C -> A`. A vertex-wise metric propagated around
-such a path should return to its original representation if all traversed
-transformations are perfectly invertible. In practice, each resampling step
-introduces numerical error, so the agreement between the original and
-round-tripped metric provides a measure of accumulated cycle error.
+A cycle (or return path) is a path through the surface transformation graph
+that starts and ends at the same space, for example ``A -> B -> A`` or
+``A -> B -> C -> A``. A vertex-wise metric propagated around such a path should
+return to its original representation if all traversed transformations are
+perfectly invertible. In practice, each resampling step introduces numerical
+error, so the agreement between the original and round-tripped metric provides
+a measure of accumulated cycle error.
 
 This module provides reusable machinery to:
 
@@ -34,11 +34,15 @@ import logging
 from dataclasses import dataclass
 from itertools import pairwise
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 import networkx as nx
 import nibabel as nib
 import numpy as np
+from nibabel.nifti1 import intent_codes
 
 from neuromaps_prime.graph import NeuromapsGraph
 
@@ -78,34 +82,114 @@ class CycleResult:
         return " -> ".join(self.path)
 
 
+def _iter_roundtrip_paths(
+    subgraph: nx.DiGraph,
+    origin: str,
+    max_length: int,
+) -> Iterator[tuple[str, ...]]:
+    """Yield bounded two-leg round-trip paths from an origin node."""
+    turn_nodes = sorted(n for n in subgraph.nodes if n != origin)
+
+    for turn in turn_nodes:
+        for outbound in sorted(
+            nx.all_simple_paths(
+                subgraph,
+                source=origin,
+                target=turn,
+                cutoff=max_length - 1,
+            )
+        ):
+            out_hops = len(outbound) - 1
+            if out_hops < 1:
+                continue
+
+            remaining = max_length - out_hops
+            if remaining < 1:
+                continue
+
+            for inbound in sorted(
+                nx.all_simple_paths(
+                    subgraph,
+                    source=turn,
+                    target=origin,
+                    cutoff=remaining,
+                )
+            ):
+                in_hops = len(inbound) - 1
+                total_hops = out_hops + in_hops
+
+                if total_hops < 2 or total_hops > max_length:
+                    continue
+
+                roundtrip = tuple(outbound + inbound[1:])
+
+                counts: dict[str, int] = {}
+                for node in roundtrip:
+                    counts[node] = counts.get(node, 0) + 1
+
+                if counts.get(origin, 0) != 2:
+                    continue
+
+                if any(node != origin and count > 2 for node, count in counts.items()):
+                    continue
+
+                yield roundtrip
+
+
 def find_return_paths(
     graph: NeuromapsGraph,
     origin: str,
     *,
     edge_type: str = NeuromapsGraph.surface_to_surface_key,
+    max_length: int | None = None,
+    allow_revisits: bool = False,
+    max_paths: int | None = None,
 ) -> list[tuple[str, ...]]:
-    """Enumerate directed return paths from an origin space.
+    """Enumerate return paths from an origin space through a graph layer.
 
-    A return path is a directed cycle that begins and ends at ``origin``.
-    Interior nodes are not repeated, so cycles represent unique transformation
-    routes through the graph.
+    A return path is any directed path that begins and ends at ``origin``.
+    By default, this returns directed simple cycles with no repeated interior
+    nodes. When ``allow_revisits=True``, paths are instead constructed from two
+    simple directed legs: an outbound path and a return path. This permits a node
+    to be visited once in each direction while preventing unrestricted graph walks.
 
     Traversal is restricted to a single graph edge layer so that cycle evaluation
     measures one transformation modality at a time.
+
+    When ``allow_revisits=True``, this instead enumerates round-trips composed
+    of two directed simple legs: an outbound simple path from ``origin`` to a
+    turning node, plus a return simple path from that node back to ``origin``.
+    A node can therefore appear at most once per leg (at most twice overall),
+    which avoids degenerate ping-pong walks while still permitting bridge nodes
+    to be crossed once out and once back.
 
     Args:
         graph: Populated :class:`~neuromaps_prime.graph.NeuromapsGraph`.
         origin: Space the metric starts from and must return to.
         edge_type: Edge key to traverse (``'surface_to_surface'`` or
             ``'volume_to_volume'``).
+        max_length: Optional cap on the number of edges in a path. NetworkX
+            represents paths as node sequences, so this corresponds to
+            ``len(path) - 1``. Required when ``allow_revisits=True``.
+        allow_revisits: If ``True``, enumerate two-leg round-trips composed of an
+            outbound simple path and a return simple path. Nodes may appear once
+            per leg (so the origin appears at the start and end of the returned
+            path, and intermediate nodes may appear twice overall). A finite
+            ``max_length`` is required to prevent unbounded enumeration.
+        max_paths: Optional cap on the number of return paths generated. This
+            limits the number of paths, not the number of edges.
 
     Returns:
-        Return paths sorted by length.
+        Return paths sorted by length then lexicographically, e.g.
+        ``[('A', 'B', 'A'), ('A', 'C', 'A'), ('A', 'B', 'C', 'A'), ...]``.
 
     Raises:
         ValueError: If ``origin`` is not a node in the graph.
     """
     subgraph = graph.utils.get_subgraph(edge_type)
+
+    if allow_revisits and max_length is None:
+        raise ValueError("max_length is required when allow_revisits=True")
 
     if origin not in subgraph:
         raise ValueError(
@@ -113,18 +197,35 @@ def find_return_paths(
             f"Available: {sorted(subgraph.nodes)}"
         )
 
-    paths: list[tuple[str, ...]] = []
+    if not allow_revisits:
+        paths: list[tuple[str, ...]] = []
+        for cycle in nx.simple_cycles(subgraph, length_bound=max_length):
+            if origin not in cycle:
+                continue
+            # Rotate the directed cycle so it starts at origin, then close it.
+            start = cycle.index(origin)
+            rotated = cycle[start:] + cycle[:start] + [origin]
+            paths.append(tuple(rotated))
+        return sorted(paths, key=lambda p: (len(p), p))
 
-    for cycle in nx.simple_cycles(subgraph):
-        if origin not in cycle:
-            continue
+    visited: set[tuple[str, ...]] = set()
 
-        start = cycle.index(origin)
-        rotated = cycle[start:] + cycle[:start] + [origin]
-        paths.append(tuple(rotated))
+    for path in _iter_roundtrip_paths(
+        subgraph,
+        origin,
+        max_length,
+    ):
+        visited.add(path)
 
-    # sort by number of hops
-    return sorted(paths, key=lambda p: (len(p) - 1, p))
+        if max_paths is not None and len(visited) >= max_paths:
+            break
+
+    ordered = sorted(visited, key=lambda p: (len(p), p))
+
+    if max_paths is not None:
+        return ordered[:max_paths]
+
+    return ordered
 
 
 def load_metric(metric_file: str | Path) -> np.ndarray:
@@ -144,6 +245,14 @@ def load_metric(metric_file: str | Path) -> np.ndarray:
         )
 
     data_array = img.darrays[0]
+
+    allowed_intents = {
+        int(intent_codes["NIFTI_INTENT_NONE"]),
+        int(intent_codes["NIFTI_INTENT_SHAPE"]),
+    }
+
+    if int(data_array.intent) not in allowed_intents:
+        raise ValueError(f"Expected metric GIFTI intent, got '{data_array.intent}'")
 
     data = np.asarray(data_array.data, dtype=np.float64)
 
@@ -301,6 +410,7 @@ def run_cycle_test(
     workdir: str | Path,
     *,
     density: str | None = None,
+    max_length: int | None = None,
     output_file: str | Path | None = None,
 ) -> list[CycleResult]:
     """Evaluate metric preservation across all return paths from an origin.
@@ -318,6 +428,8 @@ def run_cycle_test(
         workdir: Directory for intermediate metric files.
         density: Fixed mesh density for every hop, or ``None`` to let the
             transformer choose per hop (see :func:`roundtrip_metric`).
+        max_length: Optional cap on path length passed to
+            :func:`find_return_paths`.
         output_file: Optional path to a text file where the results summary
             will be saved. When ``None`` no file is written.
 
@@ -325,7 +437,7 @@ def run_cycle_test(
         One :class:`CycleResult` per return path, in enumeration order.
     """
     results: list[CycleResult] = []
-    for path in find_return_paths(graph, origin):
+    for path in find_return_paths(graph, origin, max_length=max_length):
         roundtrip = roundtrip_metric(
             graph, metric_file, path, hemisphere, workdir, density=density
         )
