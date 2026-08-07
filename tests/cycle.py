@@ -230,13 +230,38 @@ def find_return_paths(
 def load_metric(metric_file: str | Path) -> np.ndarray:
     """Load a GIFTI metric as a one-dimensional floating-point array.
 
-    The first data array is returned as a NumPy array for comparison and
-    resampling during cycle evaluation.
+    Raises:
+        ValueError: If the file is not a scalar metric GIFTI.
     """
-    return np.asarray(
-        nib.load(metric_file).darrays[0].data,
-        dtype=np.float64,
-    )
+    img = nib.load(metric_file)
+
+    if not isinstance(img, nib.gifti.GiftiImage):
+        raise ValueError(f"Expected GIFTI metric file, got {type(img)}")
+
+    if len(img.darrays) != 1:
+        raise ValueError(
+            f"Expected one data array for metric file, found {len(img.darrays)}"
+        )
+
+    data_array = img.darrays[0]
+
+    if data_array.intent not in {
+        "NIFTI_INTENT_SHAPE",
+        "NIFTI_INTENT_NONE",
+    }:
+        raise ValueError(
+            f"Expected metric GIFTI intent, got '{data_array.intent}'"
+        )
+
+    data = np.asarray(data_array.data, dtype=np.float64)
+
+    if data.ndim != 1:
+        raise ValueError(
+            "Expected one-dimensional metric data. "
+            f"Got shape {data.shape}; this may be a surface file."
+        )
+
+    return data
 
 
 def roundtrip_metric(
