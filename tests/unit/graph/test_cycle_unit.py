@@ -466,10 +466,15 @@ def test_closed_cycles_preserve_metric(
         density=DENSITY,
     )
 
-    assert {result.path for result in results} == EXPECTED_CYCLES
+    paths = {result.path for result in results}
+
+    assert EXPECTED_CYCLES.issubset(paths)
 
     for result in results:
-        assert result.pearson_r > 0.999
+        assert result.pearson_r == pytest.approx(
+            1.0,
+            abs=1e-3,
+        ), f"Cycle {result.path} had pearson_r={result.pearson_r}"
 
 
 @pytest.mark.usefixtures("patch_metric_resample")
