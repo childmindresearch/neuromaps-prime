@@ -43,7 +43,7 @@ import nibabel as nib
 import numpy as np
 import pytest
 from nibabel.gifti import GiftiDataArray, GiftiImage
-from scipy.spatial import ConvexHull, cKDTree
+from scipy.spatial import ConvexHull, KDTree
 
 from neuromaps_prime.graph import NeuromapsGraph
 from tests.cycle import (
@@ -186,7 +186,7 @@ def _resample_metric(
     testing metric propagation through surface transformation cycles without
     requiring Workbench.
     """
-    _, indices = cKDTree(source_vertices).query(
+    _, indices = KDTree(source_vertices).query(
         target_vertices,
         k=3,
     )
