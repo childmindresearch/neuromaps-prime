@@ -39,8 +39,6 @@ from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-import warnings
-
 import networkx as nx
 import nibabel as nib
 import numpy as np
@@ -348,11 +346,9 @@ def score_roundtrip(
             np.max(np.abs(original[finite_mask] - roundtrip[finite_mask]))
         )
     else:
-        warnings.warn(
+        logger.warning(
             "Round-trip metric contains no finite values; "
-            "max absolute difference is undefined.",
-            RuntimeWarning,
-            stacklevel=2,
+            "max absolute difference is undefined."
         )
         max_abs_diff = np.nan
 
@@ -360,10 +356,8 @@ def score_roundtrip(
     vectors_equal = bool(np.allclose(original, roundtrip, equal_nan=True))
 
     if finite_count < 2:
-        warnings.warn(
-            "Fewer than two finite values available to compute Pearson correlation.",
-            RuntimeWarning,
-            stacklevel=2,
+        logger.warning(
+            "Fewer than two finite values available to compute Pearson correlation."
         )
         pearson_r = 1.0 if finite_count > 0 and vectors_equal else 0.0
         return pearson_r, max_abs_diff
