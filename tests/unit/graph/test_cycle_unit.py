@@ -454,16 +454,13 @@ def test_closed_cycles_preserve_metric(
     transformations compose to identity, the returned metric should closely
     match the original metric.
     """
-    graph = rotation_graph
-    metric = rotation_metric
-
     workdir = tmp_path / "output"
     workdir.mkdir()
 
     results = run_cycle_test(
-        graph,
+        rotation_graph,
         "A",
-        metric,
+        rotation_metric,
         HEMISPHERE,
         workdir,
         density=DENSITY,
@@ -490,16 +487,14 @@ def test_concatenated_transform_matches_direct_transform(
 
     This validates transform composition independently of cycle closure.
     """
-    graph = rotation_graph
-    metric = rotation_metric
 
     workdir = tmp_path / "output"
     workdir.mkdir()
 
     # Transform metric directly from A to C.
     direct = roundtrip_metric(
-        graph,
-        metric,
+        rotation_graph,
+        rotation_metric,
         ("A", "C"),
         HEMISPHERE,
         workdir,
@@ -508,8 +503,8 @@ def test_concatenated_transform_matches_direct_transform(
 
     # Transform metric through the intermediate space B.
     concatenated = roundtrip_metric(
-        graph,
-        metric,
+        rotation_graph,
+        rotation_metric,
         ("A", "B", "C"),
         HEMISPHERE,
         workdir,
