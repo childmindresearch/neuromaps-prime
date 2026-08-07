@@ -42,7 +42,6 @@ if TYPE_CHECKING:
 import networkx as nx
 import nibabel as nib
 import numpy as np
-from nibabel.nifti1 import intent_codes
 
 from neuromaps_prime.graph import NeuromapsGraph
 
