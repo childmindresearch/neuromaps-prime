@@ -364,8 +364,8 @@ def score_roundtrip(
 
     original_finite = original[finite_mask]
     roundtrip_finite = roundtrip[finite_mask]
-    original_std = float(np.std(original_finite))
-    roundtrip_std = float(np.std(roundtrip_finite))
+    original_std = np.std(original_finite)
+    roundtrip_std = np.std(roundtrip_finite)
     if np.isclose(original_std, 0.0) or np.isclose(roundtrip_std, 0.0):
         pearson_r = 1.0 if vectors_equal else 0.0
     else:
