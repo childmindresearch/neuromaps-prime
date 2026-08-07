@@ -354,7 +354,7 @@ def score_roundtrip(
             RuntimeWarning,
             stacklevel=2,
         )
-        max_abs_diff = float("nan")
+        max_abs_diff = np.nan
 
     finite_count = np.count_nonzero(finite_mask)
     vectors_equal = bool(np.allclose(original, roundtrip, equal_nan=True))
