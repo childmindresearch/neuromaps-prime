@@ -403,15 +403,12 @@ def patch_metric_resample(
 
 
 def test_find_return_paths_returns_expected_cycles(
-    rotation_graph: tuple[NeuromapsGraph, Path],
+    rotation_graph: NeuromapsGraph,
 ) -> None:
     """Find all simple closed paths originating from the synthetic graph node A."""
-    graph = rotation_graph  # retrieve graph
-    paths = find_return_paths(graph, "A")  # find every cycle originating from A
+    paths = find_return_paths(rotation_graph, "A")
 
-    assert (
-        set(paths) == EXPECTED_CYCLES
-    )  # validate that cycles are present, regardless of order
+    assert set(paths) == EXPECTED_CYCLES
 
 
 def test_find_return_paths_respects_length_limit(
