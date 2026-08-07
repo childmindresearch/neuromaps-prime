@@ -209,19 +209,19 @@ def find_return_paths(
             paths.append(tuple(rotated))
         return sorted(paths, key=lambda p: (len(p), p))
 
-    paths: set[tuple[str, ...]] = set()
+    visited: set[tuple[str, ...]] = set()
 
     for path in _iter_roundtrip_paths(
         subgraph,
         origin,
         max_length,
     ):
-        paths.add(path)
+        visited.add(path)
 
-        if max_paths is not None and len(paths) >= max_paths:
+        if max_paths is not None and len(visited) >= max_paths:
             break
 
-    ordered = sorted(paths, key=lambda p: (len(p), p))
+    ordered = sorted(visited, key=lambda p: (len(p), p))
 
     if max_paths is not None:
         return ordered[:max_paths]
