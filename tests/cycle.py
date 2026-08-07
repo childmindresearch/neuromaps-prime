@@ -369,7 +369,7 @@ def score_roundtrip(
     if np.isclose(original_std, 0.0) or np.isclose(roundtrip_std, 0.0):
         pearson_r = 1.0 if vectors_equal else 0.0
     else:
-        pearson_r = float(np.corrcoef(original_finite, roundtrip_finite)[0, 1])
+        pearson_r = np.corrcoef(original_finite, roundtrip_finite)[0, 1]
         if np.isnan(pearson_r) and vectors_equal:
             pearson_r = 1.0
 
