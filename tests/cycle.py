@@ -42,9 +42,9 @@ if TYPE_CHECKING:
 import networkx as nx
 import nibabel as nib
 import numpy as np
+from nibabel.nifti1 import intent_codes
 
 from neuromaps_prime.graph import NeuromapsGraph
-from nibabel.nifti1 import intent_codes
 
 logger = logging.getLogger(__name__)
 
@@ -252,9 +252,7 @@ def load_metric(metric_file: str | Path) -> np.ndarray:
     }
 
     if int(data_array.intent) not in allowed_intents:
-        raise ValueError(
-            f"Expected metric GIFTI intent, got '{data_array.intent}'"
-        )
+        raise ValueError(f"Expected metric GIFTI intent, got '{data_array.intent}'")
 
     data = np.asarray(data_array.data, dtype=np.float64)
 

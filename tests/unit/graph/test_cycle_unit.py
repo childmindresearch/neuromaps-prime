@@ -492,7 +492,6 @@ def test_concatenated_transform_matches_direct_transform(
 
     This validates transform composition independently of cycle closure.
     """
-
     workdir = tmp_path / "output"
     workdir.mkdir()
 
@@ -521,5 +520,5 @@ def test_concatenated_transform_matches_direct_transform(
         concatenated,
     )
 
-    assert pearson_r > 0.999
-    assert max_abs_diff < 0.02
+    assert pearson_r == pytest.approx(1.0, abs=1e-3)
+    assert max_abs_diff == pytest.approx(0.0, abs=0.02)
