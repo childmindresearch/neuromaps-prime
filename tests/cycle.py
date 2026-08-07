@@ -246,14 +246,6 @@ def load_metric(metric_file: str | Path) -> np.ndarray:
 
     data_array = img.darrays[0]
 
-    allowed_intents = {
-        int(intent_codes["NIFTI_INTENT_NONE"]),
-        int(intent_codes["NIFTI_INTENT_SHAPE"]),
-    }
-
-    if int(data_array.intent) not in allowed_intents:
-        raise ValueError(f"Expected metric GIFTI intent, got '{data_array.intent}'")
-
     data = np.asarray(data_array.data, dtype=np.float64)
 
     if data.ndim != 1:
