@@ -140,8 +140,8 @@ def _iter_roundtrip_paths(
 def find_return_paths(
     graph: NeuromapsGraph,
     origin: str,
-    edge_type: str = NeuromapsGraph.surface_to_surface_key,
     *,
+    edge_type: str = NeuromapsGraph.surface_to_surface_key,
     max_length: int | None = None,
     allow_revisits: bool = False,
     max_paths: int | None = None,
