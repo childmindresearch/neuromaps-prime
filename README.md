@@ -5,10 +5,6 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/childmindresearch/neuromaps-prime/blob/main/LICENSE)
 [![pages](https://img.shields.io/badge/api-docs-blue)](https://childmindresearch.github.io/neuromaps-prime)
 
-> [!Important]
-> This project is currently in active development. The API is subject to breaking
-> changes without notice.
-
 The `neuromaps-prime` toolbox integrates multiscale, multimodal annotations across NHP
 brains, enabling comprehensive comparative analyses of brain organization. This package
 extends the neuromaps ecosystem to provide unified access to diverse NHP brain datasets
@@ -22,7 +18,7 @@ and specialized tools for NHP-specific analyses.
 ## Data
 
 Data currently included in the Neuromaps-PRIME graph:
-<img src=".github/neuromaps-graph.svg" align="center" width="200%"/>
+<img src=".github/neuromaps-graph.svg" align="center" width="100%"/>
 
 ## Installation
 
@@ -42,10 +38,9 @@ pip install git+https://github.com/childmindresearch/neuromaps-prime
 
 ## Examples
 
-See the [`examples/`](examples/) directory for sample scripts:
+See the [`examples/`](https://github.com/childmindresearch/neuromaps-prime/tree/main/examples) directory for sample scripts:
 
-- [`example_graph_init.py`](examples/example_graph_init.py) — graph inspection and plotting
-- [`example_surface_transform.py`](examples/example_surface_transform.py) — surface-to-surface resampling and surface-to-volume projection
-- [`example_volume_transform.py`](examples/example_volume_transform.py) — volume-to-volume warping and volume-to-surface projection
-- [`example_plot_interactive_graph.py`](examples/example_plot_interactive_graph.py) - generating an interactive HTML plot of the graph
-
+- [`example_graph_init.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_graph_init.py) — graph inspection and plotting
+- [`example_surface_transform.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_surface_transform.py) — surface-to-surface resampling and surface-to-volume projection
+- [`example_volume_transform.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_volume_transform.py) — volume-to-volume warping and volume-to-surface projection
+- [`example_plot_interactive_graph.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_plot_interactive_graph.py) - generating an interactive HTML plot of the graph
