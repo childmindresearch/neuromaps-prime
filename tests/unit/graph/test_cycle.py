@@ -232,8 +232,8 @@ def _fake_metric_resample(
     input_file_path: str | Path,
     current_sphere: str | Path,
     new_sphere: str | Path,
-    method: str,
-    area_surfs: dict[str, str | Path],
+    method: str,  # noqa: ARG001 - required to match Workbench interface
+    area_surfs: dict[str, str | Path],  # noqa: ARG001 - required to match Workbench interface
     output_file_path: str,
 ) -> SimpleNamespace:
     """Mock Workbench metric resampling for isolated cycle tests.
