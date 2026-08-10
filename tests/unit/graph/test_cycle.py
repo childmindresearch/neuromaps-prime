@@ -242,7 +242,6 @@ def _fake_metric_resample(
     between synthetic sphere geometries, writes the resulting GIFTI metric,
     and returns an object matching the interface expected from Workbench.
     """
-
     # load input and resample from current sphere to new sphere
     result = _resample_metric(
         load_metric(input_file_path),
