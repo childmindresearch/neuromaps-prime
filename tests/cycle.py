@@ -1,0 +1,492 @@
+"""Utilities for evaluating cyclic surface transformations.
+
+A cycle (or return path) is a path through the surface transformation graph
+that starts and ends at the same space, for example ``A -> B -> A`` or
+``A -> B -> C -> A``. A vertex-wise metric propagated around such a path should
+return to its original representation if all traversed transformations are
+perfectly invertible. In practice, each resampling step introduces numerical
+error, so the agreement between the original and round-tripped metric provides
+a measure of accumulated cycle error.
+
+This module provides reusable machinery to:
+
+1. enumerate return paths through a graph's surface transformation layer;
+2. propagate a seed metric through each transformation hop;
+3. compare the returned metric against the original using Pearson correlation
+   and maximum vertex-wise absolute difference.
+
+The cycle evaluation operates on complete transformation paths rather than
+individual edges, allowing errors introduced across multiple transforms and
+resampling operations to be assessed together.
+
+The unit tests exercise this machinery using a synthetic three-space graph with
+known rotational transforms. Because the synthetic transformations compose to
+identity, all closed paths are expected to return the input metric with near
+perfect agreement. Production regression tests use real surface templates and
+transformations to evaluate accumulated errors in realistic transformation
+networks.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import logging
+from dataclasses import dataclass
+from itertools import pairwise
+from pathlib import Path
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+import networkx as nx
+import nibabel as nib
+import numpy as np
+
+from neuromaps_prime.graph import NeuromapsGraph
+
+logger = logging.getLogger(__name__)
+
+
+def _path_token(path: tuple[str, ...]) -> str:
+    """Create a deterministic identifier for intermediate cycle outputs.
+
+    The token is derived from the ordered sequence of spaces in the path so
+    that different cycles produce unique, reproducible output filenames.
+    """
+    return hashlib.sha256("->".join(path).encode()).hexdigest()
+
+
+@dataclass(frozen=True)
+class CycleResult:
+    """Outcome of round-tripping a metric through one return path.
+
+    Attributes:
+        path: Ordered sequence of spaces traversed, including the starting space at
+            both the beginning and end.
+        pearson_r: Pearson correlation between the original metric and the
+            round-tripped metric. Higher values indicate stronger preservation of
+            the metric's spatial pattern.
+        max_abs_diff: Maximum absolute vertex-wise difference between the original
+            and round-tripped metric.
+    """
+
+    path: tuple[str, ...]
+    pearson_r: float
+    max_abs_diff: float
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable ``A -> B -> A`` label for the path."""
+        return " -> ".join(self.path)
+
+
+def _iter_roundtrip_paths(
+    subgraph: nx.DiGraph,
+    origin: str,
+    max_length: int,
+) -> Iterator[tuple[str, ...]]:
+    """Yield bounded two-leg round-trip paths from an origin node."""
+    turn_nodes = sorted(n for n in subgraph.nodes if n != origin)
+
+    for turn in turn_nodes:
+        for outbound in sorted(
+            nx.all_simple_paths(
+                subgraph,
+                source=origin,
+                target=turn,
+                cutoff=max_length - 1,
+            )
+        ):
+            out_hops = len(outbound) - 1
+            if out_hops < 1:
+                continue
+
+            remaining = max_length - out_hops
+            if remaining < 1:
+                continue
+
+            for inbound in sorted(
+                nx.all_simple_paths(
+                    subgraph,
+                    source=turn,
+                    target=origin,
+                    cutoff=remaining,
+                )
+            ):
+                in_hops = len(inbound) - 1
+                total_hops = out_hops + in_hops
+
+                if total_hops < 2 or total_hops > max_length:
+                    continue
+
+                roundtrip = tuple(outbound + inbound[1:])
+
+                counts: dict[str, int] = {}
+                for node in roundtrip:
+                    counts[node] = counts.get(node, 0) + 1
+
+                if counts.get(origin, 0) != 2:
+                    continue
+
+                if any(node != origin and count > 2 for node, count in counts.items()):
+                    continue
+
+                yield roundtrip
+
+
+def find_return_paths(
+    graph: NeuromapsGraph,
+    origin: str,
+    *,
+    edge_type: str = NeuromapsGraph.surface_to_surface_key,
+    max_length: int | None = None,
+    allow_revisits: bool = False,
+    max_paths: int | None = None,
+) -> list[tuple[str, ...]]:
+    """Enumerate return paths from an origin space through a graph layer.
+
+    A return path is any directed path that begins and ends at ``origin``.
+    By default, this returns directed simple cycles with no repeated interior
+    nodes. When ``allow_revisits=True``, paths are instead constructed from two
+    simple directed legs: an outbound path and a return path. This permits a node
+    to be visited once in each direction while preventing unrestricted graph walks.
+
+    Traversal is restricted to a single graph edge layer so that cycle evaluation
+    measures one transformation modality at a time.
+
+    When ``allow_revisits=True``, this instead enumerates round-trips composed
+    of two directed simple legs: an outbound simple path from ``origin`` to a
+    turning node, plus a return simple path from that node back to ``origin``.
+    A node can therefore appear at most once per leg (at most twice overall),
+    which avoids degenerate ping-pong walks while still permitting bridge nodes
+    to be crossed once out and once back.
+
+    Args:
+        graph: Populated :class:`~neuromaps_prime.graph.NeuromapsGraph`.
+        origin: Space the metric starts from and must return to.
+        edge_type: Edge key to traverse (``'surface_to_surface'`` or
+            ``'volume_to_volume'``).
+        max_length: Optional cap on the number of edges in a path. NetworkX
+            represents paths as node sequences, so this corresponds to
+            ``len(path) - 1``. Required when ``allow_revisits=True``.
+        allow_revisits: If ``True``, enumerate two-leg round-trips composed of an
+            outbound simple path and a return simple path. Nodes may appear once
+            per leg (so the origin appears at the start and end of the returned
+            path, and intermediate nodes may appear twice overall). A finite
+            ``max_length`` is required to prevent unbounded enumeration.
+        max_paths: Optional cap on the number of return paths generated. This
+            limits the number of paths, not the number of edges.
+
+    Returns:
+        Return paths sorted by length then lexicographically, e.g.
+        ``[('A', 'B', 'A'), ('A', 'C', 'A'), ('A', 'B', 'C', 'A'), ...]``.
+
+    Raises:
+        ValueError: If ``origin`` is not a node in the graph.
+    """
+    subgraph = graph.utils.get_subgraph(edge_type)
+
+    if allow_revisits and max_length is None:
+        raise ValueError("max_length is required when allow_revisits=True")
+
+    if origin not in subgraph:
+        raise ValueError(
+            f"Origin space '{origin}' is not in the '{edge_type}' layer. "
+            f"Available: {sorted(subgraph.nodes)}"
+        )
+
+    if not allow_revisits:
+        paths: list[tuple[str, ...]] = []
+        for cycle in nx.simple_cycles(subgraph, length_bound=max_length):
+            if origin not in cycle:
+                continue
+            # Rotate the directed cycle so it starts at origin, then close it.
+            start = cycle.index(origin)
+            rotated = cycle[start:] + cycle[:start] + [origin]
+            paths.append(tuple(rotated))
+        return sorted(paths, key=lambda p: (len(p), p))
+
+    visited: set[tuple[str, ...]] = set()
+
+    for path in _iter_roundtrip_paths(
+        subgraph,
+        origin,
+        max_length,
+    ):
+        visited.add(path)
+
+        if max_paths is not None and len(visited) >= max_paths:
+            break
+
+    ordered = sorted(visited, key=lambda p: (len(p), p))
+
+    if max_paths is not None:
+        return ordered[:max_paths]
+
+    return ordered
+
+
+def load_metric(metric_file: str | Path) -> np.ndarray:
+    """Load a GIFTI metric as a one-dimensional floating-point array.
+
+    Raises:
+        ValueError: If the file is not a scalar metric GIFTI.
+    """
+    img = nib.load(metric_file)
+
+    if not isinstance(img, nib.gifti.GiftiImage):
+        raise ValueError(f"Expected GIFTI metric file, got {type(img)}")
+
+    if len(img.darrays) != 1:
+        raise ValueError(
+            f"Expected one data array for metric file, found {len(img.darrays)}"
+        )
+
+    data_array = img.darrays[0]
+
+    data = np.asarray(data_array.data, dtype=np.float64)
+
+    if data.ndim != 1:
+        raise ValueError(
+            "Expected one-dimensional metric data. "
+            f"Got shape {data.shape}; this may be a surface file."
+        )
+
+    return data
+
+
+def roundtrip_metric(
+    graph: NeuromapsGraph,
+    metric_file: str | Path,
+    path: tuple[str, ...],
+    hemisphere: Literal["left", "right"],
+    workdir: str | Path,
+    *,
+    density: str | None = None,
+    add_edge: bool = False,
+) -> Path:
+    """Propagate a metric through each hop in a return path.
+
+    Each consecutive pair of spaces defines one surface transformation. The output
+    metric from one hop becomes the input metric for the next until the metric has
+    returned to the starting space.
+
+    This function uses the production surface transformer so cycle tests exercise
+    the same transformation machinery used by real workflows.
+
+    Args:
+        graph: Populated :class:`~neuromaps_prime.graph.NeuromapsGraph`.
+        metric_file: Seed metric GIFTI defined on the origin space.
+        path: Return path from :func:`find_return_paths`.
+        hemisphere: ``'left'`` or ``'right'``.
+        workdir: Directory for the per-hop intermediate metric files.
+        density: Fixed mesh density to use for every hop. When ``None`` the
+            transformer estimates the source density and resamples to each
+            target's highest available density.
+        add_edge: Whether the transformer may register composed transforms as
+            new edges. Off by default so the cycle test does not mutate the
+            graph it is measuring.
+
+    Returns:
+        Path to the metric after it has returned to the origin space.
+
+    Raises:
+        RuntimeError: If any hop cannot be resolved to a transform.
+    """
+    workdir = Path(workdir)
+    current = Path(metric_file)
+    path_token = _path_token(path)
+    for hop, (src, dst) in enumerate(pairwise(path)):
+        out_name = f"cycle_{path_token}_hop{hop:02d}_{src}-to-{dst}.func.gii"
+        result = graph.surface_to_surface_transformer(
+            transformer_type="metric",
+            input_file=current,
+            source_space=src,
+            target_space=dst,
+            hemisphere=hemisphere,
+            # Keep output path relative so dockerized wb_command writes inside
+            # its mounted output directory instead of an unmapped host path.
+            output_file_path=workdir / out_name,
+            source_density=density,
+            target_density=density,
+            add_edge=add_edge,
+        )
+        if result is None:
+            raise RuntimeError(
+                f"No surface transform for hop '{src}' -> '{dst}' "
+                f"on path {' -> '.join(path)}"
+            )
+        current = Path(result)
+    return current
+
+
+def score_roundtrip(
+    original_file: str | Path, roundtrip_file: str | Path
+) -> tuple[float, float]:
+    """Return ``(pearson_r, max_abs_diff)`` for an original vs round-tripped metric.
+
+    Computes Pearson correlation to measure preservation of the metric's
+    spatial pattern and maximum absolute difference to measure vertex-wise
+    numerical error.
+
+    Metrics with insufficient finite values or zero variance are handled
+    explicitly because Pearson correlation is undefined in those cases.
+
+    Args:
+        original_file: The seed metric on the origin space.
+        roundtrip_file: The metric after it has returned to the origin space.
+
+    Returns:
+        Tuple of the Pearson correlation and the maximum absolute vertex-wise
+        difference between the two metrics.
+
+        Pearson correlation is undefined when either metric is constant or when
+        there are fewer than two finite values. These cases return ``1.0`` only
+        when a valid finite comparison supports equality; otherwise ``0.0`` is
+        returned.
+
+    Raises:
+        ValueError: If the two metrics have different vertex counts (which means
+            the metric did not return to the origin mesh).
+    """
+    original = load_metric(original_file)
+    roundtrip = load_metric(roundtrip_file)
+    if original.shape != roundtrip.shape:
+        raise ValueError(
+            "Round-tripped metric did not return to the origin mesh: "
+            f"{roundtrip.shape} vs {original.shape}."
+        )
+    finite_mask = np.isfinite(original) & np.isfinite(roundtrip)
+    if np.any(finite_mask):
+        max_abs_diff = float(
+            np.max(np.abs(original[finite_mask] - roundtrip[finite_mask]))
+        )
+    else:
+        logger.warning(
+            "Round-trip metric contains no finite values; "
+            "max absolute difference is undefined."
+        )
+        max_abs_diff = np.nan
+
+    finite_count = np.count_nonzero(finite_mask)
+    vectors_equal = bool(np.allclose(original, roundtrip, equal_nan=True))
+
+    if finite_count < 2:
+        logger.warning(
+            "Fewer than two finite values available to compute Pearson correlation."
+        )
+        pearson_r = 1.0 if finite_count > 0 and vectors_equal else 0.0
+        return pearson_r, max_abs_diff
+
+    original_finite = original[finite_mask]
+    roundtrip_finite = roundtrip[finite_mask]
+    original_std = np.std(original_finite)
+    roundtrip_std = np.std(roundtrip_finite)
+    if np.isclose(original_std, 0.0) or np.isclose(roundtrip_std, 0.0):
+        pearson_r = 1.0 if vectors_equal else 0.0
+    else:
+        pearson_r = np.corrcoef(original_finite, roundtrip_finite)[0, 1]
+        if np.isnan(pearson_r) and vectors_equal:
+            pearson_r = 1.0
+
+    return pearson_r, max_abs_diff
+
+
+def run_cycle_test(
+    graph: NeuromapsGraph,
+    origin: str,
+    metric_file: str | Path,
+    hemisphere: Literal["left", "right"],
+    workdir: str | Path,
+    *,
+    density: str | None = None,
+    max_length: int | None = None,
+    output_file: str | Path | None = None,
+) -> list[CycleResult]:
+    """Evaluate metric preservation across all return paths from an origin.
+
+    For each return path, the metric is propagated through every transformation
+    hop, returned to the origin space, and compared against the original metric.
+    Results are collected as :class:`CycleResult` objects containing both pattern
+    preservation and numerical error metrics.
+
+    Args:
+        graph: Populated :class:`~neuromaps_prime.graph.NeuromapsGraph`.
+        origin: Space the metric starts from and must return to.
+        metric_file: Seed metric GIFTI defined on the origin space.
+        hemisphere: ``'left'`` or ``'right'``.
+        workdir: Directory for intermediate metric files.
+        density: Fixed mesh density for every hop, or ``None`` to let the
+            transformer choose per hop (see :func:`roundtrip_metric`).
+        max_length: Optional cap on path length passed to
+            :func:`find_return_paths`.
+        output_file: Optional path to a text file where the results summary
+            will be saved. When ``None`` no file is written.
+
+    Returns:
+        One :class:`CycleResult` per return path, in enumeration order.
+    """
+    results: list[CycleResult] = []
+    for path in find_return_paths(graph, origin, max_length=max_length):
+        roundtrip = roundtrip_metric(
+            graph, metric_file, path, hemisphere, workdir, density=density
+        )
+        pearson_r, max_abs_diff = score_roundtrip(metric_file, roundtrip)
+        logger.info(
+            "cycle %s: r=%.6f max|delta|=%.3e",
+            " -> ".join(path),
+            pearson_r,
+            max_abs_diff,
+        )
+        results.append(
+            CycleResult(path=path, pearson_r=pearson_r, max_abs_diff=max_abs_diff)
+        )
+
+    summary = _format_cycle_summary(results, origin, hemisphere)
+
+    for line in summary.splitlines():
+        logger.info(line)
+
+    if output_file is not None:
+        output_path = Path(output_file)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        output_path.write_text(
+            summary + "\n",
+            encoding="utf-8",
+        )
+
+        logger.info("Cycle test results saved to %s", output_path)
+
+    return results
+
+
+def _format_cycle_summary(
+    results: list[CycleResult],
+    origin: str,
+    hemisphere: str,
+) -> str:
+    """Create a human-readable summary table of cycle evaluation results."""
+    header = f"{'Transformation path':<50}  {'Pearson r':>10}  {'Max |delta|':>14}"
+    separator = "-" * len(header)
+
+    lines = [
+        f"Cycle test results — origin: {origin}, hemisphere: {hemisphere}",
+        separator,
+        header,
+        separator,
+    ]
+
+    lines.extend(
+        f"{r.label:<50}  {r.pearson_r:>10.6f}  {r.max_abs_diff:>14.3e}" for r in results
+    )
+
+    lines.extend(
+        [
+            separator,
+            f"Total cycles: {len(results)}",
+        ]
+    )
+
+    return "\n".join(lines)
