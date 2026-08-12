@@ -20,5 +20,5 @@ Juna:
         TPM:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c87b46452edca6fb89aa1?view_only=b214f40525fe44b5bea3103478d08d0d
           notes:
-          - Tissue probability maps, 0.50mm resolution
+          - Tissue probability map
       
