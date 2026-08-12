@@ -12,4 +12,6 @@ from neuromaps_prime.analysis.stats import (
     permtest_metric,
 )
 
-__all__ = ["compare_images", "efficient_pearsonr", "permtest_metric"]
+from neuromaps_prime.analysis.parcellate import ParcellatedData, parcellate
+
+__all__ = ["compare_images", "efficient_pearsonr", "permtest_metric", "ParcellatedData", "parcellate"]
