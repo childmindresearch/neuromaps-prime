@@ -23,6 +23,23 @@ NCBR:
       white:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c5e9bdf105947ee71d?view_only=b214f40525fe44b5bea3103478d08d0d
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c23e551fbafd8290e6?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        PC_ChimpBNA:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88270d76354cd6b89b76?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88253d751cc6ffb66ddb?view_only=b214f40525fe44b5bea3103478d08d0d
+          notes:
+          - ChimpBNA parcellation atlas. 164k surface density.
+        PC_DK:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c882778afc916b3b02b37?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c882b9a2ada619db66e19?view_only=b214f40525fe44b5bea3103478d08d0d
+          notes:
+          - Desikan-Killiany parcellation atlas. 164k surface density.
+
   volumes:
     400um:
-      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c67ef401e8b5cc761e?view_only=b214f40525fe44b5bea3103478d08d0d
+      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88286452edca6fb89abe?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        BM:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88272919a6956918f9f8?view_only=b214f40525fe44b5bea3103478d08d0d
+          notes: 
+          - Brain mask, 0.40mm resolution

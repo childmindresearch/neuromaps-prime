@@ -1,0 +1,24 @@
+Juna:
+  species: chimpanzee
+  description: Juna.Chimp Chimpanzee Atlas
+  references:
+  - citation: Vickery S, et al. 2020. eLife. 9:e60136.
+    doi: 10.7554/eLife.60136
+    url: https://elifesciences.org/articles/60136
+  surfaces:
+    164k:
+      annotation:
+        PC_Davi130:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c87b43fc0070f3cb89b84?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c87b278babe512918f872?view_only=b214f40525fe44b5bea3103478d08d0d
+          notes:
+          - Davi130 parcellation. 164k surface density.
+  volumes:
+    500um:
+      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c87b23fc0070f3cb89b7f?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        TPM:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c87b46452edca6fb89aa1?view_only=b214f40525fe44b5bea3103478d08d0d
+          notes:
+          - Tissue probability maps, 0.50mm resolution
+      
