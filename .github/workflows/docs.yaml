@@ -33,12 +33,12 @@ jobs:
     - name: Install the project
       run: uv sync --only-group docs
     - name: Build docs
-      run: >
+      run: |
         uv run pdoc src/neuromaps_prime \
-        -o docs_build \
-        -t docs/pdoc-theme \
-        --docformat google \
-        --favicon https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/.github/neuromaps_prime.svg
+          -o docs_build \
+          -t docs/pdoc-theme \
+          --docformat google \
+          --favicon https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/.github/neuromaps_prime.svg
     - name: Setup Pages
       uses: actions/configure-pages@v6
     - name: Upload artifact
