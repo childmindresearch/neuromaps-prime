@@ -34,7 +34,7 @@ import logging
 from dataclasses import dataclass
 from itertools import pairwise
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -530,10 +530,7 @@ def save_cycle_figure(
     lower = min(values)
     upper = 1.001
 
-    if lower >= 0.99:
-        lower = 0.98
-    else:
-        lower = max(0.0, lower - 0.01)
+    lower = 0.98 if lower >= 0.99 else max(0.0, lower - 0.01)
 
     ax.set_ylim(lower, upper)
 
