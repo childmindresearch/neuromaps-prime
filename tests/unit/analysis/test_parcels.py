@@ -171,6 +171,80 @@ class TestParcelReduce:
         assert np.isnan(result.values[0])
         assert np.isfinite(result.values[1:]).all()
 
+    def test_inf_dropped_by_default(
+        self, surface_data: tuple[np.ndarray, np.ndarray]
+    ) -> None:
+        """Verify that Inf values are excluded from summaries by default."""
+        data, labels = surface_data
+        data = data.copy()
+        data[2] = np.inf  # region 1 also holds vertices 3 and 4
+        np.testing.assert_allclose(parcel_reduce(data, labels).values, [3.5, 5.5, 8.0])
+
+    def test_nonfinite_kept_when_disabled(
+        self, surface_data: tuple[np.ndarray, np.ndarray]
+    ) -> None:
+        """Verify drop_nonfinite=False lets NaN/Inf propagate into a region."""
+        data, labels = surface_data
+        data = data.copy()
+        data[2] = np.nan
+        result = parcel_reduce(data, labels, drop_nonfinite=False)
+        assert np.isnan(result.values[0])
+        np.testing.assert_allclose(result.values[1:], [5.5, 8.0])
+
+    def test_all_nonfinite_region_returns_nan(
+        self, surface_data: tuple[np.ndarray, np.ndarray]
+    ) -> None:
+        """Verify a region whose values are all Inf yields NaN when dropped."""
+        data, labels = surface_data
+        data = data.copy()
+        data[[2, 3, 4]] = np.inf  # region 1
+        result = parcel_reduce(data, labels)
+        assert np.isnan(result.values[0])
+        assert np.isfinite(result.values[1:]).all()
+
+    def test_propagate_default_none(
+        self, surface_data: tuple[np.ndarray, np.ndarray]
+    ) -> None:
+        """Verify that dense is None unless propagate is requested."""
+        assert parcel_reduce(*surface_data).dense is None
+
+    def test_propagate_surface(
+        self, surface_data: tuple[np.ndarray, np.ndarray]
+    ) -> None:
+        """Verify summaries are broadcast back onto the input vertices."""
+        data, labels = surface_data
+        result = parcel_reduce(data, labels, propagate=True)
+        assert result.dense.shape == data.shape
+        np.testing.assert_allclose(
+            result.dense, [np.nan, np.nan, 3.0, 3.0, 3.0, 5.5, 5.5, 8.0, 8.0, 8.0]
+        )
+
+    def test_propagate_background_is_nan(
+        self, surface_data: tuple[np.ndarray, np.ndarray]
+    ) -> None:
+        """Verify propagated background elements become NaN."""
+        data, labels = surface_data
+        dense = parcel_reduce(data, labels, propagate=True).dense
+        assert np.isnan(dense[:2]).all()
+
+    def test_propagate_volume_shape(
+        self, volume_data: tuple[np.ndarray, np.ndarray]
+    ) -> None:
+        """Verify propagation preserves 3D volumetric shape."""
+        data, labels = volume_data
+        result = parcel_reduce(data, labels, propagate=True)
+        assert result.dense.shape == data.shape
+        np.testing.assert_allclose(result.dense[0], np.full((3, 3), data[0].mean()))
+
+    def test_propagate_multi_feature(
+        self, surface_data: tuple[np.ndarray, np.ndarray]
+    ) -> None:
+        """Verify propagation keeps the trailing feature axis."""
+        data, labels = surface_data
+        result = parcel_reduce(np.c_[data, data * 2], labels, propagate=True)
+        assert result.dense.shape == (10, 2)
+        np.testing.assert_allclose(result.dense[2], [3.0, 6.0])
+
     @pytest.mark.parametrize(
         ("method", "expected"),
         [
