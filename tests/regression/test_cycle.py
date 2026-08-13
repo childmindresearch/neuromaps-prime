@@ -336,9 +336,8 @@ def test_surface_transform_cycles(
         roundtrip = _transform_cycle(
             graph,
             metric_file,
-            shortest_paths,
+            path,
             HEMISPHERE,
-            workdir,
         )
 
         pearson_r, max_abs_diff = score_roundtrip(
