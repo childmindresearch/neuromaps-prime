@@ -1,43 +1,53 @@
-"""Regression benchmark for surface transformation cycle accuracy.
+"""Regression benchmark for shortest surface transformation cycles.
 
-This benchmark evaluates round-trip surface transformations on the real
-NeuromapsPrime graph.
+This test benchmarks end-to-end surface transformation accuracy on the real
+NeuromapsPrime graph using standard template surfaces.
 
-A real surface annotation is initialized in an origin template space and
-propagated through the shortest executable return paths in the surface
-transformation graph. The round-tripped annotation is compared with the
-original using Pearson correlation and maximum vertex-wise absolute
-difference.
+A deterministic vertex-wise metric is generated from the origin template's
+midthickness surface, propagated through every shortest executable return path
+in the surface transformation graph, and compared with the original metric
+after returning to the starting space.
 
-The benchmark records transformation accuracy rather than enforcing fixed
-pass/fail thresholds. Results are written to CSV for comparison across
-changes to the transformation machinery.
+The benchmark is intentionally independent of surface annotations. The metric
+is generated directly from the standard midthickness surface so that private
+annotation resources do not affect the test.
 
-Only cycles with all required surface resources available are evaluated.
+Only the shortest return paths are evaluated. This keeps the benchmark focused
+on the most direct transformation routes while still covering every shortest
+path possibility.
 
-Intermediate transformation files are written to pytest's temporary
-directory and are removed after the test completes. Plotting is handled
-separately by ``plot_cycle_regression.py``.
+Transformation outputs are written to pytest's temporary directory. The
+benchmark summary is saved separately under ``tests/regression/output`` so
+that results can be inspected after the test run.
 
-To test another template or annotation, update ``ORIGIN``, ``LABEL``, and
-``HEMISPHERE`` below.
+Metrics recorded for each transformation cycle include:
+
+- Pearson correlation between original and round-tripped metric.
+- Maximum absolute difference between original and round-tripped values.
+- Number of transformations in the cycle.
+
+This test is intended primarily as a benchmark rather than a strict regression
+test. Results are recorded for comparison across changes to transformation
+infrastructure.
 
 Run with::
 
-    pytest tests/regression/test_cycle_regression.py -v -s
+    pytest tests/regression/test_cycle.py -v -s
 """
 
 from __future__ import annotations
 
-import csv
 import logging
 from itertools import pairwise
 from pathlib import Path
 
+import nibabel as nib
+import numpy as np
+import pandas as pd
 import pytest
-from tests.cycle import find_return_paths, roundtrip_metric, score_roundtrip
 
 from neuromaps_prime.graph import NeuromapsGraph
+from tests.cycle import find_return_paths, roundtrip_metric, score_roundtrip
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +57,6 @@ logger = logging.getLogger(__name__)
 # -------------------------------------------------------------------------
 
 ORIGIN = "Yerkes19"
-LABEL = "RM_auto_ampa"
 HEMISPHERE = "left"
 
 
@@ -57,10 +66,19 @@ HEMISPHERE = "left"
 
 
 @pytest.fixture
+def graph() -> NeuromapsGraph:
+    """Create a Neuromaps graph for regression benchmarking."""
+    return NeuromapsGraph()
+
+
+@pytest.fixture
 def output_dir() -> Path:
-    """Directory for storing persistent cycle benchmark outputs."""
+    """Directory for storing benchmark summaries."""
     directory = Path(__file__).resolve().parent / "output/cycle_outputs"
-    directory.mkdir(parents=True, exist_ok=True)
+    directory.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
     return directory
 
@@ -70,19 +88,62 @@ def output_dir() -> Path:
 # -------------------------------------------------------------------------
 
 
+def _make_surface_metric(
+    surface_file: Path,
+    output_file: Path,
+) -> Path:
+    """Create a deterministic vertex-wise metric from a midthickness surface."""
+    image = nib.load(surface_file)
+
+    vertices = np.asarray(
+        image.darrays[0].data,
+        dtype=np.float64,
+    )
+
+    if vertices.ndim != 2 or vertices.shape[1] != 3:
+        raise ValueError(
+            f"Expected surface vertices with shape (n_vertices, 3), "
+            f"got {vertices.shape}."
+        )
+
+    # A smooth deterministic metric based only on the standard surface
+    # geometry. This avoids dependence on any external annotation.
+    metric = vertices.sum(axis=1)
+
+    metric_image = nib.gifti.GiftiImage(
+        darrays=[
+            nib.gifti.GiftiDataArray(
+                metric.astype(np.float32),
+            )
+        ]
+    )
+
+    output_file.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    nib.save(
+        metric_image,
+        output_file,
+    )
+
+    return output_file
+
+
 def _shortest_paths(
     paths: list[tuple[str, ...]],
 ) -> list[tuple[str, ...]]:
-    """Return all shortest paths from a collection of return paths."""
+    """Return all paths having the minimum number of transformation hops."""
     if not paths:
         return []
 
-    shortest_length = min(len(path) for path in paths)
+    shortest_length = min(len(path) - 1 for path in paths)
 
     return [
         path
         for path in paths
-        if len(path) == shortest_length
+        if len(path) - 1 == shortest_length
     ]
 
 
@@ -93,7 +154,7 @@ def _valid_cycle_paths(
     hemisphere: str,
 ) -> list[tuple[str, ...]]:
     """Return cycles whose required surface resources are available."""
-    valid_paths = []
+    valid_paths: list[tuple[str, ...]] = []
 
     for path in paths:
         valid = True
@@ -122,28 +183,6 @@ def _valid_cycle_paths(
     return valid_paths
 
 
-def _write_benchmark_csv(
-    results: list[dict[str, object]],
-    output_file: Path,
-) -> None:
-    """Write cycle benchmark results to CSV."""
-    with output_file.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(
-            file,
-            fieldnames=[
-                "origin",
-                "label",
-                "hemisphere",
-                "path",
-                "n_hops",
-                "pearson_r",
-                "max_abs_diff",
-            ],
-        )
-        writer.writeheader()
-        writer.writerows(results)
-
-
 # -------------------------------------------------------------------------
 # Tests
 # -------------------------------------------------------------------------
@@ -154,24 +193,39 @@ def test_surface_transform_cycles(
     output_dir: Path,
     tmp_path: Path,
 ) -> None:
-    """Benchmark shortest executable transformation cycles."""
+    """Benchmark shortest executable surface transformation cycles."""
     logging.basicConfig(level=logging.INFO)
 
     density = graph.find_highest_density(ORIGIN)
 
-    annotation = graph.fetch_surface_annotation(
-        space=ORIGIN,
-        label=LABEL,
-        density=density,
-        hemisphere=HEMISPHERE,
+    # ------------------------------------------------------------------
+    # Create a deterministic metric from the standard midthickness surface.
+    # ------------------------------------------------------------------
+
+    surface = graph._cache.require_surface_atlas(
+        ORIGIN,
+        density,
+        HEMISPHERE,
+        "midthickness",
     )
 
-    assert annotation is not None, (
-        f"Missing annotation '{LABEL}' for {ORIGIN} "
-        f"({HEMISPHERE}, density={density})."
+    surface_file = Path(surface)
+
+    assert surface_file.exists(), (
+        f"Missing midthickness surface: {surface_file}"
     )
 
-    metric_file = Path(annotation.fetch())
+    metric_file = _make_surface_metric(
+        surface_file,
+        tmp_path / f"{ORIGIN}_{density}_{HEMISPHERE}_metric.func.gii",
+    )
+
+    assert metric_file.exists()
+    assert metric_file.stat().st_size > 0
+
+    # ------------------------------------------------------------------
+    # Find all return paths and retain every shortest possibility.
+    # ------------------------------------------------------------------
 
     all_paths = find_return_paths(
         graph,
@@ -197,6 +251,10 @@ def test_surface_transform_cycles(
         ORIGIN,
     )
     logger.info(
+        "Density: %s",
+        density,
+    )
+    logger.info(
         "Total return paths: %d",
         len(all_paths),
     )
@@ -213,7 +271,14 @@ def test_surface_transform_cycles(
         f"No executable shortest transformation cycles found from '{ORIGIN}'."
     )
 
-    # Transformation outputs are temporary, like the unit tests.
+    # ------------------------------------------------------------------
+    # Run each shortest cycle.
+    #
+    # Intermediate transformation files stay in tmp_path, just like the
+    # unit tests. Nothing from the transformation itself is written into
+    # the persistent regression output directory.
+    # ------------------------------------------------------------------
+
     workdir = tmp_path / "cycle_outputs"
     workdir.mkdir()
 
@@ -235,9 +300,6 @@ def test_surface_transform_cycles(
         )
 
         result = {
-            "origin": ORIGIN,
-            "label": LABEL,
-            "hemisphere": HEMISPHERE,
             "path": " -> ".join(path),
             "n_hops": len(path) - 1,
             "pearson_r": pearson_r,
@@ -247,24 +309,56 @@ def test_surface_transform_cycles(
         results.append(result)
 
         logger.info(
-            "%-50s  r=%10.6f  max|delta|=%12.3e  hops=%d",
+            "cycle %s: r=%.6f max|delta|=%.3e",
             result["path"],
             pearson_r,
             max_abs_diff,
-            len(path) - 1,
         )
 
-    output_file = (
-        output_dir
-        / f"cycle_{ORIGIN}_{LABEL}_{HEMISPHERE}.csv"
-    )
+    # ------------------------------------------------------------------
+    # Summarize benchmark results.
+    # ------------------------------------------------------------------
 
-    _write_benchmark_csv(
-        results,
-        output_file,
+    frame = pd.DataFrame(results).sort_values(
+        "pearson_r",
+        ascending=False,
     )
 
     logger.info(
-        "Saved cycle benchmark metrics: %s",
+        "\n=== Surface Cycle Benchmark: %s (%s, %s) ===\n%s",
+        ORIGIN,
+        density,
+        HEMISPHERE,
+        frame.to_string(index=False),
+    )
+
+    output_file = (
+        output_dir
+        / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.csv"
+    )
+
+    frame.to_csv(
         output_file,
+        index=False,
+    )
+
+    logger.info(
+        "Saved cycle benchmark results: %s",
+        output_file,
+    )
+
+    # ------------------------------------------------------------------
+    # Basic sanity checks.
+    #
+    # This is a benchmark, not a hard threshold regression test. We still
+    # require finite comparison metrics so that an invalid transformation
+    # cannot silently produce a meaningless benchmark.
+    # ------------------------------------------------------------------
+
+    assert np.isfinite(frame["pearson_r"]).all(), (
+        "Benchmark produced non-finite Pearson correlations."
+    )
+
+    assert np.isfinite(frame["max_abs_diff"]).all(), (
+        "Benchmark produced non-finite maximum absolute differences."
     )
