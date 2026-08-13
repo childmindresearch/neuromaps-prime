@@ -491,6 +491,7 @@ def _format_cycle_summary(
 
     return "\n".join(lines)
 
+
 def save_cycle_figure(
     results: list[dict[str, Any]],
     output_file: Path,

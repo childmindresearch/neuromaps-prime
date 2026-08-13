@@ -87,6 +87,7 @@ def output_dir() -> Path:
 # Helpers
 # -------------------------------------------------------------------------
 
+
 def _find_executable_density(
     graph: NeuromapsGraph,
     source: str,
@@ -111,6 +112,7 @@ def _find_executable_density(
         return None
 
     return density
+
 
 def _make_surface_metric(
     surface_file: Path,
@@ -162,11 +164,7 @@ def _shortest_paths(
 
     shortest_length = min(len(path) - 1 for path in paths)
 
-    return [
-        path
-        for path in paths
-        if len(path) - 1 == shortest_length
-    ]
+    return [path for path in paths if len(path) - 1 == shortest_length]
 
 
 def _valid_cycle_paths(
@@ -206,9 +204,7 @@ def _transform_cycle(
     for hop, (source, target) in enumerate(pairwise(path)):
         density = graph.find_common_density(source, target)
 
-        output_name = (
-            f"hop{hop:02d}_{source}-to-{target}.func.gii"
-        )
+        output_name = f"hop{hop:02d}_{source}-to-{target}.func.gii"
 
         result = graph.surface_to_surface_transformer(
             transformer_type="metric",
@@ -265,27 +261,20 @@ def test_surface_transform_cycles(
     )
 
     assert surface is not None, (
-        f"Missing midthickness surface for {ORIGIN} "
-        f"at {density} ({HEMISPHERE})."
+        f"Missing midthickness surface for {ORIGIN} at {density} ({HEMISPHERE})."
     )
 
     surface_file = Path(surface.fetch())
 
-    assert surface_file.exists(), (
-        f"Missing midthickness surface: {surface_file}"
-    )
+    assert surface_file.exists(), f"Missing midthickness surface: {surface_file}"
 
     metric_file = _make_surface_metric(
         surface_file,
         tmp_path / f"{ORIGIN}_{density}_{HEMISPHERE}_metric.func.gii",
     )
 
-    assert metric_file.exists(), (
-        f"Failed to create metric: {metric_file}"
-    )
-    assert metric_file.stat().st_size > 0, (
-        f"Created metric is empty: {metric_file}"
-    )
+    assert metric_file.exists(), f"Failed to create metric: {metric_file}"
+    assert metric_file.stat().st_size > 0, f"Created metric is empty: {metric_file}"
 
     # ------------------------------------------------------------------
     # Find all return paths and retain every shortest possibility.
@@ -297,8 +286,7 @@ def test_surface_transform_cycles(
     )
 
     assert all_paths, (
-        f"No return paths found from '{ORIGIN}' "
-        "in the surface transformation graph."
+        f"No return paths found from '{ORIGIN}' in the surface transformation graph."
     )
 
     shortest_paths = _shortest_paths(all_paths)
@@ -396,10 +384,7 @@ def test_surface_transform_cycles(
         frame.to_string(index=False),
     )
 
-    output_file = (
-        output_dir
-        / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.csv"
-    )
+    output_file = output_dir / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.csv"
 
     frame.to_csv(
         output_file,
@@ -411,18 +396,12 @@ def test_surface_transform_cycles(
         output_file,
     )
 
-    figure_file = (
-        output_dir
-        / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.png"
-    )
+    figure_file = output_dir / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.png"
 
     save_cycle_figure(
         results,
         figure_file,
-        title=(
-            f"Surface Cycle Benchmark: "
-            f"{ORIGIN} ({density}, {HEMISPHERE})"
-        ),
+        title=(f"Surface Cycle Benchmark: {ORIGIN} ({density}, {HEMISPHERE})"),
     )
 
     logger.info(
