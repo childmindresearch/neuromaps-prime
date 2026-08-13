@@ -40,15 +40,13 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 import pytest
-
-from neuromaps_prime.graph import NeuromapsGraph
-from tests.cycle import find_return_paths, score_roundtrip
-
 from tests.cycle import (
     find_return_paths,
     save_cycle_figure,
     score_roundtrip,
 )
+
+from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
 
@@ -173,9 +171,9 @@ def _valid_cycle_paths(
     hemisphere: Literal["left", "right"],
 ) -> list[tuple[str, ...]]:
     """Return cycles for which every hop has a common executable density."""
-    valid_paths = []
-
-    for path in paths:
+    return [
+        path
+        for path in paths
         if all(
             _find_executable_density(
                 graph,
@@ -185,10 +183,8 @@ def _valid_cycle_paths(
             )
             is not None
             for source, target in pairwise(path)
-        ):
-            valid_paths.append(path)
-
-    return valid_paths
+        )
+    ]
 
 
 def _transform_cycle(
@@ -196,7 +192,6 @@ def _transform_cycle(
     metric_file: Path,
     path: tuple[str, ...],
     hemisphere: Literal["left", "right"],
-    workdir: Path,
 ) -> Path:
     """Transform a metric through every hop in a cycle."""
     current_metric = metric_file
