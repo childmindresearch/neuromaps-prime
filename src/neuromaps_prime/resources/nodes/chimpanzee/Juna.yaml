@@ -7,9 +7,6 @@ Juna:
     url: https://elifesciences.org/articles/60136
   surfaces:
     164k:
-      sphere:
-        left:
-        right:
       annotation:
         PC_Davi130:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c87b43fc0070f3cb89b84?view_only=b214f40525fe44b5bea3103478d08d0d
