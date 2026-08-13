@@ -15,7 +15,9 @@ changes to the transformation machinery.
 
 Only cycles with all required surface resources available are evaluated.
 
-Plotting is handled separately by ``plot_cycle_regression.py``.
+Intermediate transformation files are written to pytest's temporary
+directory and are removed after the test completes. Plotting is handled
+separately by ``plot_cycle_regression.py``.
 
 To test another template or annotation, update ``ORIGIN``, ``LABEL``, and
 ``HEMISPHERE`` below.
@@ -55,16 +57,11 @@ HEMISPHERE = "left"
 
 
 @pytest.fixture
-def graph() -> NeuromapsGraph:
-    """Create a Neuromaps graph for regression benchmarking."""
-    return NeuromapsGraph()
-
-
-@pytest.fixture
 def output_dir() -> Path:
-    """Directory for storing cycle regression benchmark outputs."""
+    """Directory for storing persistent cycle benchmark outputs."""
     directory = Path(__file__).resolve().parent / "output/cycle_outputs"
     directory.mkdir(parents=True, exist_ok=True)
+
     return directory
 
 
@@ -155,6 +152,7 @@ def _write_benchmark_csv(
 def test_surface_transform_cycles(
     graph: NeuromapsGraph,
     output_dir: Path,
+    tmp_path: Path,
 ) -> None:
     """Benchmark shortest executable transformation cycles."""
     logging.basicConfig(level=logging.INFO)
@@ -195,17 +193,29 @@ def test_surface_transform_cycles(
     )
 
     logger.info(
-        "Testing %d/%d shortest executable transformation cycles from %s "
-        "(%d total return paths)",
-        len(valid_paths),
-        len(shortest_paths),
+        "Surface cycle benchmark for %s",
         ORIGIN,
+    )
+    logger.info(
+        "Total return paths: %d",
         len(all_paths),
+    )
+    logger.info(
+        "Shortest return paths: %d",
+        len(shortest_paths),
+    )
+    logger.info(
+        "Executable shortest return paths: %d",
+        len(valid_paths),
     )
 
     assert valid_paths, (
         f"No executable shortest transformation cycles found from '{ORIGIN}'."
     )
+
+    # Transformation outputs are temporary, like the unit tests.
+    workdir = tmp_path / "cycle_outputs"
+    workdir.mkdir()
 
     results: list[dict[str, object]] = []
 
@@ -215,7 +225,7 @@ def test_surface_transform_cycles(
             metric_file,
             path,
             HEMISPHERE,
-            output_dir,
+            workdir,
             density=density,
         )
 
