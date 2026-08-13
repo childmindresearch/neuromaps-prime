@@ -34,7 +34,7 @@ import logging
 from dataclasses import dataclass
 from itertools import pairwise
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, Any
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -490,3 +490,64 @@ def _format_cycle_summary(
     )
 
     return "\n".join(lines)
+
+def save_cycle_figure(
+    results: list[dict[str, Any]],
+    output_file: Path,
+    title: str,
+) -> Path:
+    """Save a bar plot of round-trip Pearson correlations."""
+    import matplotlib.pyplot as plt
+
+    if not results:
+        raise ValueError("Cannot plot cycle results: no results were provided.")
+
+    labels = [str(result["path"]) for result in results]
+    values = [float(result["pearson_r"]) for result in results]
+
+    fig, ax = plt.subplots(figsize=(max(8, len(labels) * 1.5), 5))
+
+    ax.bar(range(len(labels)), values)
+
+    ax.set_xticks(range(len(labels)))
+    ax.set_xticklabels(
+        labels,
+        rotation=30,
+        ha="right",
+        fontsize=8,
+    )
+
+    ax.set_ylabel("Round-trip Pearson r")
+    ax.set_title(title)
+
+    ax.axhline(
+        1.0,
+        linestyle="--",
+        linewidth=0.8,
+    )
+
+    lower = min(values)
+    upper = 1.001
+
+    if lower >= 0.99:
+        lower = 0.98
+    else:
+        lower = max(0.0, lower - 0.01)
+
+    ax.set_ylim(lower, upper)
+
+    for index, value in enumerate(values):
+        ax.text(
+            index,
+            value,
+            f"{value:.6f}",
+            ha="center",
+            va="bottom",
+            fontsize=8,
+        )
+
+    fig.tight_layout()
+    fig.savefig(output_file, dpi=150)
+    plt.close(fig)
+
+    return output_file

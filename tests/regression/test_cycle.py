@@ -44,6 +44,12 @@ import pytest
 from neuromaps_prime.graph import NeuromapsGraph
 from tests.cycle import find_return_paths, score_roundtrip
 
+from tests.cycle import (
+    find_return_paths,
+    save_cycle_figure,
+    score_roundtrip,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -397,6 +403,25 @@ def test_surface_transform_cycles(
     logger.info(
         "Saved cycle benchmark results: %s",
         output_file,
+    )
+
+    figure_file = (
+        output_dir
+        / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.png"
+    )
+
+    save_cycle_figure(
+        results,
+        figure_file,
+        title=(
+            f"Surface Cycle Benchmark: "
+            f"{ORIGIN} ({density}, {HEMISPHERE})"
+        ),
+    )
+
+    logger.info(
+        "Saved cycle benchmark figure: %s",
+        figure_file,
     )
 
     # ------------------------------------------------------------------
