@@ -166,17 +166,30 @@ def parcel_reduce(
             warnings.simplefilter("ignore", RuntimeWarning)
             if isinstance(method, str):
                 _reduce_ndimage(
-                    values, data_flat, labels_1d, unique, method, min_valid,
+                    values,
+                    data_flat,
+                    labels_1d,
+                    unique,
+                    method,
+                    min_valid,
                     drop_nonfinite,
                 )
             else:
                 _reduce_callable(
-                    values, data_flat, labels_1d, unique, method, min_valid,
+                    values,
+                    data_flat,
+                    labels_1d,
+                    unique,
+                    method,
+                    min_valid,
                     drop_nonfinite,
                 )
 
-    dense = _propagate(data_arr, data_flat, labels_1d, unique, values) if propagate \
+    dense = (
+        _propagate(data_arr, data_flat, labels_1d, unique, values)
+        if propagate
         else None
+    )
 
     if n_features == 1:
         values = values[:, 0]
