@@ -52,10 +52,11 @@ def _collapse(arr: np.ndarray) -> np.ndarray:
     Surface data are ``(n_vertices,)`` or ``(n_vertices, n_features)``.
     Volumetric data are ``(i, j, k)`` or ``(i, j, k, n_features)``.
     """
-    if arr.ndim not in (1, 2, 3, 4):
-        raise ValueError(f"Unsupported array with {arr.ndim} dimensions.")
-    out = arr.reshape(-1, *arr.shape[2:])
-    return out[:, None] if out.ndim == 1 else out
+    if arr.ndim in (1, 3):
+        return arr.reshape(-1, 1)
+    if arr.ndim in (2, 4):
+        return arr.reshape(-1, arr.shape[-1])
+    raise ValueError(f"Unsupported array with {arr.ndim} dimensions.")
 
 
 def parcel_reduce(
@@ -114,8 +115,8 @@ def parcel_reduce(
     else:
         raise ValueError("'method' must be a string or a callable.")
 
-    data_arr = load_data(data, dtype=np.float64)
-    labels_arr = load_data(parcellation, np.int64)
+    data_arr = load_data(data, dtype=np.float64).array
+    labels_arr = np.rint(load_data(parcellation, np.int64).array)
 
     data_flat = _collapse(data_arr)
     labels_flat = _collapse(labels_arr)
@@ -125,7 +126,7 @@ def parcel_reduce(
             "Parcellation must be a single volume or surface, got "
             f"{labels_flat.shape[1]} features."
         )
-    labels_1d = np.rint(labels_flat[:, 0])
+    labels_1d = labels_flat[:, 0]
 
     if data_flat.shape[0] != labels_1d.shape[0]:
         raise ValueError(
