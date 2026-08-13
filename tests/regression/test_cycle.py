@@ -16,19 +16,13 @@ Only the shortest return paths are evaluated. This keeps the benchmark focused
 on the most direct transformation routes while still covering every shortest
 path possibility.
 
-Transformation outputs are written to pytest's temporary directory. The
-benchmark summary is saved separately under ``tests/regression/output`` so
-that results can be inspected after the test run.
+Transformation outputs are temporary and are removed after the test.
 
 Metrics recorded for each transformation cycle include:
 
 - Pearson correlation between original and round-tripped metric.
 - Maximum absolute difference between original and round-tripped values.
 - Number of transformations in the cycle.
-
-This test is intended primarily as a benchmark rather than a strict regression
-test. Results are recorded for comparison across changes to transformation
-infrastructure.
 
 Run with::
 
@@ -40,6 +34,7 @@ from __future__ import annotations
 import logging
 from itertools import pairwise
 from pathlib import Path
+from typing import Literal
 
 import nibabel as nib
 import numpy as np
@@ -47,7 +42,7 @@ import pandas as pd
 import pytest
 
 from neuromaps_prime.graph import NeuromapsGraph
-from tests.cycle import find_return_paths, roundtrip_metric, score_roundtrip
+from tests.cycle import find_return_paths, score_roundtrip
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +52,7 @@ logger = logging.getLogger(__name__)
 # -------------------------------------------------------------------------
 
 ORIGIN = "Yerkes19"
-HEMISPHERE = "left"
+HEMISPHERE: Literal["left", "right"] = "left"
 
 
 # -------------------------------------------------------------------------
@@ -79,7 +74,6 @@ def output_dir() -> Path:
         parents=True,
         exist_ok=True,
     )
-
     return directory
 
 
@@ -102,12 +96,10 @@ def _make_surface_metric(
 
     if vertices.ndim != 2 or vertices.shape[1] != 3:
         raise ValueError(
-            f"Expected surface vertices with shape (n_vertices, 3), "
+            "Expected surface vertices with shape (n_vertices, 3), "
             f"got {vertices.shape}."
         )
 
-    # A smooth deterministic metric based only on the standard surface
-    # geometry. This avoids dependence on any external annotation.
     metric = vertices.sum(axis=1)
 
     metric_image = nib.gifti.GiftiImage(
@@ -151,29 +143,24 @@ def _valid_cycle_paths(
     graph: NeuromapsGraph,
     paths: list[tuple[str, ...]],
     density: str,
-    hemisphere: str,
+    hemisphere: Literal["left", "right"],
 ) -> list[tuple[str, ...]]:
-    """Return cycles whose required surface resources are available."""
+    """Return cycles whose required surface transforms are available."""
     valid_paths: list[tuple[str, ...]] = []
 
     for path in paths:
         valid = True
 
         for source, target in pairwise(path):
-            try:
-                graph._cache.require_surface_atlas(
-                    source,
-                    density,
-                    hemisphere,
-                    "sphere",
-                )
-                graph._cache.require_surface_atlas(
-                    target,
-                    density,
-                    hemisphere,
-                    "sphere",
-                )
-            except ValueError:
+            transform = graph.fetch_surface_to_surface_transform(
+                source=source,
+                target=target,
+                density=density,
+                hemisphere=hemisphere,
+                resource_type="sphere",
+            )
+
+            if transform is None:
                 valid = False
                 break
 
@@ -181,6 +168,60 @@ def _valid_cycle_paths(
             valid_paths.append(path)
 
     return valid_paths
+
+
+def _transform_cycle(
+    graph: NeuromapsGraph,
+    metric_file: Path,
+    path: tuple[str, ...],
+    hemisphere: Literal["left", "right"],
+    density: str,
+    workdir: Path,
+) -> Path:
+    """Transform a metric through every hop in a cycle."""
+    workdir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    current_metric = metric_file
+
+    for hop, (source, target) in enumerate(pairwise(path)):
+        output_name = (
+            f"hop{hop:02d}_{source}-to-{target}.func.gii"
+        )
+
+        result = graph.surface_to_surface_transformer(
+            transformer_type="metric",
+            input_file=current_metric,
+            source_space=source,
+            target_space=target,
+            hemisphere=hemisphere,
+            # Pass only the filename so the Dockerized Workbench runner
+            # writes into its mounted output directory.
+            output_file_path=output_name,
+            source_density=density,
+            target_density=density,
+        )
+
+        if result is None:
+            raise RuntimeError(
+                f"No surface transform for hop '{source}' -> '{target}' "
+                f"on path {' -> '.join(path)}"
+            )
+
+        # The transformer returns the actual output path. Do not reconstruct
+        # the path from `workdir`, because the Docker runner may use a
+        # temporary mounted output directory internally.
+        current_metric = Path(result)
+
+        if not current_metric.exists():
+            raise FileNotFoundError(
+                "Surface transformation did not produce an output file: "
+                f"{current_metric}"
+            )
+
+    return current_metric
 
 
 # -------------------------------------------------------------------------
@@ -202,14 +243,19 @@ def test_surface_transform_cycles(
     # Create a deterministic metric from the standard midthickness surface.
     # ------------------------------------------------------------------
 
-    surface = graph._cache.require_surface_atlas(
-        ORIGIN,
-        density,
-        HEMISPHERE,
-        "midthickness",
+    surface = graph.fetch_surface_atlas(
+        space=ORIGIN,
+        density=density,
+        hemisphere=HEMISPHERE,
+        resource_type="midthickness",
     )
 
-    surface_file = Path(surface)
+    assert surface is not None, (
+        f"Missing midthickness surface for {ORIGIN} "
+        f"at {density} ({HEMISPHERE})."
+    )
+
+    surface_file = Path(surface.fetch())
 
     assert surface_file.exists(), (
         f"Missing midthickness surface: {surface_file}"
@@ -220,8 +266,12 @@ def test_surface_transform_cycles(
         tmp_path / f"{ORIGIN}_{density}_{HEMISPHERE}_metric.func.gii",
     )
 
-    assert metric_file.exists()
-    assert metric_file.stat().st_size > 0
+    assert metric_file.exists(), (
+        f"Failed to create metric: {metric_file}"
+    )
+    assert metric_file.stat().st_size > 0, (
+        f"Created metric is empty: {metric_file}"
+    )
 
     # ------------------------------------------------------------------
     # Find all return paths and retain every shortest possibility.
@@ -274,24 +324,26 @@ def test_surface_transform_cycles(
     # ------------------------------------------------------------------
     # Run each shortest cycle.
     #
-    # Intermediate transformation files stay in tmp_path, just like the
-    # unit tests. Nothing from the transformation itself is written into
-    # the persistent regression output directory.
+    # All transformation outputs are kept under pytest's temporary
+    # directory. They are automatically removed when the test completes.
     # ------------------------------------------------------------------
-
-    workdir = tmp_path / "cycle_outputs"
-    workdir.mkdir()
 
     results: list[dict[str, object]] = []
 
-    for path in valid_paths:
-        roundtrip = roundtrip_metric(
+    for cycle_number, path in enumerate(valid_paths):
+        workdir = tmp_path / f"cycle_{cycle_number:02d}"
+        workdir.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        roundtrip = _transform_cycle(
             graph,
             metric_file,
             path,
             HEMISPHERE,
+            density,
             workdir,
-            density=density,
         )
 
         pearson_r, max_abs_diff = score_roundtrip(
@@ -350,7 +402,7 @@ def test_surface_transform_cycles(
     # ------------------------------------------------------------------
     # Basic sanity checks.
     #
-    # This is a benchmark, not a hard threshold regression test. We still
+    # This is a benchmark, not a hard-threshold regression test. We still
     # require finite comparison metrics so that an invalid transformation
     # cannot silently produce a meaningless benchmark.
     # ------------------------------------------------------------------
