@@ -87,6 +87,30 @@ def output_dir() -> Path:
 # Helpers
 # -------------------------------------------------------------------------
 
+def _find_executable_density(
+    graph: NeuromapsGraph,
+    source: str,
+    target: str,
+    hemisphere: Literal["left", "right"],
+) -> str | None:
+    """Find a density at which a surface transform can be executed."""
+    try:
+        density = graph.find_common_density(source, target)
+    except ValueError:
+        return None
+
+    transform = graph.fetch_surface_to_surface_transform(
+        source=source,
+        target=target,
+        density=density,
+        hemisphere=hemisphere,
+        resource_type="sphere",
+    )
+
+    if transform is None:
+        return None
+
+    return density
 
 def _make_surface_metric(
     surface_file: Path,
@@ -148,29 +172,22 @@ def _shortest_paths(
 def _valid_cycle_paths(
     graph: NeuromapsGraph,
     paths: list[tuple[str, ...]],
-    density: str,
     hemisphere: Literal["left", "right"],
 ) -> list[tuple[str, ...]]:
-    """Return cycles whose required surface transforms are available."""
-    valid_paths: list[tuple[str, ...]] = []
+    """Return cycles for which every hop has a common executable density."""
+    valid_paths = []
 
     for path in paths:
-        valid = True
-
-        for source, target in pairwise(path):
-            transform = graph.fetch_surface_to_surface_transform(
-                source=source,
-                target=target,
-                density=density,
-                hemisphere=hemisphere,
-                resource_type="sphere",
+        if all(
+            _find_executable_density(
+                graph,
+                source,
+                target,
+                hemisphere,
             )
-
-            if transform is None:
-                valid = False
-                break
-
-        if valid:
+            is not None
+            for source, target in pairwise(path)
+        ):
             valid_paths.append(path)
 
     return valid_paths
@@ -181,18 +198,14 @@ def _transform_cycle(
     metric_file: Path,
     path: tuple[str, ...],
     hemisphere: Literal["left", "right"],
-    density: str,
     workdir: Path,
 ) -> Path:
     """Transform a metric through every hop in a cycle."""
-    workdir.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
     current_metric = metric_file
 
     for hop, (source, target) in enumerate(pairwise(path)):
+        density = graph.find_common_density(source, target)
+
         output_name = (
             f"hop{hop:02d}_{source}-to-{target}.func.gii"
         )
@@ -203,10 +216,8 @@ def _transform_cycle(
             source_space=source,
             target_space=target,
             hemisphere=hemisphere,
-            # Pass only the filename so the Dockerized Workbench runner
-            # writes into its mounted output directory.
             output_file_path=output_name,
-            source_density=density,
+            source_density=None,
             target_density=density,
         )
 
@@ -216,9 +227,6 @@ def _transform_cycle(
                 f"on path {' -> '.join(path)}"
             )
 
-        # The transformer returns the actual output path. Do not reconstruct
-        # the path from `workdir`, because the Docker runner may use a
-        # temporary mounted output directory internally.
         current_metric = Path(result)
 
         if not current_metric.exists():
@@ -298,7 +306,6 @@ def test_surface_transform_cycles(
     valid_paths = _valid_cycle_paths(
         graph,
         shortest_paths,
-        density,
         HEMISPHERE,
     )
 
@@ -346,9 +353,8 @@ def test_surface_transform_cycles(
         roundtrip = _transform_cycle(
             graph,
             metric_file,
-            path,
+            shortest_paths,
             HEMISPHERE,
-            density,
             workdir,
         )
 
