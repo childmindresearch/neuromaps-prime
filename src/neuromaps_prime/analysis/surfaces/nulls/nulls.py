@@ -52,7 +52,7 @@ def _resolve_data(
 
     if isinstance(data, tuple):
         return np.hstack([_load_one(d) for d in data])
-    return _load_one(data)  # ty: ignore[invalid-argument-type] - not tuple
+    return _load_one(data)  # type: ignore[arg-type] # Not a tuple
 
 
 def _generate_spins(
