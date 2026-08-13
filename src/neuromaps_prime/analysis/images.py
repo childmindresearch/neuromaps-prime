@@ -6,11 +6,20 @@ that label indices are consecutive, with background regions
 zeroed out.
 """
 
-from collections.abc import Iterable
+from __future__ import annotations
+
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import nibabel as nib
 import numpy as np
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from numpy.typing import ArrayLike, DTypeLike
+
+__all__ = ["PARC_IGNORE", "load_data", "load_gifti", "relabel_gifti"]
 
 # Default parcellation labels to ignore (unknown regions, medial wall, etc.)
 PARC_IGNORE = frozenset(
@@ -25,6 +34,54 @@ PARC_IGNORE = frozenset(
         "medial_wall",
     }
 )
+
+NiftiImage = nib.Nifti1Image | nib.Nifti2Image
+
+
+def load_data(
+    data: ArrayLike | str | Path, dtype: DTypeLike | None = None
+) -> np.ndarray:
+    """Load a brain map into a NumPy array.
+
+    Accepts an in-memory array, a path to a GIFTI or NIfTI file, or an
+    already-loaded nibabel image. GIFTI images are extracted via
+    ``agg_data()``; NIfTI images via ``get_fdata()``.
+
+    Args:
+        data: A NumPy array, array-like, file path (``.gii``, ``.nii``,
+            ``.nii.gz``, etc.), or a ``nibabel.GiftiImage`` /
+            ``nibabel.Nifti1Image`` / ``nibabel.Nifti2Image``.
+        dtype: Optional target data type for loaded arrays (e.g., ``np.float32``).
+
+    Returns:
+        A NumPy array containing the image data.
+
+    Raises:
+        ValueError: If *data* is a nibabel image of an unsupported type.
+
+    Note:
+        For label images loaded from NIfTI files, floating-point
+        imprecision in ``get_fdata()`` may require rounding before
+        casting to integers. Callers should apply ``np.rint()`` as
+        needed.
+    """
+    # Nibabel to handle FileNotFoundError
+    if isinstance(data, str | Path):
+        img = nib.load(str(data))
+    # Data (assumed) to be an array
+    elif not isinstance(data, nib.GiftiImage | NiftiImage):
+        return np.asarray(data, dtype=dtype)
+
+    if isinstance(img, nib.GiftiImage):
+        arr = img.agg_data()
+    elif isinstance(img, NiftiImage):
+        arr = img.get_fdata(dtype=dtype) if dtype is not None else img.get_fdata()
+    else:
+        raise ValueError(f"Unsupported nibabel image: {type(img)}")
+
+    if dtype is not None and arr.dtype != dtype:
+        return arr.astype(dtype, copy=False)
+    return arr
 
 
 def load_gifti(surface: str | Path) -> nib.GiftiImage:

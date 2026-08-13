@@ -4,22 +4,26 @@ from __future__ import annotations
 
 import warnings
 from collections.abc import Callable
-from pathlib import Path
-from typing import Literal, NamedTuple
+from typing import TYPE_CHECKING, Literal, NamedTuple
 
-import nibabel as nib
 import numpy as np
-from numpy.typing import ArrayLike
 
-__all__ = ["ParcellatedData", "parcellate"]
+from neuromaps_prime.analysis.images import load_data
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from numpy.typing import ArrayLike
+
+__all__ = ["ParcelSummary", "parcel_reduce"]
 
 
-Method = Literal["mean", "median", "sum", "std", "min", "max"] | Callable[
-    [np.ndarray], float
-]
+ReduceMethod = (
+    Literal["mean", "median", "sum", "std", "min", "max"] | Callable[..., float]
+)
 
 
-class ParcellatedData(NamedTuple):
+class ParcelSummary(NamedTuple):
     """Region-wise summary of a continuous brain map.
 
     Attributes:
@@ -42,53 +46,27 @@ _REDUCERS: dict[str, Callable] = {
 }
 
 
-def _load(obj: ArrayLike | str | Path, *, what: str) -> np.ndarray:
-    """Load a surface or volume input into a flat array.
-
-    Accepts an in-memory array, a path to a GIFTI or NIfTI file, or an
-    already-loaded nibabel image.
-    """
-    if isinstance(obj, (str, Path)):
-        path = Path(obj)
-        if not path.exists():
-            raise FileNotFoundError(f"{what} file does not exist: {path}")
-        img = nib.load(str(path))
-    elif isinstance(obj, (nib.GiftiImage, nib.Nifti1Image, nib.Nifti2Image)):
-        img = obj
-    else:
-        return np.asarray(obj)
-
-    if isinstance(img, nib.GiftiImage):
-        return np.asarray(img.agg_data())
-    return np.asarray(img.get_fdata())
-
-
-def _flatten(arr: np.ndarray, *, what: str) -> np.ndarray:
+def _collapse(arr: np.ndarray) -> np.ndarray:
     """Collapse spatial dimensions, preserving a trailing feature axis.
 
     Surface data are ``(n_vertices,)`` or ``(n_vertices, n_features)``.
     Volumetric data are ``(i, j, k)`` or ``(i, j, k, n_features)``.
     """
-    if arr.ndim == 1:
-        return arr[:, None]
-    if arr.ndim == 2:
-        return arr
-    if arr.ndim == 3:
-        return arr.reshape(-1, 1)
-    if arr.ndim == 4:
-        return arr.reshape(-1, arr.shape[-1])
-    raise ValueError(f"Unsupported {what} with {arr.ndim} dimensions.")
+    if arr.ndim not in (1, 2, 3, 4):
+        raise ValueError(f"Unsupported array with {arr.ndim} dimensions.")
+    out = arr.reshape(-1, *arr.shape[2:])
+    return out[:, None] if out.ndim == 1 else out
 
 
-def parcellate(
+def parcel_reduce(
     data: ArrayLike | str | Path,
     parcellation: ArrayLike | str | Path,
     *,
-    method: Method = "mean",
+    method: ReduceMethod = "mean",
     background: float | int | None = 0,
     min_valid: int = 1,
-) -> ParcellatedData:
-    """Summarise a continuous brain map within each region of a parcellation.
+) -> ParcelSummary:
+    """Summarises a continuous brain map within each region of a parcellation.
 
     Works for surface and volumetric data alike: the parcellation simply has to
     have the same spatial shape as the map. No resampling is performed, so
@@ -134,20 +112,20 @@ def parcellate(
     elif callable(method):
         reducer = method
     else:
-        raise ValueError("method must be a string or a callable.")
+        raise ValueError("'method' must be a string or a callable.")
 
-    data_arr = _load(data, what="data")
-    labels_arr = _load(parcellation, what="parcellation")
+    data_arr = load_data(data, dtype=np.float64)
+    labels_arr = load_data(parcellation, np.int64)
 
-    data_flat = _flatten(np.asarray(data_arr, dtype=float), what="data")
-    labels_flat = _flatten(np.asarray(labels_arr), what="parcellation")
+    data_flat = _collapse(data_arr)
+    labels_flat = _collapse(labels_arr)
 
     if labels_flat.shape[1] != 1:
         raise ValueError(
             "Parcellation must be a single volume or surface, got "
             f"{labels_flat.shape[1]} features."
         )
-    labels_1d = labels_flat[:, 0]
+    labels_1d = np.rint(labels_flat[:, 0])
 
     if data_flat.shape[0] != labels_1d.shape[0]:
         raise ValueError(
@@ -156,8 +134,7 @@ def parcellate(
             "into the parcellation's space and density first."
         )
 
-    labels_int = np.rint(labels_1d).astype(np.int64)
-    unique = np.unique(labels_int)
+    unique = np.unique(labels_1d)
     if background is not None:
         unique = unique[unique != int(background)]
     unique = unique[~np.isnan(unique.astype(float))]
@@ -167,8 +144,8 @@ def parcellate(
 
     # Group elements by label with a single sort rather than rescanning the
     # whole array once per region, which matters for volumetric data.
-    order = np.argsort(labels_int, kind="stable")
-    sorted_labels = labels_int[order]
+    order = np.argsort(labels_1d, kind="stable")
+    sorted_labels = labels_1d[order]
     sorted_data = data_flat[order]
     starts = np.searchsorted(sorted_labels, unique, side="left")
     stops = np.searchsorted(sorted_labels, unique, side="right")
@@ -177,7 +154,7 @@ def parcellate(
         # Regions that are entirely NaN yield NaN by design; numpy's
         # "Mean of empty slice" warning would be noise here.
         warnings.simplefilter("ignore", RuntimeWarning)
-        for i, (start, stop) in enumerate(zip(starts, stops)):
+        for i, (start, stop) in enumerate(zip(starts, stops, strict=True)):
             if stop <= start:
                 continue
             block = sorted_data[start:stop]
@@ -188,4 +165,4 @@ def parcellate(
     if n_features == 1:
         values = values[:, 0]
 
-    return ParcellatedData(labels=unique, values=values)
+    return ParcelSummary(labels=unique, values=values)
