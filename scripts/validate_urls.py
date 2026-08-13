@@ -1,4 +1,4 @@
-"""Validate URLs from YAML files using HEAD requests (no download).
+r"""Validate URLs from YAML files using HEAD requests (no download).
 
 Usage::
     uv run scripts/validate_urls.py \\
@@ -13,30 +13,39 @@ Or standalone:
 # /// script
 # requires-python = ">=3.12"
 # dependencies = [
-#     "pyyaml>=6.0.2"
+#     "aiohttp>=3.14.1",
+#     "pyyaml>=6.0.2",
 # ]
 # ///
 
 from __future__ import annotations
 
 import argparse
-import concurrent.futures
+import asyncio
+import datetime
+import email.utils
 import logging
+import random
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
 
+import aiohttp
 import yaml
 
 _HEADERS: dict[str, str] = {
     "User-Agent": "url-validator/1.0",
     "Connection": "close",
 }
-_TIMEOUT: int = 90
-_GET_RANGE_TRIGGER: frozenset[int] = frozenset({403, 405})
+_TIMEOUT = 90
+_MAX_RETRIES = 5
+_BACKOFF_BASE = 10.0
+_BACKOFF_MAX = 600.0
+_GET_RANGE_TRIGGER = frozenset({403, 405})
+_GET_RANGE_TRIGGER_DETAILS: frozenset[str] = frozenset(
+    f"HTTP {code}" for code in _GET_RANGE_TRIGGER
+)
 
 log = logging.getLogger("url-validator")
 
@@ -49,11 +58,13 @@ class CheckResult:
         url: The URL that was checked.
         ok: True if the server responded with a non-error status.
         detail: Human-readable status string (e.g. ``"200"`` or ``"HTTP 404"``).
+        sources: YAML files the URL was found in.
     """
 
     url: str
     ok: bool
     detail: str
+    sources: list[Path] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -88,76 +99,194 @@ class UrlIndex:
         return self._data[url]
 
     def __len__(self) -> int:
+        """Return count of URLs."""
         return len(self._data)
 
 
-def _make_request(url: str, method: str, range_header: bool = False) -> Request:
-    """Build an :class:`urllib.request.Request` with shared headers.
+def _parse_retry_after(value: str | None) -> float | None:
+    """Parse a ``Retry-After`` header value into seconds.
+
+    Supports both delay-in-seconds and HTTP-date formats. Returns ``None``
+    when the value is missing or unparseable.
 
     Args:
-        url: Target URL.
-        method: HTTP method (``"HEAD"`` or ``"GET"``).
+        value: Raw ``Retry-After`` header value.
+
+    Returns:
+        Seconds to wait, or ``None``.
+    """
+    if not value:
+        return None
+    value = value.strip()
+    if value.isdigit():
+        return float(value)
+    try:
+        dt = email.utils.parsedate_to_datetime(value)
+        return max(
+            0.0,
+            (dt - datetime.datetime.now(datetime.UTC)).total_seconds(),
+        )
+    except Exception:
+        return None
+
+
+def _make_headers(*, range_header: bool = False) -> dict[str, str]:
+    """Build request headers with shared defaults.
+
+    Args:
         range_header: If True, add ``Range: bytes=0-0`` to avoid body download.
 
     Returns:
-        A configured :class:`~urllib.request.Request` instance.
+        Header dictionary suitable for :mod:`aiohttp`.
     """
-    req = Request(url, method=method, headers=_HEADERS)
+    headers = dict(_HEADERS)
     if range_header:
-        req.add_header("Range", "bytes=0-0")
-    return req
+        headers["Range"] = "bytes=0-0"
+    return headers
 
 
-def _get_range(url: str) -> CheckResult:
-    """Fallback probe: GET with ``Range: bytes=0-0`` to avoid body download.
-
-    Used when the server rejects HEAD (403/405). Fetches at most one byte.
+async def _probe(
+    session: aiohttp.ClientSession,
+    *,
+    url: str,
+    method: str,
+    sources: list[Path],
+    range_header: bool = False,
+    fallback: bool = False,
+) -> CheckResult:
+    """Send one async request, backing off on HTTP 429 rate limits.
 
     Args:
+        session: Shared :class:`aiohttp.ClientSession`.
         url: Target URL.
+        method: HTTP method (``"HEAD"`` or ``"GET"``).
+        sources: YAML files the URL came from.
+        range_header: If True, request only the first byte.
+        fallback: If True, annotate a successful status as a GET fallback.
 
     Returns:
         :class:`CheckResult` with ``ok=True`` on any non-error response.
     """
-    try:
-        with urlopen(
-            _make_request(url, "GET", range_header=True), timeout=_TIMEOUT
-        ) as r:
-            return CheckResult(url, True, f"{r.status} (GET fallback)")
-    except Exception as exc:
-        return CheckResult(url, False, str(exc))
+    headers = _make_headers(range_header=range_header)
+
+    for attempt in range(1, _MAX_RETRIES + 1):
+        try:
+            async with session.request(
+                method=method,
+                url=url,
+                headers=headers,
+                timeout=aiohttp.ClientTimeout(total=_TIMEOUT),
+                allow_redirects=True,
+            ) as response:
+                if response.status == 429:
+                    retry_after = _parse_retry_after(
+                        response.headers.get("Retry-After")
+                    )
+                    if retry_after is not None:
+                        delay = retry_after
+                    else:
+                        delay = min(_BACKOFF_BASE**attempt, _BACKOFF_MAX)
+                    # Apply ±50 % jitter
+                    delay *= random.uniform(0.5, 1.5)  # noqa: S311
+                    log.warning(
+                        "Rate limited on %s, backing off %.1fs (%d/%d)",
+                        url,
+                        delay,
+                        attempt,
+                        _MAX_RETRIES,
+                    )
+                    if attempt < _MAX_RETRIES:
+                        await asyncio.sleep(delay)
+                        continue
+                    return CheckResult(
+                        url,
+                        ok=False,
+                        detail=f"HTTP 429 after {_MAX_RETRIES} attempts",
+                        sources=sources,
+                    )
+
+                if response.status < 400:
+                    detail = f"{response.status}"
+                    if fallback:
+                        detail = f"{detail} (GET fallback)"
+                    return CheckResult(
+                        url,
+                        ok=True,
+                        detail=detail,
+                        sources=sources,
+                    )
+
+                return CheckResult(
+                    url,
+                    ok=False,
+                    detail=f"HTTP {response.status}",
+                    sources=sources,
+                )
+
+        except TimeoutError:
+            return CheckResult(url, ok=False, detail="timeout", sources=sources)
+        except aiohttp.ClientError as exc:
+            return CheckResult(url, ok=False, detail=str(exc), sources=sources)
+        except Exception as exc:
+            return CheckResult(url, ok=False, detail=str(exc), sources=sources)
+
+    return CheckResult(url, ok=False, detail="HTTP 429", sources=sources)
 
 
-def check_url(url: str) -> CheckResult:
-    """Probe *url* without downloading its body.
+async def _get_range(
+    session: aiohttp.ClientSession,
+    url: str,
+    sources: list[Path],
+) -> CheckResult:
+    """Fallback probe: GET with ``Range: bytes=0-0`` to avoid body download.
+
+    Fetches at most one byte. Retries on HTTP 429 like the primary probe.
+
+    Args:
+        session: Shared :class:`aiohttp.ClientSession`.
+        url: Target URL.
+        sources: YAML files the URL came from.
+
+    Returns:
+        :class:`CheckResult` with ``ok=True`` on any non-error response.
+    """
+    return await _probe(
+        session,
+        url=url,
+        method="GET",
+        sources=sources,
+        range_header=True,
+        fallback=True,
+    )
+
+
+async def check_url(
+    session: aiohttp.ClientSession,
+    url: str,
+    sources: list[Path],
+) -> CheckResult:
+    """Probe *url* asynchronously without downloading its body.
 
     Strategy:
-        1. Send a HEAD request.
+        1. Send a HEAD request, retrying on HTTP 429 with backoff.
         2. On 403/405 (server rejects HEAD), fall back to :func:`_get_range`.
         3. Map any other HTTP/network error to a failed :class:`CheckResult`.
 
     Args:
+        session: Shared :class:`aiohttp.ClientSession`.
         url: The URL to validate.
+        sources: YAML files the URL came from.
 
     Returns:
         :class:`CheckResult` describing whether the URL is reachable.
     """
-    try:
-        with urlopen(_make_request(url, "HEAD"), timeout=_TIMEOUT) as r:
-            if r.status < 400:
-                return CheckResult(url, True, str(r.status))
-            return _get_range(url)
-    except HTTPError as exc:
-        if exc.code in _GET_RANGE_TRIGGER:
-            return _get_range(url)
-        return CheckResult(url, False, f"HTTP {exc.code}")
-    except URLError as exc:
-        return CheckResult(url, False, str(exc.reason))
-    except Exception as exc:
-        return CheckResult(url, False, str(exc))
+    result = await _probe(session, url=url, method="HEAD", sources=sources)
+    if not result.ok and result.detail in _GET_RANGE_TRIGGER_DETAILS:
+        return await _get_range(session, url, sources)
+    return result
 
 
-def _extract_urls(node: Any, out: list[str]) -> None:
+def _extract_urls(node: Any, out: list[str]) -> None:  # noqa: ANN401
     """Recursively extract HTTP/HTTPS strings from an arbitrary YAML node.
 
     Uses DFS with a caller-supplied *out* buffer to avoid per-call allocations.
@@ -224,49 +353,96 @@ def discover_yamls(roots: list[str]) -> list[Path]:
     return [*base.rglob("*.yaml"), *base.rglob("*.yml")]
 
 
-def run(index: UrlIndex, workers: int, fail_fast: bool) -> list[CheckResult]:
+async def _bounded_check(
+    session: aiohttp.ClientSession,
+    semaphore: asyncio.Semaphore,
+    url: str,
+    sources: list[Path],
+) -> CheckResult:
+    """Probe *url* while respecting the concurrency semaphore."""
+    async with semaphore:
+        return await check_url(session, url, sources)
+
+
+async def _cancel_pending(pending: set[asyncio.Task[CheckResult]]) -> None:
+    """Cancel any tasks still in flight and await their cleanup."""
+    for task in pending:
+        task.cancel()
+    if pending:
+        await asyncio.gather(*pending, return_exceptions=True)
+
+
+def _format_sources(sources: list[Path]) -> str:
+    """Return a comma-separated string of source paths, or 'unknown'."""
+    return ", ".join(str(p) for p in sources) if sources else "unknown"
+
+
+async def _report_result(
+    result: CheckResult,
+    failed: list[CheckResult],
+) -> None:
+    """Log a single result and append to *failed* if it did not succeed."""
+    srcs = _format_sources(result.sources)
+    if result.ok:
+        log.info("OK    %s  %s  (%s)", result.detail.rjust(20), result.url, srcs)
+    else:
+        log.error("FAIL  %s  %s  (%s)", result.detail.rjust(20), result.url, srcs)
+        failed.append(result)
+
+
+async def run(
+    index: UrlIndex,
+    *,
+    workers: int,
+    fail_fast: bool,
+) -> list[CheckResult]:
     """Probe all URLs in *index* concurrently and return failed results.
 
-    Each result is logged at INFO (ok) or ERROR (fail) as it arrives.
-    On ``KeyboardInterrupt`` in-flight futures are cancelled and the process
-    exits with code 130.
+    Uses ``asyncio`` with a bounded semaphore for concurrency. HTTP 429
+    responses are retried with exponential backoff (honouring ``Retry-After``
+    when provided). Pending work is cancelled on ``fail_fast`` or
+    ``KeyboardInterrupt``.
 
     Args:
         index: URL index produced by :func:`build_index`.
-        workers: Maximum number of threads in the pool.
+        workers: Maximum number of in-flight requests.
         fail_fast: If True, stop after the first failure.
 
     Returns:
         List of :class:`CheckResult` where ``ok`` is False.
     """
     failed: list[CheckResult] = []
+    semaphore = asyncio.Semaphore(workers)
+    connector = aiohttp.TCPConnector(limit=workers)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(check_url, url): url for url in index.urls()}
+    async with aiohttp.ClientSession(connector=connector, headers=_HEADERS) as session:
+        pending: set[asyncio.Task[CheckResult]] = {
+            asyncio.create_task(
+                _bounded_check(session, semaphore, url, index.sources(url)),
+                name=url,
+            )
+            for url in index.urls()
+        }
+
         try:
-            for future in concurrent.futures.as_completed(futures):
-                result = future.result()
-                srcs = ", ".join(str(p) for p in index.sources(result.url))
-                if result.ok:
-                    log.info(
-                        "OK    %s  %s  (%s)", result.detail.rjust(20), result.url, srcs
-                    )
-                else:
-                    log.error(
-                        "FAIL  %s  %s  (%s)", result.detail.rjust(20), result.url, srcs
-                    )
-                    failed.append(result)
-                    if fail_fast:
-                        pool.shutdown(wait=False, cancel_futures=True)
-                        break
+            while pending:
+                done, pending = await asyncio.wait(
+                    pending,
+                    return_when=asyncio.FIRST_COMPLETED,
+                )
+                for task in done:
+                    await _report_result(task.result(), failed)
+                    if fail_fast and failed:
+                        await _cancel_pending(pending)
+                        return failed
         except KeyboardInterrupt:
-            pool.shutdown(wait=False, cancel_futures=True)
+            await _cancel_pending(pending)
             sys.exit(130)
 
     return failed
 
 
-def _configure_logging(verbose: bool) -> None:
+def _configure_logging(*, verbose: bool) -> None:
     """Set up root logger with a compact format suitable for CI output.
 
     Args:
@@ -299,7 +475,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    _configure_logging(args.verbose)
+    _configure_logging(verbose=args.verbose)
 
     yaml_files = discover_yamls(args.files)
     index = build_index(yaml_files)
@@ -310,7 +486,7 @@ def main() -> None:
 
     log.info("Checking %d unique URLs with %d workers...\n", len(index), args.workers)
 
-    failed = run(index, workers=args.workers, fail_fast=args.fail_fast)
+    failed = asyncio.run(run(index, workers=args.workers, fail_fast=args.fail_fast))
 
     log.info("=" * 60)
     log.info("Results: %d/%d OK", len(index) - len(failed), len(index))
@@ -318,7 +494,7 @@ def main() -> None:
     if failed:
         log.error("Failed URLs:")
         for r in failed:
-            srcs = ", ".join(str(p) for p in index.sources(r.url))
+            srcs = _format_sources(r.sources)
             log.error("  %s\n    reason : %s\n    sources: %s", r.url, r.detail, srcs)
         sys.exit(1)
 

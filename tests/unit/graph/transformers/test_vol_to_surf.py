@@ -8,6 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from neuromaps_prime.graph.models import TransformResult
+
 if TYPE_CHECKING:
     from collections.abc import Callable
     from typing import Literal
@@ -110,7 +112,7 @@ class TestVolumeToSurfaceTransformer:
             ) as mock_surface_project,
         ):
             mock_transformer.volume_ops.surface_ops.transform_surface.return_value = (
-                expected_output
+                TransformResult(output_path=expected_output)
             )
             result = mock_transformer.volume_to_surface_transformer(
                 **basic_params._asdict()
@@ -145,7 +147,7 @@ class TestVolumeToSurfaceTransformer:
             self.make_atlas_side_effect(tmp_path)
         )
         mock_transformer.volume_ops.surface_ops.transform_surface.return_value = (
-            projected_file
+            TransformResult(output_path=projected_file)
         )
         with (
             patch(

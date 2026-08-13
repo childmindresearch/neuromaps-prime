@@ -1,6 +1,10 @@
 Yerkes19:
   species: macaque
   description: Yerkes19 Macaque Atlas
+  references:
+    - citation: Van Essen, et al. 2012. Cerebral Cortex. 22.
+      doi: 10.1093/cercor/bhr290
+      url: https://pubmed.ncbi.nlm.nih.gov/22052704/
   surfaces:
     10k:
       sphere:

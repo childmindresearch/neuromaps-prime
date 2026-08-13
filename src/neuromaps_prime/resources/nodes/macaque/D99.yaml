@@ -1,6 +1,13 @@
 D99:
   species: macaque
   description: D99 Macaque Atlas
+  references:
+  - citation: Saleem KS, et al. 2021. Neuroimage. 245:118759.
+    doi: 10.1016/j.neuroimage.2021.118759
+    url: https://pubmed.ncbi.nlm.nih.gov/34838750/
+  - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+    doi: 10.5281/zenodo.15642801
+    url: https://zenodo.org/records/15642801
   surfaces:
     41k:
       midthickness:
@@ -15,6 +22,34 @@ D99:
       white:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303cc9143f354902958?view_only=b214f40525fe44b5bea3103478d08d0d
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523022882bdb2bc3ebdee?view_only=b214f40525fe44b5bea3103478d08d0d
+    168k:
+      midthickness:
+        left: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/lh.D99.mid.surf.gii
+        right: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/rh.D99.mid.surf.gii
+      pial:
+        left: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/lh.D99.pial.surf.gii
+        right: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/rh.D99.pial.surf.gii
+      sphere:
+        left: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/lh.D99.sphere.surf.gii
+        right: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/rh.D99.sphere.surf.gii
+      white:
+        left: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/lh.D99.wm.surf.gii
+        right: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/rh.D99.wm.surf.gii
+
   volumes:
     250um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52302a52f9bb3897129cf?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        PC:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f510c80941e7c8fa7abf3?view_only=b214f40525fe44b5bea3103478d08d0d
+          notes:
+            - 'lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f510b7da771710ca7aa44?view_only=b214f40525fe44b5bea3103478d08d0d'
+            - 'cortical-only lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f510acd87cca2536799ee?view_only=b214f40525fe44b5bea3103478d08d0d'
+        PC_hemi_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f510c45728813016799d7?view_only=b214f40525fe44b5bea3103478d08d0d
+          notes:
+            - Right-hemisphere-only subset of the D99 v2.0 atlas.
+        TPL:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f511f406d0c8a912c3017?view_only=b214f40525fe44b5bea3103478d08d0d
+          notes:
+            - Ex vivo MTR (magnetization transfer ratio) reference volume. Scanned at 7T with 200um isotropic resolution. Standard reference space for the D99 v2.0 atlas.
