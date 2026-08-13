@@ -7,6 +7,9 @@ Juna:
     url: https://elifesciences.org/articles/60136
   surfaces:
     164k:
+      sphere:
+        left:
+        right:
       annotation:
         PC_Davi130:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c87b43fc0070f3cb89b84?view_only=b214f40525fe44b5bea3103478d08d0d
@@ -21,4 +24,12 @@ Juna:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c87b46452edca6fb89aa1?view_only=b214f40525fe44b5bea3103478d08d0d
           notes:
           - Tissue probability map
+    1000um:
+      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7de9b686407810d60022f5?view_only=b214f40525fe44b5bea3103478d08d0d
+      annotation:
+        TPM:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7de90172dab69cd9a5919f?view_only=b214f40525fe44b5bea3103478d08d0d
+          notes:
+          - Tissue probability map
+
       
