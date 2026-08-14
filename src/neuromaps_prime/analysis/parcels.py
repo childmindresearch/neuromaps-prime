@@ -205,6 +205,7 @@ def _reduce_ndimage(
     unique: np.ndarray,
     method: str,
     min_valid: int,
+    *,
     drop_nonfinite: bool,
 ) -> None:
     """Fill ``values`` in place using a :mod:`scipy.ndimage` reducer.
