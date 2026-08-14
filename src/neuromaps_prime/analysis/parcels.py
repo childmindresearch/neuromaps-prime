@@ -223,7 +223,7 @@ def _reduce_ndimage(
         else:
             eff_labels = labels_1d
         counts = ndimage.sum_labels(finite.astype(float), labels_1d, index=unique)
-        summarised = np.asarray(reducer(col, eff_labels, unique), dtype=float)
+        summarised = reducer(col, eff_labels, unique)
         values[:, f] = np.where(counts >= min_valid, summarised, np.nan)
 
 
