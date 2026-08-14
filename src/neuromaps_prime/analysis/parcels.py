@@ -234,6 +234,7 @@ def _reduce_callable(
     unique: np.ndarray,
     method: Callable[..., float],
     min_valid: int,
+    *,
     drop_nonfinite: bool,
 ) -> None:
     """Fill ``values`` in place by applying a user callable per region.
