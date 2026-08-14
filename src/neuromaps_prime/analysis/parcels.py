@@ -72,7 +72,6 @@ def parcel_reduce(
     method: ReduceMethod = "mean",
     background: float | int | None = 0,
     min_valid: int = 1,
-    *,
     drop_nonfinite: bool = True,
     propagate: bool = False,
 ) -> ParcelSummary:
@@ -173,7 +172,7 @@ def parcel_reduce(
                     unique,
                     method,
                     min_valid,
-                    drop_nonfinite,
+                    drop_nonfinite=drop_nonfinite,
                 )
             else:
                 _reduce_callable(
@@ -183,7 +182,7 @@ def parcel_reduce(
                     unique,
                     method,
                     min_valid,
-                    drop_nonfinite,
+                    drop_nonfinite=drop_nonfinite,
                 )
 
     dense = (
