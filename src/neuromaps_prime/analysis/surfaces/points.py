@@ -21,7 +21,7 @@ from scipy import ndimage
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
 
-from neuromaps_prime.analysis.images import PARC_IGNORE, load_gifti, relabel_gifti
+from neuromaps_prime.analysis.images import PARC_IGNORE, load_data, relabel_gifti
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -466,12 +466,12 @@ def get_surface_distance(
     if medial_labels is not None:
         drop = set(drop) & set(medial_labels)
 
-    vert, faces = load_gifti(surface).agg_data()
+    vert, faces = load_data(surface).array
     n_vert = vert.shape[0]
     labels, mask = None, np.zeros(n_vert, dtype=bool)
 
     if medial is not None:
-        mask = load_gifti(medial).agg_data().astype(bool)
+        mask = load_data(medial, dtype=bool).array
     if parcellation is not None:
         parcellation_img = relabel_gifti(parcellation, background=drop)
         labels = parcellation_img.agg_data()

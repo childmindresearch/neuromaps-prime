@@ -19,12 +19,13 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any, Literal, NamedTuple
 
+import nibabel as nib
 import numpy as np
 from numpy.typing import ArrayLike
 from scipy import optimize, spatial
 from scipy.ndimage import labeled_comprehension
 
-from neuromaps_prime.analysis.images import PARC_IGNORE, load_gifti
+from neuromaps_prime.analysis.images import PARC_IGNORE, load_data
 from neuromaps_prime.analysis.surfaces.points import _geodesic_parcel_centroid
 
 __all__ = [
@@ -157,14 +158,15 @@ def get_parcel_centroids(
         ValueError: If *method* is not one of the recognised values.
         FileNotFoundError: If *surface* or *parcellation* do not exist.
     """
-    vertices, faces = load_gifti(surface).agg_data()
+    vertices, faces = load_data(surface).array
 
     if parcellation is None:
         return vertices
 
-    label_data = load_gifti(parcellation)
-    labels = label_data.agg_data()
-    labeltable = label_data.labeltable.get_labels_as_dict()
+    labels, img = load_data(parcellation, return_image=True)
+    if not isinstance(img, nib.GiftiImage):
+        raise ValueError(f"Expected to load Gifti surface for: {parcellation}")
+    labeltable = img.labeltable.get_labels_as_dict()
 
     return _get_parcel_centroids(
         vertices, faces, labels, method=method, drop=drop, labeltable=labeltable
@@ -470,9 +472,7 @@ def spin_parcels(
             f"{len(parcellation_list)} parcellation(s)."
         )
 
-    vertex_labels = np.hstack(
-        [load_gifti(parc).agg_data() for parc in parcellation_list]
-    )
+    vertex_labels = np.hstack([load_data(parc).array for parc in parcellation_list])
     label_values = np.unique(vertex_labels)
     parcel_mask = label_values != 0
     n_vertices = len(vertex_labels)
@@ -572,7 +572,7 @@ def parcels_to_vertices(
     data = np.asarray(data, dtype=float)
     data = data[..., np.newaxis] if data.ndim == 1 else data
     parcellation_list = _to_hemisphere_list(parcellation)
-    labels = np.hstack([load_gifti(parc).agg_data() for parc in parcellation_list])
+    labels = np.hstack([load_data(parc).array for parc in parcellation_list])
     return _project_parcels_to_verts(data, labels)
 
 
@@ -635,7 +635,7 @@ def vertices_to_parcels(
     data = np.expand_dims(data, axis=-1) if data.ndim == 1 else data
 
     parcellation_list = _to_hemisphere_list(parcellation)
-    labels = np.hstack([load_gifti(p).agg_data() for p in parcellation_list])
+    labels = np.hstack([load_data(p).array for p in parcellation_list])
 
     if data.shape[0] != len(labels):
         raise ValueError(
@@ -717,8 +717,7 @@ def spin_data(
     data_2d = data[..., np.newaxis] if data.ndim == 1 else data
 
     # Load parcellation images once; reuse data + labeltables
-    label_img_list = [load_gifti(parc) for parc in parcellation_list]
-    label_list = [img.agg_data() for img in label_img_list]
+    label_list = [load_data(parc).array for parc in parcellation_list]
     combined_labels = np.hstack(label_list)
     parcel_values = np.unique(combined_labels)
     parcel_mask = parcel_values != 0
