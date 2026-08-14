@@ -72,6 +72,7 @@ def parcel_reduce(
     method: ReduceMethod = "mean",
     background: float | int | None = 0,
     min_valid: int = 1,
+    *,
     drop_nonfinite: bool = True,
     propagate: bool = False,
 ) -> ParcelSummary:
