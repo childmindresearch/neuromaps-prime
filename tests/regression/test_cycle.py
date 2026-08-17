@@ -13,9 +13,12 @@ is generated directly from the standard midthickness surface so that private
 annotation resources do not affect the test.
 
 Only the shortest return paths are evaluated. Every shortest path is retained
-when each hop has a common surface density.
+when each hop has a compatible surface transform and target surface at the
+benchmark density.
 
-Transformation outputs are temporary and are removed after the test.
+The benchmark uses a single density throughout each cycle whenever that
+density is available for every hop. This prevents a lower-density transform
+from being selected simply because it sorts first in the graph.
 
 Metrics recorded for each transformation cycle include:
 
@@ -90,87 +93,96 @@ def _find_executable_surface(
     source: str,
     target: str,
     hemisphere: Literal["left", "right"],
+    preferred_density: str | None = None,
 ) -> tuple[str, str] | None:
-    """Find a density and surface resource that can execute a transform.
+    """Find an executable surface transform and its target density.
 
-    Sphere surfaces are preferred because they are the standard resource for
-    Workbench spherical resampling. If a sphere is unavailable, midthickness
-    is used as a fallback.
+    Args:
+        graph: NeuromapsPrime graph.
+        source: Source template space.
+        target: Target template space.
+        hemisphere: Hemisphere to use.
+        preferred_density: Density to prefer when selecting a transform.
+            When supplied, a transform at this density is selected if one
+            exists with a corresponding target surface.
+
+    Returns:
+        ``(density, resource_type)`` for an executable hop, or ``None`` when
+        no compatible transform and target surface are available.
+
+    Notes:
+        The graph may contain multiple transforms between the same spaces at
+        different densities. Density selection must therefore be explicit.
+
+        In particular, both Yerkes19 <-> fsLR have 10k and 32k transforms.
+        Sorting densities lexicographically would select 10k first, even when
+        the benchmark metric was created on a 32k surface. The preferred
+        density avoids that unintended downsampling.
     """
-    try:
-        density = graph.find_common_density(source, target)
-    except ValueError:
-        return None
-
-    transform = graph.fetch_surface_to_surface_transform(
-        source=source,
-        target=target,
-        density=density,
+    transforms = graph.search_surface_transforms(
+        source_space=source,
+        target_space=target,
         hemisphere=hemisphere,
-        resource_type="sphere",
     )
 
-    if transform is None:
-        transform = graph.fetch_surface_to_surface_transform(
-            source=source,
-            target=target,
-            density=density,
-            hemisphere=hemisphere,
-            resource_type="midthickness",
-        )
-
-    if transform is None:
+    if not transforms:
         return None
 
-    for resource_type in ("sphere", "midthickness"):
-        source_surface = graph.fetch_surface_atlas(
-            space=source,
-            density=density,
-            hemisphere=hemisphere,
-            resource_type=resource_type,
+    # Prefer the requested benchmark density.
+    if preferred_density is not None:
+        preferred = [
+            transform
+            for transform in transforms
+            if transform.density == preferred_density
+        ]
+
+        # Only use the preferred-density transform if the corresponding
+        # target surface actually exists.
+        preferred = sorted(
+            preferred,
+            key=lambda transform: (
+                transform.resource_type != "sphere",
+            ),
         )
+
+        for transform in preferred:
+            target_surface = graph.fetch_surface_atlas(
+                space=target,
+                density=preferred_density,
+                hemisphere=hemisphere,
+                resource_type=transform.resource_type,
+            )
+
+            if target_surface is not None:
+                return preferred_density, transform.resource_type
+
+    # Fall back to any executable transform. Sphere transforms are preferred
+    # because they are the standard resource for Workbench spherical
+    # resampling.
+    transforms = sorted(
+        transforms,
+        key=lambda transform: (
+            transform.resource_type != "sphere",
+            transform.density,
+        ),
+    )
+
+    for transform in transforms:
+        density = transform.density
+
         target_surface = graph.fetch_surface_atlas(
             space=target,
             density=density,
             hemisphere=hemisphere,
-            resource_type=resource_type,
+            resource_type=transform.resource_type,
         )
 
-        if source_surface is not None and target_surface is not None:
-            return density, resource_type
+        if target_surface is None:
+            continue
+
+        return density, transform.resource_type
 
     return None
-
-
-def _find_executable_density(
-    graph: NeuromapsGraph,
-    source: str,
-    target: str,
-) -> str | None:
-    """Return a common density for an executable surface transformation."""
-    try:
-        density = graph.find_common_density(source, target)
-    except ValueError:
-        return None
-
-    transform = graph.fetch_surface_to_surface_transform(
-        source=source,
-        target=target,
-        density=density,
-        hemisphere=HEMISPHERE,
-        resource_type="sphere",
-    )
-
-    if transform is None:
-        transform = graph.fetch_surface_to_surface_transform(
-            source=source,
-            target=target,
-            density=density,
-            hemisphere=HEMISPHERE,
-            resource_type="midthickness",
-        )
-
-    return density if transform is not None else None
 
 
 def _make_surface_metric(
@@ -233,22 +245,28 @@ def _shortest_paths(
 def _valid_cycle_paths(
     graph: NeuromapsGraph,
     paths: list[tuple[str, ...]],
+    density: str,
 ) -> list[tuple[str, ...]]:
-    """Return cycles for which every hop has an executable surface resource."""
-    return [
-        path
-        for path in paths
-        if all(
+    """Return cycles executable entirely at the requested density."""
+    valid_paths: list[tuple[str, ...]] = []
+
+    for path in paths:
+        executable = all(
             _find_executable_surface(
                 graph,
                 source,
                 target,
                 HEMISPHERE,
+                preferred_density=density,
             )
             is not None
             for source, target in pairwise(path)
         )
-    ]
+
+        if executable:
+            valid_paths.append(path)
+
+    return valid_paths
 
 
 def _resolve_transform_output(
@@ -259,9 +277,9 @@ def _resolve_transform_output(
     """Resolve a transformation output returned by the graph transformer.
 
     Workbench runs inside a Docker container with a writable ``/styx_output``
-    directory. Therefore the transformer must receive a filename rather than
-    an absolute host path. Depending on the runner version, the transformer
-    may return either the generated path or just the output filename.
+    directory. Therefore the transformer receives a filename rather than an
+    absolute host path. Depending on the runner version, the transformer may
+    return either the generated path or just the output filename.
     """
     if result is not None:
         result_path = Path(result)
@@ -289,11 +307,18 @@ def _transform_cycle(
     graph: NeuromapsGraph,
     metric_file: Path,
     path: tuple[str, ...],
-    hemisphere: str,
+    hemisphere: Literal["left", "right"],
     workdir: Path,
+    density: str,
 ) -> Path:
-    """Transform a metric through every hop in a cycle."""
+    """Transform a metric through every hop of a cycle.
+
+    Every hop is explicitly performed at ``density``. This ensures that a
+    cycle such as Yerkes19 -> fsLR -> Yerkes19 stays at 32k when 32k resources
+    are available in both directions.
+    """
     current_metric = metric_file
+    current_density = density
 
     for hop, (source, target) in enumerate(pairwise(path)):
         available = _find_executable_surface(
@@ -301,22 +326,34 @@ def _transform_cycle(
             source,
             target,
             hemisphere,
+            preferred_density=density,
         )
 
         if available is None:
             raise RuntimeError(
                 f"No executable surface transform for hop '{source}' -> "
-                f"'{target}' on path {' -> '.join(path)}"
+                f"'{target}' at density '{density}' on path "
+                f"{' -> '.join(path)}"
             )
 
-        density, geometry = available
+        transform_density, geometry = available
+
+        if transform_density != density:
+            raise RuntimeError(
+                f"Unexpected density for hop '{source}' -> '{target}': "
+                f"expected '{density}', got '{transform_density}'."
+            )
+
+        target_density = density
 
         logger.info(
-            "hop %d: %s -> %s | density=%s | geometry=%s",
+            "hop %d: %s -> %s | source_density=%s | target_density=%s | "
+            "geometry=%s",
             hop,
             source,
             target,
-            density,
+            current_density,
+            target_density,
             geometry,
         )
 
@@ -324,11 +361,6 @@ def _transform_cycle(
             f"hop{hop:02d}_{source}-to-{target}.func.gii"
         )
 
-        # IMPORTANT:
-        # Pass only a filename here. The Workbench Docker runner mounts its
-        # own writable output directory as /styx_output. Passing an absolute
-        # host path causes wb_command to try to create that path inside the
-        # container.
         result = graph.surface_to_surface_transformer(
             transformer_type="metric",
             input_file=current_metric,
@@ -336,8 +368,8 @@ def _transform_cycle(
             target_space=target,
             hemisphere=hemisphere,
             output_file_path=output_name,
-            source_density=None,
-            target_density=density,
+            source_density=current_density,
+            target_density=target_density,
         )
 
         current_metric = _resolve_transform_output(
@@ -345,6 +377,8 @@ def _transform_cycle(
             output_name,
             workdir,
         )
+
+        current_density = target_density
 
     return current_metric
 
@@ -422,6 +456,7 @@ def test_surface_transform_cycles(
                 source,
                 target,
                 HEMISPHERE,
+                preferred_density=density,
             )
             is not None
             for source, target in pairwise(path)
@@ -436,6 +471,7 @@ def test_surface_transform_cycles(
     valid_paths = _valid_cycle_paths(
         graph,
         shortest_paths,
+        density,
     )
 
     logger.info(
@@ -455,12 +491,14 @@ def test_surface_transform_cycles(
         len(shortest_paths),
     )
     logger.info(
-        "Executable shortest return paths: %d",
+        "Executable shortest return paths at %s: %d",
+        density,
         len(valid_paths),
     )
 
     assert valid_paths, (
-        f"No executable shortest transformation cycles found from '{ORIGIN}'."
+        f"No executable shortest transformation cycles found from "
+        f"'{ORIGIN}' at density '{density}'."
     )
 
     # ------------------------------------------------------------------
@@ -489,6 +527,7 @@ def test_surface_transform_cycles(
             path,
             HEMISPHERE,
             workdir,
+            density,
         )
 
         pearson_r, max_abs_diff = score_roundtrip(
