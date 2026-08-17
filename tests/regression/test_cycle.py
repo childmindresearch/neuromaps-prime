@@ -33,18 +33,19 @@ from __future__ import annotations
 import logging
 from itertools import pairwise
 from pathlib import Path
+from typing import Literal
 
 import nibabel as nib
 import numpy as np
 import pandas as pd
 import pytest
+
+from neuromaps_prime.graph import NeuromapsGraph
 from tests.cycle import (
     find_return_paths,
     save_cycle_figure,
     score_roundtrip,
 )
-
-from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
 
@@ -84,16 +85,92 @@ def output_dir() -> Path:
 # -------------------------------------------------------------------------
 
 
+def _find_executable_surface(
+    graph: NeuromapsGraph,
+    source: str,
+    target: str,
+    hemisphere: Literal["left", "right"],
+) -> tuple[str, str] | None:
+    """Find a density and surface resource that can execute a transform.
+
+    Sphere surfaces are preferred because they are the standard resource for
+    Workbench spherical resampling. If a sphere is unavailable, midthickness
+    is used as a fallback.
+    """
+    try:
+        density = graph.find_common_density(source, target)
+    except ValueError:
+        return None
+
+    transform = graph.fetch_surface_to_surface_transform(
+        source=source,
+        target=target,
+        density=density,
+        hemisphere=hemisphere,
+        resource_type="sphere",
+    )
+
+    if transform is None:
+        transform = graph.fetch_surface_to_surface_transform(
+            source=source,
+            target=target,
+            density=density,
+            hemisphere=hemisphere,
+            resource_type="midthickness",
+        )
+
+    if transform is None:
+        return None
+
+    for resource_type in ("sphere", "midthickness"):
+        source_surface = graph.fetch_surface_atlas(
+            space=source,
+            density=density,
+            hemisphere=hemisphere,
+            resource_type=resource_type,
+        )
+        target_surface = graph.fetch_surface_atlas(
+            space=target,
+            density=density,
+            hemisphere=hemisphere,
+            resource_type=resource_type,
+        )
+
+        if source_surface is not None and target_surface is not None:
+            return density, resource_type
+
+    return None
+
+
 def _find_executable_density(
     graph: NeuromapsGraph,
     source: str,
     target: str,
 ) -> str | None:
-    """Find a common density for a surface transformation hop."""
+    """Return a common density for an executable surface transformation."""
     try:
-        return graph.find_common_density(source, target)
+        density = graph.find_common_density(source, target)
     except ValueError:
         return None
+
+    transform = graph.fetch_surface_to_surface_transform(
+        source=source,
+        target=target,
+        density=density,
+        hemisphere=HEMISPHERE,
+        resource_type="sphere",
+    )
+
+    if transform is None:
+        transform = graph.fetch_surface_to_surface_transform(
+            source=source,
+            target=target,
+            density=density,
+            hemisphere=HEMISPHERE,
+            resource_type="midthickness",
+        )
+
+    return density if transform is not None else None
 
 
 def _make_surface_metric(
@@ -146,22 +223,27 @@ def _shortest_paths(
 
     shortest_length = min(len(path) - 1 for path in paths)
 
-    return [path for path in paths if len(path) - 1 == shortest_length]
+    return [
+        path
+        for path in paths
+        if len(path) - 1 == shortest_length
+    ]
 
 
 def _valid_cycle_paths(
     graph: NeuromapsGraph,
     paths: list[tuple[str, ...]],
 ) -> list[tuple[str, ...]]:
-    """Return paths for which every hop has a common density."""
+    """Return cycles for which every hop has an executable surface resource."""
     return [
         path
         for path in paths
         if all(
-            _find_executable_density(
+            _find_executable_surface(
                 graph,
                 source,
                 target,
+                HEMISPHERE,
             )
             is not None
             for source, target in pairwise(path)
@@ -169,38 +251,84 @@ def _valid_cycle_paths(
     ]
 
 
+def _resolve_transform_output(
+    result: str | Path | None,
+    output_name: str,
+    workdir: Path,
+) -> Path:
+    """Resolve a transformation output returned by the graph transformer.
+
+    Workbench runs inside a Docker container with a writable ``/styx_output``
+    directory. Therefore the transformer must receive a filename rather than
+    an absolute host path. Depending on the runner version, the transformer
+    may return either the generated path or just the output filename.
+    """
+    if result is not None:
+        result_path = Path(result)
+
+        if result_path.exists():
+            return result_path
+
+        workdir_result = workdir / result_path.name
+
+        if workdir_result.exists():
+            return workdir_result
+
+    expected = workdir / output_name
+
+    if expected.exists():
+        return expected
+
+    raise FileNotFoundError(
+        "Surface transformation did not produce an output file. "
+        f"Expected '{expected}', got result={result!r}."
+    )
+
+
 def _transform_cycle(
     graph: NeuromapsGraph,
     metric_file: Path,
     path: tuple[str, ...],
     hemisphere: str,
+    workdir: Path,
 ) -> Path:
     """Transform a metric through every hop in a cycle."""
     current_metric = metric_file
 
     for hop, (source, target) in enumerate(pairwise(path)):
-        density = _find_executable_density(
+        available = _find_executable_surface(
             graph,
             source,
             target,
+            hemisphere,
         )
 
-        if density is None:
+        if available is None:
             raise RuntimeError(
-                f"No common density for hop '{source}' -> '{target}' "
-                f"on path {' -> '.join(path)}"
+                f"No executable surface transform for hop '{source}' -> "
+                f"'{target}' on path {' -> '.join(path)}"
             )
 
+        density, geometry = available
+
         logger.info(
-            "hop %d: %s -> %s | density=%s",
+            "hop %d: %s -> %s | density=%s | geometry=%s",
             hop,
             source,
             target,
             density,
+            geometry,
         )
 
-        output_name = f"hop{hop:02d}_{source}-to-{target}.func.gii"
+        output_name = (
+            f"hop{hop:02d}_{source}-to-{target}.func.gii"
+        )
 
+        # IMPORTANT:
+        # Pass only a filename here. The Workbench Docker runner mounts its
+        # own writable output directory as /styx_output. Passing an absolute
+        # host path causes wb_command to try to create that path inside the
+        # container.
         result = graph.surface_to_surface_transformer(
             transformer_type="metric",
             input_file=current_metric,
@@ -212,19 +340,11 @@ def _transform_cycle(
             target_density=density,
         )
 
-        if result is None:
-            raise RuntimeError(
-                f"No surface transform for hop '{source}' -> '{target}' "
-                f"on path {' -> '.join(path)}"
-            )
-
-        current_metric = Path(result)
-
-        if not current_metric.exists():
-            raise FileNotFoundError(
-                "Surface transformation did not produce an output file: "
-                f"{current_metric}"
-            )
+        current_metric = _resolve_transform_output(
+            result,
+            output_name,
+            workdir,
+        )
 
     return current_metric
 
@@ -256,20 +376,28 @@ def test_surface_transform_cycles(
     )
 
     assert surface is not None, (
-        f"Missing midthickness surface for {ORIGIN} at {density} ({HEMISPHERE})."
+        f"Missing midthickness surface for {ORIGIN} "
+        f"at {density} ({HEMISPHERE})."
     )
 
     surface_file = Path(surface.fetch())
 
-    assert surface_file.exists(), f"Missing midthickness surface: {surface_file}"
+    assert surface_file.exists(), (
+        f"Missing midthickness surface: {surface_file}"
+    )
 
     metric_file = _make_surface_metric(
         surface_file,
         tmp_path / f"{ORIGIN}_{density}_{HEMISPHERE}_metric.func.gii",
     )
 
-    assert metric_file.exists(), f"Failed to create metric: {metric_file}"
-    assert metric_file.stat().st_size > 0, f"Created metric is empty: {metric_file}"
+    assert metric_file.exists(), (
+        f"Failed to create metric: {metric_file}"
+    )
+
+    assert metric_file.stat().st_size > 0, (
+        f"Created metric is empty: {metric_file}"
+    )
 
     # ------------------------------------------------------------------
     # Find all return paths and retain every shortest possibility.
@@ -281,17 +409,19 @@ def test_surface_transform_cycles(
     )
 
     assert all_paths, (
-        f"No return paths found from '{ORIGIN}' in the surface transformation graph."
+        f"No return paths found from '{ORIGIN}' "
+        "in the surface transformation graph."
     )
 
     shortest_paths = _shortest_paths(all_paths)
 
     for path in shortest_paths:
         executable = all(
-            _find_executable_density(
+            _find_executable_surface(
                 graph,
                 source,
                 target,
+                HEMISPHERE,
             )
             is not None
             for source, target in pairwise(path)
@@ -358,6 +488,7 @@ def test_surface_transform_cycles(
             metric_file,
             path,
             HEMISPHERE,
+            workdir,
         )
 
         pearson_r, max_abs_diff = score_roundtrip(
@@ -398,7 +529,10 @@ def test_surface_transform_cycles(
         frame.to_string(index=False),
     )
 
-    output_file = output_dir / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.csv"
+    output_file = (
+        output_dir
+        / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.csv"
+    )
 
     frame.to_csv(
         output_file,
@@ -410,12 +544,18 @@ def test_surface_transform_cycles(
         output_file,
     )
 
-    figure_file = output_dir / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.png"
+    figure_file = (
+        output_dir
+        / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.png"
+    )
 
     save_cycle_figure(
         results,
         figure_file,
-        title=(f"Surface Cycle Benchmark: {ORIGIN} ({density}, {HEMISPHERE})"),
+        title=(
+            f"Surface Cycle Benchmark: "
+            f"{ORIGIN} ({density}, {HEMISPHERE})"
+        ),
     )
 
     logger.info(
