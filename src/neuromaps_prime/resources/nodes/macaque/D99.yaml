@@ -24,17 +24,17 @@ D99:
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523022882bdb2bc3ebdee?view_only=b214f40525fe44b5bea3103478d08d0d
     168k:
       midthickness:
-        left: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/lh.D99.mid.surf.gii
-        right: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/rh.D99.mid.surf.gii
+        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.mid.surf.gii
+        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.mid.surf.gii
       pial:
-        left: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/lh.D99.pial.surf.gii
-        right: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/rh.D99.pial.surf.gii
+        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.pial.surf.gii
+        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.pial.surf.gii
       sphere:
-        left: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/lh.D99.sphere.surf.gii
-        right: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/rh.D99.sphere.surf.gii
+        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.sphere.surf.gii
+        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.sphere.surf.gii
       white:
-        left: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/lh.D99.wm.surf.gii
-        right: https://github.com/HumanBrainED/RheMAP-Surf/blob/v1.0/surfaces/rh.D99.wm.surf.gii
+        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.wm.surf.gii
+        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.wm.surf.gii
 
   volumes:
     250um:
