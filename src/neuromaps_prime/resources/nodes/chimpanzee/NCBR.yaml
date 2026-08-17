@@ -8,38 +8,38 @@ NCBR:
   surfaces:
     41k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c17ef401e8b5cc761b?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c200e86708937eeabc?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c17ef401e8b5cc761b
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c200e86708937eeabc
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c17a6372a22ecc76f2?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c2ae88a491b17ee8e4?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c17a6372a22ecc76f2
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c2ae88a491b17ee8e4
     164k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c5ae88a491b17ee8e7?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c6686472f5c7cc6e52?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c5ae88a491b17ee8e7
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c6686472f5c7cc6e52
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c500e86708937eeabf?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7b67bf1cb32f0f56692d7b?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c500e86708937eeabf
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7b67bf1cb32f0f56692d7b
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c5e9bdf105947ee71d?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c23e551fbafd8290e6?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c5e9bdf105947ee71d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f4c23e551fbafd8290e6
       annotation:
         PC_ChimpBNA:
-          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88270d76354cd6b89b76?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88253d751cc6ffb66ddb?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88270d76354cd6b89b76
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88253d751cc6ffb66ddb
           notes:
           - ChimpBNA parcellation atlas. 164k surface density.
         PC_DK:
-          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c882778afc916b3b02b37?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c882b9a2ada619db66e19?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c882778afc916b3b02b37
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c882b9a2ada619db66e19
           notes:
           - Desikan-Killiany parcellation atlas. 164k surface density.
 
   volumes:
     400um:
-      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88286452edca6fb89abe?view_only=b214f40525fe44b5bea3103478d08d0d
+      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88286452edca6fb89abe
       annotation:
         BM:
-          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88272919a6956918f9f8?view_only=b214f40525fe44b5bea3103478d08d0d
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88272919a6956918f9f8
           notes: 
           - Brain mask

@@ -8,49 +8,49 @@ Yerkes19:
   surfaces:
     10k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e4d366de13d713f48?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aab76e18c73904448?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e4d366de13d713f48
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aab76e18c73904448
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226a4f3931c54c9047d7?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ba52f9bb38971293a?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226a4f3931c54c9047d7
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ba52f9bb38971293a
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ca52f9bb38971293c?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226f49b4c2d6503ecb33?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ca52f9bb38971293c
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226f49b4c2d6503ecb33
       pial:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e1e7b820217713409?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b49b4c2d6503ecb22?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e1e7b820217713409
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b49b4c2d6503ecb22
       inflated:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522691e7b820217713402?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226d23e17e11247129bc?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522691e7b820217713402
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226d23e17e11247129bc
       annotation:
         PC_Yeo7Networks:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a64572881301679aba?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37a752a710f2c2b40?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a64572881301679aba
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37a752a710f2c2b40
           notes:
           - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 10k surface density.
-          - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a680941e7c8fa7ad49?view_only=b214f40525fe44b5bea3103478d08d0d'
-          - 'right lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a34572881301679ab8?view_only=b214f40525fe44b5bea3103478d08d0d'
+          - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a680941e7c8fa7ad49'
+          - 'right lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a34572881301679ab8'
         PC_MarkovMonkey:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37da771710ca7abbd?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a580941e7c8fa7ad47?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37da771710ca7abbd
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a580941e7c8fa7ad47
           notes:
           - Markov monkey cortical parcellation, 10k surface density.
     32k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f54791541aee377a7b0c8?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aab76e18c73904446?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f54791541aee377a7b0c8
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aab76e18c73904446
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ea52f9bb389712940?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aaa1f78e1979033b0?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ea52f9bb389712940
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aaa1f78e1979033b0
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226d743de820043eac3b?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b6846076e8371364a?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226d743de820043eac3b
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b6846076e8371364a
       pial:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226be06110211c3eac62?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ecd1f7a1773903f7a?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226be06110211c3eac62
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ecd1f7a1773903f7a
       inflated:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e3a883e73df3eb152?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b2882bdb2bc3ebcbd?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e3a883e73df3eb152
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b2882bdb2bc3ebcbd
       annotation:
         RM_auto_ampa:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ff5369bb2ad30a2d0?view_only=d3c6b547365d4e1f8095e928101ee4a5
@@ -151,37 +151,37 @@ Yerkes19:
           notes:
           - α2-adrenergic receptor density, radioligand [³H]UK-14304. Noradrenergic receptor.
         MM:
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52947a752a710f2c2b26?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52947a752a710f2c2b26
           references:
           - https://doi.org/10.1073/pnas.1721653115
           notes:
           - Myelin map (bias corrected). MacaqueYerkes19 v1.2.
         SMM:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527acd87cca253679b05?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527b80941e7c8fa7ad2d?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527acd87cca253679b05
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527b80941e7c8fa7ad2d
           references:
           - https://doi.org/10.1073/pnas.1721653115
           notes:
           - Smoothed myelin map (bias corrected). MacaqueYerkes19 v1.2.
         CT:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d0d8bf292baf2c2d69?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d07a752a710f2c2b5d?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d0d8bf292baf2c2d69
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d07a752a710f2c2b5d
           references:
           - https://doi.org/10.1073/pnas.1721653115
           notes:
           - Cortical thickness. MacaqueYerkes19 v1.2.
         CV:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52877a752a710f2c2b1c?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52881541aee377a7af33?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52877a752a710f2c2b1c
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52881541aee377a7af33
           references:
           - https://doi.org/10.1073/pnas.1721653115
           notes:
           - Curvature. MacaqueYerkes19 v1.2.
         PC_Yeo7Networks:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0
           notes:
           - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 32k surface density.
-          - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a3d0d28dc642a7afe5?view_only=b214f40525fe44b5bea3103478d08d0d'
+          - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a3d0d28dc642a7afe5'
   volumes:
     500um:
-      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226eab76e18c7390444c?view_only=b214f40525fe44b5bea3103478d08d0d
+      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226eab76e18c7390444c

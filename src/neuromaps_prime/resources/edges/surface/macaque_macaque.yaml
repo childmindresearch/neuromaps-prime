@@ -4,11 +4,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43fef44e0687016b9b34?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43feb5295c553db8cc95?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43fef44e0687016b9b34
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43feb5295c553db8cc95
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43feb5295c553db8cc96?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43fec63a718cdfb8d0c6?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43feb5295c553db8cc96
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43fec63a718cdfb8d0c6
       references:
       - citation: Lepage, C., et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
@@ -20,11 +20,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f470c4cf949e3cd7df8f3?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f470dedf908b2217df2c2?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f470c4cf949e3cd7df8f3
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f470dedf908b2217df2c2
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f470cd4be03f6846ba1a3?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f470d1e78bf36907df619?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f470cd4be03f6846ba1a3
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f470d1e78bf36907df619
 
 - from: CIVETNMT
   to: NMT2Sym
@@ -32,11 +32,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48fc2b160b523a6ba074?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48fa4cf949e3cd7df98f?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48fc2b160b523a6ba074
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48fa4cf949e3cd7df98f
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48fad4be03f6846ba241?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48fbedf908b2217df3d4?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48fad4be03f6846ba241
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48fbedf908b2217df3d4
       references:
       - citation: Lepage, C., et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
@@ -48,11 +48,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bae4cf949e3cd7dfa37?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bae97f5a8d6e96b9b87?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bae4cf949e3cd7dfa37
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bae97f5a8d6e96b9b87
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4badf44e0687016b9f1d?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bae4ec6fad47d6b998a?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4badf44e0687016b9f1d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bae4ec6fad47d6b998a
 
 - from: D99
   to: CIVETNMT
@@ -60,11 +60,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f433ab30df7012c7df8cb?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f433a3a67df4a7bb8cbca?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f433ab30df7012c7df8cb
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f433a3a67df4a7bb8cbca
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43384e6a7ca98db8cc12?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f433aa48132c37f6b99b6?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43384e6a7ca98db8cc12
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f433aa48132c37f6b99b6
       references:
       - citation: Lepage, C., et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
@@ -94,11 +94,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f472bedf908b2217df2cc?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f472b2b297b6deab8c9d4?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f472bedf908b2217df2cc
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f472b2b297b6deab8c9d4
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f472ad4be03f6846ba1b4?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f472bd4be03f6846ba1b6?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f472ad4be03f6846ba1b4
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f472bd4be03f6846ba1b6
 
 - from: D99
   to: NMT2Sym
@@ -125,11 +125,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f491b2b297b6deab8ca27?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f491bedf908b2217df3db?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f491b2b297b6deab8ca27
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f491bedf908b2217df3db
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f491a97f5a8d6e96b9aca?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f491ac63a718cdfb8d2ea?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f491a97f5a8d6e96b9aca
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f491ac63a718cdfb8d2ea
 
 - from: D99
   to: Yerkes19
@@ -155,11 +155,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bc8b422df79d9b8c824?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bcaf44e0687016b9f2d?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bc8b422df79d9b8c824
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bcaf44e0687016b9f2d
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bca2b297b6deab8cab6?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bcae81de16f937df33a?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bca2b297b6deab8cab6
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4bcae81de16f937df33a
 
 - from: MEBRAINS
   to: CIVETNMT
@@ -167,11 +167,11 @@
     CIVET:
       101k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4356b5295c553db8cc5d?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43561e78bf36907df481?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4356b5295c553db8cc5d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43561e78bf36907df481
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43551e78bf36907df47e?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4357babb8ee8a47df6db?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43551e78bf36907df47e
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4357babb8ee8a47df6db
 
 - from: MEBRAINS
   to: D99
@@ -197,11 +197,11 @@
     CIVET:
       101k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f442cf44e0687016b9b64?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f442db5295c553db8cccf?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f442cf44e0687016b9b64
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f442db5295c553db8cccf
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f442d4e6a7ca98db8cc3a?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f442cb30df7012c7df90f?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f442d4e6a7ca98db8cc3a
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f442cb30df7012c7df90f
 
 - from: MEBRAINS
   to: NMT2Sym
@@ -227,11 +227,11 @@
     CIVET:
       101k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49f93a67df4a7bb8cdd7?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49fa1e78bf36907df73a?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49f93a67df4a7bb8cdd7
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49fa1e78bf36907df73a
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49fa3a67df4a7bb8cdda?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49f92b160b523a6ba0cc?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49fa3a67df4a7bb8cdda
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49f92b160b523a6ba0cc
 
 - from: MEBRAINS
   to: Yerkes19
@@ -257,11 +257,11 @@
     CIVET:
       101k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4c5b97f5a8d6e96b9bc5?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4c5d2b160b523a6ba17a?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4c5b97f5a8d6e96b9bc5
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4c5d2b160b523a6ba17a
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4c5e97f5a8d6e96b9bc7?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4c5db422df79d9b8c840?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4c5e97f5a8d6e96b9bc7
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4c5db422df79d9b8c840
 
 - from: NMT2Sym
   to: CIVETNMT
@@ -269,11 +269,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4376ff98819c6e7df40d?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4376f44e0687016b9b24?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4376ff98819c6e7df40d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4376f44e0687016b9b24
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43760ad6228a4a6b9bb2?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4376b30df7012c7df8d5?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f43760ad6228a4a6b9bb2
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4376b30df7012c7df8d5
       references:
       - citation: Lepage, C., et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.
@@ -303,11 +303,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f44a42b160b523a6b9eb5?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f44a5c63a718cdfb8d0ff?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f44a42b160b523a6b9eb5
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f44a5c63a718cdfb8d0ff
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f44a5f44e0687016b9bb0?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f44a54cf949e3cd7df833?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f44a5f44e0687016b9bb0
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f44a54cf949e3cd7df833
       references:
       - citation: Lepage, C., et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
@@ -337,11 +337,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b1c63a718cdfb8d229?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b1f44e0687016b9d02?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b1c63a718cdfb8d229
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b1f44e0687016b9d02
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b01e78bf36907df65b?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b13a67df4a7bb8cd38?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b01e78bf36907df65b
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b13a67df4a7bb8cd38
 
 - from: NMT2Sym
   to: Yerkes19
@@ -367,11 +367,11 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b1c63a718cdfb8d229?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d2bb422df79d9b8c8f1?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b1c63a718cdfb8d229
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d2bb422df79d9b8c8f1
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d353e6dfd1a99b8c771?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d359bf888fc296b991e?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d353e6dfd1a99b8c771
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d359bf888fc296b991e
 
 - from: Yerkes19
   to: CIVETNMT
@@ -379,11 +379,11 @@
     CIVET:
       32k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f438cb30df7012c7df8d7?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f438fd4be03f6846ba0a8?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f438cb30df7012c7df8d7
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f438fd4be03f6846ba0a8
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f438e2b160b523a6b9dfc?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f438db5295c553db8cc6c?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f438e2b160b523a6b9dfc
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f438db5295c553db8cc6c
       references:
       - citation: Lepage, C., et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
@@ -413,11 +413,11 @@
     CIVET:
       32k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f45b1c63a718cdfb8d191?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f45afbabb8ee8a47df79f?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f45b1c63a718cdfb8d191
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f45afbabb8ee8a47df79f
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f45afb30df7012c7df9bf?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f45b1f44e0687016b9c69?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f45afb30df7012c7df9bf
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f45b1f44e0687016b9c69
 
 - from: Yerkes19
   to: MEBRAINS
@@ -443,11 +443,11 @@
     CIVET:
       32k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48633a67df4a7bb8cd73?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4863c63a718cdfb8d2b5?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48633a67df4a7bb8cd73
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4863c63a718cdfb8d2b5
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4862babb8ee8a47df845?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48634cf949e3cd7df956?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4862babb8ee8a47df845
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f48634cf949e3cd7df956
 
 - from: Yerkes19
   to: NMT2Sym
@@ -473,8 +473,8 @@
     CIVET:
       32k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4abbedf908b2217df52d?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4abc2b297b6deab8ca7f?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4abbedf908b2217df52d
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4abc2b297b6deab8ca7f
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4abcedf908b2217df52f?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4abc1e78bf36907df879?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4abcedf908b2217df52f
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4abc1e78bf36907df879

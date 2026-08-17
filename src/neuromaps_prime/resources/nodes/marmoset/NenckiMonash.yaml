@@ -4,11 +4,11 @@ NenckiMonash:
   surfaces:
     39k:
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2ad36777f4a86d2148f4a5?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2ad36777f4a86d2148f4a5
   volumes:
     50um:
-      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c9f406cd2b941c3d90cb1?view_only=b214f40525fe44b5bea3103478d08d0d
+      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c9f406cd2b941c3d90cb1
       annotation:
         PC: 
           notes:
-          - https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2adec9e8a4df9d0612617f?view_only=b214f40525fe44b5bea3103478d08d0d
+          - https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2adec9e8a4df9d0612617f
