@@ -12,9 +12,8 @@ The benchmark is intentionally independent of surface annotations. The metric
 is generated directly from the standard midthickness surface so that private
 annotation resources do not affect the test.
 
-Only the shortest return paths are evaluated. This keeps the benchmark focused
-on the most direct transformation routes while still covering every shortest
-path possibility.
+Only the shortest return paths are evaluated. Every shortest path is retained
+when each hop has a common surface density.
 
 Transformation outputs are temporary and are removed after the test.
 
@@ -34,7 +33,6 @@ from __future__ import annotations
 import logging
 from itertools import pairwise
 from pathlib import Path
-from typing import Literal
 
 import nibabel as nib
 import numpy as np
@@ -56,7 +54,7 @@ logger = logging.getLogger(__name__)
 # -------------------------------------------------------------------------
 
 ORIGIN = "Yerkes19"
-HEMISPHERE: Literal["left", "right"] = "left"
+HEMISPHERE = "left"
 
 
 # -------------------------------------------------------------------------
@@ -90,26 +88,12 @@ def _find_executable_density(
     graph: NeuromapsGraph,
     source: str,
     target: str,
-    hemisphere: Literal["left", "right"],
 ) -> str | None:
-    """Find a density at which a surface transform can be executed."""
+    """Find a common density for a surface transformation hop."""
     try:
-        density = graph.find_common_density(source, target)
+        return graph.find_common_density(source, target)
     except ValueError:
         return None
-
-    transform = graph.fetch_surface_to_surface_transform(
-        source=source,
-        target=target,
-        density=density,
-        hemisphere=hemisphere,
-        resource_type="sphere",
-    )
-
-    if transform is None:
-        return None
-
-    return density
 
 
 def _make_surface_metric(
@@ -162,15 +146,18 @@ def _shortest_paths(
 
     shortest_length = min(len(path) - 1 for path in paths)
 
-    return [path for path in paths if len(path) - 1 == shortest_length]
+    return [
+        path
+        for path in paths
+        if len(path) - 1 == shortest_length
+    ]
 
 
 def _valid_cycle_paths(
     graph: NeuromapsGraph,
     paths: list[tuple[str, ...]],
-    hemisphere: Literal["left", "right"],
 ) -> list[tuple[str, ...]]:
-    """Return cycles for which every hop has a common executable density."""
+    """Return paths for which every hop has a common density."""
     return [
         path
         for path in paths
@@ -179,7 +166,6 @@ def _valid_cycle_paths(
                 graph,
                 source,
                 target,
-                hemisphere,
             )
             is not None
             for source, target in pairwise(path)
@@ -191,13 +177,31 @@ def _transform_cycle(
     graph: NeuromapsGraph,
     metric_file: Path,
     path: tuple[str, ...],
-    hemisphere: Literal["left", "right"],
+    hemisphere: str,
 ) -> Path:
     """Transform a metric through every hop in a cycle."""
     current_metric = metric_file
 
     for hop, (source, target) in enumerate(pairwise(path)):
-        density = graph.find_common_density(source, target)
+        density = _find_executable_density(
+            graph,
+            source,
+            target,
+        )
+
+        if density is None:
+            raise RuntimeError(
+                f"No common density for hop '{source}' -> '{target}' "
+                f"on path {' -> '.join(path)}"
+            )
+
+        logger.info(
+            "hop %d: %s -> %s | density=%s",
+            hop,
+            source,
+            target,
+            density,
+        )
 
         output_name = f"hop{hop:02d}_{source}-to-{target}.func.gii"
 
@@ -256,20 +260,27 @@ def test_surface_transform_cycles(
     )
 
     assert surface is not None, (
-        f"Missing midthickness surface for {ORIGIN} at {density} ({HEMISPHERE})."
+        f"Missing midthickness surface for {ORIGIN} at {density} "
+        f"({HEMISPHERE})."
     )
 
     surface_file = Path(surface.fetch())
 
-    assert surface_file.exists(), f"Missing midthickness surface: {surface_file}"
+    assert surface_file.exists(), (
+        f"Missing midthickness surface: {surface_file}"
+    )
 
     metric_file = _make_surface_metric(
         surface_file,
         tmp_path / f"{ORIGIN}_{density}_{HEMISPHERE}_metric.func.gii",
     )
 
-    assert metric_file.exists(), f"Failed to create metric: {metric_file}"
-    assert metric_file.stat().st_size > 0, f"Created metric is empty: {metric_file}"
+    assert metric_file.exists(), (
+        f"Failed to create metric: {metric_file}"
+    )
+    assert metric_file.stat().st_size > 0, (
+        f"Created metric is empty: {metric_file}"
+    )
 
     # ------------------------------------------------------------------
     # Find all return paths and retain every shortest possibility.
@@ -281,15 +292,32 @@ def test_surface_transform_cycles(
     )
 
     assert all_paths, (
-        f"No return paths found from '{ORIGIN}' in the surface transformation graph."
+        f"No return paths found from '{ORIGIN}' "
+        "in the surface transformation graph."
     )
 
     shortest_paths = _shortest_paths(all_paths)
 
+    for path in shortest_paths:
+        executable = all(
+            _find_executable_density(
+                graph,
+                source,
+                target,
+            )
+            is not None
+            for source, target in pairwise(path)
+        )
+
+        logger.info(
+            "Shortest path: %s | executable=%s",
+            " -> ".join(path),
+            executable,
+        )
+
     valid_paths = _valid_cycle_paths(
         graph,
         shortest_paths,
-        HEMISPHERE,
     )
 
     logger.info(
@@ -319,9 +347,6 @@ def test_surface_transform_cycles(
 
     # ------------------------------------------------------------------
     # Run each shortest cycle.
-    #
-    # All transformation outputs are kept under pytest's temporary
-    # directory. They are automatically removed when the test completes.
     # ------------------------------------------------------------------
 
     results: list[dict[str, object]] = []
@@ -331,6 +356,13 @@ def test_surface_transform_cycles(
         workdir.mkdir(
             parents=True,
             exist_ok=True,
+        )
+
+        logger.info(
+            "Running cycle %d/%d: %s",
+            cycle_number + 1,
+            len(valid_paths),
+            " -> ".join(path),
         )
 
         roundtrip = _transform_cycle(
@@ -378,7 +410,10 @@ def test_surface_transform_cycles(
         frame.to_string(index=False),
     )
 
-    output_file = output_dir / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.csv"
+    output_file = (
+        output_dir
+        / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.csv"
+    )
 
     frame.to_csv(
         output_file,
@@ -390,12 +425,18 @@ def test_surface_transform_cycles(
         output_file,
     )
 
-    figure_file = output_dir / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.png"
+    figure_file = (
+        output_dir
+        / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.png"
+    )
 
     save_cycle_figure(
         results,
         figure_file,
-        title=(f"Surface Cycle Benchmark: {ORIGIN} ({density}, {HEMISPHERE})"),
+        title=(
+            f"Surface Cycle Benchmark: "
+            f"{ORIGIN} ({density}, {HEMISPHERE})"
+        ),
     )
 
     logger.info(
@@ -405,10 +446,6 @@ def test_surface_transform_cycles(
 
     # ------------------------------------------------------------------
     # Basic sanity checks.
-    #
-    # This is a benchmark, not a hard-threshold regression test. We still
-    # require finite comparison metrics so that an invalid transformation
-    # cannot silently produce a meaningless benchmark.
     # ------------------------------------------------------------------
 
     assert np.isfinite(frame["pearson_r"]).all(), (
