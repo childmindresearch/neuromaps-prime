@@ -1,30 +1,39 @@
-"""Regression benchmark for shortest surface transformation cycles.
+"""Regression benchmark for surface transformation round trips.
 
 This test benchmarks end-to-end surface transformation accuracy on the real
-NeuromapsPrime graph using standard template surfaces.
+NeuromapsPrime graph.
 
 A deterministic vertex-wise metric is generated from the origin template's
-midthickness surface, propagated through every shortest executable return path
-in the surface transformation graph, and compared with the original metric
-after returning to the starting space.
+midthickness surface, propagated through every available round-trip route, and
+compared with the original metric after returning to the starting space.
 
-The benchmark is intentionally independent of surface annotations. The metric
-is generated directly from the standard midthickness surface so that private
-annotation resources do not affect the test.
+Unlike a shortest-path benchmark, this test evaluates all logical return
+cycles represented in the graph. A logical transformation edge may itself
+require multiple executable surface transformations.
 
-Only the shortest return paths are evaluated. Every shortest path is retained
-when each hop has a compatible surface transform and target surface at the
-benchmark density.
+For example, a logical route such as::
 
-The benchmark uses a single density throughout each cycle whenever that
-density is available for every hop. This prevents a lower-density transform
-from being selected simply because it sorts first in the graph.
+    Yerkes19 -> fsaverage -> Yerkes19
 
-Metrics recorded for each transformation cycle include:
+may be executed as::
 
+    Yerkes19 -> fsLR -> fsaverage -> fsLR -> Yerkes19
+
+when the direct Yerkes19 <-> fsaverage resources are unavailable but the
+intermediate fsLR resources make the transformation executable.
+
+The benchmark is intentionally independent of surface annotations. The
+metric is generated directly from the standard midthickness surface so that
+private annotation resources do not affect the test.
+
+Metrics recorded for each round trip include:
+
+- Logical transformation path.
+- Actual executable transformation path.
+- Number of executable transformations.
+- Number of logical transformations.
 - Pearson correlation between original and round-tripped metric.
 - Maximum absolute difference between original and round-tripped values.
-- Number of transformations in the cycle.
 
 Run with::
 
@@ -39,6 +48,7 @@ from pathlib import Path
 from typing import Literal
 
 import nibabel as nib
+import networkx as nx
 import numpy as np
 import pandas as pd
 import pytest
@@ -59,6 +69,7 @@ logger = logging.getLogger(__name__)
 
 ORIGIN = "Yerkes19"
 HEMISPHERE = "left"
+DENSITY = "32k"
 
 
 # -------------------------------------------------------------------------
@@ -84,92 +95,34 @@ def output_dir() -> Path:
 
 
 # -------------------------------------------------------------------------
-# Helpers
+# Surface resource helpers
 # -------------------------------------------------------------------------
 
 
-def _find_executable_surface(
+def _has_surface_transform(
     graph: NeuromapsGraph,
     source: str,
     target: str,
     hemisphere: Literal["left", "right"],
-    preferred_density: str | None = None,
-) -> tuple[str, str] | None:
-    """Find an executable surface transform and its target density.
-
-    Args:
-        graph: NeuromapsPrime graph.
-        source: Source template space.
-        target: Target template space.
-        hemisphere: Hemisphere to use.
-        preferred_density: Density to prefer when selecting a transform.
-            When supplied, a transform at this density is selected if one
-            exists with a corresponding target surface.
-
-    Returns:
-        ``(density, resource_type)`` for an executable hop, or ``None`` when
-        no compatible transform and target surface are available.
-
-    Notes:
-        The graph may contain multiple transforms between the same spaces at
-        different densities. Density selection must therefore be explicit.
-
-        In particular, both Yerkes19 <-> fsLR have 10k and 32k transforms.
-        Sorting densities lexicographically would select 10k first, even when
-        the benchmark metric was created on a 32k surface. The preferred
-        density avoids that unintended downsampling.
-    """
+    density: str,
+) -> bool:
+    """Return whether a surface transform is executable at ``density``."""
     transforms = graph.search_surface_transforms(
         source_space=source,
         target_space=target,
         hemisphere=hemisphere,
+        density=density,
     )
 
     if not transforms:
-        return None
+        return False
 
-    # Prefer the requested benchmark density.
-    if preferred_density is not None:
-        preferred = [
-            transform
-            for transform in transforms
-            if transform.density == preferred_density
-        ]
-
-        # Only use the preferred-density transform if the corresponding
-        # target surface actually exists.
-        preferred = sorted(
-            preferred,
-            key=lambda transform: (
-                transform.resource_type != "sphere",
-            ),
-        )
-
-        for transform in preferred:
-            target_surface = graph.fetch_surface_atlas(
-                space=target,
-                density=preferred_density,
-                hemisphere=hemisphere,
-                resource_type=transform.resource_type,
-            )
-
-            if target_surface is not None:
-                return preferred_density, transform.resource_type
-
-    # Fall back to any executable transform. Sphere transforms are preferred
-    # because they are the standard resource for Workbench spherical
-    # resampling.
-    transforms = sorted(
+    for transform in sorted(
         transforms,
         key=lambda transform: (
             transform.resource_type != "sphere",
-            transform.density,
         ),
-    )
-
-    for transform in transforms:
-        density = transform.density
-
+    ):
         target_surface = graph.fetch_surface_atlas(
             space=target,
             density=density,
@@ -177,12 +130,192 @@ def _find_executable_surface(
             resource_type=transform.resource_type,
         )
 
-        if target_surface is None:
-            continue
+        if target_surface is not None:
+            return True
 
-        return density, transform.resource_type
+    return False
+
+
+def _find_executable_surface(
+    graph: NeuromapsGraph,
+    source: str,
+    target: str,
+    hemisphere: Literal["left", "right"],
+    density: str,
+) -> tuple[str, str] | None:
+    """Find an executable surface transform at the requested density.
+
+    Sphere transforms are preferred because they are the standard resources
+    for Workbench spherical resampling.
+
+    Returns:
+        ``(density, resource_type)`` if an executable transform exists,
+        otherwise ``None``.
+    """
+    transforms = graph.search_surface_transforms(
+        source_space=source,
+        target_space=target,
+        hemisphere=hemisphere,
+        density=density,
+    )
+
+    transforms = sorted(
+        transforms,
+        key=lambda transform: (
+            transform.resource_type != "sphere",
+        ),
+    )
+
+    for transform in transforms:
+        target_surface = graph.fetch_surface_atlas(
+            space=target,
+            density=density,
+            hemisphere=hemisphere,
+            resource_type=transform.resource_type,
+        )
+
+        if target_surface is not None:
+            return density, transform.resource_type
 
     return None
+
+
+# -------------------------------------------------------------------------
+# Executable route resolution
+# -------------------------------------------------------------------------
+
+
+def _surface_graph(
+    graph: NeuromapsGraph,
+    hemisphere: Literal["left", "right"],
+    density: str,
+) -> nx.DiGraph:
+    """Build a graph containing executable surface transformations.
+
+    Every directed edge represents a surface transformation that can be
+    executed at the benchmark density.
+    """
+    surface_graph = nx.DiGraph()
+
+    for source, target, key in graph.edges(keys=True):
+        if key != graph.surface_to_surface_key:
+            continue
+
+        if _has_surface_transform(
+            graph,
+            source,
+            target,
+            hemisphere,
+            density,
+        ):
+            surface_graph.add_edge(
+                source,
+                target,
+            )
+
+    return surface_graph
+
+
+def _find_executable_route(
+    graph: NeuromapsGraph,
+    source: str,
+    target: str,
+    hemisphere: Literal["left", "right"],
+    density: str,
+    forbidden: set[str] | None = None,
+) -> tuple[str, ...] | None:
+    """Find an executable surface route between two spaces.
+
+    The route may contain intermediate template spaces.
+
+    Args:
+        graph: NeuromapsPrime graph.
+        source: Starting space.
+        target: Destination space.
+        hemisphere: Hemisphere to use.
+        density: Surface density required for every hop.
+        forbidden: Spaces that should not be traversed.
+
+    Returns:
+        Tuple containing the executable route, including source and target,
+        or ``None`` when no route exists.
+    """
+    surface_graph = _surface_graph(
+        graph,
+        hemisphere,
+        density,
+    )
+
+    if source not in surface_graph or target not in surface_graph:
+        return None
+
+    if forbidden:
+        surface_graph = surface_graph.copy()
+        surface_graph.remove_nodes_from(
+            node
+            for node in forbidden
+            if node not in {source, target}
+        )
+
+    try:
+        return tuple(
+            nx.shortest_path(
+                surface_graph,
+                source=source,
+                target=target,
+            )
+        )
+    except nx.NetworkXNoPath:
+        return None
+
+
+def _expand_logical_path(
+    graph: NeuromapsGraph,
+    logical_path: tuple[str, ...],
+    hemisphere: Literal["left", "right"],
+    density: str,
+) -> tuple[str, ...] | None:
+    """Expand a logical cycle into executable surface transformations.
+
+    Each logical edge is resolved independently. Intermediate spaces are
+    allowed, but the resolver avoids using spaces that have already been
+    traversed unnecessarily.
+
+    Example::
+
+        logical:
+            Yerkes19 -> fsaverage -> Yerkes19
+
+        executable:
+            Yerkes19 -> fsLR -> fsaverage -> fsLR -> Yerkes19
+    """
+    executable_path: list[str] = [logical_path[0]]
+    used_spaces: set[str] = {logical_path[0]}
+
+    for source, target in pairwise(logical_path):
+        current_source = executable_path[-1]
+
+        route = _find_executable_route(
+            graph,
+            current_source,
+            target,
+            hemisphere,
+            density,
+            forbidden=used_spaces - {current_source, target},
+        )
+
+        if route is None:
+            return None
+
+        executable_path.extend(route[1:])
+        used_spaces.update(route)
+
+    return tuple(executable_path)
+
+
+# -------------------------------------------------------------------------
+# Metric generation
+# -------------------------------------------------------------------------
 
 
 def _make_surface_metric(
@@ -226,47 +359,9 @@ def _make_surface_metric(
     return output_file
 
 
-def _shortest_paths(
-    paths: list[tuple[str, ...]],
-) -> list[tuple[str, ...]]:
-    """Return all paths having the minimum number of transformation hops."""
-    if not paths:
-        return []
-
-    shortest_length = min(len(path) - 1 for path in paths)
-
-    return [
-        path
-        for path in paths
-        if len(path) - 1 == shortest_length
-    ]
-
-
-def _valid_cycle_paths(
-    graph: NeuromapsGraph,
-    paths: list[tuple[str, ...]],
-    density: str,
-) -> list[tuple[str, ...]]:
-    """Return cycles executable entirely at the requested density."""
-    valid_paths: list[tuple[str, ...]] = []
-
-    for path in paths:
-        executable = all(
-            _find_executable_surface(
-                graph,
-                source,
-                target,
-                HEMISPHERE,
-                preferred_density=density,
-            )
-            is not None
-            for source, target in pairwise(path)
-        )
-
-        if executable:
-            valid_paths.append(path)
-
-    return valid_paths
+# -------------------------------------------------------------------------
+# Transformation output
+# -------------------------------------------------------------------------
 
 
 def _resolve_transform_output(
@@ -274,13 +369,7 @@ def _resolve_transform_output(
     output_name: str,
     workdir: Path,
 ) -> Path:
-    """Resolve a transformation output returned by the graph transformer.
-
-    Workbench runs inside a Docker container with a writable ``/styx_output``
-    directory. Therefore the transformer receives a filename rather than an
-    absolute host path. Depending on the runner version, the transformer may
-    return either the generated path or just the output filename.
-    """
+    """Resolve a transformation output returned by the graph transformer."""
     if result is not None:
         result_path = Path(result)
 
@@ -303,6 +392,11 @@ def _resolve_transform_output(
     )
 
 
+# -------------------------------------------------------------------------
+# Cycle execution
+# -------------------------------------------------------------------------
+
+
 def _transform_cycle(
     graph: NeuromapsGraph,
     metric_file: Path,
@@ -311,14 +405,8 @@ def _transform_cycle(
     workdir: Path,
     density: str,
 ) -> Path:
-    """Transform a metric through every hop of a cycle.
-
-    Every hop is explicitly performed at ``density``. This ensures that a
-    cycle such as Yerkes19 -> fsLR -> Yerkes19 stays at 32k when 32k resources
-    are available in both directions.
-    """
+    """Transform a metric through every executable hop in a cycle."""
     current_metric = metric_file
-    current_density = density
 
     for hop, (source, target) in enumerate(pairwise(path)):
         available = _find_executable_surface(
@@ -326,25 +414,17 @@ def _transform_cycle(
             source,
             target,
             hemisphere,
-            preferred_density=density,
+            density,
         )
 
         if available is None:
             raise RuntimeError(
-                f"No executable surface transform for hop '{source}' -> "
-                f"'{target}' at density '{density}' on path "
-                f"{' -> '.join(path)}"
+                f"No executable surface transform for hop "
+                f"'{source}' -> '{target}' at density '{density}' "
+                f"on path {' -> '.join(path)}"
             )
 
-        transform_density, geometry = available
-
-        if transform_density != density:
-            raise RuntimeError(
-                f"Unexpected density for hop '{source}' -> '{target}': "
-                f"expected '{density}', got '{transform_density}'."
-            )
-
-        target_density = density
+        _, geometry = available
 
         logger.info(
             "hop %d: %s -> %s | source_density=%s | target_density=%s | "
@@ -352,8 +432,8 @@ def _transform_cycle(
             hop,
             source,
             target,
-            current_density,
-            target_density,
+            density,
+            density,
             geometry,
         )
 
@@ -368,8 +448,8 @@ def _transform_cycle(
             target_space=target,
             hemisphere=hemisphere,
             output_file_path=output_name,
-            source_density=current_density,
-            target_density=target_density,
+            source_density=density,
+            target_density=density,
         )
 
         current_metric = _resolve_transform_output(
@@ -377,8 +457,6 @@ def _transform_cycle(
             output_name,
             workdir,
         )
-
-        current_density = target_density
 
     return current_metric
 
@@ -393,13 +471,13 @@ def test_surface_transform_cycles(
     output_dir: Path,
     tmp_path: Path,
 ) -> None:
-    """Benchmark shortest executable surface transformation cycles."""
+    """Benchmark all executable surface transformation round trips."""
     logging.basicConfig(level=logging.INFO)
 
-    density = graph.find_highest_density(ORIGIN)
+    density = DENSITY
 
     # ------------------------------------------------------------------
-    # Create a deterministic metric from the standard midthickness surface.
+    # Create deterministic metric.
     # ------------------------------------------------------------------
 
     surface = graph.fetch_surface_atlas(
@@ -434,81 +512,79 @@ def test_surface_transform_cycles(
     )
 
     # ------------------------------------------------------------------
-    # Find all return paths and retain every shortest possibility.
+    # Find every logical return path.
     # ------------------------------------------------------------------
 
-    all_paths = find_return_paths(
+    logical_paths = find_return_paths(
         graph,
         ORIGIN,
     )
 
-    assert all_paths, (
+    assert logical_paths, (
         f"No return paths found from '{ORIGIN}' "
         "in the surface transformation graph."
     )
 
-    shortest_paths = _shortest_paths(all_paths)
-
-    for path in shortest_paths:
-        executable = all(
-            _find_executable_surface(
-                graph,
-                source,
-                target,
-                HEMISPHERE,
-                preferred_density=density,
-            )
-            is not None
-            for source, target in pairwise(path)
-        )
-
-        logger.info(
-            "Shortest path: %s | executable=%s",
-            " -> ".join(path),
-            executable,
-        )
-
-    valid_paths = _valid_cycle_paths(
-        graph,
-        shortest_paths,
-        density,
-    )
-
     logger.info(
-        "Surface cycle benchmark for %s",
+        "Found %d logical return paths from %s",
+        len(logical_paths),
         ORIGIN,
     )
+
+    # ------------------------------------------------------------------
+    # Expand every logical path into an executable surface path.
+    # ------------------------------------------------------------------
+
+    cycles: list[tuple[tuple[str, ...], tuple[str, ...]]] = []
+
+    for logical_path in logical_paths:
+        executable_path = _expand_logical_path(
+            graph,
+            logical_path,
+            HEMISPHERE,
+            density,
+        )
+
+        if executable_path is None:
+            logger.info(
+                "Skipping non-executable logical path: %s",
+                " -> ".join(logical_path),
+            )
+            continue
+
+        cycles.append(
+            (
+                logical_path,
+                executable_path,
+            )
+        )
+
     logger.info(
-        "Density: %s",
+        "Executable return cycles at %s: %d",
         density,
-    )
-    logger.info(
-        "Total return paths: %d",
-        len(all_paths),
-    )
-    logger.info(
-        "Shortest return paths: %d",
-        len(shortest_paths),
-    )
-    logger.info(
-        "Executable shortest return paths at %s: %d",
-        density,
-        len(valid_paths),
+        len(cycles),
     )
 
-    assert valid_paths, (
-        f"No executable shortest transformation cycles found from "
+    for logical_path, executable_path in cycles:
+        logger.info(
+            "Executable cycle: %s | path: %s",
+            " -> ".join(logical_path),
+            " -> ".join(executable_path),
+        )
+
+    assert cycles, (
+        f"No executable surface transformation cycles found from "
         f"'{ORIGIN}' at density '{density}'."
     )
 
     # ------------------------------------------------------------------
-    # Run each shortest cycle.
+    # Run every executable round trip.
     # ------------------------------------------------------------------
 
     results: list[dict[str, object]] = []
 
-    for cycle_number, path in enumerate(valid_paths):
-        workdir = tmp_path / f"cycle_{cycle_number:02d}"
+    for cycle_number, (logical_path, path) in enumerate(cycles):
+        workdir = tmp_path / f"cycle_{cycle_number:03d}"
         workdir.mkdir(
             parents=True,
             exist_ok=True,
@@ -517,7 +593,7 @@ def test_surface_transform_cycles(
         logger.info(
             "Running cycle %d/%d: %s",
             cycle_number + 1,
-            len(valid_paths),
+            len(cycles),
             " -> ".join(path),
         )
 
@@ -536,8 +612,10 @@ def test_surface_transform_cycles(
         )
 
         result = {
+            "logical_path": " -> ".join(logical_path),
             "path": " -> ".join(path),
             "n_hops": len(path) - 1,
+            "n_logical_hops": len(logical_path) - 1,
             "pearson_r": pearson_r,
             "max_abs_diff": max_abs_diff,
         }
@@ -551,13 +629,17 @@ def test_surface_transform_cycles(
             max_abs_diff,
         )
 
+    assert results, (
+        f"No executable round-trip results were produced from '{ORIGIN}'."
+    )
+
     # ------------------------------------------------------------------
-    # Summarize benchmark results.
+    # Summarize all round trips.
     # ------------------------------------------------------------------
 
     frame = pd.DataFrame(results).sort_values(
-        "pearson_r",
-        ascending=False,
+        ["n_logical_hops", "logical_path"],
+        ascending=[True, True],
     )
 
     logger.info(
@@ -582,6 +664,10 @@ def test_surface_transform_cycles(
         "Saved cycle benchmark results: %s",
         output_file,
     )
+
+    # ------------------------------------------------------------------
+    # Figure.
+    # ------------------------------------------------------------------
 
     figure_file = (
         output_dir
