@@ -84,13 +84,30 @@ MIN_MEAN_PEARSON: dict[str, float] = {
     "CIVETNMT": 0.501674,
     "MEBRAINS": 0.561245,
     "D99": 0.610269,
-    "NMT2Sym": 0.000000,
+    "NMT2Sym": 0.541054,
     "all": 0.5,
 }
 
 LOG_COMMANDS = True
 
+def _get_min_mean_pearson(origin: str) -> float:
+    """Return the configured regression threshold for an origin.
 
+    A specific origin uses its own recorded baseline. When the test is
+    configured with ``ORIGIN="all"``, the explicit ``"all"`` threshold is
+    used for every origin.
+    """
+    threshold_key = "all" if ORIGIN == "all" else origin
+
+    try:
+        return MIN_MEAN_PEARSON[threshold_key]
+    except KeyError as exc:
+        raise ValueError(
+            f"No Pearson-r regression threshold configured for "
+            f"origin '{threshold_key}'. "
+            f"Configured thresholds: {sorted(MIN_MEAN_PEARSON)}"
+        ) from exc
+    
 # -------------------------------------------------------------------------
 # Command logging
 # -------------------------------------------------------------------------
@@ -744,6 +761,7 @@ def _save_cycle_results(
     rows: list[dict[str, object]],
     plot_dir: Path,
     command_handler: CommandLogHandler | None,
+    min_mean_pearson: float,
 ) -> int:
     """Save CSV/TXT cycle results and validate regression output."""
     if not rows:
@@ -806,7 +824,7 @@ def _save_cycle_results(
             separator,
             f"Total cycles: {len(rows)}",
             f"Mean Pearson r: {mean_r:.6f}",
-            f"Minimum required mean Pearson r: {MIN_MEAN_PEARSON:.6f}",
+            f"Minimum required mean Pearson r: {min_mean_pearson:.6f}",
         ]
     )
 
@@ -828,10 +846,12 @@ def _save_cycle_results(
             command_handler.log_file,
         )
 
-    assert mean_r >= MIN_MEAN_PEARSON, (
+    assert mean_r >= min_mean_pearson, (
         "Average round-trip correlation regressed: "
+        f"origin={origin}, "
+        f"hemisphere={hemisphere}, "
         f"mean r={mean_r:.6f}, "
-        f"threshold={MIN_MEAN_PEARSON:.6f}. "
+        f"threshold={min_mean_pearson:.6f}. "
         f"Inspect outputs in {OUTPUT_DIR}."
     )
 
@@ -948,6 +968,14 @@ def _run_origin_hemisphere(
         exist_ok=True,
     )
 
+    min_mean_pearson = _get_min_mean_pearson(origin)
+
+    logger.info(
+        "Regression threshold for %s: mean Pearson r >= %.6f",
+        origin,
+        min_mean_pearson,
+    )
+
     command_handler = None
 
     if LOG_COMMANDS:
@@ -1054,4 +1082,5 @@ def _run_origin_hemisphere(
         rows=rows,
         plot_dir=plot_dir,
         command_handler=command_handler,
+        min_mean_pearson=min_mean_pearson,
     )
