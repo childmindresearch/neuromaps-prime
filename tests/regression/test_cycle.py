@@ -71,7 +71,7 @@ OUTPUT_DIR.mkdir(
 
 # Set to a list containing one space to test only that origin, or use
 # "all" to test every surface-layer graph node.
-ORIGIN: str = "Yerkes19"
+ORIGIN: str = "CIVETNMT"
 
 HEMISPHERES = (
     "left",
@@ -828,6 +828,13 @@ def _save_cycle_results(
         f"threshold={MIN_MEAN_PEARSON:.6f}. "
         f"Inspect outputs in {OUTPUT_DIR}."
     )
+
+    """ Current r values are as follows:
+    Yerkes19: r=0.572255
+    CIVETNMT:
+    MEBRAINS:
+    D99:
+    NMT2Sym:"""
 
     return len(rows)
 
