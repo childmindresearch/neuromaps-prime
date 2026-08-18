@@ -22,7 +22,6 @@ MOCK_OWNER = "mockowner"
 MOCK_REPO = "mockrepo"
 MOCK_REF = "v0.1"
 MOCK_PATH = "data/test.txt"
-MOCK_URL = f"https://github.com/{MOCK_OWNER}/{MOCK_REPO}/blob/{MOCK_REF}/{MOCK_PATH}"
 MOCK_DOWNLOAD_URL = (
     f"https://raw.githubusercontent.com/{MOCK_OWNER}/{MOCK_REPO}/{MOCK_REF}/{MOCK_PATH}"
 )
@@ -66,14 +65,6 @@ class TestGitHubFileMeta:
 class TestGitHubStorage:
     """Test suite for GitHubStorage download and metadata retrieval."""
 
-    def test_parse_blob_url(self) -> None:
-        """Test blob URL is correctly parsed into owner/repo/ref/path."""
-        owner, repo, ref, path = GitHubStorage._parse(MOCK_URL)
-        assert owner == MOCK_OWNER
-        assert repo == MOCK_REPO
-        assert ref == MOCK_REF
-        assert path == MOCK_PATH
-
     def test_parse_raw_url(self) -> None:
         """Test bare raw URL is correctly parsed into owner/repo/ref/path."""
         owner, repo, ref, path = GitHubStorage._parse(MOCK_RAW_URL)
@@ -98,16 +89,23 @@ class TestGitHubStorage:
         assert ref == MOCK_REF
         assert path == MOCK_PATH
 
+    def test_parse_blob_url_raises(self) -> None:
+        """Test blob URL is raises ValueError."""
+        with pytest.raises(ValueError, match="unsupported"):
+            GitHubStorage._parse(
+                f"https://github.com/{MOCK_OWNER}/{MOCK_REPO}/blob/{MOCK_REF}/{MOCK_PATH}"
+            )
+
     def test_parse_invalid_url_raises(self) -> None:
         """Test parsing a non-GitHub URL raises ValueError."""
-        with pytest.raises(ValueError, match="Unrecognized GitHub URL"):
+        with pytest.raises(ValueError, match="Unrecognized"):
             GitHubStorage._parse(f"https://github.com/{MOCK_OWNER}/{MOCK_REPO}")
 
     @patch("neuromaps_prime.remote.github.requests.get")
     def test_get_meta(self, mock_get: MagicMock, mock_meta_response: MagicMock) -> None:
         """Test get_meta returns parsed GitHubFileMeta and calls correct URL."""
         mock_get.return_value = mock_meta_response
-        meta = GitHubStorage().get_meta(MOCK_URL)
+        meta = GitHubStorage().get_meta(MOCK_RAW_URL)
         assert meta.name == "test.txt"
         assert meta.sha == MOCK_SHA
         mock_get.assert_called_once_with(
@@ -121,7 +119,7 @@ class TestGitHubStorage:
         """Test get_meta propagates HTTP errors from the remote server."""
         mock_get.return_value.raise_for_status.side_effect = Exception("HTTP Error")
         with pytest.raises(Exception, match="HTTP Error"):
-            GitHubStorage().get_meta(MOCK_URL)
+            GitHubStorage().get_meta(MOCK_RAW_URL)
 
     @patch("neuromaps_prime.remote.github.requests.get")
     def test_download_valid(
@@ -131,7 +129,7 @@ class TestGitHubStorage:
         mock_download = MagicMock(iter_content=MagicMock(return_value=[MOCK_CONTENT]))
         mock_get.side_effect = [mock_meta_response, mock_download]
         dest = tmp_path / "test.txt"
-        GitHubStorage().download(MOCK_URL, dest)
+        GitHubStorage().download(MOCK_RAW_URL, dest)
         assert dest.read_bytes() == MOCK_CONTENT
 
     @patch("neuromaps_prime.remote.github.requests.get")
@@ -144,7 +142,7 @@ class TestGitHubStorage:
         )
         mock_get.side_effect = [mock_meta_response, mock_download]
         with pytest.raises(ValueError, match="Checksum mismatch"):
-            GitHubStorage().download(MOCK_URL, tmp_path / "test.txt")
+            GitHubStorage().download(MOCK_RAW_URL, tmp_path / "test.txt")
 
     def test_default_chunk_size(self) -> None:
         """Test chunk_size defaults to 8192."""

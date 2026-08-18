@@ -30,6 +30,7 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import aiohttp
 import yaml
@@ -260,17 +261,39 @@ async def _get_range(
     )
 
 
+def _is_github_blob_url(url: str) -> bool:
+    """Return True if *url* is a GitHub ``/blob/`` file-page URL.
+
+    These are human-facing pages (e.g. ``github.com/owner/repo/blob/main/file``)
+    that render an HTML view rather than exposing the raw file, so they cannot
+    be consumed programmatically. Query strings and fragments are ignored.
+
+    Args:
+        url: A candidate URL string.
+
+    Returns:
+        True if the URL points at a ``github.com`` blob page, else False.
+    """
+    parts = urlsplit(url)
+    host = (parts.hostname or "").lower().removeprefix("www.")
+    if host != "github.com":
+        return False
+    segments = [s for s in parts.path.split("/") if s]
+    return len(segments) >= 3 and segments[2] == "blob"
+
+
 async def check_url(
     session: aiohttp.ClientSession,
     url: str,
     sources: list[Path],
 ) -> CheckResult:
-    """Probe *url* asynchronously without downloading its body.
+    """Validate *url* without downloading its body.
 
     Strategy:
-        1. Send a HEAD request, retrying on HTTP 429 with backoff.
-        2. On 403/405 (server rejects HEAD), fall back to :func:`_get_range`.
-        3. Map any other HTTP/network error to a failed :class:`CheckResult`.
+        1. Reject unsupported URL types (GitHub ``/blob/`` pages) up front.
+        2. Send a HEAD request, retrying on HTTP 429 with backoff.
+        3. On 403/405 (server rejects HEAD), fall back to :func:`_get_range`.
+        4. Map any other HTTP/network error to a failed :class:`CheckResult`.
 
     Args:
         session: Shared :class:`aiohttp.ClientSession`.
@@ -280,6 +303,14 @@ async def check_url(
     Returns:
         :class:`CheckResult` describing whether the URL is reachable.
     """
+    if _is_github_blob_url(url):
+        return CheckResult(
+            url,
+            ok=False,
+            detail="unsupported URL type: GitHub blob URL (use a raw file URL)",
+            sources=sources,
+        )
+
     result = await _probe(session, url=url, method="HEAD", sources=sources)
     if not result.ok and result.detail in _GET_RANGE_TRIGGER_DETAILS:
         return await _get_range(session, url, sources)
