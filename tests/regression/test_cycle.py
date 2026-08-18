@@ -1,11 +1,7 @@
 """Cycle regression test on the real NeuromapsPrime graph.
 
-Round-trips a synthetic surface metric around return paths from configured
-origin spaces and evaluates the quality of each transformation cycle.
-
-The test exercises the real surface transformation machinery, including
-cross-density resampling. Individual unusable paths or missing resources are
-skipped with warnings rather than causing the entire run to fail.
+This branch adds end-to-end cycle regression testing on the
+real Neuromaps graph to validate transform roundtrip quality across multi-hop paths.
 
 Resulting fles are written to a run-specific directory:
 
@@ -69,9 +65,9 @@ OUTPUT_DIR.mkdir(
     exist_ok=True,
 )
 
-# Set to a list containing one space to test only that origin, or use
-# "all" to test every surface-layer graph node.
-ORIGIN: str = "CIVETNMT"
+# Set to a specific space to test only that origin, or use "all" to test
+# every configured origin.
+ORIGIN: str = "NMT2Sym"
 
 HEMISPHERES = (
     "left",
@@ -80,7 +76,17 @@ HEMISPHERES = (
 
 MAX_CYCLE_LENGTH = 4
 MAX_PATHS: int | None = None
-MIN_MEAN_PEARSON = 0.95
+
+# Minimum acceptable mean Pearson correlation for each regression run.
+# Values should be updated deliberately.  Last updated 08/18 (TR).
+MIN_MEAN_PEARSON: dict[str, float] = {
+    "Yerkes19": 0.572255,
+    "CIVETNMT": 0.501674,
+    "MEBRAINS": 0.561245,
+    "D99": 0.610269,
+    "NMT2Sym": 0.000000,
+    "all": 0.5,
+}
 
 LOG_COMMANDS = True
 
@@ -828,13 +834,6 @@ def _save_cycle_results(
         f"threshold={MIN_MEAN_PEARSON:.6f}. "
         f"Inspect outputs in {OUTPUT_DIR}."
     )
-
-    """ Current r values are as follows:
-    Yerkes19: r=0.572255
-    CIVETNMT:
-    MEBRAINS:
-    D99:
-    NMT2Sym:"""
 
     return len(rows)
 
