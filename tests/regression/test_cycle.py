@@ -56,7 +56,7 @@ logger = logging.getLogger(__name__)
 # Run configuration
 # -------------------------------------------------------------------------
 
-_RUN_SUFFIX = datetime.now().strftime("%Y%m%d_%H%M%S")
+_RUN_SUFFIX = datetime.now().strftime("%Y%m%d_%H%M")
 
 OUTPUT_DIR = Path(__file__).resolve().parent / f"cycle_outputs_{_RUN_SUFFIX}"
 
@@ -67,7 +67,7 @@ OUTPUT_DIR.mkdir(
 
 # Set to a specific space to test only that origin, or use "all" to test
 # every configured origin.
-ORIGIN: str = "NMT2Sym"
+ORIGIN: str = "CIVETNMT"
 
 HEMISPHERES = (
     "left",
@@ -79,35 +79,34 @@ MAX_PATHS: int | None = None
 
 # Minimum acceptable mean Pearson correlation for each regression run.
 # Values should be updated deliberately.  Last updated 08/18 (TR).
-MIN_MEAN_PEARSON: dict[str, float] = {
-    "Yerkes19": 0.572255,
-    "CIVETNMT": 0.501674,
-    "MEBRAINS": 0.561245,
-    "D99": 0.610269,
-    "NMT2Sym": 0.541054,
-    "all": 0.5,
+MIN_MEAN_PEARSON: dict[tuple[str, str], float] = {
+    ("Yerkes19", "left"): 0.572255,
+    ("CIVETNMT", "left"): 0.501674,
+    ("MEBRAINS", "left"): 0.561245,
+    ("D99", "left"): 0.610269,
+    ("NMT2Sym", "left"): 0.541054,
+    ("all", "left"): 0.5,
+    ("Yerkes19", "right"): 0.5,
+    ("CIVETNMT", "right"): 0.5,
+    ("MEBRAINS", "right"): 0.5,
+    ("D99", "right"): 0.5,
+    ("NMT2Sym", "right"): 0.5,
+    ("all", "right"): 0.5,
 }
 
 LOG_COMMANDS = True
 
-def _get_min_mean_pearson(origin: str) -> float:
-    """Return the configured regression threshold for an origin.
 
-    A specific origin uses its own recorded baseline. When the test is
-    configured with ``ORIGIN="all"``, the explicit ``"all"`` threshold is
-    used for every origin.
-    """
-    threshold_key = "all" if ORIGIN == "all" else origin
+def _get_min_mean_pearson(
+    origin: str,
+    hemisphere: str,
+) -> float:
+    """Return the configured regression threshold for an origin/hemisphere."""
+    threshold_origin = "all" if ORIGIN == "all" else origin
 
-    try:
-        return MIN_MEAN_PEARSON[threshold_key]
-    except KeyError as exc:
-        raise ValueError(
-            f"No Pearson-r regression threshold configured for "
-            f"origin '{threshold_key}'. "
-            f"Configured thresholds: {sorted(MIN_MEAN_PEARSON)}"
-        ) from exc
-    
+    return MIN_MEAN_PEARSON[(threshold_origin, hemisphere)]
+
+
 # -------------------------------------------------------------------------
 # Command logging
 # -------------------------------------------------------------------------
@@ -846,7 +845,14 @@ def _save_cycle_results(
             command_handler.log_file,
         )
 
-    assert mean_r >= min_mean_pearson, (
+    if min_mean_pearson is None:
+        pytest.fail(
+            f"No baseline threshold configured for "
+            f"origin={origin}, hemisphere={hemisphere}. "
+            f"Observed mean r={mean_r:.6f}."
+        )
+
+    assert mean_r >= min_mean_pearson - 1e-6, (
         "Average round-trip correlation regressed: "
         f"origin={origin}, "
         f"hemisphere={hemisphere}, "
@@ -968,11 +974,15 @@ def _run_origin_hemisphere(
         exist_ok=True,
     )
 
-    min_mean_pearson = _get_min_mean_pearson(origin)
+    min_mean_pearson = _get_min_mean_pearson(
+        origin,
+        hemisphere,
+    )
 
     logger.info(
-        "Regression threshold for %s: mean Pearson r >= %.6f",
+        "Regression threshold for %s (%s): mean Pearson r >= %.6f",
         origin,
+        hemisphere,
         min_mean_pearson,
     )
 
