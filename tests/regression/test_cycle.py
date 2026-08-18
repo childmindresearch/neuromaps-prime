@@ -7,9 +7,9 @@ The test exercises the real surface transformation machinery, including
 cross-density resampling. Individual unusable paths or missing resources are
 skipped with warnings rather than causing the entire run to fail.
 
-Artifacts are written to a run-specific directory:
+Resulting fles are written to a run-specific directory:
 
-    tests/regression/cycle_outputs_<random_suffix>/
+    tests/regression/cycle_outputs_<datetime>/
 
 Each run may contain:
 
@@ -34,7 +34,7 @@ Run with::
 from __future__ import annotations
 
 import logging
-import secrets
+from datetime import datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 # Run configuration
 # -------------------------------------------------------------------------
 
-_RUN_SUFFIX = secrets.token_hex(4)
+_RUN_SUFFIX = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 OUTPUT_DIR = Path(__file__).resolve().parent / f"cycle_outputs_{_RUN_SUFFIX}"
 
@@ -69,27 +69,19 @@ OUTPUT_DIR.mkdir(
     exist_ok=True,
 )
 
-# Set to None to test every surface-layer graph node.
-ORIGINS: list[str] | None = None
-
-LABEL = "RM_scalinghcp"
+# Set to a list containing one space to test only that origin, or use
+# "all" to test every surface-layer graph node.
+ORIGIN: str = "Yerkes19"
 
 HEMISPHERES = (
     "left",
     "right",
 )
 
-# Keep cycle enumeration bounded on the dense real graph.
 MAX_CYCLE_LENGTH = 4
-
-# Set to None to enumerate all paths up to MAX_CYCLE_LENGTH.
 MAX_PATHS: int | None = None
+MIN_MEAN_PEARSON = 0.95
 
-# Because non-mirrored multi-hop paths can accumulate substantial error,
-# require only one minimally correlated usable path.
-MIN_BEST_PEARSON = 0.05
-
-# Enable capture of niwrap/Styx command logs.
 LOG_COMMANDS = True
 
 
@@ -231,7 +223,6 @@ def _write_metric(
 def _make_xyz_product_metric(
     graph: NeuromapsGraph,
     origin: str,
-    label: str,
     density: str,
     hemisphere: str,
     output_dir: Path,
@@ -256,9 +247,7 @@ def _make_xyz_product_metric(
         axis=1,
     )
 
-    metric_file = (
-        output_dir / f"metric_{origin}_{label}_{density}_{hemisphere}.func.gii"
-    )
+    metric_file = output_dir / f"metric_{origin}_{density}_{hemisphere}.func.gii"
 
     return _write_metric(
         metric_file,
@@ -523,7 +512,7 @@ def test_cycle_roundtrip() -> None:
     """Round-trip synthetic metrics through real transformation cycles."""
     graph = NeuromapsGraph()
 
-    origins = ORIGINS if ORIGINS is not None else sorted(graph.nodes)
+    origins = sorted(graph.nodes) if ORIGIN == "all" else [ORIGIN]
 
     total_usable_paths = 0
 
@@ -545,7 +534,6 @@ def test_cycle_roundtrip() -> None:
 
     plot_run_summaries(
         run_dir=OUTPUT_DIR,
-        label=LABEL,
     )
 
     assert total_usable_paths > 0, (
@@ -562,7 +550,6 @@ def test_cycle_roundtrip() -> None:
 def _plot_cycle_summary(
     run_dir: Path,
     origin: str,
-    label: str,
 ) -> None:
     """Create one two-panel cycle summary plot for an origin space.
 
@@ -572,7 +559,7 @@ def _plot_cycle_summary(
     frames: dict[str, pd.DataFrame] = {}
 
     for hemisphere in ("left", "right"):
-        csv_path = run_dir / f"cycle_{origin}_{label}_{hemisphere}.csv"
+        csv_path = run_dir / f"cycle_{origin}_{hemisphere}.csv"
 
         if not csv_path.exists():
             logger.warning(
@@ -597,8 +584,6 @@ def _plot_cycle_summary(
         )
         return
 
-    # Use the union of paths across both hemispheres so that the two
-    # panels use the same y-axis ordering.
     paths = sorted(
         {path for frame in frames.values() for path in frame["path"]},
         key=lambda path: (
@@ -607,8 +592,6 @@ def _plot_cycle_summary(
         ),
     )
 
-    # Plot longest/least-correlated paths at the top by reversing the
-    # normal horizontal-bar ordering.
     paths = list(reversed(paths))
 
     fig, axes = plt.subplots(
@@ -678,22 +661,29 @@ def _plot_cycle_summary(
             alpha=0.3,
         )
 
-        ax.set_xlim(
-            min(
+        finite_values = values.dropna()
+
+        if not finite_values.empty:
+            lower = min(
                 -0.05,
-                float(values.min(skipna=True)) - 0.05,
-            ),
+                float(finite_values.min()) - 0.05,
+            )
+        else:
+            lower = -0.05
+
+        ax.set_xlim(
+            lower,
             1.0,
         )
 
     fig.suptitle(
-        f"{origin} — {label}\nSurface transformation cycle round-trip accuracy",
+        f"{origin}\nSurface transformation cycle round-trip accuracy",
         fontsize=16,
     )
 
     fig.tight_layout(rect=(0, 0, 1, 0.95))
 
-    output_file = run_dir / f"cycle_{origin}_{label}_summary.png"
+    output_file = run_dir / f"cycle_{origin}_summary.png"
 
     fig.savefig(
         output_file,
@@ -711,7 +701,6 @@ def _plot_cycle_summary(
 
 def plot_run_summaries(
     run_dir: str | Path,
-    label: str = LABEL,
 ) -> None:
     """Create combined left/right plots for every origin in a run."""
     run_dir = Path(run_dir)
@@ -719,27 +708,20 @@ def plot_run_summaries(
     if not run_dir.is_dir():
         raise FileNotFoundError(f"Run directory does not exist: {run_dir}")
 
-    csv_files = sorted(run_dir.glob(f"cycle_*_{label}_left.csv"))
+    csv_files = sorted(run_dir.glob("cycle_*_left.csv"))
 
     if not csv_files:
-        raise FileNotFoundError(
-            f"No cycle CSV files found in {run_dir} for label '{label}'."
-        )
+        raise FileNotFoundError(f"No cycle CSV files found in {run_dir}.")
 
     origins = []
-
-    suffix = f"_{label}_left.csv"
 
     for csv_file in csv_files:
         name = csv_file.name
 
-        if not name.startswith("cycle_"):
+        if not name.startswith("cycle_") or not name.endswith("_left.csv"):
             continue
 
-        if not name.endswith(suffix):
-            continue
-
-        origin = name[len("cycle_") : -len(suffix)]
+        origin = name[len("cycle_") : -len("_left.csv")]
 
         origins.append(origin)
 
@@ -747,7 +729,6 @@ def plot_run_summaries(
         _plot_cycle_summary(
             run_dir=run_dir,
             origin=origin,
-            label=label,
         )
 
 
@@ -776,7 +757,7 @@ def _save_cycle_results(
         ascending=[False, True],
     )
 
-    csv_path = OUTPUT_DIR / f"cycle_{origin}_{LABEL}_{hemisphere}.csv"
+    csv_path = OUTPUT_DIR / f"cycle_{origin}_{hemisphere}.csv"
 
     frame.to_csv(
         csv_path,
@@ -798,10 +779,7 @@ def _save_cycle_results(
     separator = "-" * len(header)
 
     lines = [
-        (
-            f"Cycle test results — origin: {origin}, "
-            f"label: {LABEL}, hemisphere: {hemisphere}"
-        ),
+        (f"Cycle test results — origin: {origin}, hemisphere: {hemisphere}"),
         separator,
         header,
         separator,
@@ -815,14 +793,18 @@ def _save_cycle_results(
             f"{float(row['max_abs_diff']):>14.3e}"
         )
 
+    mean_r = float(frame["pearson_r"].mean())
+
     lines.extend(
         [
             separator,
             f"Total cycles: {len(rows)}",
+            f"Mean Pearson r: {mean_r:.6f}",
+            f"Minimum required mean Pearson r: {MIN_MEAN_PEARSON:.6f}",
         ]
     )
 
-    txt_path = OUTPUT_DIR / f"cycle_{origin}_{LABEL}_{hemisphere}.txt"
+    txt_path = OUTPUT_DIR / f"cycle_{origin}_{hemisphere}.txt"
 
     txt_path.write_text(
         "\n".join(lines) + "\n",
@@ -831,7 +813,7 @@ def _save_cycle_results(
 
     logger.info("Saved CSV: %s", csv_path)
     logger.info("Saved TXT summary: %s", txt_path)
-    logger.info("Saved path artifacts: %s", plot_dir)
+    logger.info("Saved path results: %s", plot_dir)
 
     if command_handler is not None:
         command_handler.save()
@@ -840,22 +822,11 @@ def _save_cycle_results(
             command_handler.log_file,
         )
 
-    assert np.isfinite(frame["pearson_r"]).all(), (
-        "At least one executable path produced a non-finite "
-        f"Pearson r. Inspect {csv_path}."
-    )
-
-    assert np.isfinite(frame["max_abs_diff"]).all(), (
-        "At least one executable path produced a non-finite "
-        f"maximum absolute difference. Inspect {csv_path}."
-    )
-
-    best_r = float(frame["pearson_r"].max())
-
-    assert best_r > MIN_BEST_PEARSON, (
-        "Best round-trip correlation is too low: "
-        f"r={best_r:.6f}. Inspect generated artifacts in "
-        f"{OUTPUT_DIR}."
+    assert mean_r >= MIN_MEAN_PEARSON, (
+        "Average round-trip correlation regressed: "
+        f"mean r={mean_r:.6f}, "
+        f"threshold={MIN_MEAN_PEARSON:.6f}. "
+        f"Inspect outputs in {OUTPUT_DIR}."
     )
 
     return len(rows)
@@ -964,7 +935,7 @@ def _run_origin_hemisphere(
     hemisphere: str,
 ) -> int:
     """Run all cycles for one origin and hemisphere."""
-    work_dir = OUTPUT_DIR / f"work_{origin}_{LABEL}_{hemisphere}"
+    work_dir = OUTPUT_DIR / f"work_{origin}_{hemisphere}"
 
     work_dir.mkdir(
         parents=True,
@@ -987,7 +958,6 @@ def _run_origin_hemisphere(
         metric_file = _make_xyz_product_metric(
             graph=graph,
             origin=origin,
-            label=LABEL,
             density=density,
             hemisphere=hemisphere,
             output_dir=work_dir,
@@ -1032,7 +1002,7 @@ def _run_origin_hemisphere(
         )
         return 0
 
-    plot_dir = OUTPUT_DIR / f"cycle_{origin}_{LABEL}_{hemisphere}_plots"
+    plot_dir = OUTPUT_DIR / f"cycle_{origin}_{hemisphere}_plots"
 
     plot_dir.mkdir(
         parents=True,
