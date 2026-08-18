@@ -999,7 +999,6 @@ source = { editable = "." }
 dependencies = [
     { name = "joblib" },
     { name = "matplotlib" },
-    { name = "matplotlib-surface-plotting" },
     { name = "networkx" },
     { name = "nibabel" },
     { name = "niwrap" },
@@ -1042,7 +1041,6 @@ validate = [
 requires-dist = [
     { name = "joblib", specifier = ">=1.5.3" },
     { name = "matplotlib", specifier = ">=3.10.7" },
-    { name = "matplotlib-surface-plotting", specifier = ">=0.14" },
     { name = "networkx", specifier = ">=3.6.1" },
     { name = "nibabel", specifier = ">=5.2.1" },
     { name = "niwrap", specifier = ">=0.9.6,<1.0" },
