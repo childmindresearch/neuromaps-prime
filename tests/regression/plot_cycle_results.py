@@ -141,9 +141,7 @@ def plot_origin(
             linewidth=1,
         )
 
-        ax.set_title(
-            f"{hemisphere.capitalize()} hemisphere ({len(frame)} cycles)"
-        )
+        ax.set_title(f"{hemisphere.capitalize()} hemisphere ({len(frame)} cycles)")
 
         ax.set_xlabel("Pearson r")
         ax.set_xlim(-1, 1)
@@ -200,8 +198,7 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(
         description=(
-            "Create left/right hemisphere cycle plots "
-            "from a regression run directory."
+            "Create left/right hemisphere cycle plots from a regression run directory."
         )
     )
 
@@ -218,10 +215,7 @@ def main() -> None:
         "--output-dir",
         type=Path,
         default=None,
-        help=(
-            "Directory for generated plots. "
-            "Defaults to the input run directory."
-        ),
+        help=("Directory for generated plots. Defaults to the input run directory."),
     )
 
     parser.add_argument(
@@ -236,14 +230,10 @@ def main() -> None:
     run_dir = args.run_dir.expanduser().resolve()
 
     if not run_dir.exists():
-        raise FileNotFoundError(
-            f"Run directory does not exist: {run_dir}"
-        )
+        raise FileNotFoundError(f"Run directory does not exist: {run_dir}")
 
     if not run_dir.is_dir():
-        raise NotADirectoryError(
-            f"Expected a directory: {run_dir}"
-        )
+        raise NotADirectoryError(f"Expected a directory: {run_dir}")
 
     output_dir = (
         args.output_dir.expanduser().resolve()
@@ -254,9 +244,7 @@ def main() -> None:
     grouped = find_cycle_csvs(run_dir)
 
     if not grouped:
-        raise FileNotFoundError(
-            f"No cycle CSV files found in {run_dir}"
-        )
+        raise FileNotFoundError(f"No cycle CSV files found in {run_dir}")
 
     logger.info(
         "Found results for %d origin space(s):",
@@ -271,9 +259,7 @@ def main() -> None:
         )
 
     for origin, hemisphere_files in sorted(grouped.items()):
-        output_path = (
-            output_dir / f"cycle_{origin}_left_right_pearson.png"
-        )
+        output_path = output_dir / f"cycle_{origin}_left_right_pearson.png"
 
         plot_origin(
             origin=origin,

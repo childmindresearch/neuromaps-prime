@@ -519,8 +519,7 @@ def _log_progress(
     )
 
 
-def test_cycle_roundtrip(
-) -> None:
+def test_cycle_roundtrip() -> None:
     """Round-trip synthetic metrics through real transformation cycles."""
     graph = NeuromapsGraph()
 
@@ -751,6 +750,7 @@ def plot_run_summaries(
             label=label,
         )
 
+
 def _save_cycle_results(
     origin: str,
     hemisphere: str,
@@ -860,6 +860,7 @@ def _save_cycle_results(
 
     return len(rows)
 
+
 def _run_cycle_path(
     graph: NeuromapsGraph,
     metric_file: Path,
@@ -955,6 +956,7 @@ def _run_cycle_path(
         "pearson_r": pearson_r,
         "max_abs_diff": max_abs_diff,
     }
+
 
 def _run_origin_hemisphere(
     graph: NeuromapsGraph,
