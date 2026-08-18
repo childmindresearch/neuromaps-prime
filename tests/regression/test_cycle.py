@@ -1,39 +1,30 @@
-"""Regression benchmark for surface transformation round trips.
+"""Cycle regression test on the real NeuromapsPrime graph.
 
-This test benchmarks end-to-end surface transformation accuracy on the real
-NeuromapsPrime graph.
+Round-trips a synthetic surface metric around return paths from configured
+origin spaces and evaluates the quality of each transformation cycle.
 
-A deterministic vertex-wise metric is generated from the origin template's
-midthickness surface, propagated through every available round-trip route, and
-compared with the original metric after returning to the starting space.
+The test exercises the real surface transformation machinery, including
+cross-density resampling. Individual unusable paths or missing resources are
+skipped with warnings rather than causing the entire run to fail.
 
-Unlike a shortest-path benchmark, this test evaluates all logical return
-cycles represented in the graph. A logical transformation edge may itself
-require multiple executable surface transformations.
+Artifacts are written to a run-specific directory:
 
-For example, a logical route such as::
+    tests/regression/cycle_outputs_<random_suffix>/
 
-    Yerkes19 -> fsaverage -> Yerkes19
+Each run may contain:
 
-may be executed as::
+* CSV summaries
+* TXT summaries
+* per-path transformation manifests
+* intermediate metric files
+* surface visualizations
+* optional wb_command/niwrap/styx logs
 
-    Yerkes19 -> fsLR -> fsaverage -> fsLR -> Yerkes19
+Area surfaces are attempted in this order:
 
-when the direct Yerkes19 <-> fsaverage resources are unavailable but the
-intermediate fsLR resources make the transformation executable.
-
-The benchmark is intentionally independent of surface annotations. The
-metric is generated directly from the standard midthickness surface so that
-private annotation resources do not affect the test.
-
-Metrics recorded for each round trip include:
-
-- Logical transformation path.
-- Actual executable transformation path.
-- Number of executable transformations.
-- Number of logical transformations.
-- Pearson correlation between original and round-tripped metric.
-- Maximum absolute difference between original and round-tripped values.
+1. midthickness
+2. pial
+3. white
 
 Run with::
 
@@ -43,274 +34,163 @@ Run with::
 from __future__ import annotations
 
 import logging
-from itertools import pairwise
+import secrets
 from pathlib import Path
-from typing import Literal
 
+import matplotlib.pyplot as plt
 import nibabel as nib
-import networkx as nx
 import numpy as np
 import pandas as pd
-import pytest
-
-from neuromaps_prime.graph import NeuromapsGraph
+from matplotlib_surface_plotting import plot_surf
+from nibabel.gifti import GiftiDataArray, GiftiImage
 from tests.cycle import (
+    RoundtripResult,
+    _path_token,
     find_return_paths,
-    save_cycle_figure,
+    roundtrip_metric,
     score_roundtrip,
 )
+
+from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
 
 
 # -------------------------------------------------------------------------
-# Regression parameters
+# Run configuration
 # -------------------------------------------------------------------------
 
-ORIGIN = "Yerkes19"
-HEMISPHERE = "left"
-DENSITY = "32k"
+_RUN_SUFFIX = secrets.token_hex(4)
+
+OUTPUT_DIR = Path(__file__).resolve().parent / f"cycle_outputs_{_RUN_SUFFIX}"
+
+OUTPUT_DIR.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+# Set to None to test every surface-layer graph node.
+ORIGINS: list[str] | None = None
+
+LABEL = "RM_scalinghcp"
+
+HEMISPHERES = (
+    "left",
+    "right",
+)
+
+# Keep cycle enumeration bounded on the dense real graph.
+MAX_CYCLE_LENGTH = 4
+
+# Set to None to enumerate all paths up to MAX_CYCLE_LENGTH.
+MAX_PATHS: int | None = None
+
+# Because non-mirrored multi-hop paths can accumulate substantial error,
+# require only one minimally correlated usable path.
+MIN_BEST_PEARSON = 0.05
+
+# Enable capture of niwrap/Styx command logs.
+LOG_COMMANDS = True
 
 
 # -------------------------------------------------------------------------
-# Fixtures
+# Command logging
 # -------------------------------------------------------------------------
 
 
-@pytest.fixture
-def graph() -> NeuromapsGraph:
-    """Create a Neuromaps graph for regression benchmarking."""
-    return NeuromapsGraph()
+class CommandLogHandler(logging.Handler):
+    """Capture niwrap/Styx records containing command information."""
 
+    def __init__(self, log_file: Path) -> None:
+        """Initialize a command log handler."""
+        super().__init__()
+        self.log_file = log_file
+        self.commands: list[str] = []
 
-@pytest.fixture
-def output_dir() -> Path:
-    """Directory for storing benchmark summaries."""
-    directory = Path(__file__).resolve().parent / "output/cycle_outputs"
-    directory.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-    return directory
+    def emit(self, record: logging.LogRecord) -> None:
+        """Capture records that appear to contain command information."""
+        message = record.getMessage()
 
+        if "command" in message.lower() or "wb_command" in record.name.lower():
+            self.commands.append(self.format(record))
 
-# -------------------------------------------------------------------------
-# Surface resource helpers
-# -------------------------------------------------------------------------
+    def save(self) -> None:
+        """Write captured command records to disk."""
+        if not self.commands:
+            return
 
-
-def _has_surface_transform(
-    graph: NeuromapsGraph,
-    source: str,
-    target: str,
-    hemisphere: Literal["left", "right"],
-    density: str,
-) -> bool:
-    """Return whether a surface transform is executable at ``density``."""
-    transforms = graph.search_surface_transforms(
-        source_space=source,
-        target_space=target,
-        hemisphere=hemisphere,
-        density=density,
-    )
-
-    if not transforms:
-        return False
-
-    for transform in sorted(
-        transforms,
-        key=lambda transform: (
-            transform.resource_type != "sphere",
-        ),
-    ):
-        target_surface = graph.fetch_surface_atlas(
-            space=target,
-            density=density,
-            hemisphere=hemisphere,
-            resource_type=transform.resource_type,
+        self.log_file.write_text(
+            "# wb_command / niwrap / Styx calls used in this cycle\n"
+            "# These records are intended for debugging and manual inspection.\n\n"
+            + "\n".join(self.commands)
+            + "\n",
+            encoding="utf-8",
         )
 
-        if target_surface is not None:
-            return True
-
-    return False
-
-
-def _find_executable_surface(
-    graph: NeuromapsGraph,
-    source: str,
-    target: str,
-    hemisphere: Literal["left", "right"],
-    density: str,
-) -> tuple[str, str] | None:
-    """Find an executable surface transform at the requested density.
-
-    Sphere transforms are preferred because they are the standard resources
-    for Workbench spherical resampling.
-
-    Returns:
-        ``(density, resource_type)`` if an executable transform exists,
-        otherwise ``None``.
-    """
-    transforms = graph.search_surface_transforms(
-        source_space=source,
-        target_space=target,
-        hemisphere=hemisphere,
-        density=density,
-    )
-
-    transforms = sorted(
-        transforms,
-        key=lambda transform: (
-            transform.resource_type != "sphere",
-        ),
-    )
-
-    for transform in transforms:
-        target_surface = graph.fetch_surface_atlas(
-            space=target,
-            density=density,
-            hemisphere=hemisphere,
-            resource_type=transform.resource_type,
-        )
-
-        if target_surface is not None:
-            return density, transform.resource_type
-
-    return None
-
 
 # -------------------------------------------------------------------------
-# Executable route resolution
+# Surface helpers
 # -------------------------------------------------------------------------
 
 
-def _surface_graph(
-    graph: NeuromapsGraph,
-    hemisphere: Literal["left", "right"],
-    density: str,
-) -> nx.DiGraph:
-    """Build a graph containing executable surface transformations.
+def _load_surface_coords(
+    surface_file: Path,
+) -> np.ndarray:
+    """Load surface coordinates as ``(n_vertices, 3)``."""
+    image = nib.load(str(surface_file))
 
-    Every directed edge represents a surface transformation that can be
-    executed at the benchmark density.
-    """
-    surface_graph = nx.DiGraph()
+    for darray in image.darrays:
+        data = np.asarray(darray.data)
 
-    for source, target, key in graph.edges(keys=True):
-        if key != graph.surface_to_surface_key:
-            continue
+        if data.ndim == 2 and data.shape[1] == 3:
+            return np.asarray(
+                data,
+                dtype=np.float64,
+            )
 
-        if _has_surface_transform(
-            graph,
-            source,
-            target,
-            hemisphere,
-            density,
+    raise ValueError(f"No pointset coordinates found in {surface_file}.")
+
+
+def _load_surface_topology(
+    surface_file: Path,
+) -> np.ndarray:
+    """Load triangle topology from a surface GIFTI."""
+    image = nib.load(str(surface_file))
+
+    for darray in image.darrays:
+        if str(darray.intent) in (
+            "NIFTI_INTENT_TRIANGLE",
+            "1009",
         ):
-            surface_graph.add_edge(
-                source,
-                target,
+            return np.asarray(
+                darray.data,
+                dtype=np.int32,
             )
 
-    return surface_graph
+    for darray in image.darrays:
+        data = np.asarray(darray.data)
+
+        if (
+            data.ndim == 2
+            and data.shape[1] == 3
+            and np.issubdtype(
+                data.dtype,
+                np.integer,
+            )
+        ):
+            return data.astype(np.int32)
+
+    raise ValueError(f"No triangle topology found in {surface_file}.")
 
 
-def _find_executable_route(
-    graph: NeuromapsGraph,
-    source: str,
-    target: str,
-    hemisphere: Literal["left", "right"],
-    density: str,
-    forbidden: set[str] | None = None,
-) -> tuple[str, ...] | None:
-    """Find an executable surface route between two spaces.
-
-    The route may contain intermediate template spaces.
-
-    Args:
-        graph: NeuromapsPrime graph.
-        source: Starting space.
-        target: Destination space.
-        hemisphere: Hemisphere to use.
-        density: Surface density required for every hop.
-        forbidden: Spaces that should not be traversed.
-
-    Returns:
-        Tuple containing the executable route, including source and target,
-        or ``None`` when no route exists.
-    """
-    surface_graph = _surface_graph(
-        graph,
-        hemisphere,
-        density,
+def _extract_surface_mesh(
+    surface_file: Path,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Extract coordinates and triangles from a surface."""
+    return (
+        _load_surface_coords(surface_file),
+        _load_surface_topology(surface_file),
     )
-
-    if source not in surface_graph or target not in surface_graph:
-        return None
-
-    if forbidden:
-        surface_graph = surface_graph.copy()
-        surface_graph.remove_nodes_from(
-            node
-            for node in forbidden
-            if node not in {source, target}
-        )
-
-    try:
-        return tuple(
-            nx.shortest_path(
-                surface_graph,
-                source=source,
-                target=target,
-            )
-        )
-    except nx.NetworkXNoPath:
-        return None
-
-
-def _expand_logical_path(
-    graph: NeuromapsGraph,
-    logical_path: tuple[str, ...],
-    hemisphere: Literal["left", "right"],
-    density: str,
-) -> tuple[str, ...] | None:
-    """Expand a logical cycle into executable surface transformations.
-
-    Each logical edge is resolved independently. Intermediate spaces are
-    allowed, but the resolver avoids using spaces that have already been
-    traversed unnecessarily.
-
-    Example::
-
-        logical:
-            Yerkes19 -> fsaverage -> Yerkes19
-
-        executable:
-            Yerkes19 -> fsLR -> fsaverage -> fsLR -> Yerkes19
-    """
-    executable_path: list[str] = [logical_path[0]]
-    used_spaces: set[str] = {logical_path[0]}
-
-    for source, target in pairwise(logical_path):
-        current_source = executable_path[-1]
-
-        route = _find_executable_route(
-            graph,
-            current_source,
-            target,
-            hemisphere,
-            density,
-            forbidden=used_spaces - {current_source, target},
-        )
-
-        if route is None:
-            return None
-
-        executable_path.extend(route[1:])
-        used_spaces.update(route)
-
-    return tuple(executable_path)
 
 
 # -------------------------------------------------------------------------
@@ -318,384 +198,882 @@ def _expand_logical_path(
 # -------------------------------------------------------------------------
 
 
-def _make_surface_metric(
-    surface_file: Path,
-    output_file: Path,
+def _write_metric(
+    metric_file: Path,
+    values: np.ndarray,
 ) -> Path:
-    """Create a deterministic vertex-wise metric from a midthickness surface."""
-    image = nib.load(surface_file)
-
-    vertices = np.asarray(
-        image.darrays[0].data,
-        dtype=np.float64,
-    )
-
-    if vertices.ndim != 2 or vertices.shape[1] != 3:
-        raise ValueError(
-            "Expected surface vertices with shape (n_vertices, 3), "
-            f"got {vertices.shape}."
-        )
-
-    metric = vertices.sum(axis=1)
-
-    metric_image = nib.gifti.GiftiImage(
+    """Write one scalar value per vertex as a GIFTI metric."""
+    image = GiftiImage(
         darrays=[
-            nib.gifti.GiftiDataArray(
-                metric.astype(np.float32),
+            GiftiDataArray(
+                np.asarray(
+                    values,
+                    dtype=np.float32,
+                ),
+                intent="NIFTI_INTENT_NONE",
             )
         ]
     )
 
-    output_file.parent.mkdir(
+    metric_file.parent.mkdir(
         parents=True,
         exist_ok=True,
     )
 
     nib.save(
-        metric_image,
-        output_file,
+        image,
+        str(metric_file),
     )
 
-    return output_file
+    return metric_file
 
 
-# -------------------------------------------------------------------------
-# Transformation output
-# -------------------------------------------------------------------------
-
-
-def _resolve_transform_output(
-    result: str | Path | None,
-    output_name: str,
-    workdir: Path,
-) -> Path:
-    """Resolve a transformation output returned by the graph transformer."""
-    if result is not None:
-        result_path = Path(result)
-
-        if result_path.exists():
-            return result_path
-
-        workdir_result = workdir / result_path.name
-
-        if workdir_result.exists():
-            return workdir_result
-
-    expected = workdir / output_name
-
-    if expected.exists():
-        return expected
-
-    raise FileNotFoundError(
-        "Surface transformation did not produce an output file. "
-        f"Expected '{expected}', got result={result!r}."
-    )
-
-
-# -------------------------------------------------------------------------
-# Cycle execution
-# -------------------------------------------------------------------------
-
-
-def _transform_cycle(
+def _make_xyz_product_metric(
     graph: NeuromapsGraph,
-    metric_file: Path,
-    path: tuple[str, ...],
-    hemisphere: Literal["left", "right"],
-    workdir: Path,
+    origin: str,
+    label: str,
     density: str,
+    hemisphere: str,
+    output_dir: Path,
 ) -> Path:
-    """Transform a metric through every executable hop in a cycle."""
-    current_metric = metric_file
+    """Create a deterministic synthetic metric from sphere coordinates."""
+    sphere = graph.fetch_surface_atlas(
+        space=origin,
+        density=density,
+        hemisphere=hemisphere,
+        resource_type="sphere",
+    )
 
-    for hop, (source, target) in enumerate(pairwise(path)):
-        available = _find_executable_surface(
-            graph,
-            source,
-            target,
-            hemisphere,
-            density,
+    if sphere is None:
+        raise FileNotFoundError(
+            f"No sphere atlas for {origin} at {density} ({hemisphere})."
         )
 
-        if available is None:
-            raise RuntimeError(
-                f"No executable surface transform for hop "
-                f"'{source}' -> '{target}' at density '{density}' "
-                f"on path {' -> '.join(path)}"
-            )
+    coords = _load_surface_coords(Path(sphere.fetch()))
 
-        _, geometry = available
+    values = np.prod(
+        coords,
+        axis=1,
+    )
+
+    metric_file = (
+        output_dir / f"metric_{origin}_{label}_{density}_{hemisphere}.func.gii"
+    )
+
+    return _write_metric(
+        metric_file,
+        values,
+    )
+
+
+def _load_metric_values(
+    metric_file: Path,
+) -> np.ndarray:
+    """Load scalar values from a metric GIFTI."""
+    return np.asarray(
+        nib.load(str(metric_file)).darrays[0].data,
+        dtype=np.float64,
+    )
+
+
+# -------------------------------------------------------------------------
+# Surface matching for visualization
+# -------------------------------------------------------------------------
+
+
+def _find_matching_surface(
+    graph: NeuromapsGraph,
+    space: str,
+    hemisphere: str,
+    resource_type: str,
+    n_vertices: int,
+) -> tuple[object, str] | None:
+    """Find a surface whose vertex count matches the metric."""
+    atlases = graph.utils.cache.get_surface_atlases(
+        space=space,
+        hemisphere=hemisphere,
+        resource_type=resource_type,
+    )
+
+    for atlas in atlases:
+        try:
+            coords = _load_surface_coords(Path(atlas.fetch()))
+        except (
+            ValueError,
+            FileNotFoundError,
+            OSError,
+        ):
+            continue
+
+        if coords.shape[0] == n_vertices:
+            return atlas, atlas.density
+
+    return None
+
+
+# -------------------------------------------------------------------------
+# Surface plotting
+# -------------------------------------------------------------------------
+
+
+def _plot_single_surface(
+    graph: NeuromapsGraph,
+    space: str,
+    metric_values: np.ndarray,
+    hemisphere: str,
+    resource_type: str,
+    vmin: float,
+    vmax: float,
+    plot_dir: Path,
+    path_token: str,
+    path_label: str,
+    hop_index: int,
+    pearson_r: float,
+) -> None:
+    """Plot a metric on a surface matching its vertex count."""
+    match = _find_matching_surface(
+        graph,
+        space,
+        hemisphere,
+        resource_type,
+        metric_values.shape[0],
+    )
+
+    if match is None:
+        logger.warning(
+            "No %s surface for %s (%s) matching %d vertices; skipping plot.",
+            resource_type,
+            space,
+            hemisphere,
+            metric_values.shape[0],
+        )
+        return
+
+    surface_atlas, density = match
+
+    try:
+        coords, faces = _extract_surface_mesh(Path(surface_atlas.fetch()))
+    except (
+        ValueError,
+        FileNotFoundError,
+        OSError,
+    ) as exc:
+        logger.warning(
+            "Could not load %s mesh for %s (%s): %s",
+            resource_type,
+            space,
+            density,
+            exc,
+        )
+        return
+
+    output_path = plot_dir / (
+        f"{path_token}_node{hop_index:02d}_{space}_{resource_type}.png"
+    )
+
+    try:
+        plot_surf(
+            coords,
+            faces,
+            metric_values,
+            rotate=[270, 0],
+            filename=str(output_path),
+            vmin=vmin,
+            vmax=vmax,
+            cmap="viridis",
+            title=(f"{path_label}\n{space} | r={pearson_r:.5f}"),
+        )
 
         logger.info(
-            "hop %d: %s -> %s | source_density=%s | target_density=%s | "
-            "geometry=%s",
-            hop,
-            source,
-            target,
+            "Saved surface plot: %s",
+            output_path,
+        )
+
+    except Exception as exc:
+        logger.warning(
+            "plot_surf failed for %s %s (%s): %s",
+            space,
+            resource_type,
             density,
-            density,
-            geometry,
+            exc,
         )
 
-        output_name = (
-            f"hop{hop:02d}_{source}-to-{target}.func.gii"
-        )
-
-        result = graph.surface_to_surface_transformer(
-            transformer_type="metric",
-            input_file=current_metric,
-            source_space=source,
-            target_space=target,
-            hemisphere=hemisphere,
-            output_file_path=output_name,
-            source_density=density,
-            target_density=density,
-        )
-
-        current_metric = _resolve_transform_output(
-            result,
-            output_name,
-            workdir,
-        )
-
-    return current_metric
+    finally:
+        plt.close("all")
 
 
-# -------------------------------------------------------------------------
-# Tests
-# -------------------------------------------------------------------------
-
-
-def test_surface_transform_cycles(
+def _plot_cycle_cortical_surfaces(
     graph: NeuromapsGraph,
-    output_dir: Path,
-    tmp_path: Path,
+    path: tuple[str, ...],
+    metrics_by_hop: list[tuple[str, np.ndarray]],
+    hemisphere: str,
+    pearson_r: float,
+    plot_dir: Path,
 ) -> None:
-    """Benchmark all executable surface transformation round trips."""
-    logging.basicConfig(level=logging.INFO)
+    """Plot midthickness and sphere views for every cycle node."""
+    if not metrics_by_hop:
+        return
 
-    density = DENSITY
+    path_token = _path_token(path)
+    path_label = " -> ".join(path)
 
-    # ------------------------------------------------------------------
-    # Create deterministic metric.
-    # ------------------------------------------------------------------
+    for hop_index, (
+        space,
+        metric_values,
+    ) in enumerate(metrics_by_hop):
+        finite = np.isfinite(metric_values)
 
-    surface = graph.fetch_surface_atlas(
-        space=ORIGIN,
-        density=density,
-        hemisphere=HEMISPHERE,
-        resource_type="midthickness",
+        if np.any(finite):
+            vmin, vmax = np.percentile(
+                metric_values[finite],
+                [2, 98],
+            )
+        else:
+            vmin, vmax = 0.0, 1.0
+
+        _plot_single_surface(
+            graph=graph,
+            space=space,
+            metric_values=metric_values,
+            hemisphere=hemisphere,
+            resource_type="midthickness",
+            vmin=float(vmin),
+            vmax=float(vmax),
+            plot_dir=plot_dir,
+            path_token=path_token,
+            path_label=path_label,
+            hop_index=hop_index,
+            pearson_r=pearson_r,
+        )
+
+        _plot_single_surface(
+            graph=graph,
+            space=space,
+            metric_values=metric_values,
+            hemisphere=hemisphere,
+            resource_type="sphere",
+            vmin=float(vmin),
+            vmax=float(vmax),
+            plot_dir=plot_dir,
+            path_token=path_token,
+            path_label=path_label,
+            hop_index=hop_index,
+            pearson_r=pearson_r,
+        )
+
+
+# -------------------------------------------------------------------------
+# Transform manifests
+# -------------------------------------------------------------------------
+
+
+def _write_transform_manifest(
+    roundtrip: RoundtripResult,
+    output_file: Path,
+) -> None:
+    """Write a per-path manifest describing the executed transformations."""
+    lines = ["source_space,target_space,area_resource,output_file"]
+
+    lines.extend(
+        ",".join(
+            [
+                hop.source,
+                hop.target,
+                hop.area_resource,
+                str(hop.output_file),
+            ]
+        )
+        for hop in roundtrip.hops
     )
 
-    assert surface is not None, (
-        f"Missing midthickness surface for {ORIGIN} "
-        f"at {density} ({HEMISPHERE})."
+    output_file.write_text(
+        "\n".join(lines) + "\n",
+        encoding="utf-8",
     )
 
-    surface_file = Path(surface.fetch())
 
-    assert surface_file.exists(), (
-        f"Missing midthickness surface: {surface_file}"
-    )
+# -------------------------------------------------------------------------
+# Main regression test
+# -------------------------------------------------------------------------
 
-    metric_file = _make_surface_metric(
-        surface_file,
-        tmp_path / f"{ORIGIN}_{density}_{HEMISPHERE}_metric.func.gii",
-    )
 
-    assert metric_file.exists(), (
-        f"Failed to create metric: {metric_file}"
-    )
-
-    assert metric_file.stat().st_size > 0, (
-        f"Created metric is empty: {metric_file}"
-    )
-
-    # ------------------------------------------------------------------
-    # Find every logical return path.
-    # ------------------------------------------------------------------
-
-    logical_paths = find_return_paths(
-        graph,
-        ORIGIN,
-    )
-
-    assert logical_paths, (
-        f"No return paths found from '{ORIGIN}' "
-        "in the surface transformation graph."
-    )
+def _log_progress(
+    *,
+    completed: int,
+    total: int,
+    origin: str,
+    hemisphere: str,
+    path: tuple[str, ...],
+) -> None:
+    """Log overall cycle regression progress."""
+    percentage = 100.0 * completed / total if total else 100.0
 
     logger.info(
-        "Found %d logical return paths from %s",
-        len(logical_paths),
-        ORIGIN,
+        "CYCLE PROGRESS: %d/%d (%.1f%%) | origin=%s | hemisphere=%s | path=%s",
+        completed,
+        total,
+        percentage,
+        origin,
+        hemisphere,
+        " -> ".join(path),
     )
 
-    # ------------------------------------------------------------------
-    # Expand every logical path into an executable surface path.
-    # ------------------------------------------------------------------
 
-    cycles: list[tuple[tuple[str, ...], tuple[str, ...]]] = []
+def test_cycle_roundtrip(
+) -> None:
+    """Round-trip synthetic metrics through real transformation cycles."""
+    graph = NeuromapsGraph()
 
-    for logical_path in logical_paths:
-        executable_path = _expand_logical_path(
-            graph,
-            logical_path,
-            HEMISPHERE,
-            density,
-        )
+    origins = ORIGINS if ORIGINS is not None else sorted(graph.nodes)
 
-        if executable_path is None:
+    total_usable_paths = 0
+
+    for origin in origins:
+        for hemisphere in HEMISPHERES:
             logger.info(
-                "Skipping non-executable logical path: %s",
-                " -> ".join(logical_path),
+                "\n=== CYCLE ROUND-TRIP TEST: %s (%s) ===",
+                origin,
+                hemisphere,
+            )
+
+            result = _run_origin_hemisphere(
+                graph=graph,
+                origin=origin,
+                hemisphere=hemisphere,
+            )
+
+            total_usable_paths += result
+
+    plot_run_summaries(
+        run_dir=OUTPUT_DIR,
+        label=LABEL,
+    )
+
+    assert total_usable_paths > 0, (
+        "No executable surface transformation cycles were found "
+        "for any configured origin/hemisphere."
+    )
+
+
+# -------------------------------------------------------------------------
+# Plot
+# -------------------------------------------------------------------------
+
+
+def _plot_cycle_summary(
+    run_dir: Path,
+    origin: str,
+    label: str,
+) -> None:
+    """Create one two-panel cycle summary plot for an origin space.
+
+    The left panel shows left-hemisphere cycle correlations and the right
+    panel shows right-hemisphere cycle correlations.
+    """
+    frames: dict[str, pd.DataFrame] = {}
+
+    for hemisphere in ("left", "right"):
+        csv_path = run_dir / f"cycle_{origin}_{label}_{hemisphere}.csv"
+
+        if not csv_path.exists():
+            logger.warning(
+                "No %s CSV found for %s: %s",
+                hemisphere,
+                origin,
+                csv_path,
             )
             continue
 
-        cycles.append(
-            (
-                logical_path,
-                executable_path,
-            )
+        frame = pd.read_csv(csv_path)
+
+        if frame.empty:
+            continue
+
+        frames[hemisphere] = frame
+
+    if not frames:
+        logger.warning(
+            "No cycle CSVs found for origin %s.",
+            origin,
         )
+        return
+
+    # Use the union of paths across both hemispheres so that the two
+    # panels use the same y-axis ordering.
+    paths = sorted(
+        {path for frame in frames.values() for path in frame["path"]},
+        key=lambda path: (
+            len(str(path).split(" -> ")) - 1,
+            str(path),
+        ),
+    )
+
+    # Plot longest/least-correlated paths at the top by reversing the
+    # normal horizontal-bar ordering.
+    paths = list(reversed(paths))
+
+    fig, axes = plt.subplots(
+        nrows=1,
+        ncols=2,
+        figsize=(
+            18,
+            max(8, 0.30 * len(paths)),
+        ),
+        sharey=True,
+    )
+
+    for ax, hemisphere in zip(
+        axes,
+        ("left", "right"),
+        strict=True,
+    ):
+        frame = frames.get(hemisphere)
+
+        if frame is None:
+            ax.text(
+                0.5,
+                0.5,
+                "No results",
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+            )
+            ax.set_title(hemisphere.capitalize())
+            ax.set_xlabel("Pearson r")
+            continue
+
+        values = frame.set_index("path")["pearson_r"].reindex(paths)
+
+        y_positions = np.arange(len(paths))
+
+        ax.barh(
+            y_positions,
+            values,
+        )
+
+        ax.set_yticks(y_positions)
+
+        if ax is axes[0]:
+            ax.set_yticklabels(
+                paths,
+                fontsize=8,
+            )
+            ax.set_ylabel("Transformation path")
+        else:
+            ax.tick_params(
+                axis="y",
+                labelleft=False,
+            )
+
+        ax.set_xlabel("Pearson r")
+
+        ax.set_title(hemisphere.capitalize())
+
+        ax.axvline(
+            0.0,
+            linewidth=1,
+        )
+
+        ax.grid(
+            axis="x",
+            alpha=0.3,
+        )
+
+        ax.set_xlim(
+            min(
+                -0.05,
+                float(values.min(skipna=True)) - 0.05,
+            ),
+            1.0,
+        )
+
+    fig.suptitle(
+        f"{origin} — {label}\nSurface transformation cycle round-trip accuracy",
+        fontsize=16,
+    )
+
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
+
+    output_file = run_dir / f"cycle_{origin}_{label}_summary.png"
+
+    fig.savefig(
+        output_file,
+        dpi=200,
+        bbox_inches="tight",
+    )
+
+    plt.close(fig)
 
     logger.info(
-        "Executable return cycles at %s: %d",
-        density,
-        len(cycles),
+        "Saved combined cycle summary plot: %s",
+        output_file,
     )
 
-    for logical_path, executable_path in cycles:
-        logger.info(
-            "Executable cycle: %s | path: %s",
-            " -> ".join(logical_path),
-            " -> ".join(executable_path),
+
+def plot_run_summaries(
+    run_dir: str | Path,
+    label: str = LABEL,
+) -> None:
+    """Create combined left/right plots for every origin in a run."""
+    run_dir = Path(run_dir)
+
+    if not run_dir.is_dir():
+        raise FileNotFoundError(f"Run directory does not exist: {run_dir}")
+
+    csv_files = sorted(run_dir.glob(f"cycle_*_{label}_left.csv"))
+
+    if not csv_files:
+        raise FileNotFoundError(
+            f"No cycle CSV files found in {run_dir} for label '{label}'."
         )
 
-    assert cycles, (
-        f"No executable surface transformation cycles found from "
-        f"'{ORIGIN}' at density '{density}'."
+    origins = []
+
+    suffix = f"_{label}_left.csv"
+
+    for csv_file in csv_files:
+        name = csv_file.name
+
+        if not name.startswith("cycle_"):
+            continue
+
+        if not name.endswith(suffix):
+            continue
+
+        origin = name[len("cycle_") : -len(suffix)]
+
+        origins.append(origin)
+
+    for origin in origins:
+        _plot_cycle_summary(
+            run_dir=run_dir,
+            origin=origin,
+            label=label,
+        )
+
+def _save_cycle_results(
+    origin: str,
+    hemisphere: str,
+    rows: list[dict[str, object]],
+    plot_dir: Path,
+    command_handler: CommandLogHandler | None,
+) -> int:
+    """Save CSV/TXT cycle results and validate regression output."""
+    if not rows:
+        logger.warning(
+            "No executable paths for %s (%s).",
+            origin,
+            hemisphere,
+        )
+
+        if command_handler is not None:
+            command_handler.save()
+
+        return 0
+
+    frame = pd.DataFrame(rows).sort_values(
+        ["pearson_r", "path"],
+        ascending=[False, True],
     )
 
-    # ------------------------------------------------------------------
-    # Run every executable round trip.
-    # ------------------------------------------------------------------
+    csv_path = OUTPUT_DIR / f"cycle_{origin}_{LABEL}_{hemisphere}.csv"
 
-    results: list[dict[str, object]] = []
+    frame.to_csv(
+        csv_path,
+        index=False,
+    )
 
-    for cycle_number, (logical_path, path) in enumerate(cycles):
-        workdir = tmp_path / f"cycle_{cycle_number:03d}"
-        workdir.mkdir(
-            parents=True,
-            exist_ok=True,
+    path_width = max(
+        len("Transformation path"),
+        max(len(str(row["path"])) for row in rows),
+    )
+
+    header = (
+        f"{'Transformation path':<{path_width}}  "
+        f"{'Hops':>4}  "
+        f"{'Pearson r':>10}  "
+        f"{'Max |delta|':>14}"
+    )
+
+    separator = "-" * len(header)
+
+    lines = [
+        (
+            f"Cycle test results — origin: {origin}, "
+            f"label: {LABEL}, hemisphere: {hemisphere}"
+        ),
+        separator,
+        header,
+        separator,
+    ]
+
+    for _, row in frame.iterrows():
+        lines.append(
+            f"{row['path']!s:<{path_width}}  "
+            f"{int(row['n_hops']):>4}  "
+            f"{float(row['pearson_r']):>10.6f}  "
+            f"{float(row['max_abs_diff']):>14.3e}"
         )
 
+    lines.extend(
+        [
+            separator,
+            f"Total cycles: {len(rows)}",
+        ]
+    )
+
+    txt_path = OUTPUT_DIR / f"cycle_{origin}_{LABEL}_{hemisphere}.txt"
+
+    txt_path.write_text(
+        "\n".join(lines) + "\n",
+        encoding="utf-8",
+    )
+
+    logger.info("Saved CSV: %s", csv_path)
+    logger.info("Saved TXT summary: %s", txt_path)
+    logger.info("Saved path artifacts: %s", plot_dir)
+
+    if command_handler is not None:
+        command_handler.save()
         logger.info(
-            "Running cycle %d/%d: %s",
-            cycle_number + 1,
-            len(cycles),
-            " -> ".join(path),
+            "Saved command log: %s",
+            command_handler.log_file,
         )
 
-        roundtrip = _transform_cycle(
-            graph,
-            metric_file,
-            path,
-            HEMISPHERE,
-            workdir,
-            density,
+    assert np.isfinite(frame["pearson_r"]).all(), (
+        "At least one executable path produced a non-finite "
+        f"Pearson r. Inspect {csv_path}."
+    )
+
+    assert np.isfinite(frame["max_abs_diff"]).all(), (
+        "At least one executable path produced a non-finite "
+        f"maximum absolute difference. Inspect {csv_path}."
+    )
+
+    best_r = float(frame["pearson_r"].max())
+
+    assert best_r > MIN_BEST_PEARSON, (
+        "Best round-trip correlation is too low: "
+        f"r={best_r:.6f}. Inspect generated artifacts in "
+        f"{OUTPUT_DIR}."
+    )
+
+    return len(rows)
+
+def _run_cycle_path(
+    graph: NeuromapsGraph,
+    metric_file: Path,
+    original_metric: np.ndarray,
+    path: tuple[str, ...],
+    hemisphere: str,
+    path_workdir: Path,
+    plot_dir: Path,
+) -> dict[str, object] | None:
+    """Execute, score, manifest, and plot one transformation cycle."""
+    path_label = " -> ".join(path)
+    path_token = _path_token(path)
+
+    try:
+        roundtrip = roundtrip_metric(
+            graph=graph,
+            metric_file=metric_file,
+            path=path,
+            hemisphere=hemisphere,
+            workdir=path_workdir,
+            density=None,
+            add_edge=False,
         )
 
         pearson_r, max_abs_diff = score_roundtrip(
             metric_file,
-            roundtrip,
+            roundtrip.final_metric,
         )
 
-        result = {
-            "logical_path": " -> ".join(logical_path),
-            "path": " -> ".join(path),
-            "n_hops": len(path) - 1,
-            "n_logical_hops": len(logical_path) - 1,
-            "pearson_r": pearson_r,
-            "max_abs_diff": max_abs_diff,
-        }
+    except (
+        RuntimeError,
+        FileNotFoundError,
+        OSError,
+        ValueError,
+    ) as exc:
+        logger.warning(
+            "Skipping non-executable cycle %s (%s): %s",
+            path_label,
+            hemisphere,
+            exc,
+        )
+        return None
 
-        results.append(result)
+    manifest_file = plot_dir / f"{path_token}_transforms.csv"
 
-        logger.info(
-            "cycle %s: r=%.6f max|delta|=%.3e",
-            result["path"],
-            pearson_r,
-            max_abs_diff,
+    try:
+        _write_transform_manifest(
+            roundtrip=roundtrip,
+            output_file=manifest_file,
+        )
+    except OSError as exc:
+        logger.warning(
+            "Could not write transform manifest for %s: %s",
+            path_label,
+            exc,
         )
 
-    assert results, (
-        f"No executable round-trip results were produced from '{ORIGIN}'."
+    try:
+        metrics_by_hop = [(path[0], original_metric)] + [
+            (
+                hop.target,
+                hop.metric_values,
+            )
+            for hop in roundtrip.hops
+        ]
+
+        _plot_cycle_cortical_surfaces(
+            graph=graph,
+            path=path,
+            metrics_by_hop=metrics_by_hop,
+            hemisphere=hemisphere,
+            pearson_r=pearson_r,
+            plot_dir=plot_dir,
+        )
+
+    except Exception as exc:
+        logger.warning(
+            "Failed to create surface plots for %s: %s",
+            path_label,
+            exc,
+        )
+
+    logger.info(
+        "cycle %s: r=%.6f max|delta|=%.3e",
+        path_label,
+        pearson_r,
+        max_abs_diff,
     )
 
-    # ------------------------------------------------------------------
-    # Summarize all round trips.
-    # ------------------------------------------------------------------
+    return {
+        "path": path_label,
+        "n_hops": len(path) - 1,
+        "pearson_r": pearson_r,
+        "max_abs_diff": max_abs_diff,
+    }
 
-    frame = pd.DataFrame(results).sort_values(
-        ["n_logical_hops", "logical_path"],
-        ascending=[True, True],
+def _run_origin_hemisphere(
+    graph: NeuromapsGraph,
+    origin: str,
+    hemisphere: str,
+) -> int:
+    """Run all cycles for one origin and hemisphere."""
+    work_dir = OUTPUT_DIR / f"work_{origin}_{LABEL}_{hemisphere}"
+
+    work_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    command_handler = None
+
+    if LOG_COMMANDS:
+        command_handler = CommandLogHandler(work_dir / "wb_commands.log")
+
+        for logger_name in ("niwrap", "styx"):
+            command_logger = logging.getLogger(logger_name)
+            command_logger.addHandler(command_handler)
+            command_logger.setLevel(logging.DEBUG)
+
+    try:
+        density = graph.find_highest_density(origin)
+
+        metric_file = _make_xyz_product_metric(
+            graph=graph,
+            origin=origin,
+            label=LABEL,
+            density=density,
+            hemisphere=hemisphere,
+            output_dir=work_dir,
+        )
+
+    except (
+        AssertionError,
+        FileNotFoundError,
+        OSError,
+        ValueError,
+        RuntimeError,
+    ) as exc:
+        logger.warning(
+            "Skipping %s (%s): could not seed origin metric: %s",
+            origin,
+            hemisphere,
+            exc,
+        )
+        return 0
+
+    original_metric = _load_metric_values(metric_file)
+
+    paths = find_return_paths(
+        graph,
+        origin,
+        max_length=MAX_CYCLE_LENGTH,
+        allow_revisits=True,
+        max_paths=MAX_PATHS,
     )
 
     logger.info(
-        "\n=== Surface Cycle Benchmark: %s (%s, %s) ===\n%s",
-        ORIGIN,
-        density,
-        HEMISPHERE,
-        frame.to_string(index=False),
+        "Found %d return paths from %s",
+        len(paths),
+        origin,
     )
 
-    output_file = (
-        output_dir
-        / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.csv"
+    if not paths:
+        logger.warning(
+            "No return paths from %s; skipping %s.",
+            origin,
+            hemisphere,
+        )
+        return 0
+
+    plot_dir = OUTPUT_DIR / f"cycle_{origin}_{LABEL}_{hemisphere}_plots"
+
+    plot_dir.mkdir(
+        parents=True,
+        exist_ok=True,
     )
 
-    frame.to_csv(
-        output_file,
-        index=False,
-    )
+    rows: list[dict[str, object]] = []
+
+    total_paths = len(paths)
 
     logger.info(
-        "Saved cycle benchmark results: %s",
-        output_file,
+        "Starting %d cycles for %s (%s)",
+        total_paths,
+        origin,
+        hemisphere,
     )
 
-    # ------------------------------------------------------------------
-    # Figure.
-    # ------------------------------------------------------------------
+    for completed, path in enumerate(paths, start=1):
+        _log_progress(
+            completed=completed,
+            total=total_paths,
+            origin=origin,
+            hemisphere=hemisphere,
+            path=path,
+        )
 
-    figure_file = (
-        output_dir
-        / f"cycle_{ORIGIN}_{density}_{HEMISPHERE}.png"
-    )
+        row = _run_cycle_path(
+            graph=graph,
+            metric_file=metric_file,
+            original_metric=original_metric,
+            path=path,
+            hemisphere=hemisphere,
+            path_workdir=work_dir / f"path_{_path_token(path)}",
+            plot_dir=plot_dir,
+        )
 
-    save_cycle_figure(
-        results,
-        figure_file,
-        title=(
-            f"Surface Cycle Benchmark: "
-            f"{ORIGIN} ({density}, {HEMISPHERE})"
-        ),
-    )
+        if row is not None:
+            rows.append(row)
 
-    logger.info(
-        "Saved cycle benchmark figure: %s",
-        figure_file,
-    )
-
-    # ------------------------------------------------------------------
-    # Basic sanity checks.
-    # ------------------------------------------------------------------
-
-    assert np.isfinite(frame["pearson_r"]).all(), (
-        "Benchmark produced non-finite Pearson correlations."
-    )
-
-    assert np.isfinite(frame["max_abs_diff"]).all(), (
-        "Benchmark produced non-finite maximum absolute differences."
+    return _save_cycle_results(
+        origin=origin,
+        hemisphere=hemisphere,
+        rows=rows,
+        plot_dir=plot_dir,
+        command_handler=command_handler,
     )
