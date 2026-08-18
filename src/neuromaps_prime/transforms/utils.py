@@ -1,9 +1,13 @@
 """Utility functions for working with GIFTI files and surface projections."""
 
+import logging
 from functools import lru_cache
 from pathlib import Path
 
 import nibabel as nib
+from nibabel.gifti import GiftiImage
+
+logger = logging.getLogger(__name__)
 
 
 def estimate_surface_density(surface_file: Path) -> str:
@@ -30,7 +34,7 @@ def get_vertex_count(surface_file: Path) -> int:
         Number of vertices in the surface file.
     """
     surface = nib.load(surface_file)
-    if not isinstance(surface, nib.GiftiImage):
+    if not isinstance(surface, GiftiImage):
         raise TypeError(f"Input file is not a GIFTI surface file: {surface_file}.")
     return surface.darrays[0].data.shape[0]
 
@@ -87,3 +91,25 @@ def validate_surface_file(file_path: str | Path) -> bool:
     if not str(file_path).endswith(".gii"):
         raise ValueError("Expected surface file.")
     return True
+
+
+def log_gii_shapes(path: Path) -> int:
+    """Log the shapes and metadata of a GIFTI file."""
+    gii = nib.load(path)
+    if not isinstance(gii, GiftiImage):
+        raise TypeError(f"Expected GIFTI file: {path}")
+
+    for i, arr in enumerate(gii.darrays):
+        logger.info(
+            "DARRAY %d: shape=%s intent=%s",
+            i,
+            arr.data.shape,
+            arr.intent,
+        )
+
+    # return first valid vertex-like array if present
+    for arr in gii.darrays:
+        if arr.data.ndim == 1:
+            return arr.data.shape[0]
+
+    return 0
