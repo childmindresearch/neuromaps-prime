@@ -200,7 +200,7 @@ def find_return_paths(
         max_paths: Optional maximum number of paths returned.
 
     Returns:
-        Paths sorted by hop count and then lexicographically.
+        Paths sorted by hop count (length) and then lexicographically.
     """
     subgraph = graph.utils.get_subgraph(edge_type)
 
@@ -230,6 +230,7 @@ def find_return_paths(
         paths = set()
 
         for cycle in cycles:
+            # Rotate the directed cycle so it starts at origin, then close it.
             if origin not in cycle:
                 continue
 
@@ -250,7 +251,7 @@ def find_return_paths(
 
 
 # -------------------------------------------------------------------------
-# Metric I/O
+# Metrics
 # -------------------------------------------------------------------------
 
 
@@ -258,18 +259,18 @@ def load_metric(
     metric_file: str | Path,
 ) -> np.ndarray:
     """Load a scalar GIFTI metric as a one-dimensional array."""
-    image = nib.load(metric_file)
+    img = nib.load(metric_file)
 
-    if not isinstance(image, nib.gifti.GiftiImage):
-        raise ValueError(f"Expected GIFTI metric file, got {type(image)}.")
+    if not isinstance(img, nib.gifti.GiftiImage):
+        raise ValueError(f"Expected GIFTI metric file, got {type(img)}.")
 
-    if len(image.darrays) != 1:
+    if len(img.darrays) != 1:
         raise ValueError(
-            f"Expected one data array for metric file; found {len(image.darrays)}."
+            f"Expected one data array for metric file, found {len(img.darrays)}"
         )
 
     data = np.asarray(
-        image.darrays[0].data,
+        img.darrays[0].data,
         dtype=np.float64,
     )
 
