@@ -37,6 +37,7 @@ import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
 import pandas as pd
+import pytest
 from matplotlib_surface_plotting import plot_surf
 from nibabel.gifti import GiftiDataArray, GiftiImage
 from tests.cycle import (
@@ -67,7 +68,7 @@ OUTPUT_DIR.mkdir(
 
 # Set to a specific space to test only that origin, or use "all" to test
 # every configured origin.
-ORIGIN: str = "CIVETNMT"
+ORIGIN: str = "Yerkes19"
 
 HEMISPHERES = (
     "left",
@@ -80,17 +81,23 @@ MAX_PATHS: int | None = None
 # Minimum acceptable mean Pearson correlation for each regression run.
 # Values should be updated deliberately.  Last updated 08/18 (TR).
 MIN_MEAN_PEARSON: dict[tuple[str, str], float] = {
+
     ("Yerkes19", "left"): 0.572255,
-    ("CIVETNMT", "left"): 0.501674,
-    ("MEBRAINS", "left"): 0.561245,
-    ("D99", "left"): 0.610269,
-    ("NMT2Sym", "left"): 0.541054,
-    ("all", "left"): 0.5,
     ("Yerkes19", "right"): 0.5,
-    ("CIVETNMT", "right"): 0.5,
+
+    ("CIVETNMT", "left"): 0.501674,
+    ("CIVETNMT", "right"): 0.5172,
+
+    ("MEBRAINS", "left"): 0.561245,
     ("MEBRAINS", "right"): 0.5,
+
+    ("D99", "left"): 0.610269,
     ("D99", "right"): 0.5,
+
+    ("NMT2Sym", "left"): 0.541054,
     ("NMT2Sym", "right"): 0.5,
+
+    ("all", "left"): 0.5,
     ("all", "right"): 0.5,
 }
 
