@@ -638,3 +638,91 @@ def score_roundtrip(
             pearson_r = 1.0
 
     return pearson_r, max_abs_diff
+def run_cycle_test(
+    graph: NeuromapsGraph,
+    origin: str,
+    metric_file: str | Path,
+    hemisphere: Hemisphere,
+    workdir: str | Path,
+    *,
+    density: str | None = None,
+    max_length: int | None = None,
+    allow_revisits: bool = False,
+    max_paths: int | None = None,
+    add_edge: bool = False,
+) -> list[CycleResult]:
+    """Execute and score all return paths from an origin.
+
+    This is a lightweight orchestration helper intended primarily for unit
+    tests. Individual paths that cannot be executed are skipped, allowing the
+    caller to inspect all successfully executed cycles.
+
+    Args:
+        graph: Populated :class:`NeuromapsGraph`.
+        origin: Starting and ending space.
+        metric_file: Seed metric.
+        hemisphere: Hemisphere being tested.
+        workdir: Directory for transformation artifacts.
+        density: Optional fixed surface density.
+        max_length: Maximum number of transformation hops.
+        allow_revisits: Allow bridge nodes to occur once on each leg.
+        max_paths: Optional maximum number of paths to execute.
+        add_edge: Whether transformations may mutate the graph.
+
+    Returns:
+        A list of :class:`CycleResult` objects for successfully executed
+        return paths.
+    """
+    paths = find_return_paths(
+        graph,
+        origin,
+        max_length=max_length,
+        allow_revisits=allow_revisits,
+        max_paths=max_paths,
+    )
+
+    results: list[CycleResult] = []
+
+    for path in paths:
+        path_token = _path_token(path)
+        path_workdir = Path(workdir) / f"path_{path_token}"
+
+        try:
+            roundtrip = roundtrip_metric(
+                graph=graph,
+                metric_file=metric_file,
+                path=path,
+                hemisphere=hemisphere,
+                workdir=path_workdir,
+                density=density,
+                add_edge=add_edge,
+            )
+
+            pearson_r, max_abs_diff = score_roundtrip(
+                metric_file,
+                roundtrip.final_metric,
+            )
+
+        except (
+            RuntimeError,
+            FileNotFoundError,
+            OSError,
+            ValueError,
+        ) as exc:
+            logger.warning(
+                "Skipping non-executable cycle %s (%s): %s",
+                " -> ".join(path),
+                hemisphere,
+                exc,
+            )
+            continue
+
+        results.append(
+            CycleResult(
+                path=path,
+                pearson_r=pearson_r,
+                max_abs_diff=max_abs_diff,
+            )
+        )
+
+    return results
