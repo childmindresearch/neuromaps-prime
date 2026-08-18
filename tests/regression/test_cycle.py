@@ -71,7 +71,7 @@ OUTPUT_DIR.mkdir(
 ORIGIN: str = "MEBRAINS"
 
 HEMISPHERES = (
-    #"left",
+    # "left",
     "right",
 )
 
