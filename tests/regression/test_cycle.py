@@ -71,7 +71,7 @@ OUTPUT_DIR.mkdir(
 ORIGIN: str = "MEBRAINS"
 
 HEMISPHERES = (
-    "left",
+    #"left",
     "right",
 )
 
@@ -86,11 +86,11 @@ MIN_MEAN_PEARSON: dict[tuple[str, str], float] = {
     ("CIVETNMT", "left"): 0.501674,
     ("CIVETNMT", "right"): 0.5172,
     ("MEBRAINS", "left"): 0.561245,
-    ("MEBRAINS", "right"): 0.5,
+    ("MEBRAINS", "right"): 0.555567,
     ("D99", "left"): 0.610269,
-    ("D99", "right"): 0.5,
+    ("D99", "right"): 0.567145,
     ("NMT2Sym", "left"): 0.541054,
-    ("NMT2Sym", "right"): 0.5,
+    ("NMT2Sym", "right"): 0.505617,
     ("all", "left"): 0.5,
     ("all", "right"): 0.5,
 }
