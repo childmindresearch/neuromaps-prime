@@ -638,6 +638,8 @@ def score_roundtrip(
             pearson_r = 1.0
 
     return pearson_r, max_abs_diff
+
+
 def run_cycle_test(
     graph: NeuromapsGraph,
     origin: str,
