@@ -1,9 +1,9 @@
 """Cycle regression test on the real NeuromapsPrime graph.
 
-This branch adds end-to-end cycle regression testing on the
+Adds end-to-end cycle regression testing on the
 real Neuromaps graph to validate transform roundtrip quality across multi-hop paths.
 
-Resulting fles are written to a run-specific directory:
+Resulting files are written to a run-specific directory:
 
     tests/regression/cycle_outputs_<datetime>/
 
