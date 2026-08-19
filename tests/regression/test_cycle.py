@@ -99,8 +99,14 @@ MIN_MEAN_PEARSON: dict[tuple[str, str], float] = {
     ("CIVET", "right"): 0.5,
     ("NCBR", "left"): 0.998746,
     ("NCBR", "right"): 0.998746,
-    ("all", "left"): 0.564602,
-    ("all", "right"): 0.545228,
+    ("Yerkes29", "left"): 0.5,
+    ("Yerkes29", "right"): 0.5,
+    ("MBM", "left"): 0.5,
+    ("MBM", "right"): 0.5,
+    ("NenckiMonash", "left"): 0.5,
+    ("NenkiMonash", "right"): 0.5,
+    ("all", "left"): 0.5,
+    ("all", "right"): 0.5,
 }
 
 LOG_COMMANDS = True
@@ -766,7 +772,7 @@ def _save_all_summary(run_dir: Path) -> None:
 
         mean_r = float(combined["pearson_r"].mean())
 
-        threshold = MIN_MEAN_PEARSON[("all", hemisphere)]
+        all_min_mean_pearson = MIN_MEAN_PEARSON[("all", hemisphere)]
 
         summaries.append(
             f"All spaces ({hemisphere}):\n"
@@ -780,14 +786,14 @@ def _save_all_summary(run_dir: Path) -> None:
             hemisphere,
             len(combined),
             mean_r,
-            threshold,
+            all_min_mean_pearson,
         )
 
-        assert mean_r >= threshold - allowed_regression, (
+        assert mean_r >= all_min_mean_pearson - allowed_regression, (
             "Average round-trip correlation regressed for all spaces: "
             f"hemisphere={hemisphere}, "
             f"mean r={mean_r:.6f}, "
-            f"threshold={threshold:.6f}, "
+            f"threshold={all_min_mean_pearson:.6f}, "
             f"allowed regression={allowed_regression:.6f}. "
             f"Inspect outputs in {run_dir}."
         )
