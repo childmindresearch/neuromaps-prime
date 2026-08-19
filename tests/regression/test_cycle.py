@@ -1,7 +1,7 @@
 """Cycle regression test on the real NeuromapsPrime graph.
 
-Adds end-to-end cycle regression testing on the
-real Neuromaps graph to validate transform roundtrip quality across multi-hop paths.
+Adds end-to-end cycle regression testing on the real Neuromaps graph
+to validate transform roundtrip quality across multi-hop paths.
 
 Resulting files are written to a run-specific directory:
 
