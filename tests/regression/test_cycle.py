@@ -108,10 +108,8 @@ def _get_min_mean_pearson(
     origin: str,
     hemisphere: str,
 ) -> float:
-    """Return the configured regression threshold for an origin/hemisphere."""
-    threshold_origin = "all" if ORIGIN == "all" else origin
-
-    return MIN_MEAN_PEARSON[(threshold_origin, hemisphere)]
+    """Return the baseline for an individual origin/hemisphere."""
+    return MIN_MEAN_PEARSON[(origin, hemisphere)]
 
 
 # -------------------------------------------------------------------------
@@ -732,17 +730,25 @@ def _plot_cycle_summary(
 
 
 def _save_all_summary(run_dir: Path) -> None:
-    """Calculate overall left/right Pearson r across all origin spaces."""
+    """Calculate and validate overall left/right Pearson r across all origins."""
     summaries: list[str] = []
+
+    allowed_regression = 0.0001
 
     for hemisphere in HEMISPHERES:
         csv_files = sorted(run_dir.glob(f"cycle_*_{hemisphere}.csv"))
 
-        frames = [
-            pd.read_csv(csv_file)
-            for csv_file in csv_files
-            if not pd.read_csv(csv_file).empty
-        ]
+        frames: list[pd.DataFrame] = []
+
+        for csv_file in csv_files:
+            # Do not include an aggregate file if one ever exists.
+            if csv_file.stem.startswith("cycle_all_"):
+                continue
+
+            frame = pd.read_csv(csv_file)
+
+            if not frame.empty:
+                frames.append(frame)
 
         if not frames:
             logger.warning(
@@ -751,21 +757,37 @@ def _save_all_summary(run_dir: Path) -> None:
             )
             continue
 
-        combined = pd.concat(frames, ignore_index=True)
+        combined = pd.concat(
+            frames,
+            ignore_index=True,
+        )
 
         mean_r = float(combined["pearson_r"].mean())
+
+        threshold = MIN_MEAN_PEARSON[("all", hemisphere)]
 
         summaries.append(
             f"All spaces ({hemisphere}):\n"
             f"  Total executable cycles: {len(combined)}\n"
             f"  Mean Pearson r: {mean_r:.6f}\n"
+            f"  Minimum required mean Pearson r: {threshold:.6f}\n"
         )
 
         logger.info(
-            "ALL SPACES (%s): %d cycles, mean Pearson r = %.6f",
+            "ALL SPACES (%s): %d cycles, mean Pearson r = %.6f, threshold = %.6f",
             hemisphere,
             len(combined),
             mean_r,
+            threshold,
+        )
+
+        assert mean_r >= threshold - allowed_regression, (
+            "Average round-trip correlation regressed for all spaces: "
+            f"hemisphere={hemisphere}, "
+            f"mean r={mean_r:.6f}, "
+            f"threshold={threshold:.6f}, "
+            f"allowed regression={allowed_regression:.6f}. "
+            f"Inspect outputs in {run_dir}."
         )
 
     if not summaries:
@@ -785,7 +807,10 @@ def _save_all_summary(run_dir: Path) -> None:
         encoding="utf-8",
     )
 
-    logger.info("Saved all-space summary: %s", output_file)
+    logger.info(
+        "Saved all-space summary: %s",
+        output_file,
+    )
 
 
 def plot_run_summaries(
