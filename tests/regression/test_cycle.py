@@ -68,10 +68,10 @@ OUTPUT_DIR.mkdir(
 
 # Set to a specific space to test only that origin, or use "all" to test
 # every configured origin.
-ORIGIN: str = "MEBRAINS"
+ORIGIN: str = "all"
 
 HEMISPHERES = (
-    # "left",
+    "left",
     "right",
 )
 
@@ -91,8 +91,14 @@ MIN_MEAN_PEARSON: dict[tuple[str, str], float] = {
     ("D99", "right"): 0.567145,
     ("NMT2Sym", "left"): 0.541054,
     ("NMT2Sym", "right"): 0.505617,
-    ("all", "left"): 0.5,
-    ("all", "right"): 0.5,
+    ("fsaverage", "left"): 0.998140,
+    ("fsaverage", "right"): 0.998340,
+    ("fsLR", "left"): 0.706283,
+    ("fsLR", "right"): 0.606387,
+    ("NCBR", "left"): 0.998746,
+    ("NCBR", "right"): 0.998746,
+    ("all", "left"): 0.564602,
+    ("all", "right"): 0.545228,
 }
 
 LOG_COMMANDS = True
@@ -559,6 +565,9 @@ def test_cycle_roundtrip() -> None:
         run_dir=OUTPUT_DIR,
     )
 
+    if ORIGIN == "all":
+        _save_all_summary(OUTPUT_DIR)
+
     assert total_usable_paths > 0, (
         "No executable surface transformation cycles were found "
         "for any configured origin/hemisphere."
@@ -720,6 +729,63 @@ def _plot_cycle_summary(
         "Saved combined cycle summary plot: %s",
         output_file,
     )
+
+
+def _save_all_summary(run_dir: Path) -> None:
+    """Calculate overall left/right Pearson r across all origin spaces."""
+    summaries: list[str] = []
+
+    for hemisphere in HEMISPHERES:
+        csv_files = sorted(run_dir.glob(f"cycle_*_{hemisphere}.csv"))
+
+        frames = [
+            pd.read_csv(csv_file)
+            for csv_file in csv_files
+            if not pd.read_csv(csv_file).empty
+        ]
+
+        if not frames:
+            logger.warning(
+                "No cycle results found for all-space %s summary.",
+                hemisphere,
+            )
+            continue
+
+        combined = pd.concat(frames, ignore_index=True)
+
+        mean_r = float(combined["pearson_r"].mean())
+
+        summaries.append(
+            f"All spaces ({hemisphere}):\n"
+            f"  Total executable cycles: {len(combined)}\n"
+            f"  Mean Pearson r: {mean_r:.6f}\n"
+        )
+
+        logger.info(
+            "ALL SPACES (%s): %d cycles, mean Pearson r = %.6f",
+            hemisphere,
+            len(combined),
+            mean_r,
+        )
+
+    if not summaries:
+        return
+
+    output_file = run_dir / "cycle_all_summary.txt"
+
+    lines = [
+        "Cycle test results — all origin spaces",
+        "=" * 60,
+        "",
+        *summaries,
+    ]
+
+    output_file.write_text(
+        "\n".join(lines),
+        encoding="utf-8",
+    )
+
+    logger.info("Saved all-space summary: %s", output_file)
 
 
 def plot_run_summaries(
