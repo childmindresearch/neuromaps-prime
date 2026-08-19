@@ -95,6 +95,8 @@ MIN_MEAN_PEARSON: dict[tuple[str, str], float] = {
     ("fsaverage", "right"): 0.998340,
     ("fsLR", "left"): 0.706283,
     ("fsLR", "right"): 0.606387,
+    ("CIVET", "left"): 0.5,
+    ("CIVET", "right"): 0.5,
     ("NCBR", "left"): 0.998746,
     ("NCBR", "right"): 0.998746,
     ("all", "left"): 0.564602,
