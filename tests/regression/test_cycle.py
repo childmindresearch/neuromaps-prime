@@ -919,7 +919,7 @@ def _save_cycle_results(
             f"Observed mean r={mean_r:.6f}."
         )
 
-    allowed_regression = 0.01  # change to whatever value makes sense here
+    allowed_regression = 0.0001  # change to whatever value makes sense here
 
     assert mean_r >= min_mean_pearson - allowed_regression, (
         "Average round-trip correlation regressed: "
