@@ -12,7 +12,7 @@ import nibabel as nib
 import numpy as np
 from numpy.typing import ArrayLike
 
-from neuromaps_prime.analysis.images import PARC_IGNORE, load_gifti, relabel_gifti
+from neuromaps_prime.analysis.images import PARC_IGNORE, load_data, relabel_gifti
 from neuromaps_prime.analysis.surfaces.nulls.burt import batch_surrogates
 from neuromaps_prime.analysis.surfaces.nulls.spins import (
     _get_parcel_centroids,
@@ -43,16 +43,16 @@ def _resolve_data(
     def _load_one(item: str | Path | nib.GiftiImage) -> np.ndarray:
         if isinstance(item, nib.GiftiImage):
             return item.agg_data().ravel()
-        img = gifti_cache.get(item)
-        if img is None:
-            img = load_gifti(item)
-        return img.agg_data().ravel()
+
+        if isinstance(item, str | Path) and item in gifti_cache:
+            return gifti_cache[item].agg_data().ravel()
+
+        data = load_data(item, dtype=float)
+        return data.array.ravel()
 
     if isinstance(data, tuple):
         return np.hstack([_load_one(d) for d in data])
-    if isinstance(data, str | Path | nib.GiftiImage):
-        return _load_one(data)
-    return np.asarray(data, dtype=float).ravel()
+    return _load_one(data)  # type: ignore[arg-type] # Not a tuple
 
 
 def _generate_spins(
@@ -78,10 +78,11 @@ def _generate_spins(
         )
 
     # Pre-load all GIFTI files once
-    for s in surfaces_list:
-        gifti_cache[s] = load_gifti(s)
-    for p in parcellation_list:
-        gifti_cache[p] = load_gifti(p)
+    for item in [*surfaces_list, *parcellation_list]:
+        if isinstance(item, str | Path) and item not in gifti_cache:
+            _, img = load_data(item, return_image=True)
+            if isinstance(img, nib.GiftiImage):
+                gifti_cache[item] = img
 
     centroid_list = []
     hemi_list = []

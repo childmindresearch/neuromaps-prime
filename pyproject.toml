@@ -87,7 +87,7 @@ line-length = 88
 indent-width = 4
 src = ["src"]
 target-version = "py312"
-extend-exclude = ["examples/*.py", "scripts/validate_urls.py"]
+extend-exclude = ["examples/*.py", "examples/*.ipynb", "scripts/validate_urls.py"]
 
 [tool.ruff.lint]
 select = [

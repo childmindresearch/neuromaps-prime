@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import nibabel as nib
 import numpy as np
 import pytest
 from tests.unit.analysis.helpers import _make_gifti_parc, _make_gifti_surface
@@ -213,21 +212,6 @@ class TestGeodesicParcelCentroid:
                 faces=square_faces,
                 inds=np.array([], dtype=int),
             )
-
-
-class TestLoadGifti:
-    """Tests for _load_gifti()."""
-
-    def test_returns_gifti(self, surf_gifti_path: Path) -> None:
-        """Verify loading a valid GIFTI file returns a GiftiImage."""
-        assert isinstance(points.load_gifti(surf_gifti_path), nib.GiftiImage)
-
-    def test_wrong_type_raises(self, tmp_path: Path) -> None:
-        """Verify loading a non-GIFTI file raises ValueError."""
-        nii_path = tmp_path / "dummy.nii.gz"
-        nib.Nifti1Image(np.zeros((2, 2, 2)), np.eye(4)).to_filename(str(nii_path))
-        with pytest.raises(ValueError, match="Gifti"):
-            points.load_gifti(nii_path)
 
 
 class TestRelabelGifti:
