@@ -287,7 +287,6 @@ def _plot_single_surface(
     resource_type: str,
     vmin: float,
     vmax: float,
-    ax: plt.Axes,
     pearson_r: float,
     hop_index: int,
 ) -> None:
