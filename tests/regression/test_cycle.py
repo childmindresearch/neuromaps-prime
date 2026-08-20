@@ -1,4 +1,4 @@
-"""Cycle regression test on the real NeuromapsPrime graph.
+"""Cycle regression test on the real Neuromaps-PRIME graph.
 
 Adds end-to-end cycle regression testing on the real Neuromaps graph
 to validate transform roundtrip quality across multi-hop paths.
@@ -14,7 +14,7 @@ Each run may contain:
 * per-path transformation manifests
 * intermediate metric files
 * surface visualizations
-* optional wb_command/niwrap/styx logs
+* wb_command/niwrap/styx logs
 
 Area surfaces are attempted in this order:
 
@@ -22,7 +22,7 @@ Area surfaces are attempted in this order:
 2. pial
 3. white
 
-Run with::
+Run with:
 
     pytest tests/regression/test_cycle.py -v -s
 """
@@ -32,15 +32,16 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Final
 
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
 import pandas as pd
-import pytest
 from matplotlib_surface_plotting import plot_surf
 from nibabel.gifti import GiftiDataArray, GiftiImage
 from tests.cycle import (
+    Hemisphere,
     RoundtripResult,
     _path_token,
     find_return_paths,
@@ -66,17 +67,16 @@ OUTPUT_DIR.mkdir(
     exist_ok=True,
 )
 
-# Set to a specific space to test only that origin, or use "all" to test
-# every configured origin.
-ORIGIN: str = "all"
+# Always test every configured origin space.
 
 HEMISPHERES = (
     "left",
     "right",
 )
 
-MAX_CYCLE_LENGTH = 4
-MAX_PATHS: int | None = None
+MAX_CYCLE_LENGTH: Final = 4
+MAX_PATHS: Final[int | None] = None
+ALLOWED_REGRESSION: Final = 1e-4
 
 # Minimum acceptable mean Pearson correlation for each regression run.
 # Values should be updated deliberately.  Last updated 08/18 (TR).
@@ -104,7 +104,7 @@ MIN_MEAN_PEARSON: dict[tuple[str, str], float] = {
     ("MBM", "left"): 0.5,
     ("MBM", "right"): 0.5,
     ("NenckiMonash", "left"): 0.5,
-    ("NenkiMonash", "right"): 0.5,
+    ("NenckiMonash", "right"): 0.5,
     ("all", "left"): 0.5,
     ("all", "right"): 0.5,
 }
@@ -114,7 +114,7 @@ LOG_COMMANDS = True
 
 def _get_min_mean_pearson(
     origin: str,
-    hemisphere: str,
+    hemisphere: Hemisphere,
 ) -> float:
     """Return the baseline for an individual origin/hemisphere."""
     return MIN_MEAN_PEARSON[(origin, hemisphere)]
@@ -164,7 +164,7 @@ def _load_surface_coords(
     surface_file: Path,
 ) -> np.ndarray:
     """Load surface coordinates as ``(n_vertices, 3)``."""
-    image = nib.load(str(surface_file))
+    image = nib.load(surface_file)
 
     for darray in image.darrays:
         data = np.asarray(darray.data)
@@ -182,7 +182,7 @@ def _load_surface_topology(
     surface_file: Path,
 ) -> np.ndarray:
     """Load triangle topology from a surface GIFTI."""
-    image = nib.load(str(surface_file))
+    image = nib.load(surface_file)
 
     for darray in image.darrays:
         if str(darray.intent) in (
@@ -249,7 +249,7 @@ def _write_metric(
 
     nib.save(
         image,
-        str(metric_file),
+        metric_file,
     )
 
     return metric_file
@@ -259,7 +259,7 @@ def _make_xyz_product_metric(
     graph: NeuromapsGraph,
     origin: str,
     density: str,
-    hemisphere: str,
+    hemisphere: Hemisphere,
     output_dir: Path,
 ) -> Path:
     """Create a deterministic synthetic metric from sphere coordinates."""
@@ -275,7 +275,7 @@ def _make_xyz_product_metric(
             f"No sphere atlas for {origin} at {density} ({hemisphere})."
         )
 
-    coords = _load_surface_coords(Path(sphere.fetch()))
+    coords = _load_surface_coords(sphere.fetch())
 
     values = np.prod(
         coords,
@@ -308,10 +308,10 @@ def _load_metric_values(
 def _find_matching_surface(
     graph: NeuromapsGraph,
     space: str,
-    hemisphere: str,
+    hemisphere: Hemisphere,
     resource_type: str,
     n_vertices: int,
-) -> tuple[object, str] | None:
+) -> object | None:
     """Find a surface whose vertex count matches the metric."""
     atlases = graph.utils.cache.get_surface_atlases(
         space=space,
@@ -326,11 +326,18 @@ def _find_matching_surface(
             ValueError,
             FileNotFoundError,
             OSError,
-        ):
+        ) as exc:
+            logger.warning(
+                "Could not load %s surface for %s (%s): %s",
+                resource_type,
+                space,
+                hemisphere,
+                exc,
+            )
             continue
 
         if coords.shape[0] == n_vertices:
-            return atlas, atlas.density
+            return atlas
 
     return None
 
@@ -344,7 +351,7 @@ def _plot_single_surface(
     graph: NeuromapsGraph,
     space: str,
     metric_values: np.ndarray,
-    hemisphere: str,
+    hemisphere: Hemisphere,
     resource_type: str,
     vmin: float,
     vmax: float,
@@ -355,7 +362,7 @@ def _plot_single_surface(
     pearson_r: float,
 ) -> None:
     """Plot a metric on a surface matching its vertex count."""
-    match = _find_matching_surface(
+    surface_atlas = _find_matching_surface(
         graph,
         space,
         hemisphere,
@@ -363,7 +370,7 @@ def _plot_single_surface(
         metric_values.shape[0],
     )
 
-    if match is None:
+    if surface_atlas is None:
         logger.warning(
             "No %s surface for %s (%s) matching %d vertices; skipping plot.",
             resource_type,
@@ -373,10 +380,10 @@ def _plot_single_surface(
         )
         return
 
-    surface_atlas, density = match
+    density = surface_atlas.density
 
     try:
-        coords, faces = _extract_surface_mesh(Path(surface_atlas.fetch()))
+        coords, faces = _extract_surface_mesh(surface_atlas.fetch())
     except (
         ValueError,
         FileNotFoundError,
@@ -401,7 +408,7 @@ def _plot_single_surface(
             faces,
             metric_values,
             rotate=[270, 0],
-            filename=str(output_path),
+            filename=output_path,
             vmin=vmin,
             vmax=vmax,
             cmap="viridis",
@@ -430,7 +437,7 @@ def _plot_cycle_cortical_surfaces(
     graph: NeuromapsGraph,
     path: tuple[str, ...],
     metrics_by_hop: list[tuple[str, np.ndarray]],
-    hemisphere: str,
+    hemisphere: Hemisphere,
     pearson_r: float,
     plot_dir: Path,
 ) -> None:
@@ -461,8 +468,8 @@ def _plot_cycle_cortical_surfaces(
             metric_values=metric_values,
             hemisphere=hemisphere,
             resource_type="midthickness",
-            vmin=float(vmin),
-            vmax=float(vmax),
+            vmin=vmin,
+            vmax=vmax,
             plot_dir=plot_dir,
             path_token=path_token,
             path_label=path_label,
@@ -526,7 +533,7 @@ def _log_progress(
     completed: int,
     total: int,
     origin: str,
-    hemisphere: str,
+    hemisphere: Hemisphere,
     path: tuple[str, ...],
 ) -> None:
     """Log overall cycle regression progress."""
@@ -547,7 +554,7 @@ def test_cycle_roundtrip() -> None:
     """Round-trip synthetic metrics through real transformation cycles."""
     graph = NeuromapsGraph()
 
-    origins = sorted(graph.nodes) if ORIGIN == "all" else [ORIGIN]
+    origins = sorted(graph.nodes)
 
     total_usable_paths = 0
 
@@ -567,17 +574,16 @@ def test_cycle_roundtrip() -> None:
 
             total_usable_paths += result
 
-    plot_run_summaries(
-        run_dir=OUTPUT_DIR,
-    )
-
-    if ORIGIN == "all":
-        _save_all_summary(OUTPUT_DIR)
-
     assert total_usable_paths > 0, (
         "No executable surface transformation cycles were found "
         "for any configured origin/hemisphere."
     )
+
+    plot_run_summaries(
+        run_dir=OUTPUT_DIR,
+    )
+
+    _save_all_summary(OUTPUT_DIR)
 
 
 # -------------------------------------------------------------------------
@@ -596,7 +602,7 @@ def _plot_cycle_summary(
     """
     frames: dict[str, pd.DataFrame] = {}
 
-    for hemisphere in ("left", "right"):
+    for hemisphere in HEMISPHERES:
         csv_path = run_dir / f"cycle_{origin}_{hemisphere}.csv"
 
         if not csv_path.exists():
@@ -741,8 +747,6 @@ def _save_all_summary(run_dir: Path) -> None:
     """Calculate and validate overall left/right Pearson r across all origins."""
     summaries: list[str] = []
 
-    allowed_regression = 0.0001
-
     for hemisphere in HEMISPHERES:
         csv_files = sorted(run_dir.glob(f"cycle_*_{hemisphere}.csv"))
 
@@ -770,7 +774,7 @@ def _save_all_summary(run_dir: Path) -> None:
             ignore_index=True,
         )
 
-        mean_r = float(combined["pearson_r"].mean())
+        mean_r = combined["pearson_r"].mean()
 
         all_min_mean_pearson = MIN_MEAN_PEARSON[("all", hemisphere)]
 
@@ -778,7 +782,7 @@ def _save_all_summary(run_dir: Path) -> None:
             f"All spaces ({hemisphere}):\n"
             f"  Total executable cycles: {len(combined)}\n"
             f"  Mean Pearson r: {mean_r:.6f}\n"
-            f"  Minimum required mean Pearson r: {threshold:.6f}\n"
+            f"  Minimum required mean Pearson r: {all_min_mean_pearson:.6f}\n"
         )
 
         logger.info(
@@ -789,12 +793,12 @@ def _save_all_summary(run_dir: Path) -> None:
             all_min_mean_pearson,
         )
 
-        assert mean_r >= all_min_mean_pearson - allowed_regression, (
+        assert mean_r >= all_min_mean_pearson - ALLOWED_REGRESSION, (
             "Average round-trip correlation regressed for all spaces: "
             f"hemisphere={hemisphere}, "
             f"mean r={mean_r:.6f}, "
             f"threshold={all_min_mean_pearson:.6f}, "
-            f"allowed regression={allowed_regression:.6f}. "
+            f"allowed regression={ALLOWED_REGRESSION:.6f}. "
             f"Inspect outputs in {run_dir}."
         )
 
@@ -856,7 +860,7 @@ def plot_run_summaries(
 
 def _save_cycle_results(
     origin: str,
-    hemisphere: str,
+    hemisphere: Hemisphere,
     rows: list[dict[str, object]],
     plot_dir: Path,
     command_handler: CommandLogHandler | None,
@@ -945,22 +949,13 @@ def _save_cycle_results(
             command_handler.log_file,
         )
 
-    if min_mean_pearson is None:
-        pytest.fail(
-            f"No baseline threshold configured for "
-            f"origin={origin}, hemisphere={hemisphere}. "
-            f"Observed mean r={mean_r:.6f}."
-        )
-
-    allowed_regression = 0.0001  # change to whatever value makes sense here
-
-    assert mean_r >= min_mean_pearson - allowed_regression, (
+    assert mean_r >= min_mean_pearson - ALLOWED_REGRESSION, (
         "Average round-trip correlation regressed: "
         f"origin={origin}, "
         f"hemisphere={hemisphere}, "
         f"mean r={mean_r:.6f}, "
         f"threshold={min_mean_pearson:.6f}, "
-        f"allowed regression={allowed_regression:.6f}. "
+        f"allowed regression={ALLOWED_REGRESSION:.6f}. "
         f"Inspect outputs in {OUTPUT_DIR}."
     )
 
@@ -972,7 +967,7 @@ def _run_cycle_path(
     metric_file: Path,
     original_metric: np.ndarray,
     path: tuple[str, ...],
-    hemisphere: str,
+    hemisphere: Hemisphere,
     path_workdir: Path,
     plot_dir: Path,
 ) -> dict[str, object] | None:
@@ -1067,7 +1062,9 @@ def _run_cycle_path(
 def _run_origin_hemisphere(
     graph: NeuromapsGraph,
     origin: str,
-    hemisphere: str,
+    hemisphere: Hemisphere,
+    max_cycle_length: int = 4,
+    max_paths: int | None = None,
 ) -> int:
     """Run all cycles for one origin and hemisphere."""
     work_dir = OUTPUT_DIR / f"work_{origin}_{hemisphere}"
@@ -1130,9 +1127,9 @@ def _run_origin_hemisphere(
     paths = find_return_paths(
         graph,
         origin,
-        max_length=MAX_CYCLE_LENGTH,
+        max_length=max_cycle_length,
         allow_revisits=True,
-        max_paths=MAX_PATHS,
+        max_paths=max_paths,
     )
 
     logger.info(
