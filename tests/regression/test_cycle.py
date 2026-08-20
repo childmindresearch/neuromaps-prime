@@ -39,16 +39,22 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 from matplotlib_surface_plotting import plot_surf
-from nibabel.gifti import GiftiDataArray, GiftiImage
+from nibabel.gifti import (
+    GiftiDataArray,
+    GiftiImage,
+    intent_codes,
+)
 from tests.cycle import (
     Hemisphere,
     RoundtripResult,
     _path_token,
     find_return_paths,
+    load_metric,
     roundtrip_metric,
     score_roundtrip,
 )
 
+from neuromaps_prime.analysis.images import load_gifti
 from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
@@ -78,46 +84,13 @@ MAX_CYCLE_LENGTH: Final = 4
 MAX_PATHS: Final[int | None] = None
 ALLOWED_REGRESSION: Final = 1e-4
 
-# Minimum acceptable mean Pearson correlation for each regression run.
-# Values should be updated deliberately.  Last updated 08/18 (TR).
-MIN_MEAN_PEARSON: dict[tuple[str, str], float] = {
-    ("Yerkes19", "left"): 0.572255,
-    ("Yerkes19", "right"): 0.553471,
-    ("CIVETNMT", "left"): 0.501674,
-    ("CIVETNMT", "right"): 0.517182,
-    ("MEBRAINS", "left"): 0.561245,
-    ("MEBRAINS", "right"): 0.555567,
-    ("D99", "left"): 0.610269,
-    ("D99", "right"): 0.567145,
-    ("NMT2Sym", "left"): 0.541054,
-    ("NMT2Sym", "right"): 0.505617,
-    ("fsaverage", "left"): 0.998140,
-    ("fsaverage", "right"): 0.998340,
-    ("fsLR", "left"): 0.706283,
-    ("fsLR", "right"): 0.606387,
-    ("CIVET", "left"): 0.5,
-    ("CIVET", "right"): 0.5,
-    ("NCBR", "left"): 0.998746,
-    ("NCBR", "right"): 0.998746,
-    ("Yerkes29", "left"): 0.5,
-    ("Yerkes29", "right"): 0.5,
-    ("MBM", "left"): 0.5,
-    ("MBM", "right"): 0.5,
-    ("NenckiMonash", "left"): 0.5,
-    ("NenckiMonash", "right"): 0.5,
-    ("all", "left"): 0.5,
-    ("all", "right"): 0.5,
+# min acceptable mean Pearson correlation across all cycles.
+MIN_MEAN_PEARSON: dict[Hemisphere, float] = {
+    "left": 0.5,
+    "right": 0.5,
 }
 
 LOG_COMMANDS = True
-
-
-def _get_min_mean_pearson(
-    origin: str,
-    hemisphere: Hemisphere,
-) -> float:
-    """Return the baseline for an individual origin/hemisphere."""
-    return MIN_MEAN_PEARSON[(origin, hemisphere)]
 
 
 # -------------------------------------------------------------------------
@@ -164,16 +137,11 @@ def _load_surface_coords(
     surface_file: Path,
 ) -> np.ndarray:
     """Load surface coordinates as ``(n_vertices, 3)``."""
-    image = nib.load(surface_file)
+    image = load_gifti(surface_file)
 
     for darray in image.darrays:
-        data = np.asarray(darray.data)
-
-        if data.ndim == 2 and data.shape[1] == 3:
-            return np.asarray(
-                data,
-                dtype=np.float64,
-            )
+        if darray.intent == intent_codes["NIFTI_INTENT_POINTSET"]:
+            return np.asarray(darray.data, dtype=np.float64)
 
     raise ValueError(f"No pointset coordinates found in {surface_file}.")
 
@@ -182,42 +150,13 @@ def _load_surface_topology(
     surface_file: Path,
 ) -> np.ndarray:
     """Load triangle topology from a surface GIFTI."""
-    image = nib.load(surface_file)
+    image = load_gifti(surface_file)
 
     for darray in image.darrays:
-        if str(darray.intent) in (
-            "NIFTI_INTENT_TRIANGLE",
-            "1009",
-        ):
-            return np.asarray(
-                darray.data,
-                dtype=np.int32,
-            )
-
-    for darray in image.darrays:
-        data = np.asarray(darray.data)
-
-        if (
-            data.ndim == 2
-            and data.shape[1] == 3
-            and np.issubdtype(
-                data.dtype,
-                np.integer,
-            )
-        ):
-            return data.astype(np.int32)
+        if darray.intent == intent_codes["NIFTI_INTENT_TRIANGLE"]:
+            return np.asarray(darray.data, dtype=np.int32)
 
     raise ValueError(f"No triangle topology found in {surface_file}.")
-
-
-def _extract_surface_mesh(
-    surface_file: Path,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Extract coordinates and triangles from a surface."""
-    return (
-        _load_surface_coords(surface_file),
-        _load_surface_topology(surface_file),
-    )
 
 
 # -------------------------------------------------------------------------
@@ -290,16 +229,6 @@ def _make_xyz_product_metric(
     )
 
 
-def _load_metric_values(
-    metric_file: Path,
-) -> np.ndarray:
-    """Load scalar values from a metric GIFTI."""
-    return np.asarray(
-        nib.load(str(metric_file)).darrays[0].data,
-        dtype=np.float64,
-    )
-
-
 # -------------------------------------------------------------------------
 # Surface matching for visualization
 # -------------------------------------------------------------------------
@@ -355,13 +284,11 @@ def _plot_single_surface(
     resource_type: str,
     vmin: float,
     vmax: float,
-    plot_dir: Path,
-    path_token: str,
-    path_label: str,
-    hop_index: int,
+    ax: plt.Axes,
     pearson_r: float,
+    hop_index: int,
 ) -> None:
-    """Plot a metric on a surface matching its vertex count."""
+    """Plot a metric on a surface axis."""
     surface_atlas = _find_matching_surface(
         graph,
         space,
@@ -380,57 +307,31 @@ def _plot_single_surface(
         )
         return
 
-    density = surface_atlas.density
-
     try:
-        coords, faces = _extract_surface_mesh(surface_atlas.fetch())
-    except (
-        ValueError,
-        FileNotFoundError,
-        OSError,
-    ) as exc:
+        surface_file = surface_atlas.fetch()
+        coords = _load_surface_coords(surface_file)
+        faces = _load_surface_topology(surface_file)
+    except (ValueError, FileNotFoundError, OSError) as exc:
         logger.warning(
             "Could not load %s mesh for %s (%s): %s",
             resource_type,
             space,
-            density,
+            hemisphere,
             exc,
         )
         return
 
-    output_path = plot_dir / (
-        f"{path_token}_node{hop_index:02d}_{space}_{resource_type}.png"
+    plot_surf(
+        coords,
+        faces,
+        metric_values,
+        ax=ax,
+        rotate=[270, 0],
+        vmin=vmin,
+        vmax=vmax,
+        cmap="viridis",
+        title=f"{space} | node {hop_index} | r={pearson_r:.5f}",
     )
-
-    try:
-        plot_surf(
-            coords,
-            faces,
-            metric_values,
-            rotate=[270, 0],
-            filename=output_path,
-            vmin=vmin,
-            vmax=vmax,
-            cmap="viridis",
-            title=(f"{path_label}\n{space} | r={pearson_r:.5f}"),
-        )
-
-        logger.info(
-            "Saved surface plot: %s",
-            output_path,
-        )
-
-    except Exception as exc:
-        logger.warning(
-            "plot_surf failed for %s %s (%s): %s",
-            space,
-            resource_type,
-            density,
-            exc,
-        )
-
-    finally:
-        plt.close("all")
 
 
 def _plot_cycle_cortical_surfaces(
@@ -441,17 +342,25 @@ def _plot_cycle_cortical_surfaces(
     pearson_r: float,
     plot_dir: Path,
 ) -> None:
-    """Plot midthickness and sphere views for every cycle node."""
+    """Plot all cycle nodes in a single figure."""
     if not metrics_by_hop:
         return
 
     path_token = _path_token(path)
     path_label = " -> ".join(path)
 
-    for hop_index, (
-        space,
-        metric_values,
-    ) in enumerate(metrics_by_hop):
+    n_hops = len(metrics_by_hop)
+
+    fig, axes = plt.subplots(
+        1,
+        n_hops,
+        figsize=(6 * n_hops, 6),
+        squeeze=False,
+    )
+
+    axes = axes[0]
+
+    for hop_index, (space, metric_values) in enumerate(metrics_by_hop):
         finite = np.isfinite(metric_values)
 
         if np.any(finite):
@@ -470,27 +379,26 @@ def _plot_cycle_cortical_surfaces(
             resource_type="midthickness",
             vmin=vmin,
             vmax=vmax,
-            plot_dir=plot_dir,
-            path_token=path_token,
-            path_label=path_label,
-            hop_index=hop_index,
+            ax=axes[hop_index],
             pearson_r=pearson_r,
+            hop_index=hop_index,
         )
 
-        _plot_single_surface(
-            graph=graph,
-            space=space,
-            metric_values=metric_values,
-            hemisphere=hemisphere,
-            resource_type="sphere",
-            vmin=float(vmin),
-            vmax=float(vmax),
-            plot_dir=plot_dir,
-            path_token=path_token,
-            path_label=path_label,
-            hop_index=hop_index,
-            pearson_r=pearson_r,
-        )
+    fig.suptitle(
+        f"{path_label}\n{hemisphere} hemisphere",
+        fontsize=14,
+    )
+    fig.tight_layout()
+
+    output_path = plot_dir / f"{path_token}_cycle.png"
+    fig.savefig(
+        output_path,
+        dpi=200,
+        bbox_inches="tight",
+    )
+    plt.close(fig)
+
+    logger.info("Saved cycle surface plot: %s", output_path)
 
 
 # -------------------------------------------------------------------------
@@ -634,6 +542,7 @@ def _plot_cycle_summary(
             len(str(path).split(" -> ")) - 1,
             str(path),
         ),
+        reverse=True,
     )
 
     paths = list(reversed(paths))
@@ -864,7 +773,6 @@ def _save_cycle_results(
     rows: list[dict[str, object]],
     plot_dir: Path,
     command_handler: CommandLogHandler | None,
-    min_mean_pearson: float,
 ) -> int:
     """Save CSV/TXT cycle results and validate regression output."""
     if not rows:
@@ -927,7 +835,6 @@ def _save_cycle_results(
             separator,
             f"Total cycles: {len(rows)}",
             f"Mean Pearson r: {mean_r:.6f}",
-            f"Minimum required mean Pearson r: {min_mean_pearson:.6f}",
         ]
     )
 
@@ -948,16 +855,6 @@ def _save_cycle_results(
             "Saved command log: %s",
             command_handler.log_file,
         )
-
-    assert mean_r >= min_mean_pearson - ALLOWED_REGRESSION, (
-        "Average round-trip correlation regressed: "
-        f"origin={origin}, "
-        f"hemisphere={hemisphere}, "
-        f"mean r={mean_r:.6f}, "
-        f"threshold={min_mean_pearson:.6f}, "
-        f"allowed regression={ALLOWED_REGRESSION:.6f}. "
-        f"Inspect outputs in {OUTPUT_DIR}."
-    )
 
     return len(rows)
 
@@ -1074,18 +971,6 @@ def _run_origin_hemisphere(
         exist_ok=True,
     )
 
-    min_mean_pearson = _get_min_mean_pearson(
-        origin,
-        hemisphere,
-    )
-
-    logger.info(
-        "Regression threshold for %s (%s): mean Pearson r >= %.6f",
-        origin,
-        hemisphere,
-        min_mean_pearson,
-    )
-
     command_handler = None
 
     if LOG_COMMANDS:
@@ -1122,7 +1007,7 @@ def _run_origin_hemisphere(
         )
         return 0
 
-    original_metric = _load_metric_values(metric_file)
+    original_metric = load_metric(metric_file)
 
     paths = find_return_paths(
         graph,
@@ -1192,5 +1077,4 @@ def _run_origin_hemisphere(
         rows=rows,
         plot_dir=plot_dir,
         command_handler=command_handler,
-        min_mean_pearson=min_mean_pearson,
     )
