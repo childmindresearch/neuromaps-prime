@@ -137,8 +137,7 @@ def _load_surface_coords(
 
     for darray in image.darrays:
         data = np.asarray(darray.data)
-
-        if str(darray.intent) == "1008":  # NIFTI_INTENT_POINTSET
+        if data.ndim == 2 and data.shape[1] == 3:
             return data.astype(np.float64)
 
     raise ValueError(f"No pointset coordinates found in {surface_file}.")
@@ -153,7 +152,11 @@ def _load_surface_topology(
     for darray in image.darrays:
         data = np.asarray(darray.data)
 
-        if str(darray.intent) == "1009":  # NIFTI_INTENT_TRIANGLE
+        if (
+            data.ndim == 2
+            and data.shape[1] == 3
+            and np.issubdtype(data.dtype, np.integer)
+        ):
             return data.astype(np.int32)
 
     raise ValueError(f"No triangle topology found in {surface_file}.")
@@ -325,7 +328,6 @@ def _plot_single_surface(
         coords,
         faces,
         metric_values,
-        ax=ax,
         rotate=[270, 0],
         vmin=vmin,
         vmax=vmax,
@@ -371,18 +373,21 @@ def _plot_cycle_cortical_surfaces(
         else:
             vmin, vmax = 0.0, 1.0
 
-        _plot_single_surface(
-            graph=graph,
-            space=space,
-            metric_values=metric_values,
-            hemisphere=hemisphere,
-            resource_type="midthickness",
-            vmin=vmin,
-            vmax=vmax,
-            ax=axes[hop_index],
-            pearson_r=pearson_r,
-            hop_index=hop_index,
-        )
+        for resource_type in ("midthickness", "sphere"):
+            _plot_single_surface(
+                graph=graph,
+                space=space,
+                metric_values=metric_values,
+                hemisphere=hemisphere,
+                resource_type=resource_type,
+                vmin=vmin,
+                vmax=vmax,
+                plot_dir=plot_dir,
+                path_token=path_token,
+                path_label=path_label,
+                hop_index=hop_index,
+                pearson_r=pearson_r,
+            )
 
     fig.suptitle(
         f"{path_label}\n{hemisphere} hemisphere",
