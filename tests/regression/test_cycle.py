@@ -39,11 +39,7 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 from matplotlib_surface_plotting import plot_surf
-from nibabel.gifti import (
-    GiftiDataArray,
-    GiftiImage,
-    intent_codes,
-)
+from nibabel.gifti import GiftiDataArray, GiftiImage
 from tests.cycle import (
     Hemisphere,
     RoundtripResult,
@@ -140,8 +136,10 @@ def _load_surface_coords(
     image = load_gifti(surface_file)
 
     for darray in image.darrays:
-        if darray.intent == intent_codes["NIFTI_INTENT_POINTSET"]:
-            return np.asarray(darray.data, dtype=np.float64)
+        data = np.asarray(darray.data)
+
+        if str(darray.intent) == "1008":  # NIFTI_INTENT_POINTSET
+            return data.astype(np.float64)
 
     raise ValueError(f"No pointset coordinates found in {surface_file}.")
 
@@ -153,8 +151,10 @@ def _load_surface_topology(
     image = load_gifti(surface_file)
 
     for darray in image.darrays:
-        if darray.intent == intent_codes["NIFTI_INTENT_TRIANGLE"]:
-            return np.asarray(darray.data, dtype=np.int32)
+        data = np.asarray(darray.data)
+
+        if str(darray.intent) == "1009":  # NIFTI_INTENT_TRIANGLE
+            return data.astype(np.int32)
 
     raise ValueError(f"No triangle topology found in {surface_file}.")
 
