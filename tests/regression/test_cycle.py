@@ -529,6 +529,12 @@ def _plot_cycle_summary(
         frame = pd.read_csv(csv_path)
 
         if frame.empty:
+            logger.warning(
+                "Empty %s CSV found for %s: %s",
+                hemisphere,
+                origin,
+                csv_path,
+            )
             continue
 
         frames[hemisphere] = frame
@@ -541,15 +547,14 @@ def _plot_cycle_summary(
         return
 
     paths = sorted(
-        {path for frame in frames.values() for path in frame["path"]},
+        {str(path) for frame in frames.values() for path in frame["path"]},
         key=lambda path: (
-            len(str(path).split(" -> ")) - 1,
-            str(path),
+            len(path.split(" -> ")) - 1,
+            path,
         ),
-        reverse=True,
     )
 
-    paths = list(reversed(paths))
+    path_positions = {path: index for index, path in enumerate(paths)}
 
     fig, axes = plt.subplots(
         nrows=1,
@@ -561,94 +566,87 @@ def _plot_cycle_summary(
         sharey=True,
     )
 
-    for ax, hemisphere in zip(
-        axes,
-        ("left", "right"),
-        strict=True,
-    ):
-        frame = frames.get(hemisphere)
+    try:
+        for ax, hemisphere in zip(
+            axes,
+            HEMISPHERES,
+            strict=True,
+        ):
+            frame = frames.get(hemisphere)
 
-        if frame is None:
-            ax.text(
-                0.5,
-                0.5,
-                "No results",
-                ha="center",
-                va="center",
-                transform=ax.transAxes,
+            if frame is None:
+                ax.set_visible(False)
+                continue
+
+            frame = frame.copy()
+            frame["path"] = frame["path"].astype(str)
+            frame["position"] = frame["path"].map(path_positions)
+
+            frame = frame.dropna(subset=["position", "pearson_r"])
+            frame = frame.sort_values("position")
+
+            ax.axvline(
+                1.0,
+                linestyle="--",
+                linewidth=1,
             )
-            ax.set_title(hemisphere.capitalize())
-            ax.set_xlabel("Pearson r")
-            continue
 
-        values = frame.set_index("path")["pearson_r"].reindex(paths)
+            ax.scatter(
+                frame["pearson_r"],
+                frame["position"],
+                s=40,
+            )
 
-        y_positions = np.arange(len(paths))
-
-        ax.barh(
-            y_positions,
-            values,
-        )
-
-        ax.set_yticks(y_positions)
-
-        if ax is axes[0]:
+            ax.set_yticks(range(len(paths)))
             ax.set_yticklabels(
-                paths,
-                fontsize=8,
-            )
-            ax.set_ylabel("Transformation path")
-        else:
-            ax.tick_params(
-                axis="y",
-                labelleft=False,
+                paths if hemisphere == HEMISPHERES[0] else [],
             )
 
-        ax.set_xlabel("Pearson r")
-
-        ax.set_title(hemisphere.capitalize())
-
-        ax.axvline(
-            0.0,
-            linewidth=1,
-        )
-
-        ax.grid(
-            axis="x",
-            alpha=0.3,
-        )
-
-        finite_values = values.dropna()
-
-        if not finite_values.empty:
-            lower = min(
-                -0.05,
-                float(finite_values.min()) - 0.05,
+            ax.set_xlim(
+                min(0.0, frame["pearson_r"].min() - 0.05),
+                1.01,
             )
-        else:
-            lower = -0.05
+            ax.set_xlabel("Pearson r")
+            ax.set_title(f"{hemisphere.capitalize()} hemisphere")
+            ax.grid(
+                axis="x",
+                linestyle=":",
+                alpha=0.5,
+            )
 
-        ax.set_xlim(
-            lower,
-            1.0,
+            for _, row in frame.iterrows():
+                ax.annotate(
+                    f"{row['pearson_r']:.4f}",
+                    (
+                        row["pearson_r"],
+                        row["position"],
+                    ),
+                    xytext=(5, 0),
+                    textcoords="offset points",
+                    va="center",
+                    fontsize=8,
+                )
+
+        axes[0].set_ylabel("Transformation path")
+
+        fig.suptitle(
+            f"{origin}\nSurface transformation cycle round-trip accuracy",
+            fontsize=16,
         )
 
-    fig.suptitle(
-        f"{origin}\nSurface transformation cycle round-trip accuracy",
-        fontsize=16,
-    )
+        fig.tight_layout(
+            rect=(0, 0, 1, 0.95),
+        )
 
-    fig.tight_layout(rect=(0, 0, 1, 0.95))
+        output_file = run_dir / f"cycle_{origin}_summary.png"
 
-    output_file = run_dir / f"cycle_{origin}_summary.png"
-
-    fig.savefig(
-        output_file,
-        dpi=200,
-        bbox_inches="tight",
-    )
-
-    plt.close(fig)
+        fig.savefig(
+            output_file,
+            dpi=200,
+            bbox_inches="tight",
+        )
+    finally:
+        plt.close(fig)
 
     logger.info(
         "Saved combined cycle summary plot: %s",
@@ -689,7 +687,7 @@ def _save_all_summary(run_dir: Path) -> None:
 
         mean_r = combined["pearson_r"].mean()
 
-        all_min_mean_pearson = MIN_MEAN_PEARSON[("all", hemisphere)]
+        all_min_mean_pearson = MIN_MEAN_PEARSON[hemisphere]
 
         summaries.append(
             f"All spaces ({hemisphere}):\n"
