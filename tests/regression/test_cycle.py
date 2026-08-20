@@ -289,15 +289,9 @@ def _plot_single_surface(
     vmax: float,
     pearson_r: float,
     hop_index: int,
-    ax: plt.Axes,
+    output_file: Path,
 ) -> bool:
-    """Plot a metric on a surface axis.
-
-    Returns:
-    -------
-    bool
-        ``True`` if the surface was successfully plotted, otherwise ``False``.
-    """
+    """Plot one metric on one cortical surface."""
     surface_atlas = _find_matching_surface(
         graph,
         space,
@@ -330,16 +324,32 @@ def _plot_single_surface(
         )
         return False
 
-    plot_surf(
-        coords,
-        faces,
-        metric_values,
-        ax=ax,
-        rotate=[270, 0],
-        vmin=vmin,
-        vmax=vmax,
-        cmap="viridis",
-        title=f"{space} | node {hop_index} | r={pearson_r:.5f}",
+    try:
+        plot_surf(
+            coords,
+            faces,
+            metric_values,
+            rotate=[270, 0],
+            vmin=vmin,
+            vmax=vmax,
+            cmap="viridis",
+            title=f"{space} | node {hop_index} | r={pearson_r:.5f}",
+        )
+
+        fig = plt.gcf()
+
+        fig.savefig(
+            output_file,
+            dpi=200,
+            bbox_inches="tight",
+        )
+
+    finally:
+        plt.close(fig)
+
+    logger.info(
+        "Saved surface plot: %s",
+        output_file,
     )
 
     return True
@@ -353,81 +363,57 @@ def _plot_cycle_cortical_surfaces(
     pearson_r: float,
     plot_dir: Path,
 ) -> None:
-    """Plot all cycle nodes in a single figure."""
+    """Plot each cycle node as an individual cortical surface figure."""
     if not metrics_by_hop:
         return
 
     path_token = _path_token(path)
-    path_label = " -> ".join(path)
 
-    n_hops = len(metrics_by_hop)
+    for hop_index, (space, metric_values) in enumerate(metrics_by_hop):
+        finite = np.isfinite(metric_values)
 
-    fig, axes = plt.subplots(
-        1,
-        n_hops,
-        figsize=(6 * n_hops, 6),
-        squeeze=False,
-    )
+        if np.any(finite):
+            vmin, vmax = np.percentile(
+                metric_values[finite],
+                [2, 98],
+            )
+        else:
+            vmin, vmax = 0.0, 1.0
 
-    axes = axes[0]
+        plotted = False
 
-    try:
-        for hop_index, (space, metric_values) in enumerate(metrics_by_hop):
-            finite = np.isfinite(metric_values)
+        for resource_type in (
+            "midthickness",
+            "pial",
+            "white",
+        ):
+            output_file = (
+                plot_dir / f"{path_token}_hop{hop_index}_{space}_{resource_type}.png"
+            )
 
-            if np.any(finite):
-                vmin, vmax = np.percentile(
-                    metric_values[finite],
-                    [2, 98],
-                )
-            else:
-                vmin, vmax = 0.0, 1.0
+            if _plot_single_surface(
+                graph=graph,
+                space=space,
+                metric_values=metric_values,
+                hemisphere=hemisphere,
+                resource_type=resource_type,
+                vmin=vmin,
+                vmax=vmax,
+                pearson_r=pearson_r,
+                hop_index=hop_index,
+                output_file=output_file,
+            ):
+                plotted = True
+                break
 
-            ax = axes[hop_index]
-
-            plotted = False
-
-            for resource_type in ("midthickness", "pial", "white"):
-                if _plot_single_surface(
-                    graph=graph,
-                    space=space,
-                    metric_values=metric_values,
-                    hemisphere=hemisphere,
-                    resource_type=resource_type,
-                    vmin=vmin,
-                    vmax=vmax,
-                    pearson_r=pearson_r,
-                    hop_index=hop_index,
-                    ax=ax,
-                ):
-                    plotted = True
-                    break
-
-            if not plotted:
-                ax.set_visible(False)
-
-        fig.suptitle(
-            f"{path_label}\n{hemisphere} hemisphere",
-            fontsize=14,
-        )
-
-        fig.tight_layout()
-
-        output_path = plot_dir / f"{path_token}_cycle.png"
-
-        fig.savefig(
-            output_path,
-            dpi=200,
-            bbox_inches="tight",
-        )
-
-    finally:
-        plt.close(fig)
-
-    logger.info(
-        "Saved cycle surface plot: %s",
-        output_path,
-    )
+        if not plotted:
+            logger.warning(
+                "Could not create any surface plot for %s, hop %d (%s, %s).",
+                " -> ".join(path),
+                hop_index,
+                space,
+                hemisphere,
+            )
 
 
 # -------------------------------------------------------------------------
