@@ -210,6 +210,8 @@ def test_cycle_roundtrip() -> None:
 
     plot_run_summaries(
         run_dir=OUTPUT_DIR,
+        current_values=current_values,
+        baseline=baseline,
     )
 
     logger.info(
@@ -574,7 +576,7 @@ def _log_final_regression_status(
             comparison = "regressed beyond allowed tolerance"
 
         logger.info(
-            "FINAL ALL SPACES — %s (%s): current=%.6f, "
+            "FINAL ALL-SPACE MEAN — %s (%s): current=%.6f, "
             "baseline=%.6f, difference=%+.6f, minimum allowed=%.6f — %s",
             status,
             hemisphere,
@@ -621,11 +623,141 @@ def _save_all_summary(
 
     return current_all_values
 
+def _plot_baseline_comparison(
+    run_dir: Path,
+    current_values: dict[tuple[str, str], float],
+    baseline: dict[tuple[str, str], float],
+) -> None:
+    """Plot current versus baseline mean Pearson r for each origin."""
+    keys = [
+        key
+        for key in sorted(
+            current_values,
+            key=lambda key: (
+                key[0] == "all",
+                key[0],
+                HEMISPHERES.index(key[1]),
+            ),
+        )
+        if key in baseline
+    ]
+
+    if not keys:
+        logger.warning(
+            "No current/baseline values available for comparison plot.",
+        )
+        return
+
+    labels = [
+        f"{origin} {hemisphere[0].upper()}"
+        for origin, hemisphere in keys
+    ]
+
+    y_positions = np.arange(len(keys))
+
+    baseline_values = np.array(
+        [baseline[key] for key in keys],
+        dtype=float,
+    )
+
+    current_values_array = np.array(
+        [current_values[key] for key in keys],
+        dtype=float,
+    )
+
+    fig_height = max(8, 0.45 * len(keys))
+
+    fig, ax = plt.subplots(
+        figsize=(12, fig_height),
+    )
+
+    try:
+        for y, baseline_r, current_r in zip(
+            y_positions,
+            baseline_values,
+            current_values_array,
+            strict=True,
+        ):
+            ax.plot(
+                [baseline_r, current_r],
+                [y, y],
+                linewidth=2,
+                alpha=0.7,
+            )
+
+        ax.scatter(
+            baseline_values,
+            y_positions,
+            s=55,
+            marker="o",
+            label="Baseline",
+            zorder=3,
+        )
+
+        ax.scatter(
+            current_values_array,
+            y_positions,
+            s=55,
+            marker="D",
+            label="Current",
+            zorder=3,
+        )
+
+        ax.axvline(
+            1.0,
+            linestyle="--",
+            linewidth=1,
+        )
+
+        ax.set_yticks(y_positions)
+        ax.set_yticklabels(labels)
+
+        ax.set_xlim(
+            0.45,
+            1.01,
+        )
+
+        ax.set_xlabel("Mean Pearson r")
+        ax.set_ylabel("Origin / hemisphere")
+
+        ax.set_title(
+            "Cycle round-trip accuracy: current vs baseline",
+            fontsize=16,
+        )
+
+        ax.grid(
+            axis="x",
+            linestyle=":",
+            alpha=0.5,
+        )
+
+        ax.legend(
+            loc="lower right",
+        )
+
+        fig.tight_layout()
+
+        output_file = run_dir / "cycle_baseline_comparison.png"
+
+        fig.savefig(
+            output_file,
+            dpi=200,
+            bbox_inches="tight",
+        )
+    finally:
+        plt.close(fig)
+
+    logger.info(
+        "Saved baseline comparison plot: %s",
+        output_file,
+    )
 
 def plot_run_summaries(
     run_dir: str | Path,
+    current_values: dict[tuple[str, str], float],
+    baseline: dict[tuple[str, str], float],
 ) -> None:
-    """Create combined left/right plots for every origin in a run."""
+    """Create cycle summary plots for a run."""
     run_dir = Path(run_dir)
 
     if not run_dir.is_dir():
@@ -653,6 +785,12 @@ def plot_run_summaries(
             run_dir=run_dir,
             origin=origin,
         )
+
+    _plot_baseline_comparison(
+        run_dir=run_dir,
+        current_values=current_values,
+        baseline=baseline,
+    )
 
 
 def _save_cycle_results(
