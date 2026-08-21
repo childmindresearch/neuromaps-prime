@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 __all__ = [
     "PARC_IGNORE",
     "load_data",
-    "load_gifti",
     "load_surface_coords",
     "load_surface_topology",
     "relabel_gifti",
@@ -48,26 +47,6 @@ NiftiImage: TypeAlias = nib.Nifti1Image | nib.Nifti2Image  # noqa: UP040 - <py31
 class DataOutput(NamedTuple):
     array: np.ndarray
     image: nib.GiftiImage | NiftiImage | None = None
-
-
-def load_gifti(surface: str | Path) -> nib.GiftiImage:
-    """Load a GIFTI surface or label file.
-
-    Args:
-        surface: Path to a GIFTI file.
-
-    Returns:
-        A ``nibabel.GiftiImage`` instance.
-
-    Raises:
-        ValueError: If the loaded image is not a ``GiftiImage``.
-    """
-    img = nib.load(surface)
-
-    if not isinstance(img, nib.GiftiImage):
-        raise ValueError(f"Expected to load Gifti surface for: {surface}")
-
-    return img
 
 
 def load_data(
@@ -184,13 +163,27 @@ def load_surface_coords(
     surface: str | Path,
 ) -> np.ndarray:
     """Load surface coordinates as ``(n_vertices, 3)``."""
-    image = load_gifti(surface)
-    return np.asarray(image.darrays[0].data, dtype=np.float64)
+    _, image = load_data(
+        surface,
+        return_image=True,
+    )
+
+    if not isinstance(image, nib.GiftiImage):
+        raise ValueError(f"Expected a GIFTI surface: {surface}")
+
+    return image.darrays[0].data.astype(np.float64, copy=False)
 
 
 def load_surface_topology(
     surface: str | Path,
 ) -> np.ndarray:
     """Load triangle topology from a surface GIFTI."""
-    image = load_gifti(surface)
-    return np.asarray(image.darrays[1].data, dtype=np.int32)
+    _, image = load_data(
+        surface,
+        return_image=True,
+    )
+
+    if not isinstance(image, nib.GiftiImage):
+        raise ValueError(f"Expected a GIFTI surface: {surface}")
+
+    return image.darrays[1].data.astype(np.int32, copy=False)
