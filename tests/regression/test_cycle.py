@@ -44,7 +44,6 @@ from tests.cycle import (
     score_roundtrip,
 )
 from tests.regression.utils import (
-    configure_transform_logging,
     make_xyz_product_metric,
     plot_cycle_cortical_surfaces,
     write_transform_manifest,
