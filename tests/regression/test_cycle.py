@@ -82,8 +82,8 @@ ALLOWED_REGRESSION: Final = 1e-4
 
 # min acceptable mean Pearson correlation across all cycles.
 MIN_MEAN_PEARSON: dict[Hemisphere, float] = {
-    "left": 0.5,
-    "right": 0.5,
+    "left": 0.564602,
+    "right": 0.545228,
 }
 
 LOG_COMMANDS = True
