@@ -11,7 +11,6 @@ Each run may contain:
 
 * CSV summaries
 * TXT summaries
-* per-path transformation manifests
 * intermediate metric files
 * surface visualizations
 
@@ -109,7 +108,7 @@ def _collect_cycle_values(
     run_dir: Path,
     origins: list[str],
 ) -> dict[tuple[str, str], float]:
-    """Collect current mean Pearson r values for each origin and all spaces."""
+    """Collect current mean Pearson r values for each origin and hemisphere."""
     values: dict[tuple[str, str], float] = {}
 
     for origin in origins:
@@ -124,33 +123,9 @@ def _collect_cycle_values(
             if frame.empty:
                 continue
 
-            values[(origin, hemisphere)] = float(frame["pearson_r"].mean())
-
-    for hemisphere in HEMISPHERES:
-        csv_files = sorted(
-            run_dir.glob(f"cycle_*_{hemisphere}.csv"),
-        )
-
-        frames: list[pd.DataFrame] = []
-
-        for csv_file in csv_files:
-            if csv_file.stem.startswith("cycle_all_"):
-                continue
-
-            frame = pd.read_csv(csv_file)
-
-            if not frame.empty:
-                frames.append(frame)
-
-        if not frames:
-            continue
-
-        combined = pd.concat(
-            frames,
-            ignore_index=True,
-        )
-
-        values[("all", hemisphere)] = float(combined["pearson_r"].mean())
+            values[(origin, hemisphere)] = float(
+                frame["pearson_r"].mean(),
+            )
 
     return values
 
@@ -226,9 +201,10 @@ def test_cycle_roundtrip() -> None:
         origins=origins,
     )
 
-    save_cycle_baseline(
-        baseline_dir=baseline_dir,
-        values=current_values,
+    current_values.update(
+        _save_all_summary(
+            run_dir=OUTPUT_DIR,
+        )
     )
 
     _check_cycle_baseline(
@@ -236,14 +212,13 @@ def test_cycle_roundtrip() -> None:
         baseline=baseline,
     )
 
-    plot_run_summaries(
-        run_dir=OUTPUT_DIR,
+    save_cycle_baseline(
+        baseline_dir=baseline_dir,
+        values=current_values,
     )
 
-    _save_all_summary(
+    plot_run_summaries(
         run_dir=OUTPUT_DIR,
-        baseline=baseline,
-        current_values=current_values,
     )
 
 
@@ -405,18 +380,19 @@ def _plot_cycle_summary(
 
 def _save_all_summary(
     run_dir: Path,
-    baseline: dict[tuple[str, str], float],
-) -> None:
-    """Calculate and validate overall left/right Pearson r across all origins."""
+) -> dict[tuple[str, str], float]:
+    """Calculate and save overall left/right Pearson r across all origins."""
     summaries: list[str] = []
+    current_all_values: dict[tuple[str, str], float] = {}
 
     for hemisphere in HEMISPHERES:
-        csv_files = sorted(run_dir.glob(f"cycle_*_{hemisphere}.csv"))
+        csv_files = sorted(
+            run_dir.glob(f"cycle_*_{hemisphere}.csv"),
+        )
 
         frames: list[pd.DataFrame] = []
 
         for csv_file in csv_files:
-            # Do not include an aggregate file if one ever exists.
             if csv_file.stem.startswith("cycle_all_"):
                 continue
 
@@ -437,36 +413,25 @@ def _save_all_summary(
             ignore_index=True,
         )
 
-        mean_r = combined["pearson_r"].mean()
+        mean_r = float(combined["pearson_r"].mean())
 
-        all_min_mean_pearson = baseline[("all", hemisphere)]
+        current_all_values[("all", hemisphere)] = mean_r
 
         summaries.append(
             f"All spaces ({hemisphere}):\n"
             f"  Total executable cycles: {len(combined)}\n"
             f"  Mean Pearson r: {mean_r:.6f}\n"
-            f"  Minimum required mean Pearson r: {all_min_mean_pearson:.6f}\n"
         )
 
         logger.info(
-            "ALL SPACES (%s): %d cycles, mean Pearson r = %.6f, threshold = %.6f",
+            "ALL SPACES (%s): %d cycles, mean Pearson r = %.6f",
             hemisphere,
             len(combined),
             mean_r,
-            all_min_mean_pearson,
-        )
-
-        assert mean_r >= all_min_mean_pearson - ALLOWED_REGRESSION, (
-            "Average round-trip correlation regressed for all spaces: "
-            f"hemisphere={hemisphere}, "
-            f"mean r={mean_r:.6f}, "
-            f"threshold={all_min_mean_pearson:.6f}, "
-            f"allowed regression={ALLOWED_REGRESSION:.6f}. "
-            f"Inspect outputs in {run_dir}."
         )
 
     if not summaries:
-        return
+        return current_all_values
 
     output_file = run_dir / "cycle_all_summary.txt"
 
@@ -486,6 +451,8 @@ def _save_all_summary(
         "Saved all-space summary: %s",
         output_file,
     )
+
+    return current_all_values
 
 
 def plot_run_summaries(
