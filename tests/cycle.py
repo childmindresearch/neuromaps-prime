@@ -39,12 +39,9 @@ from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-import warnings
-
 import networkx as nx
 import nibabel as nib
 import numpy as np
-from nibabel.gifti import GiftiDataArray, GiftiImage
 
 from neuromaps_prime.graph import NeuromapsGraph
 
@@ -141,8 +138,8 @@ def _iter_roundtrip_paths(
 def find_return_paths(
     graph: NeuromapsGraph,
     origin: str,
-    edge_type: str = NeuromapsGraph.surface_to_surface_key,
     *,
+    edge_type: str = NeuromapsGraph.surface_to_surface_key,
     max_length: int | None = None,
     allow_revisits: bool = False,
     max_paths: int | None = None,
@@ -210,19 +207,19 @@ def find_return_paths(
             paths.append(tuple(rotated))
         return sorted(paths, key=lambda p: (len(p), p))
 
-    paths: set[tuple[str, ...]] = set()
+    visited: set[tuple[str, ...]] = set()
 
     for path in _iter_roundtrip_paths(
         subgraph,
         origin,
         max_length,
     ):
-        paths.add(path)
+        visited.add(path)
 
-        if max_paths is not None and len(paths) >= max_paths:
+        if max_paths is not None and len(visited) >= max_paths:
             break
 
-    ordered = sorted(paths, key=lambda p: (len(p), p))
+    ordered = sorted(visited, key=lambda p: (len(p), p))
 
     if max_paths is not None:
         return ordered[:max_paths]
@@ -233,13 +230,30 @@ def find_return_paths(
 def load_metric(metric_file: str | Path) -> np.ndarray:
     """Load a GIFTI metric as a one-dimensional floating-point array.
 
-    The first data array is returned as a NumPy array for comparison and
-    resampling during cycle evaluation.
+    Raises:
+        ValueError: If the file is not a scalar metric GIFTI.
     """
-    return np.asarray(
-        nib.load(metric_file).darrays[0].data,
-        dtype=np.float64,
-    )
+    img = nib.load(metric_file)
+
+    if not isinstance(img, nib.gifti.GiftiImage):
+        raise ValueError(f"Expected GIFTI metric file, got {type(img)}")
+
+    if len(img.darrays) != 1:
+        raise ValueError(
+            f"Expected one data array for metric file, found {len(img.darrays)}"
+        )
+
+    data_array = img.darrays[0]
+
+    data = np.asarray(data_array.data, dtype=np.float64)
+
+    if data.ndim != 1:
+        raise ValueError(
+            "Expected one-dimensional metric data. "
+            f"Got shape {data.shape}; this may be a surface file."
+        )
+
+    return data
 
 
 def roundtrip_metric(
@@ -298,13 +312,12 @@ def roundtrip_metric(
             target_density=density,
             add_edge=add_edge,
         )
-        if result is None or result.path is None:
+        if result is None:
             raise RuntimeError(
                 f"No surface transform for hop '{src}' -> '{dst}' "
                 f"on path {' -> '.join(path)}"
             )
-
-        current = Path(result.path)
+        current = Path(result)
     return current
 
 
@@ -350,34 +363,30 @@ def score_roundtrip(
             np.max(np.abs(original[finite_mask] - roundtrip[finite_mask]))
         )
     else:
-        warnings.warn(
+        logger.warning(
             "Round-trip metric contains no finite values; "
-            "max absolute difference is undefined.",
-            RuntimeWarning,
-            stacklevel=2,
+            "max absolute difference is undefined."
         )
-        max_abs_diff = float("nan")
+        max_abs_diff = np.nan
 
     finite_count = np.count_nonzero(finite_mask)
     vectors_equal = bool(np.allclose(original, roundtrip, equal_nan=True))
 
     if finite_count < 2:
-        warnings.warn(
-            "Fewer than two finite values available to compute Pearson correlation.",
-            RuntimeWarning,
-            stacklevel=2,
+        logger.warning(
+            "Fewer than two finite values available to compute Pearson correlation."
         )
         pearson_r = 1.0 if finite_count > 0 and vectors_equal else 0.0
         return pearson_r, max_abs_diff
 
     original_finite = original[finite_mask]
     roundtrip_finite = roundtrip[finite_mask]
-    original_std = float(np.std(original_finite))
-    roundtrip_std = float(np.std(roundtrip_finite))
+    original_std = np.std(original_finite)
+    roundtrip_std = np.std(roundtrip_finite)
     if np.isclose(original_std, 0.0) or np.isclose(roundtrip_std, 0.0):
         pearson_r = 1.0 if vectors_equal else 0.0
     else:
-        pearson_r = float(np.corrcoef(original_finite, roundtrip_finite)[0, 1])
+        pearson_r = np.corrcoef(original_finite, roundtrip_finite)[0, 1]
         if np.isnan(pearson_r) and vectors_equal:
             pearson_r = 1.0
 
@@ -481,46 +490,3 @@ def _format_cycle_summary(
     )
 
     return "\n".join(lines)
-
-
-def save_synthetic_metric(
-    path: Path,
-    n_vertices: int,
-) -> None:
-    """Create a deterministic synthetic metric."""
-    metric = np.linspace(
-        0,
-        1,
-        n_vertices,
-        dtype=np.float32,
-    )
-
-    image = GiftiImage()
-    image.add_gifti_data_array(GiftiDataArray(metric))
-
-    nib.save(image, path)
-
-
-def get_vertex_count(
-    graph: NeuromapsGraph,
-    space: str,
-    density: str,
-    hemisphere: Literal["left", "right"],
-) -> int:
-    """Return the number of vertices in a surface atlas."""
-    atlas = graph.fetch_surface_atlas(
-        space=space,
-        density=density,
-        hemisphere=hemisphere,
-        resource_type="sphere",
-    )
-
-    if atlas is None:
-        raise ValueError(
-            f"No sphere atlas found for {space} "
-            f"(density={density}, hemisphere={hemisphere})."
-        )
-
-    image = nib.load(atlas.file_path)
-
-    return image.darrays[0].data.shape[0]
