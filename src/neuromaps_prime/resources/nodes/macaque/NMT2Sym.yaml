@@ -8,63 +8,63 @@ NMT2Sym:
   surfaces:
     41k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523df23e17e1124712cc2?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfcc9143f354902a8a?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523df23e17e1124712cc2
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfcc9143f354902a8a
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dd4d366de13d71403f?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dd6846076e837137e8?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dd4d366de13d71403f
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dd6846076e837137e8
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfa52f9bb389712be0?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfa52f9bb389712bdf?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfa52f9bb389712be0
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfa52f9bb389712bdf
       inflated:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfab76e18c73904626?view_only=b214f40525fe44b5bea3103478d08d0d
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523df4d366de13d714041?view_only=b214f40525fe44b5bea3103478d08d0d
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfab76e18c73904626
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523df4d366de13d714041
       annotation:
         SD:
-          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f5213cd87cca253679ac7?view_only=b214f40525fe44b5bea3103478d08d0d
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f5213cd87cca253679ac7
 
   volumes:
     250um:
-      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523de8a846359933ec5a5?view_only=b214f40525fe44b5bea3103478d08d0d
+      T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523de8a846359933ec5a5
       annotation:
         PC_CHARM_scale_1: 
-          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f17a752a710f2c2a9a?view_only=b214f40525fe44b5bea3103478d08d0d
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f17a752a710f2c2a9a
           references:
             - https://doi.org/10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 1 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e480941e7c8fa7ac9e?view_only=b214f40525fe44b5bea3103478d08d0d'
+            - 'CHARM atlas scale 1 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e480941e7c8fa7ac9e'
         PC_CHARM_scale_2:
-          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f01541aee377a7aef5?view_only=b214f40525fe44b5bea3103478d08d0d
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f01541aee377a7aef5
           references:
             - https://doi.org/10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 2 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e47da771710ca7aaf7?view_only=b214f40525fe44b5bea3103478d08d0d'
+            - 'CHARM atlas scale 2 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e47da771710ca7aaf7'
         PC_CHARM_scale_3:
-          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f01c9eacbdd92c2bcb?view_only=b214f40525fe44b5bea3103478d08d0d
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f01c9eacbdd92c2bcb
           references:
             - https://doi.org/10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 3 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e4d0d28dc642a7af64?view_only=b214f40525fe44b5bea3103478d08d0d'
+            - 'CHARM atlas scale 3 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e4d0d28dc642a7af64'
         PC_CHARM_scale_4:
-          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f3d8bf292baf2c2cec?view_only=b214f40525fe44b5bea3103478d08d0d
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f3d8bf292baf2c2cec
           references:
             - https://doi.org/10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 4 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e5d8bf292baf2c2ce2?view_only=b214f40525fe44b5bea3103478d08d0d'
+            - 'CHARM atlas scale 4 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e5d8bf292baf2c2ce2'
         PC_CHARM_scale_5:
-          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f37a752a710f2c2a9c?view_only=b214f40525fe44b5bea3103478d08d0d
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f37a752a710f2c2a9c
           references:
             - https://doi.org/10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 5 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e2cd87cca253679a8a?view_only=b214f40525fe44b5bea3103478d08d0d'
+            - 'CHARM atlas scale 5 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e2cd87cca253679a8a'
         PC_CHARM_scale_6:
-          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f37da771710ca7aafd?view_only=b214f40525fe44b5bea3103478d08d0d
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f37da771710ca7aafd
           references:
             - https://doi.org/10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 6 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e580941e7c8fa7aca0?view_only=b214f40525fe44b5bea3103478d08d0d'
+            - 'CHARM atlas scale 6 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e580941e7c8fa7aca0'
         BM:
-          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52061c9eacbdd92c2be7?view_only=b214f40525fe44b5bea3103478d08d0d
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52061c9eacbdd92c2be7
           notes:
             - Cortical gray matter mask.
 
