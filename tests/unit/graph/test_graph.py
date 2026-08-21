@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from itertools import pairwise
 from typing import TYPE_CHECKING
 from unittest.mock import patch
 
@@ -267,7 +268,6 @@ class TestNeuromapsGraph:
             hemisphere="left",
             resource_type="sphere",
             file_path=test_surf,
-            provider="test",
             description="Atlas with unknown space",
         )
         with pytest.raises(ValueError, match="not found"):
@@ -364,3 +364,79 @@ class TestNeuromapsGraph:
         assert len(graph._cache.surface_transform) == 0
         assert len(graph._cache.surface_annotation) == 0
         assert len(graph._cache.volume_annotation) == 0
+
+
+class TestMultiHopPathFinding:
+    """Multi-hop (3+ node) transform path resolution (Issue #45)."""
+
+    def _build_synthetic_graph(
+        self, tmp_path: Path, spaces: list[str], edges: list[tuple[str, str]]
+    ) -> NeuromapsGraph:
+        """Build a synthetic graph from *spaces* and directed *edges*.
+
+        Nodes and edges share one empty surface file, so ``find_path`` can be
+        tested without real data.
+        """
+        sphere = tmp_path / "sphere.surf.gii"
+        sphere.touch()
+        surf = {"left": str(sphere), "right": str(sphere)}
+
+        def node(name: str) -> dict:
+            return {name: {"surfaces": {"1k": {"sphere": dict(surf)}}}}
+
+        def edge(source: str, target: str) -> dict:
+            return {
+                "from": source,
+                "to": target,
+                "surfaces": {"synthetic": {"1k": {"sphere": dict(surf)}}},
+            }
+
+        graph = NeuromapsGraph(
+            runner="local",
+            data_dir=tmp_path / ".cache",
+            _testing=True,
+        )
+        graph._builder.build_from_dict(
+            graph,
+            {
+                "nodes": [node(name) for name in spaces],
+                "edges": {
+                    "surface_to_surface": [edge(a, b) for a, b in edges],
+                    "volume_to_volume": [],
+                },
+            },
+        )
+        return graph
+
+    @pytest.mark.parametrize("n_hops", [3, 5, 10])
+    def test_multihop_chain(self, tmp_path: Path, n_hops: int) -> None:
+        """find_path traverses a directed chain of *n_hops* hops end to end."""
+        spaces = [chr(ord("A") + i) for i in range(n_hops + 1)]
+        graph = self._build_synthetic_graph(tmp_path, spaces, list(pairwise(spaces)))
+        assert graph.find_path(spaces[0], spaces[-1]) == spaces
+
+    def test_prefers_computed_edge(self, tmp_path: Path) -> None:
+        """A computed A -> C edge beats the longer A -> B -> C -> D route."""
+        spaces = ["A", "B", "C", "D"]
+        graph = self._build_synthetic_graph(
+            tmp_path, spaces, [("A", "B"), ("B", "C"), ("C", "D")]
+        )
+        assert graph.find_path("A", "D") == ["A", "B", "C", "D"]
+
+        computed = tmp_path / "A_to_C.surf.gii"
+        computed.touch()
+        graph.add_transform(
+            models.SurfaceTransform(
+                name="computed_A_to_C",
+                source_space="A",
+                target_space="C",
+                density="1k",
+                hemisphere="left",
+                resource_type="sphere",
+                file_path=computed,
+                provider="synthetic",
+                description="Computed A -> C transform",
+            ),
+            graph.surface_to_surface_key,
+        )
+        assert graph.find_path("A", "D") == ["A", "C", "D"]
