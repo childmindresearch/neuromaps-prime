@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import nibabel as nib
@@ -18,8 +17,7 @@ from neuromaps_prime.analysis.images import (
     load_surface_topology,
 )
 
-if TYPE_CHECKING:
-    from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
 
