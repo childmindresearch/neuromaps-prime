@@ -179,6 +179,7 @@ def relabel_gifti(
     labeltable.labels = new_labels
     return nib.GiftiImage(darrays=[darr], labeltable=labeltable)
 
+
 def load_surface_coords(
     surface: str | Path,
 ) -> np.ndarray:
