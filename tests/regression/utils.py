@@ -60,7 +60,7 @@ def write_metric(
     return metric_file
 
 
-def make_xyz_product_metric(
+def make_sphere(
     graph: NeuromapsGraph,
     origin: str,
     density: str,

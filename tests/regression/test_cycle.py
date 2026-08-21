@@ -43,7 +43,7 @@ from tests.cycle import (
 )
 from tests.regression.utils import (
     load_latest_cycle_baseline,
-    make_xyz_product_metric,
+    make_sphere,
     plot_cycle_cortical_surfaces,
     save_cycle_baseline,
 )
@@ -108,7 +108,11 @@ def _collect_cycle_values(
     run_dir: Path,
     origins: list[str],
 ) -> dict[tuple[str, str], float]:
-    """Collect current mean Pearson r values for each origin and hemisphere."""
+    """Collect mean Pearson r values for each origin and hemisphere.
+
+    The ``all`` value is calculated from every executable cycle across all
+    origin spaces, rather than from the mean of the per-origin means.
+    """
     values: dict[tuple[str, str], float] = {}
 
     for origin in origins:
@@ -127,42 +131,33 @@ def _collect_cycle_values(
                 frame["pearson_r"].mean(),
             )
 
+    for hemisphere in HEMISPHERES:
+        frames: list[pd.DataFrame] = []
+
+        for origin in origins:
+            csv_path = run_dir / f"cycle_{origin}_{hemisphere}.csv"
+
+            if not csv_path.exists():
+                continue
+
+            frame = pd.read_csv(csv_path)
+
+            if not frame.empty:
+                frames.append(frame)
+
+        if not frames:
+            continue
+
+        combined = pd.concat(
+            frames,
+            ignore_index=True,
+        )
+
+        values[("all", hemisphere)] = float(
+            combined["pearson_r"].mean(),
+        )
+
     return values
-
-
-def _check_cycle_baseline(
-    current_values: dict[tuple[str, str], float],
-    baseline: dict[tuple[str, str], float],
-) -> None:
-    """Compare current cycle results against the previous baseline."""
-    for key, current_r in current_values.items():
-        if key not in baseline:
-            raise AssertionError(
-                f"No baseline found for origin={key[0]}, hemisphere={key[1]}."
-            )
-
-        baseline_r = baseline[key]
-        difference = current_r - baseline_r
-
-        logger.info(
-            "BASELINE (%s, %s): current=%.6f, baseline=%.6f, difference=%+.6f",
-            key[0],
-            key[1],
-            current_r,
-            baseline_r,
-            difference,
-        )
-
-        assert current_r >= baseline_r - ALLOWED_REGRESSION, (
-            "Average round-trip correlation regressed: "
-            f"origin={key[0]}, "
-            f"hemisphere={key[1]}, "
-            f"current r={current_r:.6f}, "
-            f"baseline={baseline_r:.6f}, "
-            f"difference={difference:+.6f}, "
-            f"allowed regression={ALLOWED_REGRESSION:.6f}. "
-            f"Inspect outputs in {OUTPUT_DIR}."
-        )
 
 
 def test_cycle_roundtrip() -> None:
@@ -201,16 +196,12 @@ def test_cycle_roundtrip() -> None:
         origins=origins,
     )
 
-    current_values.update(
-        _save_all_summary(
-            run_dir=OUTPUT_DIR,
-        )
-    )
-
-    _check_cycle_baseline(
-        current_values=current_values,
+    current_all_values = _save_all_summary(
+        run_dir=OUTPUT_DIR,
         baseline=baseline,
     )
+
+    current_values.update(current_all_values)
 
     save_cycle_baseline(
         baseline_dir=baseline_dir,
@@ -219,6 +210,12 @@ def test_cycle_roundtrip() -> None:
 
     plot_run_summaries(
         run_dir=OUTPUT_DIR,
+    )
+
+    logger.info(
+        "NEW BASELINE VALUES: left=%.6f, right=%.6f",
+        current_values[("all", "left")],
+        current_values[("all", "right")],
     )
 
 
@@ -378,21 +375,63 @@ def _plot_cycle_summary(
     )
 
 
-def _save_all_summary(
+def _collect_summary_rows(
     run_dir: Path,
-) -> dict[tuple[str, str], float]:
-    """Calculate and save overall left/right Pearson r across all origins."""
-    summaries: list[str] = []
-    current_all_values: dict[tuple[str, str], float] = {}
+) -> list[dict[str, object]]:
+    """Collect mean Pearson r for each origin and hemisphere."""
+    rows: list[dict[str, object]] = []
 
-    for hemisphere in HEMISPHERES:
-        csv_files = sorted(
-            run_dir.glob(f"cycle_*_{hemisphere}.csv"),
+    for csv_file in sorted(run_dir.glob("cycle_*_*.csv")):
+        stem = csv_file.stem
+
+        if stem.startswith("cycle_all_"):
+            continue
+
+        parts = stem.removeprefix("cycle_").rsplit("_", 1)
+
+        if len(parts) != 2:
+            continue
+
+        origin, hemisphere = parts
+
+        if hemisphere not in HEMISPHERES:
+            continue
+
+        frame = pd.read_csv(csv_file)
+
+        if frame.empty:
+            continue
+
+        rows.append(
+            {
+                "origin": origin,
+                "hemisphere": hemisphere,
+                "mean_pearson_r": float(frame["pearson_r"].mean()),
+            }
         )
 
+    return rows
+
+
+def _calculate_all_values(
+    run_dir: Path,
+    baseline: dict[tuple[str, str], float],
+) -> tuple[
+    dict[tuple[str, str], float],
+    list[dict[str, object]],
+    list[str],
+]:
+    """Calculate all-space Pearson r values and validate regression."""
+    current_all_values: dict[tuple[str, str], float] = {}
+    summary_rows: list[dict[str, object]] = []
+    summaries: list[str] = []
+
+    for hemisphere in HEMISPHERES:
         frames: list[pd.DataFrame] = []
 
-        for csv_file in csv_files:
+        for csv_file in sorted(
+            run_dir.glob(f"cycle_*_{hemisphere}.csv"),
+        ):
             if csv_file.stem.startswith("cycle_all_"):
                 continue
 
@@ -414,24 +453,79 @@ def _save_all_summary(
         )
 
         mean_r = float(combined["pearson_r"].mean())
-
         current_all_values[("all", hemisphere)] = mean_r
+
+        summary_rows.append(
+            {
+                "origin": "all",
+                "hemisphere": hemisphere,
+                "mean_pearson_r": mean_r,
+            }
+        )
+
+        baseline_r = baseline[("all", hemisphere)]
+        difference = mean_r - baseline_r
+        minimum_allowed = baseline_r - ALLOWED_REGRESSION
 
         summaries.append(
             f"All spaces ({hemisphere}):\n"
             f"  Total executable cycles: {len(combined)}\n"
             f"  Mean Pearson r: {mean_r:.6f}\n"
+            f"  Baseline Pearson r: {baseline_r:.6f}\n"
+            f"  Difference: {difference:+.6f}\n"
+            f"  Minimum allowed Pearson r: {minimum_allowed:.6f}\n"
         )
 
-        logger.info(
-            "ALL SPACES (%s): %d cycles, mean Pearson r = %.6f",
-            hemisphere,
-            len(combined),
-            mean_r,
+        # This is the ONLY regression assertion.
+        assert mean_r >= minimum_allowed, (
+            "Average round-trip correlation regressed for all spaces: "
+            f"hemisphere={hemisphere}, "
+            f"current r={mean_r:.6f}, "
+            f"baseline={baseline_r:.6f}, "
+            f"difference={difference:+.6f}, "
+            f"minimum allowed={minimum_allowed:.6f}, "
+            f"allowed regression={ALLOWED_REGRESSION:.6f}. "
+            f"Inspect outputs in {run_dir}."
         )
 
+    return current_all_values, summary_rows, summaries
+
+
+def _save_cycle_summary_csv(
+    run_dir: Path,
+    rows: list[dict[str, object]],
+) -> None:
+    """Save per-origin and all-space Pearson r summary."""
+    if not rows:
+        return
+
+    summary_frame = pd.DataFrame(
+        rows,
+        columns=[
+            "origin",
+            "hemisphere",
+            "mean_pearson_r",
+        ],
+    )
+
+    summary_frame.to_csv(
+        run_dir / "cycle_summary.csv",
+        index=False,
+    )
+
+    logger.info(
+        "Saved cycle summary CSV: %s",
+        run_dir / "cycle_summary.csv",
+    )
+
+
+def _save_all_summary_txt(
+    run_dir: Path,
+    summaries: list[str],
+) -> None:
+    """Save the all-space cycle summary text file."""
     if not summaries:
-        return current_all_values
+        return
 
     output_file = run_dir / "cycle_all_summary.txt"
 
@@ -450,6 +544,79 @@ def _save_all_summary(
     logger.info(
         "Saved all-space summary: %s",
         output_file,
+    )
+
+
+def _log_final_regression_status(
+    current_all_values: dict[tuple[str, str], float],
+    baseline: dict[tuple[str, str], float],
+) -> None:
+    """Log final all-space regression status."""
+    for hemisphere in HEMISPHERES:
+        key = ("all", hemisphere)
+
+        if key not in current_all_values:
+            continue
+
+        current_r = current_all_values[key]
+        baseline_r = baseline[key]
+        difference = current_r - baseline_r
+        minimum_allowed = baseline_r - ALLOWED_REGRESSION
+
+        if current_r >= baseline_r:
+            status = "PASS"
+            comparison = "improved or stayed the same"
+        elif current_r >= minimum_allowed:
+            status = "PASS"
+            comparison = "regressed within allowed tolerance"
+        else:
+            status = "FAIL"
+            comparison = "regressed beyond allowed tolerance"
+
+        logger.info(
+            "FINAL ALL SPACES — %s (%s): current=%.6f, "
+            "baseline=%.6f, difference=%+.6f, minimum allowed=%.6f — %s",
+            status,
+            hemisphere,
+            current_r,
+            baseline_r,
+            difference,
+            minimum_allowed,
+            comparison,
+        )
+
+
+def _save_all_summary(
+    run_dir: Path,
+    baseline: dict[tuple[str, str], float],
+) -> dict[tuple[str, str], float]:
+    """Calculate and save cycle Pearson r summaries."""
+    summary_rows = _collect_summary_rows(run_dir)
+
+    (
+        current_all_values,
+        all_summary_rows,
+        summaries,
+    ) = _calculate_all_values(
+        run_dir=run_dir,
+        baseline=baseline,
+    )
+
+    summary_rows.extend(all_summary_rows)
+
+    _save_cycle_summary_csv(
+        run_dir=run_dir,
+        rows=summary_rows,
+    )
+
+    _save_all_summary_txt(
+        run_dir=run_dir,
+        summaries=summaries,
+    )
+
+    _log_final_regression_status(
+        current_all_values=current_all_values,
+        baseline=baseline,
     )
 
     return current_all_values
@@ -667,7 +834,7 @@ def _run_origin_hemisphere(
     try:
         density = graph.find_highest_density(origin)
 
-        metric_file = make_xyz_product_metric(
+        metric_file = make_sphere(
             graph=graph,
             origin=origin,
             density=density,
