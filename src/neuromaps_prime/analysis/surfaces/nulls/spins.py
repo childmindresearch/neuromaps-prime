@@ -24,6 +24,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 from scipy import optimize, spatial
 from scipy.ndimage import labeled_comprehension
+from tqdm import tqdm
 
 from neuromaps_prime.analysis.images import PARC_IGNORE, load_data
 from neuromaps_prime.analysis.surfaces.points import _geodesic_parcel_centroid
@@ -346,10 +347,8 @@ def gen_spin_samples(
 
     rs = np.random.default_rng(seed)
     warned = False
-    for k in range(n_rotate):
+    for k in tqdm(range(n_rotate), desc="Generating spins"):
         count, duplicated = 0, True
-
-        _logger.info("Generating spin %5d of %d", k, n_rotate)
 
         while duplicated and count < 500:
             count += 1
@@ -511,8 +510,7 @@ def spin_parcels(
         )
 
     regions = np.zeros((n_parcels, n_spins), dtype=np.int32)
-    for spin_idx in range(n_spins):
-        _logger.info("Calculating parcel overlap: %5d/%d", spin_idx, n_spins)
+    for spin_idx in tqdm(range(n_spins), desc="Calculating parcel overlap"):
         regions[:, spin_idx] = labeled_comprehension(
             vertex_labels[spin_perm[:, spin_idx]],
             vertex_labels,
@@ -756,8 +754,7 @@ def spin_data(
         )
 
     spun = np.zeros((int(parcel_mask.sum()), spin_arr.shape[1]), dtype=float)
-    for spin_idx in range(n_rotate):
-        _logger.info("Reducing vertices to parcels: %5d/%d", spin_idx, n_rotate)
+    for spin_idx in tqdm(range(n_rotate), desc="Reducing vertices to parcels"):
         rotated = vertex_data[spin_arr[:, spin_idx]]
         reduced = _reduce_vertices_to_parcels(
             rotated, combined_labels, parcel_values=parcel_values
