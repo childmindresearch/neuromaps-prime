@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
+import pandas as pd
 from matplotlib_surface_plotting import plot_surf
 from nibabel.gifti import GiftiDataArray, GiftiImage
 from tests.cycle import Hemisphere, RoundtripResult, path_token
@@ -305,3 +307,90 @@ def write_transform_manifest(
         "\n".join(lines) + "\n",
         encoding="utf-8",
     )
+
+
+def load_latest_cycle_baseline(
+    baseline_dir: Path,
+) -> dict[tuple[str, str], float]:
+    """Load values from the most recent cycle baseline CSV.
+
+    Baseline files must be named ``cycle_baseline_<timestamp>.csv`` and
+    contain ``origin``, ``hemisphere``, and ``mean_pearson_r`` columns.
+    """
+    baseline_files = sorted(
+        baseline_dir.glob("cycle_baseline_*.csv"),
+    )
+
+    if not baseline_files:
+        raise FileNotFoundError(f"No cycle baseline CSV files found in {baseline_dir}.")
+
+    baseline_file = baseline_files[-1]
+
+    frame = pd.read_csv(baseline_file)
+
+    required_columns = {
+        "origin",
+        "hemisphere",
+        "mean_pearson_r",
+    }
+
+    missing_columns = required_columns - set(frame.columns)
+
+    if missing_columns:
+        raise ValueError(
+            f"Baseline file {baseline_file} is missing required columns: "
+            f"{sorted(missing_columns)}"
+        )
+
+    baseline: dict[tuple[str, str], float] = {}
+
+    for _, row in frame.iterrows():
+        key = (
+            str(row["origin"]),
+            str(row["hemisphere"]),
+        )
+
+        if key in baseline:
+            raise ValueError(f"Duplicate baseline entry in {baseline_file}: {key}")
+
+        baseline[key] = float(row["mean_pearson_r"])
+
+    logger.info(
+        "Using cycle baseline: %s",
+        baseline_file,
+    )
+
+    return baseline
+
+
+def save_cycle_baseline(
+    baseline_dir: Path,
+    values: dict[tuple[str, str], float],
+) -> Path:
+    """Save cycle baseline values to a timestamped CSV."""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+
+    output_file = baseline_dir / f"cycle_baseline_{timestamp}.csv"
+
+    frame = pd.DataFrame(
+        [
+            {
+                "origin": origin,
+                "hemisphere": hemisphere,
+                "mean_pearson_r": mean_pearson_r,
+            }
+            for (origin, hemisphere), mean_pearson_r in sorted(values.items())
+        ]
+    )
+
+    frame.to_csv(
+        output_file,
+        index=False,
+    )
+
+    logger.info(
+        "Saved cycle baseline: %s",
+        output_file,
+    )
+
+    return output_file

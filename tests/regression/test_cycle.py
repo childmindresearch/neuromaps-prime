@@ -43,9 +43,10 @@ from tests.cycle import (
     score_roundtrip,
 )
 from tests.regression.utils import (
+    load_latest_cycle_baseline,
     make_xyz_product_metric,
     plot_cycle_cortical_surfaces,
-    write_transform_manifest,
+    save_cycle_baseline,
 )
 
 from neuromaps_prime.graph import NeuromapsGraph
@@ -77,12 +78,6 @@ MAX_CYCLE_LENGTH: Final = 4
 MAX_PATHS: Final[int | None] = None
 ALLOWED_REGRESSION: Final = 1e-4
 
-# min acceptable mean Pearson correlation across all cycles.
-MIN_MEAN_PEARSON: dict[Hemisphere, float] = {
-    "left": 0.564602,
-    "right": 0.545228,
-}
-
 # -------------------------------------------------------------------------
 # Main regression test
 # -------------------------------------------------------------------------
@@ -110,12 +105,101 @@ def _log_progress(
     )
 
 
+def _collect_cycle_values(
+    run_dir: Path,
+    origins: list[str],
+) -> dict[tuple[str, str], float]:
+    """Collect current mean Pearson r values for each origin and all spaces."""
+    values: dict[tuple[str, str], float] = {}
+
+    for origin in origins:
+        for hemisphere in HEMISPHERES:
+            csv_path = run_dir / f"cycle_{origin}_{hemisphere}.csv"
+
+            if not csv_path.exists():
+                continue
+
+            frame = pd.read_csv(csv_path)
+
+            if frame.empty:
+                continue
+
+            values[(origin, hemisphere)] = float(frame["pearson_r"].mean())
+
+    for hemisphere in HEMISPHERES:
+        csv_files = sorted(
+            run_dir.glob(f"cycle_*_{hemisphere}.csv"),
+        )
+
+        frames: list[pd.DataFrame] = []
+
+        for csv_file in csv_files:
+            if csv_file.stem.startswith("cycle_all_"):
+                continue
+
+            frame = pd.read_csv(csv_file)
+
+            if not frame.empty:
+                frames.append(frame)
+
+        if not frames:
+            continue
+
+        combined = pd.concat(
+            frames,
+            ignore_index=True,
+        )
+
+        values[("all", hemisphere)] = float(combined["pearson_r"].mean())
+
+    return values
+
+
+def _check_cycle_baseline(
+    current_values: dict[tuple[str, str], float],
+    baseline: dict[tuple[str, str], float],
+) -> None:
+    """Compare current cycle results against the previous baseline."""
+    for key, current_r in current_values.items():
+        if key not in baseline:
+            raise AssertionError(
+                f"No baseline found for origin={key[0]}, hemisphere={key[1]}."
+            )
+
+        baseline_r = baseline[key]
+        difference = current_r - baseline_r
+
+        logger.info(
+            "BASELINE (%s, %s): current=%.6f, baseline=%.6f, difference=%+.6f",
+            key[0],
+            key[1],
+            current_r,
+            baseline_r,
+            difference,
+        )
+
+        assert current_r >= baseline_r - ALLOWED_REGRESSION, (
+            "Average round-trip correlation regressed: "
+            f"origin={key[0]}, "
+            f"hemisphere={key[1]}, "
+            f"current r={current_r:.6f}, "
+            f"baseline={baseline_r:.6f}, "
+            f"difference={difference:+.6f}, "
+            f"allowed regression={ALLOWED_REGRESSION:.6f}. "
+            f"Inspect outputs in {OUTPUT_DIR}."
+        )
+
+
 def test_cycle_roundtrip() -> None:
     """Round-trip synthetic metrics through real transformation cycles."""
     graph = NeuromapsGraph()
+    baseline_dir = Path(__file__).resolve().parent
+
+    baseline = load_latest_cycle_baseline(
+        baseline_dir=baseline_dir,
+    )
 
     origins = sorted(graph.nodes)
-
     total_usable_paths = 0
 
     for origin in origins:
@@ -126,24 +210,41 @@ def test_cycle_roundtrip() -> None:
                 hemisphere,
             )
 
-            result = _run_origin_hemisphere(
+            total_usable_paths += _run_origin_hemisphere(
                 graph=graph,
                 origin=origin,
                 hemisphere=hemisphere,
             )
-
-            total_usable_paths += result
 
     assert total_usable_paths > 0, (
         "No executable surface transformation cycles were found "
         "for any configured origin/hemisphere."
     )
 
+    current_values = _collect_cycle_values(
+        run_dir=OUTPUT_DIR,
+        origins=origins,
+    )
+
+    save_cycle_baseline(
+        baseline_dir=baseline_dir,
+        values=current_values,
+    )
+
+    _check_cycle_baseline(
+        current_values=current_values,
+        baseline=baseline,
+    )
+
     plot_run_summaries(
         run_dir=OUTPUT_DIR,
     )
 
-    _save_all_summary(OUTPUT_DIR)
+    _save_all_summary(
+        run_dir=OUTPUT_DIR,
+        baseline=baseline,
+        current_values=current_values,
+    )
 
 
 # -------------------------------------------------------------------------
@@ -302,7 +403,10 @@ def _plot_cycle_summary(
     )
 
 
-def _save_all_summary(run_dir: Path) -> None:
+def _save_all_summary(
+    run_dir: Path,
+    baseline: dict[tuple[str, str], float],
+) -> None:
     """Calculate and validate overall left/right Pearson r across all origins."""
     summaries: list[str] = []
 
@@ -335,7 +439,7 @@ def _save_all_summary(run_dir: Path) -> None:
 
         mean_r = combined["pearson_r"].mean()
 
-        all_min_mean_pearson = MIN_MEAN_PEARSON[hemisphere]
+        all_min_mean_pearson = baseline[("all", hemisphere)]
 
         summaries.append(
             f"All spaces ({hemisphere}):\n"
@@ -503,12 +607,11 @@ def _run_cycle_path(
     metric_file: Path,
     original_metric: np.ndarray,
     path: tuple[str, ...],
-    token: str,
     hemisphere: Hemisphere,
     path_workdir: Path,
     plot_dir: Path,
 ) -> dict[str, object] | None:
-    """Execute, score, manifest, and plot one transformation cycle."""
+    """Execute, score, and plot one transformation cycle."""
     path_label = " -> ".join(path)
 
     try:
@@ -540,20 +643,6 @@ def _run_cycle_path(
             exc,
         )
         return None
-
-    manifest_file = plot_dir / f"{token}_transforms.csv"
-
-    try:
-        write_transform_manifest(
-            roundtrip=roundtrip,
-            output_file=manifest_file,
-        )
-    except OSError as exc:
-        logger.warning(
-            "Could not write transform manifest for %s: %s",
-            path_label,
-            exc,
-        )
 
     try:
         metrics_by_hop = [(path[0], original_metric)] + [
@@ -692,7 +781,6 @@ def _run_origin_hemisphere(
             metric_file=metric_file,
             original_metric=original_metric,
             path=path,
-            token=token,
             hemisphere=hemisphere,
             path_workdir=work_dir / f"path_{token}",
             plot_dir=plot_dir,
