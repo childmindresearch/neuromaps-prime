@@ -134,13 +134,7 @@ def _load_surface_coords(
 ) -> np.ndarray:
     """Load surface coordinates as ``(n_vertices, 3)``."""
     image = load_gifti(surface_file)
-
-    for darray in image.darrays:
-        data = np.asarray(darray.data)
-        if data.ndim == 2 and data.shape[1] == 3:
-            return data.astype(np.float64)
-
-    raise ValueError(f"No pointset coordinates found in {surface_file}.")
+    return np.asarray(image.darrays[0].data, dtype=np.float64)
 
 
 def _load_surface_topology(
@@ -148,18 +142,7 @@ def _load_surface_topology(
 ) -> np.ndarray:
     """Load triangle topology from a surface GIFTI."""
     image = load_gifti(surface_file)
-
-    for darray in image.darrays:
-        data = np.asarray(darray.data)
-
-        if (
-            data.ndim == 2
-            and data.shape[1] == 3
-            and np.issubdtype(data.dtype, np.integer)
-        ):
-            return data.astype(np.int32)
-
-    raise ValueError(f"No triangle topology found in {surface_file}.")
+    return np.asarray(image.darrays[1].data, dtype=np.int32)
 
 
 # -------------------------------------------------------------------------
