@@ -50,7 +50,10 @@ from tests.cycle import (
     score_roundtrip,
 )
 
-from neuromaps_prime.analysis.images import load_gifti
+from neuromaps_prime.analysis.images import (
+    load_surface_coords,
+    load_surface_topology,
+)
 from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
@@ -125,27 +128,6 @@ class CommandLogHandler(logging.Handler):
 
 
 # -------------------------------------------------------------------------
-# Surface helpers
-# -------------------------------------------------------------------------
-
-
-def _load_surface_coords(
-    surface_file: Path,
-) -> np.ndarray:
-    """Load surface coordinates as ``(n_vertices, 3)``."""
-    image = load_gifti(surface_file)
-    return np.asarray(image.darrays[0].data, dtype=np.float64)
-
-
-def _load_surface_topology(
-    surface_file: Path,
-) -> np.ndarray:
-    """Load triangle topology from a surface GIFTI."""
-    image = load_gifti(surface_file)
-    return np.asarray(image.darrays[1].data, dtype=np.int32)
-
-
-# -------------------------------------------------------------------------
 # Metric generation
 # -------------------------------------------------------------------------
 
@@ -200,7 +182,7 @@ def _make_xyz_product_metric(
             f"No sphere atlas for {origin} at {density} ({hemisphere})."
         )
 
-    coords = _load_surface_coords(sphere.fetch())
+    coords = load_surface_coords(sphere.fetch())
 
     values = np.prod(
         coords,
@@ -236,7 +218,7 @@ def _find_matching_surface(
 
     for atlas in atlases:
         try:
-            coords = _load_surface_coords(Path(atlas.fetch()))
+            coords = load_surface_coords(Path(atlas.fetch()))
         except (
             ValueError,
             FileNotFoundError,
@@ -295,8 +277,8 @@ def _plot_single_surface(
 
     try:
         surface_file = surface_atlas.fetch()
-        coords = _load_surface_coords(surface_file)
-        faces = _load_surface_topology(surface_file)
+        coords = load_surface_coords(surface_file)
+        faces = load_surface_topology(surface_file)
     except (ValueError, FileNotFoundError, OSError) as exc:
         logger.warning(
             "Could not load %s mesh for %s (%s): %s",
