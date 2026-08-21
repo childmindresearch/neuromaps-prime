@@ -19,13 +19,14 @@ Run with::
 
 from __future__ import annotations
 
-from itertools import pairwise
 from typing import TYPE_CHECKING
 
 import nibabel as nib
 import numpy as np
 import pytest
 from nibabel.gifti import GiftiDataArray, GiftiImage
+
+from neuromaps_prime.analysis.images import load_data, load_surface_coords
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -35,21 +36,18 @@ if TYPE_CHECKING:
 HEMISPHERE = "left"
 ORIGIN = "D99"
 
-SINGLE_HOP_PATH = ("D99", "Yerkes19")
-MULTI_HOP_PATH = ("D99", "Yerkes19", "CIVETNMT")
+SINGLE_HOP_PATH = (ORIGIN, "Yerkes19")
+MULTI_HOP_PATH = (ORIGIN, "Yerkes19", "CIVETNMT")
 
 
 @pytest.fixture
-def real_d99_metric(
-    graph: NeuromapsGraph,
-    tmp_path: Path,
-) -> Path:
-    """Create a real metric from the highest-density D99 surface.
+def d99_surface_metric(graph: NeuromapsGraph, tmp_path: Path) -> Path:
+    """Create a metric from the highest-density D99 surface.
 
     The metric is constructed by summing the x, y, and z coordinates of each
     D99 surface vertex. This avoids requiring a separate metric file in the
-    neuromaps_prime cache while still providing real surface data for
-    Workbench to transform.
+    neuromaps_prime cache while still providing surface data for Workbench to
+    transform.
     """
     density = graph.find_highest_density(ORIGIN)
 
@@ -63,97 +61,82 @@ def real_d99_metric(
     assert sphere is not None
     assert sphere.file_path.exists()
 
-    coords = np.asarray(
-        nib.load(str(sphere.file_path)).darrays[0].data,
-        dtype=np.float32,
-    )
+    coords = load_surface_coords(sphere.file_path)
 
-    metric = coords.sum(axis=1)
+    metric = coords.sum(axis=1, dtype=np.float32)
 
     output = tmp_path / f"{ORIGIN}_{density}_metric.func.gii"
 
-    nib.save(
-        GiftiImage(
-            darrays=[
-                GiftiDataArray(metric),
-            ]
-        ),
-        output,
-    )
+    nib.save(GiftiImage(darrays=[GiftiDataArray(metric)]), output)
 
     return output
 
 
-def _run_surface_transform(
+def test_single_hop_surface_transform(
     graph: NeuromapsGraph,
-    metric: Path,
-    path: tuple[str, ...],
-    tmp_path: Path,
-) -> Path:
-    """Execute each hop in a real surface transformation path.
-
-    Each hop writes to a separate file. The output from one hop becomes the
-    input to the next hop, so a multi-hop test verifies that transformed
-    output can actually be consumed by a subsequent Workbench operation.
-    """
-    current_file = metric
-
-    for source_space, target_space in pairwise(path):
-        output_file = tmp_path / f"{source_space}_to_{target_space}.func.gii"
-
-        result = graph.surface_to_surface_transformer(
-            transformer_type="metric",
-            input_file=current_file,
-            source_space=source_space,
-            target_space=target_space,
-            hemisphere=HEMISPHERE,
-            output_file_path=output_file,
-            source_density=None,
-            target_density=None,
-            add_edge=False,
-        )
-
-        assert result.path.exists()
-
-        transformed = np.asarray(
-            nib.load(str(result.path)).darrays[0].data,
-        )
-
-        assert transformed.size > 0
-        assert np.all(np.isfinite(transformed))
-
-        current_file = result.path
-
-    return current_file
-
-
-def test_real_single_hop_surface_transform(
-    graph: NeuromapsGraph,
-    real_d99_metric: Path,
+    d99_surface_metric: Path,
     tmp_path: Path,
 ) -> None:
     """Verify Workbench executes a real single-hop surface transformation."""
-    output = _run_surface_transform(
-        graph=graph,
-        metric=real_d99_metric,
-        path=SINGLE_HOP_PATH,
-        tmp_path=tmp_path,
+    output = tmp_path / "D99_to_Yerkes19.func.gii"
+
+    result = graph.surface_to_surface_transformer(
+        transformer_type="metric",
+        input_file=d99_surface_metric,
+        source_space=ORIGIN,
+        target_space="Yerkes19",
+        hemisphere=HEMISPHERE,
+        output_file_path=output,
+        source_density=None,
+        target_density=None,
+        add_edge=False,
     )
 
-    assert output.exists()
+    assert result.path.exists()
+
+    transformed = load_data(result.path).array
+    assert transformed.size > 0
+    assert np.all(np.isfinite(transformed))
 
 
-def test_real_multihop_surface_transform(
+def test_multihop_surface_transform(
     graph: NeuromapsGraph,
-    real_d99_metric: Path,
+    d99_surface_metric: Path,
     tmp_path: Path,
 ) -> None:
     """Verify Workbench executes a real multi-hop surface transformation."""
-    output = _run_surface_transform(
-        graph=graph,
-        metric=real_d99_metric,
-        path=MULTI_HOP_PATH,
-        tmp_path=tmp_path,
+    first_output = tmp_path / "D99_to_Yerkes19.func.gii"
+
+    first_result = graph.surface_to_surface_transformer(
+        transformer_type="metric",
+        input_file=d99_surface_metric,
+        source_space=ORIGIN,
+        target_space="Yerkes19",
+        hemisphere=HEMISPHERE,
+        output_file_path=first_output,
+        source_density=None,
+        target_density=None,
+        add_edge=False,
     )
 
-    assert output.exists()
+    assert first_result.path.exists()
+
+    second_output = tmp_path / "Yerkes19_to_CIVETNMT.func.gii"
+
+    second_result = graph.surface_to_surface_transformer(
+        transformer_type="metric",
+        input_file=first_result.path,
+        source_space="Yerkes19",
+        target_space="CIVETNMT",
+        hemisphere=HEMISPHERE,
+        output_file_path=second_output,
+        source_density=None,
+        target_density=None,
+        add_edge=False,
+    )
+
+    assert second_result.path.exists()
+
+    transformed = load_data(second_result.path).array
+    assert transformed.size > 0
+    assert np.all(np.isfinite(transformed))
