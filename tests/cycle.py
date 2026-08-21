@@ -31,7 +31,6 @@ from __future__ import annotations
 
 import hashlib
 import logging
-import shutil
 from dataclasses import dataclass
 from itertools import pairwise
 from pathlib import Path
@@ -41,6 +40,7 @@ import networkx as nx
 import nibabel as nib
 import numpy as np
 
+from neuromaps_prime.analysis.images import load_data
 from neuromaps_prime.graph import NeuromapsGraph
 
 if TYPE_CHECKING:
@@ -259,20 +259,14 @@ def load_metric(
     metric_file: str | Path,
 ) -> np.ndarray:
     """Load a scalar GIFTI metric as a one-dimensional array."""
-    img = nib.load(metric_file)
-
-    if not isinstance(img, nib.gifti.GiftiImage):
-        raise ValueError(f"Expected GIFTI metric file, got {type(img)}.")
-
-    if len(img.darrays) != 1:
-        raise ValueError(
-            f"Expected one data array for metric file, found {len(img.darrays)}"
-        )
-
-    data = np.asarray(
-        img.darrays[0].data,
+    data, image = load_data(
+        metric_file,
         dtype=np.float64,
+        return_image=True,
     )
+
+    if not isinstance(image, nib.GiftiImage):
+        raise ValueError(f"Expected GIFTI metric file, got {type(image)}.")
 
     if data.ndim != 1:
         raise ValueError(
@@ -280,92 +274,6 @@ def load_metric(
         )
 
     return data
-
-
-# -------------------------------------------------------------------------
-# Container-safe output handling
-# -------------------------------------------------------------------------
-
-
-def _resolve_result_path(result: object) -> Path | None:
-    """Extract an output path from a transformer result.
-
-    The production transformer may return:
-
-    - a ``str``;
-    - a ``Path``;
-    - an object with a ``path`` attribute, such as ``TransformResult``;
-    - ``None``.
-
-    A ``TransformResult`` with ``path=None`` means that no usable output
-    artifact was produced and is therefore treated as an unsuccessful hop.
-    """
-    if result is None:
-        return None
-
-    if isinstance(result, (str, Path)):
-        return Path(result)
-
-    result_path = getattr(result, "path", None)
-
-    if result_path is None:
-        return None
-
-    if isinstance(result_path, (str, Path)):
-        return Path(result_path)
-
-    return None
-
-
-def _resolve_transform_output(
-    result: object,
-    output_name: str,
-    workdir: Path,
-) -> Path:
-    """Resolve a transformer result to a local artifact path.
-
-    niwrap/Styx may return a path inside a container-mounted output directory.
-    The regression artifacts must remain available on the host, so results are
-    copied into ``workdir`` when necessary.
-
-    ``TransformResult(path=None, ...)`` is treated as an unsuccessful
-    transformation rather than being passed to :class:`pathlib.Path`.
-    """
-    expected = workdir / output_name
-
-    if expected.exists():
-        return expected
-
-    result_path = _resolve_result_path(result)
-
-    if result_path is None:
-        raise FileNotFoundError(
-            "Surface transformation did not produce an output path. "
-            f"Expected '{expected}', got result={result!r}."
-        )
-
-    if result_path.exists():
-        if result_path.resolve() != expected.resolve():
-            expected.parent.mkdir(
-                parents=True,
-                exist_ok=True,
-            )
-            shutil.copy2(
-                result_path,
-                expected,
-            )
-
-        return expected
-
-    candidate = workdir / result_path.name
-
-    if candidate.exists():
-        return candidate
-
-    raise FileNotFoundError(
-        "Surface transformation did not produce an accessible output. "
-        f"Expected '{expected}', got result={result!r}."
-    )
 
 
 # -------------------------------------------------------------------------
@@ -380,7 +288,6 @@ def _execute_hop(
     target: str,
     hemisphere: Hemisphere,
     output_name: str,
-    workdir: Path,
     *,
     density: str | None,
     add_edge: bool,
@@ -390,12 +297,7 @@ def _execute_hop(
     The production transformer is attempted with midthickness first, followed
     by pial and white if the requested area resource cannot produce a usable
     output.
-
-    A transformer result with ``path=None`` is considered an unsuccessful hop
-    and causes the next area-resource fallback to be attempted.
     """
-    last_error: Exception | None = None
-
     for area_resource in (
         "midthickness",
         "pial",
@@ -415,11 +317,18 @@ def _execute_hop(
                 add_edge=add_edge,
             )
 
-            output_file = _resolve_transform_output(
-                result,
-                output_name,
-                workdir,
-            )
+            if result.path is None:
+                raise FileNotFoundError(
+                    f"Surface transformation did not produce an output for "
+                    f"{source} -> {target} ({hemisphere})."
+                )
+
+            output_file = result.path
+
+            if not output_file.exists():
+                raise FileNotFoundError(
+                    f"Surface transformation output does not exist: {output_file}"
+                )
 
             metric_values = load_metric(output_file)
 
@@ -447,8 +356,6 @@ def _execute_hop(
             ValueError,
             TypeError,
         ) as exc:
-            last_error = exc
-
             logger.debug(
                 "Area surface '%s' failed for %s -> %s (%s): %s",
                 area_resource,
@@ -461,8 +368,7 @@ def _execute_hop(
     raise RuntimeError(
         f"Could not execute surface transform "
         f"'{source}' -> '{target}' ({hemisphere}). "
-        f"Tried midthickness, pial, and white. "
-        f"Last error: {last_error}"
+        f"Tried midthickness, pial, and white."
     )
 
 
@@ -543,7 +449,6 @@ def roundtrip_metric(
             target=target,
             hemisphere=hemisphere,
             output_name=output_name,
-            workdir=workdir,
             density=density,
             add_edge=add_edge,
         )

@@ -312,21 +312,17 @@ def write_transform_manifest(
 def load_latest_cycle_baseline(
     baseline_dir: Path,
 ) -> dict[tuple[str, str], float]:
-    """Load values from the most recent cycle baseline CSV.
-
-    Baseline files must be named ``cycle_baseline_<timestamp>.csv`` and
-    contain ``origin``, ``hemisphere``, and ``mean_pearson_r`` columns.
-    """
+    """Load the most recent timestamped cycle baseline CSV."""
     baseline_files = sorted(
-        baseline_dir.glob("cycle_baseline_*.csv"),
+        baseline_dir.glob("cycle_????????_????.csv"),
     )
 
     if not baseline_files:
-        raise FileNotFoundError(f"No cycle baseline CSV files found in {baseline_dir}.")
+        raise FileNotFoundError(f"No cycle baseline CSV found in {baseline_dir}.")
 
-    baseline_file = baseline_files[-1]
+    latest = baseline_files[-1]
 
-    frame = pd.read_csv(baseline_file)
+    frame = pd.read_csv(latest)
 
     required_columns = {
         "origin",
@@ -338,7 +334,7 @@ def load_latest_cycle_baseline(
 
     if missing_columns:
         raise ValueError(
-            f"Baseline file {baseline_file} is missing required columns: "
+            f"Baseline file {latest} is missing required columns: "
             f"{sorted(missing_columns)}"
         )
 
@@ -351,13 +347,13 @@ def load_latest_cycle_baseline(
         )
 
         if key in baseline:
-            raise ValueError(f"Duplicate baseline entry in {baseline_file}: {key}")
+            raise ValueError(f"Duplicate baseline entry in {latest}: {key}")
 
         baseline[key] = float(row["mean_pearson_r"])
 
     logger.info(
         "Using cycle baseline: %s",
-        baseline_file,
+        latest,
     )
 
     return baseline
@@ -370,7 +366,7 @@ def save_cycle_baseline(
     """Save cycle baseline values to a timestamped CSV."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
 
-    output_file = baseline_dir / f"cycle_baseline_{timestamp}.csv"
+    output_file = baseline_dir / f"cycle_{timestamp}.csv"
 
     frame = pd.DataFrame(
         [

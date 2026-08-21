@@ -212,6 +212,7 @@ def test_cycle_roundtrip() -> None:
         run_dir=OUTPUT_DIR,
         current_values=current_values,
         baseline=baseline,
+        graph=graph,
     )
 
     logger.info(
@@ -226,142 +227,138 @@ def test_cycle_roundtrip() -> None:
 # -------------------------------------------------------------------------
 
 
-def _plot_cycle_summary(
+def _plot_species_summary(
     run_dir: Path,
-    origin: str,
+    species: str,
+    origins: list[str],
 ) -> None:
-    """Create one two-panel cycle summary plot for an origin space.
+    """Create a cycle summary plot for one species.
 
-    The left panel shows left-hemisphere cycle correlations and the right
-    panel shows right-hemisphere cycle correlations.
+    Each origin space is represented by a unique marker. Filled markers
+    represent the left hemisphere and hollow markers represent the right
+    hemisphere. The x-axis represents the origin space, while the y-axis
+    shows mean Pearson r.
     """
-    frames: dict[str, pd.DataFrame] = {}
+    rows: list[dict[str, object]] = []
 
-    for hemisphere in HEMISPHERES:
-        csv_path = run_dir / f"cycle_{origin}_{hemisphere}.csv"
+    for origin in origins:
+        for hemisphere in HEMISPHERES:
+            csv_path = run_dir / f"cycle_{origin}_{hemisphere}.csv"
 
-        if not csv_path.exists():
-            logger.warning(
-                "No %s CSV found for %s: %s",
-                hemisphere,
-                origin,
-                csv_path,
+            if not csv_path.exists():
+                continue
+
+            frame = pd.read_csv(csv_path)
+
+            if frame.empty:
+                continue
+
+            rows.append(
+                {
+                    "origin": origin,
+                    "hemisphere": hemisphere,
+                    "pearson_r": float(frame["pearson_r"].mean()),
+                }
             )
-            continue
 
-        frame = pd.read_csv(csv_path)
-
-        if frame.empty:
-            logger.warning(
-                "Empty %s CSV found for %s: %s",
-                hemisphere,
-                origin,
-                csv_path,
-            )
-            continue
-
-        frames[hemisphere] = frame
-
-    if not frames:
+    if not rows:
         logger.warning(
-            "No cycle CSVs found for origin %s.",
-            origin,
+            "No cycle results found for species %s.",
+            species,
         )
         return
 
-    paths = sorted(
-        {str(path) for frame in frames.values() for path in frame["path"]},
-        key=lambda path: (
-            len(path.split(" -> ")) - 1,
-            path,
-        ),
+    frame = pd.DataFrame(rows)
+    unique_origins = sorted(frame["origin"].unique())
+
+    markers = (
+        "o",
+        "s",
+        "^",
+        "D",
+        "P",
+        "X",
+        "*",
+        "v",
+        "<",
+        ">",
+        "p",
+        "h",
+        "8",
     )
 
-    path_positions = {path: index for index, path in enumerate(paths)}
+    marker_map = {
+        origin: markers[index % len(markers)]
+        for index, origin in enumerate(unique_origins)
+    }
 
-    fig, axes = plt.subplots(
-        nrows=1,
-        ncols=2,
-        figsize=(
-            18,
-            max(8, 0.30 * len(paths)),
-        ),
-        sharey=True,
-    )
+    fig, ax = plt.subplots(figsize=(10, 7))
 
     try:
-        for ax, hemisphere in zip(
-            axes,
-            HEMISPHERES,
-            strict=True,
-        ):
-            frame = frames.get(hemisphere)
+        for x_position, origin in enumerate(unique_origins):
+            marker = marker_map[origin]
 
-            if frame is None:
-                ax.set_visible(False)
-                continue
+            for hemisphere in HEMISPHERES:
+                subset = frame[
+                    (frame["origin"] == origin) & (frame["hemisphere"] == hemisphere)
+                ]
 
-            frame = frame.copy()
-            frame["path"] = frame["path"].astype(str)
-            frame["position"] = frame["path"].map(path_positions)
+                if subset.empty:
+                    continue
 
-            frame = frame.dropna(subset=["position", "pearson_r"])
-            frame = frame.sort_values("position")
+                mean_r = float(subset["pearson_r"].iloc[0])
 
-            ax.axvline(
-                1.0,
-                linestyle="--",
-                linewidth=1,
-            )
-
-            ax.scatter(
-                frame["pearson_r"],
-                frame["position"],
-                s=40,
-            )
-
-            ax.set_yticks(range(len(paths)))
-            ax.set_yticklabels(
-                paths if hemisphere == HEMISPHERES[0] else [],
-            )
-
-            ax.set_xlim(
-                min(0.0, frame["pearson_r"].min() - 0.05),
-                1.01,
-            )
-            ax.set_xlabel("Pearson r")
-            ax.set_title(f"{hemisphere.capitalize()} hemisphere")
-            ax.grid(
-                axis="x",
-                linestyle=":",
-                alpha=0.5,
-            )
-
-            for _, row in frame.iterrows():
-                ax.annotate(
-                    f"{row['pearson_r']:.4f}",
-                    (
-                        row["pearson_r"],
-                        row["position"],
-                    ),
-                    xytext=(5, 0),
-                    textcoords="offset points",
-                    va="center",
-                    fontsize=8,
+                ax.scatter(
+                    x_position,
+                    mean_r,
+                    s=100,
+                    marker=marker,
+                    facecolors=("none" if hemisphere == "right" else None),
+                    linewidths=1.5,
+                    label=(f"{origin} ({'L' if hemisphere == 'left' else 'R'})"),
                 )
 
-        axes[0].set_ylabel("Transformation path")
+        ax.axhline(
+            1.0,
+            linestyle="--",
+            linewidth=1,
+        )
 
-        fig.suptitle(
-            f"{origin}\nSurface transformation cycle round-trip accuracy",
+        ax.set_xticks(range(len(unique_origins)))
+        ax.set_xticklabels(
+            unique_origins,
+            rotation=45,
+            ha="right",
+        )
+
+        ax.set_xlabel("Origin space")
+        ax.set_ylabel("Mean Pearson r")
+
+        ax.set_ylim(
+            min(0.0, frame["pearson_r"].min() - 0.05),
+            1.01,
+        )
+
+        ax.set_title(
+            f"{species}\nSurface transformation cycle round-trip accuracy",
             fontsize=16,
         )
 
-        fig.tight_layout(
-            rect=(0, 0, 1, 0.95),
+        ax.grid(
+            axis="y",
+            linestyle=":",
+            alpha=0.5,
         )
 
-        output_file = run_dir / f"cycle_{origin}_summary.png"
+        ax.legend(
+            title="Origin / hemisphere",
+            bbox_to_anchor=(1.02, 1),
+            loc="upper left",
+        )
+
+        fig.tight_layout()
+
+        output_file = run_dir / f"cycle_{species}_summary.png"
 
         fig.savefig(
             output_file,
@@ -372,8 +369,68 @@ def _plot_cycle_summary(
         plt.close(fig)
 
     logger.info(
-        "Saved combined cycle summary plot: %s",
+        "Saved species cycle summary plot: %s",
         output_file,
+    )
+
+
+def plot_run_summaries(
+    run_dir: str | Path,
+    current_values: dict[tuple[str, str], float],
+    baseline: dict[tuple[str, str], float],
+    graph: NeuromapsGraph,
+) -> None:
+    """Create cycle summary plots for a run."""
+    run_dir = Path(run_dir)
+
+    if not run_dir.is_dir():
+        raise FileNotFoundError(
+            f"Run directory does not exist: {run_dir}",
+        )
+
+    csv_files = sorted(run_dir.glob("cycle_*_left.csv"))
+
+    if not csv_files:
+        raise FileNotFoundError(
+            f"No cycle CSV files found in {run_dir}.",
+        )
+
+    origins: list[str] = []
+
+    for csv_file in csv_files:
+        name = csv_file.name
+
+        if not name.startswith("cycle_") or not name.endswith("_left.csv"):
+            continue
+
+        origin = name[len("cycle_") : -len("_left.csv")]
+
+        if origin == "all":
+            continue
+
+        origins.append(origin)
+
+    species_origins: dict[str, list[str]] = {}
+
+    for origin in origins:
+        node = graph.get_node_data(origin)
+
+        # Use the actual species field from Node here.
+        species = node.species
+
+        species_origins.setdefault(species, []).append(origin)
+
+    for species, species_nodes in species_origins.items():
+        _plot_species_summary(
+            run_dir=run_dir,
+            species=species,
+            origins=species_nodes,
+        )
+
+    _plot_baseline_comparison(
+        run_dir=run_dir,
+        current_values=current_values,
+        baseline=baseline,
     )
 
 
@@ -478,7 +535,6 @@ def _calculate_all_values(
             f"  Minimum allowed Pearson r: {minimum_allowed:.6f}\n"
         )
 
-        # This is the ONLY regression assertion.
         assert mean_r >= minimum_allowed, (
             "Average round-trip correlation regressed for all spaces: "
             f"hemisphere={hemisphere}, "
@@ -565,26 +621,14 @@ def _log_final_regression_status(
         difference = current_r - baseline_r
         minimum_allowed = baseline_r - ALLOWED_REGRESSION
 
-        if current_r >= baseline_r:
-            status = "PASS"
-            comparison = "improved or stayed the same"
-        elif current_r >= minimum_allowed:
-            status = "PASS"
-            comparison = "regressed within allowed tolerance"
-        else:
-            status = "FAIL"
-            comparison = "regressed beyond allowed tolerance"
-
         logger.info(
-            "FINAL ALL-SPACE MEAN — %s (%s): current=%.6f, "
-            "baseline=%.6f, difference=%+.6f, minimum allowed=%.6f — %s",
-            status,
+            "FINAL ALL-SPACE MEAN — %s: current=%.6f, "
+            "baseline=%.6f, difference=%+.6f, minimum allowed=%.6f",
             hemisphere,
             current_r,
             baseline_r,
             difference,
             minimum_allowed,
-            comparison,
         )
 
 
@@ -748,47 +792,6 @@ def _plot_baseline_comparison(
     logger.info(
         "Saved baseline comparison plot: %s",
         output_file,
-    )
-
-
-def plot_run_summaries(
-    run_dir: str | Path,
-    current_values: dict[tuple[str, str], float],
-    baseline: dict[tuple[str, str], float],
-) -> None:
-    """Create cycle summary plots for a run."""
-    run_dir = Path(run_dir)
-
-    if not run_dir.is_dir():
-        raise FileNotFoundError(f"Run directory does not exist: {run_dir}")
-
-    csv_files = sorted(run_dir.glob("cycle_*_left.csv"))
-
-    if not csv_files:
-        raise FileNotFoundError(f"No cycle CSV files found in {run_dir}.")
-
-    origins = []
-
-    for csv_file in csv_files:
-        name = csv_file.name
-
-        if not name.startswith("cycle_") or not name.endswith("_left.csv"):
-            continue
-
-        origin = name[len("cycle_") : -len("_left.csv")]
-
-        origins.append(origin)
-
-    for origin in origins:
-        _plot_cycle_summary(
-            run_dir=run_dir,
-            origin=origin,
-        )
-
-    _plot_baseline_comparison(
-        run_dir=run_dir,
-        current_values=current_values,
-        baseline=baseline,
     )
 
 
