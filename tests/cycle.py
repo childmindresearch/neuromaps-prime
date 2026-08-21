@@ -56,7 +56,7 @@ Hemisphere = Literal["left", "right"]
 # -------------------------------------------------------------------------
 
 
-def _path_token(path: tuple[str, ...]) -> str:
+def path_token(path: tuple[str, ...]) -> str:
     """Create a deterministic identifier for a transformation path."""
     return hashlib.sha256("->".join(path).encode("utf-8")).hexdigest()[:12]
 
@@ -522,7 +522,7 @@ def roundtrip_metric(
     )
 
     current = Path(metric_file)
-    token = _path_token(path)
+    token = path_token(path)
     hops: list[HopResult] = []
 
     for hop_number, (source, target) in enumerate(pairwise(path)):
@@ -687,8 +687,8 @@ def run_cycle_test(
     results: list[CycleResult] = []
 
     for path in paths:
-        path_token = _path_token(path)
-        path_workdir = Path(workdir) / f"path_{path_token}"
+        token = path_token(path)
+        path_workdir = Path(workdir) / f"path_{token}"
 
         try:
             roundtrip = roundtrip_metric(
