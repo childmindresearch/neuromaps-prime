@@ -623,6 +623,7 @@ def _save_all_summary(
 
     return current_all_values
 
+
 def _plot_baseline_comparison(
     run_dir: Path,
     current_values: dict[tuple[str, str], float],
@@ -648,10 +649,7 @@ def _plot_baseline_comparison(
         )
         return
 
-    labels = [
-        f"{origin} {hemisphere[0].upper()}"
-        for origin, hemisphere in keys
-    ]
+    labels = [f"{origin} {hemisphere[0].upper()}" for origin, hemisphere in keys]
 
     y_positions = np.arange(len(keys))
 
@@ -751,6 +749,7 @@ def _plot_baseline_comparison(
         "Saved baseline comparison plot: %s",
         output_file,
     )
+
 
 def plot_run_summaries(
     run_dir: str | Path,
