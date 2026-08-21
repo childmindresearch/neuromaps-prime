@@ -23,6 +23,8 @@ __all__ = [
     "PARC_IGNORE",
     "load_data",
     "load_gifti",
+    "load_surface_coords",
+    "load_surface_topology",
     "relabel_gifti",
 ]
 
@@ -183,3 +185,18 @@ def relabel_gifti(
     labeltable = nib.gifti.GiftiLabelTable()
     labeltable.labels = new_labels
     return nib.GiftiImage(darrays=[darr], labeltable=labeltable)
+
+def load_surface_coords(
+    surface: str | Path,
+) -> np.ndarray:
+    """Load surface coordinates as ``(n_vertices, 3)``."""
+    image = load_gifti(surface)
+    return np.asarray(image.darrays[0].data, dtype=np.float64)
+
+
+def load_surface_topology(
+    surface: str | Path,
+) -> np.ndarray:
+    """Load triangle topology from a surface GIFTI."""
+    image = load_gifti(surface)
+    return np.asarray(image.darrays[1].data, dtype=np.int32)
