@@ -29,12 +29,11 @@ Run with:
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Final
+from typing import Final
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 from tests.cycle import (
     Hemisphere,
     find_return_paths,
@@ -49,8 +48,7 @@ from tests.regression.utils import (
     write_transform_manifest,
 )
 
-if TYPE_CHECKING:
-    from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
 
