@@ -17,9 +17,6 @@ class GitHubFileMeta(BaseModel):
     download_url: str
 
 
-_BLOB_RE = re.compile(
-    r"github\.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)/blob/(?P<ref>[^/]+)/(?P<path>.+)"
-)
 _RAW_RE = re.compile(
     r"raw\.githubusercontent\.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)/"
     r"(?:refs/(?:tags|heads)/)?(?P<ref>[^/]+)/(?P<path>.+)"
@@ -36,9 +33,9 @@ class GitHubStorage(BaseModel):
 
     @staticmethod
     def _parse(url: str) -> tuple[str, str, str, str]:
-        m = _BLOB_RE.search(url) or _RAW_RE.search(url)
+        m = _RAW_RE.search(url)
         if not m:
-            raise ValueError(f"Unrecognized GitHub URL: {url}")
+            raise ValueError(f"Unrecognized / unsupported GitHub URL: {url}")
         return m["owner"], m["repo"], m["ref"], m["path"]
 
     def get_meta(self, url: str) -> GitHubFileMeta:

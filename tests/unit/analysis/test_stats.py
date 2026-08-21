@@ -16,12 +16,6 @@ if TYPE_CHECKING:
 
 # Fixtures
 @pytest.fixture(scope="module")
-def rng() -> Generator:
-    """Deterministic random number generator."""
-    return np.random.default_rng(12345)
-
-
-@pytest.fixture(scope="module")
 def random_vectors(rng: Generator) -> np.ndarray:
     """Random vectors for correlation testing."""
     return rng.normal(size=(2, 100))
@@ -188,15 +182,13 @@ class TestComputeMetric:
 class TestPermutationIndices:
     """Tests for _permutation_indices()."""
 
-    def test_shape(self) -> None:
+    def test_shape(self, rng: Generator) -> None:
         """Verify permutation index array has expected shape."""
-        rng = np.random.default_rng(0)
         idx = stats._permutation_indices(rng, n_perm=20, n_obs=7)
         assert idx.shape == (20, 7)
 
-    def test_every_row_is_permutation(self) -> None:
+    def test_every_row_is_permutation(self, rng: Generator) -> None:
         """Verify each row contains valid permutation of indices."""
-        rng = np.random.default_rng(0)
         idx = stats._permutation_indices(rng, n_perm=20, n_obs=7)
         expected = np.arange(7)
         for row in idx:
@@ -342,3 +334,102 @@ class TestNullDistributionCallable:
                 corr_shape=(),
                 nan_policy="propagate",
             )
+
+
+class TestCompareImages:
+    """Tests for compare_images()."""
+
+    def test_returns_perm_result(self) -> None:
+        """Verify output is a PermResult namedtuple."""
+        src, trg = np.arange(10), np.arange(10)
+        result = stats.compare_images(src, trg)
+        assert isinstance(result, stats.PermResult)
+
+    def test_pearsonr_perfect_correlation(self) -> None:
+        """Verify perfect correlation returns 1."""
+        src, trg = np.arange(10), np.arange(10)
+        result = stats.compare_images(src, trg)
+        assert result.similarity == pytest.approx(1.0)
+
+    def test_no_nulls_returns_nan_pvalue(self) -> None:
+        """Verify p-value is NaN when no nulls provided."""
+        src, trg = np.arange(10), np.arange(10)
+        result = stats.compare_images(src, trg)
+        assert np.isnan(result.pvalue)
+
+    def test_with_nulls_returns_pvalue(
+        self,
+        random_vectors: tuple[np.ndarray, np.ndarray],
+        precomputed_nulls: np.ndarray,
+    ) -> None:
+        """Verify non-NaN p-value when nulls are supplied."""
+        x, y = random_vectors
+        result = stats.compare_images(x, y, nulls=precomputed_nulls)
+        assert not np.isnan(result.pvalue)
+
+    def test_return_nulls_with_nulls(
+        self,
+        random_vectors: tuple[np.ndarray, np.ndarray],
+        precomputed_nulls: np.ndarray,
+    ) -> None:
+        """Verify null distribution returned when requested."""
+        x, y = random_vectors
+        result = stats.compare_images(x, y, nulls=precomputed_nulls, return_nulls=True)
+        assert isinstance(result.nulls, np.ndarray)
+        assert result.nulls.shape == (25,)
+
+    def test_return_nulls_without_nulls_raises(
+        self, random_vectors: tuple[np.ndarray, np.ndarray]
+    ) -> None:
+        """Verify return_nulls=True requires nulls."""
+        x, y = random_vectors
+        with pytest.raises(ValueError, match="return_nulls"):
+            stats.compare_images(x, y, return_nulls=True)
+
+    def test_ignore_zero(self) -> None:
+        """Verify zeros are excluded before comparison."""
+        src = np.array([1.0, 2.0, 0.0, 4.0, 5.0])
+        trg = np.array([2.0, 4.0, 0.0, 8.0, 10.0])
+        result = stats.compare_images(src, trg, ignore_zero=True)
+        # After removing zeros: [1,2,4,5] vs [2,4,8,10] → perfect correlation
+        assert result.similarity == pytest.approx(1.0)
+
+    def test_callable_metric(self) -> None:
+        """Verify callable metric works."""
+
+        def metric(a: np.ndarray, b: np.ndarray) -> float:
+            return float(np.sum(np.abs(np.asarray(a) - np.asarray(b))))
+
+        src, trg = np.arange(5), np.arange(5)
+        result = stats.compare_images(src, trg, metric=metric)
+        assert result.similarity == pytest.approx(0.0)
+
+    def test_invalid_metric_raises(self) -> None:
+        """Verify unrecognized metric raises ValueError."""
+        with pytest.raises(ValueError, match="pearsonr"):
+            stats.compare_images(np.arange(5), np.arange(5), metric="cosine")
+
+    def test_length_mismatch_raises(self) -> None:
+        """Verify different-length inputs raise ValueError."""
+        with pytest.raises(ValueError, match="same length"):
+            stats.compare_images(np.arange(5), np.arange(4))
+
+    def test_all_zeros_returns_nan(self) -> None:
+        """Verify all-zero inputs after masking return NaN similarity."""
+        src, trg = np.zeros(10), np.zeros(10)
+        result = stats.compare_images(src, trg, ignore_zero=True)
+        assert np.isnan(result.similarity)
+
+    def test_invalid_nan_policy_raises(self) -> None:
+        """Verify unrecognized nan_policy raises ValueError."""
+        with pytest.raises(ValueError, match="nan_policy"):
+            stats.compare_images(np.arange(5), np.arange(5), nan_policy="invalid")
+
+    def test_callable_returns_non_scalar_raises(self) -> None:
+        """Verify callable metric that returns non-scalar raises."""
+
+        def metric(a: np.ndarray, b: np.ndarray) -> list:  # noqa: ARG001 # match fn signature
+            return [1.0]
+
+        with pytest.raises(ValueError, match="scalar"):
+            stats.compare_images(np.arange(5), np.arange(5), metric=metric)

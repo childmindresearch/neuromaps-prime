@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import nibabel as nib
 import numpy as np
 import pytest
+from tests.unit.analysis.helpers import _make_gifti_parc, _make_gifti_surface
 
 from neuromaps_prime.analysis.surfaces import points
 
@@ -29,32 +29,6 @@ square_vertices = np.array(
     dtype=np.float32,
 )
 square_faces = np.array([[0, 1, 2], [1, 3, 2]], dtype=np.int32)
-
-
-def _make_gifti_surface(coords: np.ndarray, faces: np.ndarray, path: Path) -> None:
-    """Write a GIFTI surface file."""
-    ptarr = nib.gifti.GiftiDataArray(
-        coords.astype(np.float32), intent="NIFTI_INTENT_POINTSET"
-    )
-    tris = nib.gifti.GiftiDataArray(faces, intent="NIFTI_INTENT_TRIANGLE")
-    nib.GiftiImage(darrays=[ptarr, tris]).to_filename(path)
-
-
-def _make_gifti_parc(
-    data: np.ndarray,
-    labels: list[tuple[int, str]],
-    path: Path,
-) -> None:
-    """Write a GIFTI parcellation file."""
-    darr = nib.gifti.GiftiDataArray(
-        data.astype(np.int32), intent="NIFTI_INTENT_LABEL", datatype="NIFTI_TYPE_INT32"
-    )
-    lt = nib.gifti.GiftiLabelTable()
-    for key, name in labels:
-        lbl = nib.gifti.GiftiLabel(key=key)
-        lbl.label = name
-        lt.labels.append(lbl)
-    nib.GiftiImage(darrays=[darr], labeltable=lt).to_filename(path)
 
 
 @pytest.fixture(scope="module")
@@ -240,27 +214,12 @@ class TestGeodesicParcelCentroid:
             )
 
 
-class TestLoadGifti:
-    """Tests for _load_gifti()."""
-
-    def test_returns_gifti(self, surf_gifti_path: Path) -> None:
-        """Verify loading a valid GIFTI file returns a GiftiImage."""
-        assert isinstance(points._load_gifti(surf_gifti_path), nib.GiftiImage)
-
-    def test_wrong_type_raises(self, tmp_path: Path) -> None:
-        """Verify loading a non-GIFTI file raises ValueError."""
-        nii_path = tmp_path / "dummy.nii.gz"
-        nib.Nifti1Image(np.zeros((2, 2, 2)), np.eye(4)).to_filename(str(nii_path))
-        with pytest.raises(ValueError, match="Gifti"):
-            points._load_gifti(nii_path)
-
-
 class TestRelabelGifti:
     """Tests for _relabel_gifti()."""
 
     def test_consecutive(self, parc_gifti_path: Path) -> None:
         """Verify output labels are remapped to consecutive indices."""
-        unique = np.unique(points._relabel_gifti(parc_gifti_path).agg_data())
+        unique = np.unique(points.relabel_gifti(parc_gifti_path).agg_data())
         np.testing.assert_array_equal(unique, [0, 1])
 
     def test_background_zeroed(self, tmp_path_factory: pytest.TempPathFactory) -> None:
@@ -271,7 +230,7 @@ class TestRelabelGifti:
             labels=[(1, "Cortex"), (2, "unknown"), (3, "Stem")],
             path=p,
         )
-        data = points._relabel_gifti(p).agg_data()
+        data = points.relabel_gifti(p).agg_data()
         assert data[1] == 0
         np.testing.assert_array_equal(np.unique(data[data > 0]), [1, 2])
 

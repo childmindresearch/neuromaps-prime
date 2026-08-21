@@ -146,11 +146,10 @@ class TestNeuromapsGraph:
         )
         assert isinstance(atlas, models.SurfaceAtlas)
 
-    @pytest.mark.xfail(reason="Not in graph YAML yet")
     def test_fetch_surface_annotation(self, graph: NeuromapsGraph) -> None:
         """Test fetching surface atlas."""
         atlas = graph.fetch_surface_annotation(
-            space="Yerkes19", density="32k", label="myelin", hemisphere="left"
+            space="Yerkes19", density="10k", label="PC_MarkovMonkey", hemisphere="left"
         )
         assert isinstance(atlas, models.SurfaceAnnotation)
 
@@ -189,11 +188,10 @@ class TestNeuromapsGraph:
         )
         assert isinstance(atlas, models.VolumeAtlas)
 
-    @pytest.mark.xfail(reason="Not in graph YAML yet")
     def test_fetch_volume_annotation(self, graph: NeuromapsGraph) -> None:
         """Test fetching surface atlas."""
         atlas = graph.fetch_volume_annotation(
-            space="Yerkes19", resolution="250um", label="myelin"
+            space="NMT2Sym", resolution="250um", label="PC_CHARM_scale_1"
         )
         assert isinstance(atlas, models.VolumeAnnotation)
 
