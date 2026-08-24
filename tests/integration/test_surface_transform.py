@@ -57,8 +57,8 @@ def surface_metric(graph: NeuromapsGraph, tmp_path: Path) -> Path:
 
     assert sphere is not None
 
-    data, _ = load_data(sphere.file_path)
-    coords = np.asarray(data[0], dtype=np.float64)
+    data = load_data(sphere.file_path)
+    coords = data.array[0]
 
     metric = coords.sum(axis=1, dtype=np.float32)
 
