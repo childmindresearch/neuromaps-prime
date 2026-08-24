@@ -57,6 +57,9 @@ def surface_metric(graph: NeuromapsGraph, tmp_path: Path) -> Path:
 
     assert sphere is not None
 
+    if not sphere.file_path.exists():
+        sphere.fetch()
+
     data = load_data(sphere.file_path)
     coords = data.array[0]
 
