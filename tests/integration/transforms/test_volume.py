@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from neuromaps_prime.graph import NeuromapsGraph
 
 
-@pytest.mark.usefixtures("require_ants")
 class TestVolumetricTransformIntegration:
     """Integration tests calling ANTs and using real data."""
 
