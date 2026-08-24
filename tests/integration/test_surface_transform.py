@@ -88,8 +88,6 @@ def test_single_hop_surface_transform(
         target_space=target,
         hemisphere=HEMISPHERE,
         output_file_path=output,
-        source_density=None,
-        target_density=None,
         add_edge=False,
     )
 
@@ -116,8 +114,6 @@ def test_multihop_surface_transform(
         target_space=target,
         hemisphere=HEMISPHERE,
         output_file_path=output,
-        source_density=None,
-        target_density=None,
         add_edge=False,
     )
 
