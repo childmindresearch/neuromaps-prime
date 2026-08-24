@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 __all__ = [
     "PARC_IGNORE",
     "load_data",
-    "load_surface_coords",
     "relabel_gifti",
 ]
 
@@ -156,12 +155,3 @@ def relabel_gifti(
     labeltable = nib.gifti.GiftiLabelTable()
     labeltable.labels = new_labels
     return nib.GiftiImage(darrays=[darr], labeltable=labeltable)
-
-
-def load_surface_coords(
-    surface: str | Path,
-) -> np.ndarray:
-    """Load surface coordinates as ``(n_vertices, 3)``."""
-    arrays, _ = load_data(surface)
-
-    return np.asarray(arrays[0], dtype=np.float64)
