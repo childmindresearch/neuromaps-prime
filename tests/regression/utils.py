@@ -328,11 +328,11 @@ def write_transform_manifest(
 
 
 def load_latest_cycle_values(
-    baseline_dir: Path,
+    dir: Path,
 ) -> dict[tuple[str, str], float]:
-    """Load the most recent valid cycle baseline CSV."""
-    baseline_files = sorted(
-        baseline_dir.glob("cycle_*.csv"),
+    """Load the most recent valid cycle pearson r CSV."""
+    files = sorted(
+        dir.glob("cycle_*.csv"),
         key=lambda path: path.stat().st_mtime,
         reverse=True,
     )
@@ -344,16 +344,16 @@ def load_latest_cycle_values(
         "mean_pearson_r",
     }
 
-    for baseline_file in baseline_files:
+    for file in files:
         try:
-            frame = pd.read_csv(baseline_file)
+            frame = pd.read_csv(file)
         except (OSError, pd.errors.ParserError):
             continue
 
         if not required_columns.issubset(frame.columns):
             continue
 
-        baseline: dict[tuple[str, str], float] = {}
+        r_values: dict[tuple[str, str], float] = {}
 
         for _, row in frame.iterrows():
             key = (
@@ -361,30 +361,30 @@ def load_latest_cycle_values(
                 str(row["hemisphere"]),
             )
 
-            if key in baseline:
-                raise ValueError(f"Duplicate baseline entry in {baseline_file}: {key}")
+            if key in r_values:
+                raise ValueError(f"Duplicate pearson r entry in {file}: {key}")
 
-            baseline[key] = float(row["mean_pearson_r"])
+            r_values[key] = float(row["mean_pearson_r"])
 
         logger.info(
-            "Using cycle baseline: %s",
-            baseline_file,
+            "Using cycle pearson r: %s",
+            file,
         )
 
-        return baseline
+        return r_values
 
-    raise FileNotFoundError(f"No valid cycle baseline CSV found in {baseline_dir}.")
+    raise FileNotFoundError(f"No valid cycle pearson CSV found in {dir}.")
 
 
 def save_cycle(
-    baseline_dir: Path,
+    dir: Path,
     values: dict[tuple[str, str], float],
     graph: NeuromapsGraph,
 ) -> Path:
-    """Save cycle baseline values to a timestamped CSV."""
+    """Save cycle pearson r values to a timestamped CSV."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
 
-    output_file = baseline_dir / f"cycle_{timestamp}.csv"
+    output_file = dir / f"cycle_{timestamp}.csv"
 
     rows = []
 
@@ -419,7 +419,7 @@ def save_cycle(
     )
 
     logger.info(
-        "Saved cycle baseline: %s",
+        "Saved cycle pearson r: %s",
         output_file,
     )
 
