@@ -206,6 +206,7 @@ def test_cycle_roundtrip() -> None:
     save_cycle_baseline(
         baseline_dir=baseline_dir,
         values=current_values,
+        graph=graph,
     )
 
     plot_run_summaries(
