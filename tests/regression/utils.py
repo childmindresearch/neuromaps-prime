@@ -312,71 +312,91 @@ def write_transform_manifest(
 def load_latest_cycle_baseline(
     baseline_dir: Path,
 ) -> dict[tuple[str, str], float]:
-    """Load the most recent timestamped cycle baseline CSV."""
+    """Load the most recent valid cycle baseline CSV."""
     baseline_files = sorted(
-        baseline_dir.glob("cycle_????????_????.csv"),
+        baseline_dir.glob("cycle_*.csv"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
     )
-
-    if not baseline_files:
-        raise FileNotFoundError(f"No cycle baseline CSV found in {baseline_dir}.")
-
-    latest = baseline_files[-1]
-
-    frame = pd.read_csv(latest)
 
     required_columns = {
         "origin",
+        "species",
         "hemisphere",
         "mean_pearson_r",
     }
 
-    missing_columns = required_columns - set(frame.columns)
+    for baseline_file in baseline_files:
+        try:
+            frame = pd.read_csv(baseline_file)
+        except (OSError, pd.errors.ParserError):
+            continue
 
-    if missing_columns:
-        raise ValueError(
-            f"Baseline file {latest} is missing required columns: "
-            f"{sorted(missing_columns)}"
+        if not required_columns.issubset(frame.columns):
+            continue
+
+        baseline: dict[tuple[str, str], float] = {}
+
+        for _, row in frame.iterrows():
+            key = (
+                str(row["origin"]),
+                str(row["hemisphere"]),
+            )
+
+            if key in baseline:
+                raise ValueError(
+                    f"Duplicate baseline entry in {baseline_file}: {key}"
+                )
+
+            baseline[key] = float(row["mean_pearson_r"])
+
+        logger.info(
+            "Using cycle baseline: %s",
+            baseline_file,
         )
 
-    baseline: dict[tuple[str, str], float] = {}
+        return baseline
 
-    for _, row in frame.iterrows():
-        key = (
-            str(row["origin"]),
-            str(row["hemisphere"]),
-        )
-
-        if key in baseline:
-            raise ValueError(f"Duplicate baseline entry in {latest}: {key}")
-
-        baseline[key] = float(row["mean_pearson_r"])
-
-    logger.info(
-        "Using cycle baseline: %s",
-        latest,
+    raise FileNotFoundError(
+        f"No valid cycle baseline CSV found in {baseline_dir}."
     )
-
-    return baseline
 
 
 def save_cycle_baseline(
     baseline_dir: Path,
     values: dict[tuple[str, str], float],
+    graph: NeuromapsGraph,
 ) -> Path:
     """Save cycle baseline values to a timestamped CSV."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
 
     output_file = baseline_dir / f"cycle_{timestamp}.csv"
 
-    frame = pd.DataFrame(
-        [
+    rows = []
+
+    for (origin, hemisphere), mean_pearson_r in sorted(values.items()):
+        species = "all"
+
+        if origin != "all":
+            species = graph.get_node_data(origin).species
+
+        rows.append(
             {
                 "origin": origin,
+                "species": species,
                 "hemisphere": hemisphere,
                 "mean_pearson_r": mean_pearson_r,
             }
-            for (origin, hemisphere), mean_pearson_r in sorted(values.items())
-        ]
+        )
+
+    frame = pd.DataFrame(
+        rows,
+        columns=[
+            "origin",
+            "species",
+            "hemisphere",
+            "mean_pearson_r",
+        ],
     )
 
     frame.to_csv(
