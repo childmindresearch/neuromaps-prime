@@ -787,6 +787,7 @@ def _save_cycle_summary_csv(
         rows,
         columns=[
             "origin",
+            "species",
             "hemisphere",
             "mean_pearson_r",
         ],
