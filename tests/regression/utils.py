@@ -74,9 +74,7 @@ def make_sphere(
     )
 
     if sphere is None:
-        raise ValueError(
-            f"No sphere atlas for {origin} at {density} ({hemisphere})."
-        )
+        raise ValueError(f"No sphere atlas for {origin} at {density} ({hemisphere}).")
 
     if not sphere.file_path.exists():
         sphere.fetch()
