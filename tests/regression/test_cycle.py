@@ -656,7 +656,7 @@ def plot_run_summaries(
     _plot_pearson_comparison(
         run_dir=run_dir,
         current_values=current_values,
-        r=r,
+        pearson=r,
     )
 
 
