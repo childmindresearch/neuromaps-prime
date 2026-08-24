@@ -662,9 +662,18 @@ def plot_run_summaries(
 
 def _collect_summary_rows(
     run_dir: Path,
+    input_csv: Path,
 ) -> list[dict[str, object]]:
     """Collect mean Pearson r for each origin and hemisphere."""
     rows: list[dict[str, object]] = []
+
+    input_frame = pd.read_csv(input_csv)
+
+    species_by_origin = (
+        input_frame[["origin", "species"]]
+        .drop_duplicates("origin")
+        .set_index("origin")["species"]
+    )
 
     for csv_file in sorted(run_dir.glob("cycle_*_*.csv")):
         stem = csv_file.stem
@@ -690,6 +699,7 @@ def _collect_summary_rows(
         rows.append(
             {
                 "origin": origin,
+                "species": species_by_origin[origin],
                 "hemisphere": hemisphere,
                 "mean_pearson_r": float(frame["pearson_r"].mean()),
             }
