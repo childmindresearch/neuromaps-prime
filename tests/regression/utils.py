@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
@@ -15,12 +14,11 @@ from matplotlib_surface_plotting import plot_surf
 from nibabel.gifti import GiftiDataArray, GiftiImage
 from tests.cycle import Hemisphere, RoundtripResult, path_token
 
-from neuromaps_prime.analysis.images import (
-    load_surface_coords,
-    load_surface_topology,
-)
+from neuromaps_prime.analysis.images import load_data
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
@@ -80,7 +78,11 @@ def make_sphere(
             f"No sphere atlas for {origin} at {density} ({hemisphere})."
         )
 
-    coords = load_surface_coords(sphere.fetch())
+    if not sphere.file_path.exists():
+        sphere.fetch()
+
+    data = load_data(sphere.file_path)
+    coords = data.array[0]
 
     values = np.prod(
         coords,
@@ -116,7 +118,11 @@ def find_matching_surface(
 
     for atlas in atlases:
         try:
-            coords = load_surface_coords(Path(atlas.fetch()))
+            if not atlas.file_path.exists():
+                atlas.fetch()
+
+            data = load_data(atlas.file_path)
+            coords = data.array[0]
         except (
             ValueError,
             FileNotFoundError,
@@ -175,9 +181,23 @@ def plot_single_surface(
 
     try:
         surface_file = surface_atlas.fetch()
-        coords = load_surface_coords(surface_file)
-        faces = load_surface_topology(surface_file)
-    except (ValueError, FileNotFoundError, OSError) as exc:
+
+        data = load_data(
+            surface_file,
+            return_image=True,
+        )
+
+        if data.image is None:
+            raise ValueError(f"Could not load surface image: {surface_file}")
+
+        coords = data.image.darrays[0].data
+        faces = data.image.darrays[1].data
+
+    except (
+        ValueError,
+        FileNotFoundError,
+        OSError,
+    ) as exc:
         logger.warning(
             "Could not load %s mesh for %s (%s): %s",
             resource_type,
@@ -344,9 +364,7 @@ def load_latest_cycle_baseline(
             )
 
             if key in baseline:
-                raise ValueError(
-                    f"Duplicate baseline entry in {baseline_file}: {key}"
-                )
+                raise ValueError(f"Duplicate baseline entry in {baseline_file}: {key}")
 
             baseline[key] = float(row["mean_pearson_r"])
 
@@ -357,9 +375,7 @@ def load_latest_cycle_baseline(
 
         return baseline
 
-    raise FileNotFoundError(
-        f"No valid cycle baseline CSV found in {baseline_dir}."
-    )
+    raise FileNotFoundError(f"No valid cycle baseline CSV found in {baseline_dir}.")
 
 
 def save_cycle_baseline(

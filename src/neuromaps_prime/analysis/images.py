@@ -22,8 +22,6 @@ if TYPE_CHECKING:
 __all__ = [
     "PARC_IGNORE",
     "load_data",
-    "load_surface_coords",
-    "load_surface_topology",
     "relabel_gifti",
 ]
 
@@ -164,33 +162,3 @@ def relabel_gifti(
     labeltable = nib.gifti.GiftiLabelTable()
     labeltable.labels = new_labels
     return nib.GiftiImage(darrays=[darr], labeltable=labeltable)
-
-
-def load_surface_coords(
-    surface: str | Path,
-) -> np.ndarray:
-    """Load surface coordinates as ``(n_vertices, 3)``."""
-    _, image = load_data(
-        surface,
-        return_image=True,
-    )
-
-    if not isinstance(image, nib.GiftiImage):
-        raise ValueError(f"Expected a GIFTI surface: {surface}")
-
-    return image.darrays[0].data.astype(np.float64, copy=False)
-
-
-def load_surface_topology(
-    surface: str | Path,
-) -> np.ndarray:
-    """Load triangle topology from a surface GIFTI."""
-    _, image = load_data(
-        surface,
-        return_image=True,
-    )
-
-    if not isinstance(image, nib.GiftiImage):
-        raise ValueError(f"Expected a GIFTI surface: {surface}")
-
-    return image.darrays[1].data.astype(np.int32, copy=False)
