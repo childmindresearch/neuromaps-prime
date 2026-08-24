@@ -42,10 +42,10 @@ from tests.cycle import (
     score_roundtrip,
 )
 from tests.regression.utils import (
-    load_latest_cycle_baseline,
+    load_latest_cycle_values,
     make_sphere,
     plot_cycle_cortical_surfaces,
-    save_cycle_baseline,
+    save_cycle,
 )
 
 from neuromaps_prime.graph import NeuromapsGraph
@@ -163,10 +163,10 @@ def _collect_cycle_values(
 def test_cycle_roundtrip() -> None:
     """Round-trip synthetic metrics through real transformation cycles."""
     graph = NeuromapsGraph()
-    baseline_dir = Path(__file__).resolve().parent
+    dir = Path(__file__).resolve().parent
 
-    baseline = load_latest_cycle_baseline(
-        baseline_dir=baseline_dir,
+    r = load_latest_cycle_values(
+        dir=dir,
     )
 
     origins = sorted(graph.nodes)
@@ -198,13 +198,13 @@ def test_cycle_roundtrip() -> None:
 
     current_all_values = _save_all_summary(
         run_dir=OUTPUT_DIR,
-        baseline=baseline,
+        r=r,
     )
 
     current_values.update(current_all_values)
 
-    save_cycle_baseline(
-        baseline_dir=baseline_dir,
+    save_cycle(
+        dir=dir,
         values=current_values,
         graph=graph,
     )
@@ -212,11 +212,11 @@ def test_cycle_roundtrip() -> None:
     plot_run_summaries(
         run_dir=OUTPUT_DIR,
         current_values=current_values,
-        baseline=baseline,
+        r=r,
     )
 
     logger.info(
-        "NEW BASELINE VALUES: left=%.6f, right=%.6f",
+        "NEW PEARSON R VALUES: left=%.6f, right=%.6f",
         current_values[("all", "left")],
         current_values[("all", "right")],
     )
@@ -550,11 +550,11 @@ def _find_origins(
     return origins
 
 
-def _find_latest_baseline_csv(
+def _find_latest_csv(
     run_dir: Path,
 ) -> Path | None:
-    """Find the most recently modified baseline CSV."""
-    baseline_files = sorted(
+    """Find the most recently modified Pearson CSV."""
+    files = sorted(
         run_dir.parent.glob("cycle_*.csv"),
         key=lambda path: path.stat().st_mtime,
         reverse=True,
@@ -567,9 +567,9 @@ def _find_latest_baseline_csv(
         "mean_pearson_r",
     }
 
-    for baseline_file in baseline_files:
+    for file in files:
         try:
-            frame = pd.read_csv(baseline_file)
+            frame = pd.read_csv(file)
         except (
             OSError,
             pd.errors.ParserError,
@@ -577,17 +577,17 @@ def _find_latest_baseline_csv(
             continue
 
         if required_columns.issubset(frame.columns):
-            return baseline_file
+            return file
 
     return None
 
 
 def _load_species_origins(
-    baseline_file: Path,
+    file: Path,
     origins: list[str],
 ) -> dict[str, list[str]]:
-    """Group run origins by species using the baseline CSV."""
-    frame = pd.read_csv(baseline_file)
+    """Group run origins by species using the Pearson r CSV."""
+    frame = pd.read_csv(file)
 
     species_origins: dict[str, list[str]] = {}
 
@@ -616,7 +616,7 @@ def _load_species_origins(
 def plot_run_summaries(
     run_dir: str | Path,
     current_values: dict[tuple[str, str], float],
-    baseline: dict[tuple[str, str], float],
+    r: dict[tuple[str, str], float],
 ) -> None:
     """Create overall and species-specific cycle summary plots."""
     run_dir = Path(run_dir)
@@ -635,11 +635,11 @@ def plot_run_summaries(
     )
 
     # Species-specific summaries.
-    baseline_file = _find_latest_baseline_csv(run_dir)
+    file = _find_latest_csv(run_dir)
 
-    if baseline_file is not None:
+    if file is not None:
         species_origins = _load_species_origins(
-            baseline_file=baseline_file,
+            file=file,
             origins=origins,
         )
 
@@ -652,11 +652,11 @@ def plot_run_summaries(
                 species=species,
             )
 
-    # Current versus baseline comparison.
-    _plot_baseline_comparison(
+    # Current versus previous comparison.
+    _plot_pearson_comparison(
         run_dir=run_dir,
         current_values=current_values,
-        baseline=baseline,
+        r=r,
     )
 
 
@@ -700,7 +700,7 @@ def _collect_summary_rows(
 
 def _calculate_all_values(
     run_dir: Path,
-    baseline: dict[tuple[str, str], float],
+    r: dict[tuple[str, str], float],
 ) -> tuple[
     dict[tuple[str, str], float],
     list[dict[str, object]],
@@ -748,15 +748,15 @@ def _calculate_all_values(
             }
         )
 
-        baseline_r = baseline[("all", hemisphere)]
-        difference = mean_r - baseline_r
-        minimum_allowed = baseline_r - ALLOWED_REGRESSION
+        pearson_r = r[("all", hemisphere)]
+        difference = mean_r - pearson_r
+        minimum_allowed = pearson_r - ALLOWED_REGRESSION
 
         summaries.append(
             f"All spaces ({hemisphere}):\n"
             f"  Total executable cycles: {len(combined)}\n"
             f"  Mean Pearson r: {mean_r:.6f}\n"
-            f"  Baseline Pearson r: {baseline_r:.6f}\n"
+            f"  Previous Pearson r: {pearson_r:.6f}\n"
             f"  Difference: {difference:+.6f}\n"
             f"  Minimum allowed Pearson r: {minimum_allowed:.6f}\n"
         )
@@ -765,7 +765,7 @@ def _calculate_all_values(
             "Average round-trip correlation regressed for all spaces: "
             f"hemisphere={hemisphere}, "
             f"current r={mean_r:.6f}, "
-            f"baseline={baseline_r:.6f}, "
+            f"previous pearson r={pearson_r:.6f}, "
             f"difference={difference:+.6f}, "
             f"minimum allowed={minimum_allowed:.6f}, "
             f"allowed regression={ALLOWED_REGRESSION:.6f}. "
@@ -833,7 +833,7 @@ def _save_all_summary_txt(
 
 def _log_final_regression_status(
     current_all_values: dict[tuple[str, str], float],
-    baseline: dict[tuple[str, str], float],
+    r: dict[tuple[str, str], float],
 ) -> None:
     """Log final all-space regression status."""
     for hemisphere in HEMISPHERES:
@@ -843,16 +843,16 @@ def _log_final_regression_status(
             continue
 
         current_r = current_all_values[key]
-        baseline_r = baseline[key]
-        difference = current_r - baseline_r
-        minimum_allowed = baseline_r - ALLOWED_REGRESSION
+        pearson_r = r[key]
+        difference = current_r - pearson_r
+        minimum_allowed = pearson_r - ALLOWED_REGRESSION
 
         logger.info(
             "FINAL ALL-SPACE MEAN — %s: current=%.6f, "
-            "baseline=%.6f, difference=%+.6f, minimum allowed=%.6f",
+            "pearson r=%.6f, difference=%+.6f, minimum allowed=%.6f",
             hemisphere,
             current_r,
-            baseline_r,
+            pearson_r,
             difference,
             minimum_allowed,
         )
@@ -860,7 +860,7 @@ def _log_final_regression_status(
 
 def _save_all_summary(
     run_dir: Path,
-    baseline: dict[tuple[str, str], float],
+    r: dict[tuple[str, str], float],
 ) -> dict[tuple[str, str], float]:
     """Calculate and save cycle Pearson r summaries."""
     summary_rows = _collect_summary_rows(run_dir)
@@ -871,7 +871,7 @@ def _save_all_summary(
         summaries,
     ) = _calculate_all_values(
         run_dir=run_dir,
-        baseline=baseline,
+        r=r,
     )
 
     summary_rows.extend(all_summary_rows)
@@ -888,18 +888,18 @@ def _save_all_summary(
 
     _log_final_regression_status(
         current_all_values=current_all_values,
-        baseline=baseline,
+        r=r,
     )
 
     return current_all_values
 
 
-def _plot_baseline_comparison(
+def _plot_pearson_comparison(
     run_dir: Path,
     current_values: dict[tuple[str, str], float],
-    baseline: dict[tuple[str, str], float],
+    pearson: dict[tuple[str, str], float],
 ) -> None:
-    """Plot current versus baseline mean Pearson r for each origin."""
+    """Plot current versus previous mean Pearson r for each origin."""
     keys = [
         key
         for key in sorted(
@@ -910,12 +910,12 @@ def _plot_baseline_comparison(
                 HEMISPHERES.index(key[1]),
             ),
         )
-        if key in baseline
+        if key in pearson
     ]
 
     if not keys:
         logger.warning(
-            "No current/baseline values available for comparison plot.",
+            "No current/pearson values available for comparison plot.",
         )
         return
 
@@ -923,8 +923,8 @@ def _plot_baseline_comparison(
 
     y_positions = np.arange(len(keys))
 
-    baseline_values = np.array(
-        [baseline[key] for key in keys],
+    pearson_values = np.array(
+        [pearson[key] for key in keys],
         dtype=float,
     )
 
@@ -940,25 +940,25 @@ def _plot_baseline_comparison(
     )
 
     try:
-        for y, baseline_r, current_r in zip(
+        for y, pearson_r, current_r in zip(
             y_positions,
-            baseline_values,
+            pearson_values,
             current_values_array,
             strict=True,
         ):
             ax.plot(
-                [baseline_r, current_r],
+                [pearson_r, current_r],
                 [y, y],
                 linewidth=2,
                 alpha=0.7,
             )
 
         ax.scatter(
-            baseline_values,
+            pearson_values,
             y_positions,
             s=55,
             marker="o",
-            label="Baseline",
+            label="Previous Pearson r",
             zorder=3,
         )
 
@@ -967,7 +967,7 @@ def _plot_baseline_comparison(
             y_positions,
             s=55,
             marker="D",
-            label="Current",
+            label="Current Pearson r",
             zorder=3,
         )
 
@@ -989,7 +989,7 @@ def _plot_baseline_comparison(
         ax.set_ylabel("Origin / hemisphere")
 
         ax.set_title(
-            "Cycle round-trip accuracy: current vs baseline",
+            "Cycle round-trip accuracy: current vs previous Pearson r",
             fontsize=16,
         )
 
@@ -1005,7 +1005,7 @@ def _plot_baseline_comparison(
 
         fig.tight_layout()
 
-        output_file = run_dir / "cycle_baseline_comparison.png"
+        output_file = run_dir / "cycle_comparison.png"
 
         fig.savefig(
             output_file,
@@ -1016,7 +1016,7 @@ def _plot_baseline_comparison(
         plt.close(fig)
 
     logger.info(
-        "Saved baseline comparison plot: %s",
+        "Saved cycle comparison plot: %s",
         output_file,
     )
 
@@ -1133,7 +1133,6 @@ def _run_cycle_path(
     except (
         RuntimeError,
         FileNotFoundError,
-        OSError,
         ValueError,
     ) as exc:
         logger.warning(

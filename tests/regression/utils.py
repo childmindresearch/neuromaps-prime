@@ -327,7 +327,7 @@ def write_transform_manifest(
     )
 
 
-def load_latest_cycle_baseline(
+def load_latest_cycle_values(
     baseline_dir: Path,
 ) -> dict[tuple[str, str], float]:
     """Load the most recent valid cycle baseline CSV."""
@@ -376,7 +376,7 @@ def load_latest_cycle_baseline(
     raise FileNotFoundError(f"No valid cycle baseline CSV found in {baseline_dir}.")
 
 
-def save_cycle_baseline(
+def save_cycle(
     baseline_dir: Path,
     values: dict[tuple[str, str], float],
     graph: NeuromapsGraph,
