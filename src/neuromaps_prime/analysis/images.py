@@ -23,7 +23,6 @@ __all__ = [
     "PARC_IGNORE",
     "load_data",
     "load_surface_coords",
-    "load_surface_topology",
     "relabel_gifti",
 ]
 
@@ -163,33 +162,6 @@ def load_surface_coords(
     surface: str | Path,
 ) -> np.ndarray:
     """Load surface coordinates as ``(n_vertices, 3)``."""
-    _, image = load_data(
-        surface,
-        return_image=True,
-    )
+    arrays, _ = load_data(surface)
 
-    if not isinstance(image, nib.GiftiImage):
-        raise ValueError(f"Expected a GIFTI surface: {surface}")
-
-    return np.asarray(
-        image.darrays[0].data,
-        dtype=np.float64,
-    )
-
-
-def load_surface_topology(
-    surface: str | Path,
-) -> np.ndarray:
-    """Load triangle topology from a surface GIFTI."""
-    _, image = load_data(
-        surface,
-        return_image=True,
-    )
-
-    if not isinstance(image, nib.GiftiImage):
-        raise ValueError(f"Expected a GIFTI surface: {surface}")
-
-    return np.asarray(
-        image.darrays[1].data,
-        dtype=np.int32,
-    )
+    return np.asarray(arrays[0], dtype=np.float64)

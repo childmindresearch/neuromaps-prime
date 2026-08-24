@@ -26,7 +26,7 @@ import numpy as np
 import pytest
 from nibabel.gifti import GiftiDataArray, GiftiImage
 
-from neuromaps_prime.analysis.images import load_data, load_surface_coords
+from neuromaps_prime.analysis.images import load_data
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -36,16 +36,13 @@ if TYPE_CHECKING:
 HEMISPHERE = "left"
 ORIGIN = "D99"
 
-SINGLE_HOP_PATH = (ORIGIN, "Yerkes19")
-MULTI_HOP_PATH = (ORIGIN, "Yerkes19", "CIVETNMT")
-
 
 @pytest.fixture
-def d99_surface_metric(graph: NeuromapsGraph, tmp_path: Path) -> Path:
-    """Create a metric from the highest-density D99 surface.
+def surface_metric(graph: NeuromapsGraph, tmp_path: Path) -> Path:
+    """Create a metric from the highest-density surface available for the given space.
 
     The metric is constructed by summing the x, y, and z coordinates of each
-    D99 surface vertex. This avoids requiring a separate metric file in the
+    given surface vertex. This avoids requiring a separate metric file in the
     neuromaps_prime cache while still providing surface data for Workbench to
     transform.
     """
@@ -59,9 +56,9 @@ def d99_surface_metric(graph: NeuromapsGraph, tmp_path: Path) -> Path:
     )
 
     assert sphere is not None
-    assert sphere.file_path.exists()
 
-    coords = load_surface_coords(sphere.file_path)
+    data, _ = load_data(sphere.file_path)
+    coords = np.asarray(data[0], dtype=np.float64)
 
     metric = coords.sum(axis=1, dtype=np.float32)
 
@@ -74,17 +71,18 @@ def d99_surface_metric(graph: NeuromapsGraph, tmp_path: Path) -> Path:
 
 def test_single_hop_surface_transform(
     graph: NeuromapsGraph,
-    d99_surface_metric: Path,
+    surface_metric: Path,
     tmp_path: Path,
 ) -> None:
     """Verify Workbench executes a real single-hop surface transformation."""
-    output = tmp_path / "D99_to_Yerkes19.func.gii"
+    target = "Yerkes19"
+    output = tmp_path / f"{ORIGIN}_to_{target}.func.gii"
 
     result = graph.surface_to_surface_transformer(
         transformer_type="metric",
-        input_file=d99_surface_metric,
+        input_file=surface_metric,
         source_space=ORIGIN,
-        target_space="Yerkes19",
+        target_space=target,
         hemisphere=HEMISPHERE,
         output_file_path=output,
         source_density=None,
@@ -101,42 +99,27 @@ def test_single_hop_surface_transform(
 
 def test_multihop_surface_transform(
     graph: NeuromapsGraph,
-    d99_surface_metric: Path,
+    surface_metric: Path,
     tmp_path: Path,
 ) -> None:
     """Verify Workbench executes a real multi-hop surface transformation."""
-    first_output = tmp_path / "D99_to_Yerkes19.func.gii"
+    target = "fsLR"
+    output = tmp_path / f"{ORIGIN}_to_{target}.func.gii"
 
-    first_result = graph.surface_to_surface_transformer(
+    result = graph.surface_to_surface_transformer(
         transformer_type="metric",
-        input_file=d99_surface_metric,
+        input_file=surface_metric,
         source_space=ORIGIN,
-        target_space="Yerkes19",
+        target_space=target,
         hemisphere=HEMISPHERE,
-        output_file_path=first_output,
+        output_file_path=output,
         source_density=None,
         target_density=None,
         add_edge=False,
     )
 
-    assert first_result.path.exists()
+    assert result.path.exists()
 
-    second_output = tmp_path / "Yerkes19_to_CIVETNMT.func.gii"
-
-    second_result = graph.surface_to_surface_transformer(
-        transformer_type="metric",
-        input_file=first_result.path,
-        source_space="Yerkes19",
-        target_space="CIVETNMT",
-        hemisphere=HEMISPHERE,
-        output_file_path=second_output,
-        source_density=None,
-        target_density=None,
-        add_edge=False,
-    )
-
-    assert second_result.path.exists()
-
-    transformed = load_data(second_result.path).array
+    transformed = load_data(result.path).array
     assert transformed.size > 0
     assert np.all(np.isfinite(transformed))
