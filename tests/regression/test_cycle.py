@@ -230,15 +230,18 @@ def test_cycle_roundtrip() -> None:
 
 def _plot_species_summary(
     run_dir: Path,
-    species: str,
     origins: list[str],
 ) -> None:
-    """Create a cycle summary plot for one species.
+    """Create one summary plot for all origin spaces.
 
     Each origin space is represented by a unique marker. Filled markers
     represent the left hemisphere and hollow markers represent the right
-    hemisphere. The x-axis represents the origin space, while the y-axis
-    shows mean Pearson r.
+    hemisphere. Both hemispheres are plotted slightly offset horizontally
+    so that their markers remain visually distinct.
+
+    Args:
+        run_dir: Directory containing per-origin cycle CSV files.
+        origins: Origin spaces to include in the plot.
     """
     rows: list[dict[str, object]] = []
 
@@ -264,13 +267,13 @@ def _plot_species_summary(
 
     if not rows:
         logger.warning(
-            "No cycle results found for species %s.",
-            species,
+            "No cycle results found for summary plot.",
         )
         return
 
     frame = pd.DataFrame(rows)
-    unique_origins = sorted(frame["origin"].unique())
+
+    unique_origins = [origin for origin in origins if origin in set(frame["origin"])]
 
     markers = (
         "o",
@@ -293,7 +296,16 @@ def _plot_species_summary(
         for index, origin in enumerate(unique_origins)
     }
 
-    fig, ax = plt.subplots(figsize=(10, 7))
+    hemisphere_offsets = {
+        "left": -0.10,
+        "right": 0.10,
+    }
+
+    fig_width = max(12, 1.25 * len(unique_origins))
+
+    fig, ax = plt.subplots(
+        figsize=(fig_width, 7),
+    )
 
     try:
         for x_position, origin in enumerate(unique_origins):
@@ -307,16 +319,19 @@ def _plot_species_summary(
                 if subset.empty:
                     continue
 
-                mean_r = float(subset["pearson_r"].iloc[0])
+                mean_r = float(
+                    subset["pearson_r"].iloc[0],
+                )
 
                 ax.scatter(
-                    x_position,
+                    x_position + hemisphere_offsets[hemisphere],
                     mean_r,
-                    s=100,
+                    s=120,
                     marker=marker,
                     facecolors=("none" if hemisphere == "right" else None),
                     linewidths=1.5,
                     label=(f"{origin} ({'L' if hemisphere == 'left' else 'R'})"),
+                    zorder=3,
                 )
 
         ax.axhline(
@@ -325,7 +340,10 @@ def _plot_species_summary(
             linewidth=1,
         )
 
-        ax.set_xticks(range(len(unique_origins)))
+        ax.set_xticks(
+            range(len(unique_origins)),
+        )
+
         ax.set_xticklabels(
             unique_origins,
             rotation=45,
@@ -336,12 +354,15 @@ def _plot_species_summary(
         ax.set_ylabel("Mean Pearson r")
 
         ax.set_ylim(
-            min(0.0, frame["pearson_r"].min() - 0.05),
+            min(
+                0.0,
+                frame["pearson_r"].min() - 0.05,
+            ),
             1.01,
         )
 
         ax.set_title(
-            f"{species}\nSurface transformation cycle round-trip accuracy",
+            "Surface transformation cycle round-trip accuracy",
             fontsize=16,
         )
 
@@ -359,18 +380,19 @@ def _plot_species_summary(
 
         fig.tight_layout()
 
-        output_file = run_dir / f"cycle_{species}_summary.png"
+        output_file = run_dir / "cycle_summary.png"
 
         fig.savefig(
             output_file,
             dpi=200,
             bbox_inches="tight",
         )
+
     finally:
         plt.close(fig)
 
     logger.info(
-        "Saved species cycle summary plot: %s",
+        "Saved cycle summary plot: %s",
         output_file,
     )
 
@@ -379,9 +401,8 @@ def plot_run_summaries(
     run_dir: str | Path,
     current_values: dict[tuple[str, str], float],
     baseline: dict[tuple[str, str], float],
-    graph: NeuromapsGraph,
 ) -> None:
-    """Create cycle summary plots for a run."""
+    """Create summary plots for a completed cycle regression run."""
     run_dir = Path(run_dir)
 
     if not run_dir.is_dir():
@@ -389,7 +410,9 @@ def plot_run_summaries(
             f"Run directory does not exist: {run_dir}",
         )
 
-    csv_files = sorted(run_dir.glob("cycle_*_left.csv"))
+    csv_files = sorted(
+        run_dir.glob("cycle_*_left.csv"),
+    )
 
     if not csv_files:
         raise FileNotFoundError(
@@ -411,22 +434,12 @@ def plot_run_summaries(
 
         origins.append(origin)
 
-    species_origins: dict[str, list[str]] = {}
+    origins = sorted(set(origins))
 
-    for origin in origins:
-        node = graph.get_node_data(origin)
-
-        # Use the actual species field from Node here.
-        species = node.species
-
-        species_origins.setdefault(species, []).append(origin)
-
-    for species, species_nodes in species_origins.items():
-        _plot_species_summary(
-            run_dir=run_dir,
-            species=species,
-            origins=species_nodes,
-        )
+    _plot_species_summary(
+        run_dir=run_dir,
+        origins=origins,
+    )
 
     _plot_baseline_comparison(
         run_dir=run_dir,
