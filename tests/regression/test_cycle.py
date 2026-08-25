@@ -1271,7 +1271,7 @@ def _run_origin_hemisphere(
         )
         return 0
 
-    plot_dir = OUTPUT_DIR / f"cycle_{origin}_{hemisphere}_plots"
+    plot_dir = OUTPUT_DIR / f"origin-{origin}_cycle-{hemisphere}"
 
     plot_dir.mkdir(
         parents=True,

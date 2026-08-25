@@ -156,6 +156,10 @@ def plot_single_surface(
     vmax: float,
     pearson_r: float,
     hop_index: int,
+    source: str,
+    target: str,
+    cycle_origin: str,
+    cycle_target: str,
     output_file: Path,
 ) -> bool:
     """Plot one metric on one cortical surface."""
@@ -186,7 +190,9 @@ def plot_single_surface(
         )
 
         if data.image is None:
-            raise ValueError(f"Could not load surface image: {surface_file}")
+            raise ValueError(
+                f"Could not load surface image: {surface_file}",
+            )
 
         coords = data.image.darrays[0].data
         faces = data.image.darrays[1].data
@@ -205,6 +211,23 @@ def plot_single_surface(
         )
         return False
 
+    if hop_index == 0:
+        title = (
+            f"{space} | "
+            f"Hop 0 — origin | "
+            f"Cycle: {cycle_origin} → {cycle_target} | "
+            f"{resource_type} | "
+            f"r={pearson_r:.5f}"
+        )
+    else:
+        title = (
+            f"{source} → {target} | "
+            f"Hop {hop_index} | "
+            f"Cycle: {cycle_origin} → {cycle_target} | "
+            f"{resource_type} | "
+            f"r={pearson_r:.5f}"
+        )
+
     try:
         plot_surf(
             coords,
@@ -214,7 +237,7 @@ def plot_single_surface(
             vmin=vmin,
             vmax=vmax,
             cmap="viridis",
-            title=f"{space} | node {hop_index} | r={pearson_r:.5f}",
+            title=title,
         )
 
         fig = plt.gcf()
@@ -250,6 +273,10 @@ def plot_cycle_cortical_surfaces(
 
     token = path_token(path)
 
+    # The first and final spaces define the complete cycle.
+    cycle_origin = path[0]
+    cycle_target = path[-1]
+
     for hop_index, (space, metric_values) in enumerate(metrics_by_hop):
         finite = np.isfinite(metric_values)
 
@@ -263,14 +290,19 @@ def plot_cycle_cortical_surfaces(
 
         plotted = False
 
+        if hop_index == 0:
+            source = cycle_origin
+            target = cycle_origin
+        else:
+            source = path[hop_index - 1]
+            target = path[hop_index]
+
         for resource_type in (
             "midthickness",
             "pial",
             "white",
         ):
-            output_file = (
-                plot_dir / f"{token}_hop{hop_index}_{space}_{resource_type}.png"
-            )
+            output_file = plot_dir / f"{token}_hop-{hop_index}_{resource_type}.png"
 
             if plot_single_surface(
                 graph=graph,
@@ -282,6 +314,10 @@ def plot_cycle_cortical_surfaces(
                 vmax=vmax,
                 pearson_r=pearson_r,
                 hop_index=hop_index,
+                source=source,
+                target=target,
+                cycle_origin=cycle_origin,
+                cycle_target=cycle_target,
                 output_file=output_file,
             ):
                 plotted = True
