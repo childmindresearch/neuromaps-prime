@@ -26,7 +26,7 @@ dependencies = [
   "platformdirs>=4.10.0",
   "styxpodman>=0.2.0",
   "joblib>=1.5.3",
-  "matplotlib-surface-plotting>=0.14",,
+  "matplotlib-surface-plotting>=0.14",
   "tqdm>=4.70.0"
 ]
 
