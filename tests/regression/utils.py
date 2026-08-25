@@ -381,14 +381,14 @@ def save_cycle(
     values: dict[tuple[str, str], float],
     graph: NeuromapsGraph,
 ) -> Path:
-    """Save cycle pearson r values to a timestamped CSV."""
+    """Save cycle Pearson r values grouped by species."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
 
     output_file = dir / f"cycle_{timestamp}.csv"
 
     rows = []
 
-    for (origin, hemisphere), mean_pearson_r in sorted(values.items()):
+    for (origin, hemisphere), mean_pearson_r in values.items():
         species = "all"
 
         if origin != "all":
@@ -402,6 +402,15 @@ def save_cycle(
                 "mean_pearson_r": mean_pearson_r,
             }
         )
+
+    rows.sort(
+        key=lambda row: (
+            row["species"],
+            row["origin"] == "all",
+            row["origin"],
+            row["hemisphere"] != "left",
+        )
+    )
 
     frame = pd.DataFrame(
         rows,
