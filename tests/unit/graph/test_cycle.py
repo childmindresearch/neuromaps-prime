@@ -407,23 +407,6 @@ def test_find_return_paths_returns_expected_cycles(
     assert set(paths) == EXPECTED_CYCLES
 
 
-def test_find_return_paths_returns_all_simple_cycles(
-    rotation_graph: NeuromapsGraph,
-) -> None:
-    """Return all simple directed cycles containing the origin space."""
-    paths = find_return_paths(
-        rotation_graph,
-        "A",
-    )
-
-    assert set(paths) == {
-        ("A", "B", "A"),
-        ("A", "C", "A"),
-        ("A", "B", "C", "A"),
-        ("A", "C", "B", "A"),
-    }
-
-
 def test_find_return_paths_rejects_unknown_node(
     rotation_graph: NeuromapsGraph,
 ) -> None:
