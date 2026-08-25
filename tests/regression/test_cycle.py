@@ -806,7 +806,7 @@ def _save_all_summary_txt(
 
 def _log_final_regression_status(
     current_all_values: dict[tuple[str, str], float],
-    r: dict[tuple[str, str], float],
+    pearson_r: dict[tuple[str, str], float],
 ) -> None:
     """Log final all-space regression status."""
     for hemisphere in HEMISPHERES:
@@ -816,16 +816,16 @@ def _log_final_regression_status(
             continue
 
         current_r = current_all_values[key]
-        pearson_r = r[key]
-        difference = current_r - pearson_r
-        minimum_allowed = pearson_r - ALLOWED_REGRESSION
+        previous_r = pearson_r[key]
+        difference = current_r - previous_r
+        minimum_allowed = previous_r - ALLOWED_REGRESSION
 
         logger.info(
             "FINAL ALL-SPACE MEAN — %s: current=%.6f, "
-            "pearson r=%.6f, difference=%+.6f, minimum allowed=%.6f",
+            "previous=%.6f, difference=%+.6f, minimum allowed=%.6f",
             hemisphere,
             current_r,
-            pearson_r,
+            previous_r,
             difference,
             minimum_allowed,
         )
