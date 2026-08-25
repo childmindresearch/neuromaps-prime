@@ -578,7 +578,7 @@ def _load_species_origins(
 def plot_run_summaries(
     run_dir: str | Path,
     current_values: dict[tuple[str, str], float],
-    r: dict[tuple[str, str], float],
+    pearson_r: dict[tuple[str, str], float],
 ) -> None:
     """Create overall and species-specific cycle summary plots."""
     run_dir = Path(run_dir)
@@ -618,7 +618,7 @@ def plot_run_summaries(
     _plot_pearson_comparison(
         run_dir=run_dir,
         current_values=current_values,
-        pearson=r,
+        pearson_r=pearson_r,
     )
 
 
@@ -720,15 +720,15 @@ def _calculate_all_values(
             }
         )
 
-        pearson_r = pearson_r[("all", hemisphere)]
-        difference = mean_r - pearson_r
-        minimum_allowed = pearson_r - ALLOWED_REGRESSION
+        previous_r = pearson_r[("all", hemisphere)]
+        difference = mean_r - previous_r
+        minimum_allowed = previous_r - ALLOWED_REGRESSION
 
         summaries.append(
             f"All spaces ({hemisphere}):\n"
             f"  Total executable cycles: {len(combined)}\n"
             f"  Mean Pearson r: {mean_r:.6f}\n"
-            f"  Previous Pearson r: {pearson_r:.6f}\n"
+            f"  Previous Pearson r: {previous_r:.6f}\n"
             f"  Difference: {difference:+.6f}\n"
             f"  Minimum allowed Pearson r: {minimum_allowed:.6f}\n"
         )
@@ -737,7 +737,7 @@ def _calculate_all_values(
             "Average round-trip correlation regressed for all spaces: "
             f"hemisphere={hemisphere}, "
             f"current r={mean_r:.6f}, "
-            f"previous pearson r={pearson_r:.6f}, "
+            f"previous pearson r={previous_r:.6f}, "
             f"difference={difference:+.6f}, "
             f"minimum allowed={minimum_allowed:.6f}, "
             f"allowed regression={ALLOWED_REGRESSION:.6f}. "
@@ -874,7 +874,7 @@ def _save_all_summary(
 def _plot_pearson_comparison(
     run_dir: Path,
     current_values: dict[tuple[str, str], float],
-    pearson: dict[tuple[str, str], float],
+    pearson_r: dict[tuple[str, str], float],
 ) -> None:
     """Plot current versus previous mean Pearson r for each origin."""
     keys = [
@@ -887,7 +887,7 @@ def _plot_pearson_comparison(
                 HEMISPHERES.index(key[1]),
             ),
         )
-        if key in pearson
+        if key in pearson_r
     ]
 
     if not keys:
@@ -901,7 +901,7 @@ def _plot_pearson_comparison(
     y_positions = np.arange(len(keys))
 
     pearson_values = np.array(
-        [pearson[key] for key in keys],
+        [pearson_r[key] for key in keys],
         dtype=float,
     )
 
