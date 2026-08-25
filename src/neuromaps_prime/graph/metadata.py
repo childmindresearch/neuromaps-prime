@@ -67,8 +67,7 @@ def _build_space_path(hops: Sequence[HopMetadataDict]) -> list[str]:
 
 
 def _print_spaces(
-    spaces: Sequence[SpaceMetadataDict],
-    out: Callable[..., None],
+    spaces: Sequence[SpaceMetadataDict], out: Callable[..., None]
 ) -> None:
     """Print node-level space references.
 
@@ -86,10 +85,7 @@ def _print_spaces(
     out()
 
 
-def _print_hop(
-    hop: HopMetadataDict,
-    out: Callable[..., None],
-) -> None:
+def _print_hop(hop: HopMetadataDict, out: Callable[..., None]) -> None:
     """Print a single hop's references and caveats.
 
     Args:
@@ -115,10 +111,7 @@ def _print_hop(
     out()
 
 
-def print_metadata_summary(
-    result: TransformResult,
-    file: TextIO | None = None,
-) -> None:
+def print_metadata_summary(result: TransformResult, file: TextIO | None = None) -> None:
     """Print a grouped metadata summary to stdout.
 
     Prints node-level references under a 'Spaces' header, then per-hop

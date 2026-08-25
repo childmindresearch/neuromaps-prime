@@ -81,7 +81,7 @@ class TestPrintMetadataSummary:
                     "provider": "RheMap",
                     "references": ["Smith et al. 2020"],
                     "notes": ["Experimental alignment"],
-                },
+                }
             ],
             spaces=[
                 {"space": "A", "references": ["Space A citation"]},
@@ -159,7 +159,7 @@ class TestPrintMetadataSummary:
                     "provider": "Test",
                     "references": ["Only ref"],
                     "notes": [],
-                },
+                }
             ],
             spaces=[],
         )
@@ -182,7 +182,7 @@ class TestPrintMetadataSummary:
                     "provider": "Test",
                     "references": [],
                     "notes": [],
-                },
+                }
             ],
             spaces=[],
         )

@@ -61,11 +61,7 @@ def surface_error_stats(metric_file: Path) -> tuple[float, float, float]:
     gii = nib.load(metric_file)
     data = np.abs(gii.darrays[0].data)
 
-    return (
-        float(np.median(data)),
-        float(np.mean(data)),
-        float(np.std(data)),
-    )
+    return (float(np.median(data)), float(np.mean(data)), float(np.std(data)))
 
 
 def annotate_heatmap(ax: mpl_axes.Axes, mat: np.ndarray) -> None:
@@ -74,13 +70,7 @@ def annotate_heatmap(ax: mpl_axes.Axes, mat: np.ndarray) -> None:
         for j in range(mat.shape[1]):
             val = mat[i, j]
             ax.text(
-                j,
-                i,
-                f"{val:.2f}",
-                ha="center",
-                va="center",
-                color="white",
-                fontsize=7,
+                j, i, f"{val:.2f}", ha="center", va="center", color="white", fontsize=7
             )
 
 
@@ -152,10 +142,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         # apply transform
         out_surface = tmp_path / f"{src}_to_{dst}.surf.gii"
 
-        area_surfs = {
-            "current-area": src_surface,
-            "new-area": dst_surface,
-        }
+        area_surfs = {"current-area": src_surface, "new-area": dst_surface}
 
         # resample because the surfaces are not the same mesh
         workbench.surface_resample(
@@ -173,9 +160,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         # now compute vertex-wise signed distance from the
         # resampled surface to the target surface
         workbench.signed_distance_to_surface(
-            surface_comp=out_surface,
-            surface_ref=dst_surface,
-            metric=str(error_file),
+            surface_comp=out_surface, surface_ref=dst_surface, metric=str(error_file)
         )
         gii = nib.load(error_file)
         vertex_errors = np.abs(gii.darrays[0].data)
@@ -329,11 +314,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
 
     # HEATMAP
     _fig1, ax1 = plt.subplots(figsize=(8, 6))
-    im1 = ax1.imshow(
-        mat,
-        interpolation="nearest",
-        cmap="turbo",
-    )
+    im1 = ax1.imshow(mat, interpolation="nearest", cmap="turbo")
     annotate_heatmap(ax1, mat)
     ax1.set_xticks(range(n))
     ax1.set_yticks(range(n))
@@ -348,11 +329,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         pad=10,
     )
     cbar = plt.colorbar(im1, ax=ax1)
-    cbar.set_label(
-        "Median absolute signed-distance error",
-        rotation=90,
-        labelpad=12,
-    )
+    cbar.set_label("Median absolute signed-distance error", rotation=90, labelpad=12)
     full_path = output_dir / "surface_transform_matrix_full.png"
     plt.tight_layout()
     fig3_caption = (
@@ -364,13 +341,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     )
     plt.subplots_adjust(left=0.10, bottom=0.30)
     plt.figtext(
-        0.5,
-        0.02,
-        fig3_caption,
-        ha="center",
-        fontsize=9,
-        fontstyle="italic",
-        wrap=True,
+        0.5, 0.02, fig3_caption, ha="center", fontsize=9, fontstyle="italic", wrap=True
     )
     plt.savefig(full_path, dpi=200)
     logger.info("Saved full-scale heatmap → %s", full_path)
@@ -380,13 +351,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     vmin = 0.0
     vmax = np.nanpercentile(nhp_vals, 95)
     _fig2, ax2 = plt.subplots(figsize=(8, 6))
-    im2 = ax2.imshow(
-        mat,
-        interpolation="nearest",
-        cmap="turbo",
-        vmin=vmin,
-        vmax=vmax,
-    )
+    im2 = ax2.imshow(mat, interpolation="nearest", cmap="turbo", vmin=vmin, vmax=vmax)
     annotate_heatmap(ax2, mat)
     ax2.set_xticks(range(n))
     ax2.set_yticks(range(n))
@@ -401,11 +366,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         pad=10,
     )
     cbar = plt.colorbar(im2, ax=ax2)
-    cbar.set_label(
-        "Median absolute signed-distance error",
-        rotation=90,
-        labelpad=12,
-    )
+    cbar.set_label("Median absolute signed-distance error", rotation=90, labelpad=12)
     nhp_path = output_dir / "surface_transform_matrix_nhp_scaled.png"
     fig3_caption = (
         "Figure 3. Heatmap of pairwise surface-to-surface transform error "
@@ -418,13 +379,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     )
     plt.subplots_adjust(left=0.10, bottom=0.30)
     plt.figtext(
-        0.5,
-        0.02,
-        fig3_caption,
-        ha="center",
-        fontsize=9,
-        fontstyle="italic",
-        wrap=True,
+        0.5, 0.02, fig3_caption, ha="center", fontsize=9, fontstyle="italic", wrap=True
     )
     plt.savefig(nhp_path, dpi=200)
     logger.info("Saved NHP-scaled heatmap → %s", nhp_path)
@@ -450,13 +405,7 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
     hist_path = output_dir / "surface_transform_histogram.png"
     plt.subplots_adjust(left=0.15, bottom=0.30)
     plt.figtext(
-        0.5,
-        0.02,
-        fig4_caption,
-        ha="center",
-        fontsize=9,
-        fontstyle="italic",
-        wrap=True,
+        0.5, 0.02, fig4_caption, ha="center", fontsize=9, fontstyle="italic", wrap=True
     )
     plt.savefig(hist_path, dpi=200)
     plt.close()

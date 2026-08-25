@@ -40,8 +40,7 @@ class TestResolveData:
     def test_gifti_file_input(self, tmp_path: Path) -> None:
         """Verify GIFTI file is loaded and flattened."""
         data_arr = nib.gifti.GiftiDataArray(
-            np.array([1.0, 2.0, 3.0, 4.0], dtype=np.float32),
-            intent="NIFTI_INTENT_NONE",
+            np.array([1.0, 2.0, 3.0, 4.0], dtype=np.float32), intent="NIFTI_INTENT_NONE"
         )
         img = nib.GiftiImage(darrays=[data_arr])
         gii_path = tmp_path / "data.func.gii"

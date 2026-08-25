@@ -18,8 +18,7 @@ if TYPE_CHECKING:
 
 # Simple triangle in the XY plane.
 simple_vertices = np.array(
-    [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
-    dtype=np.float32,
+    [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], dtype=np.float32
 )
 simple_faces = np.array([[0, 1, 2]], dtype=np.int32)
 

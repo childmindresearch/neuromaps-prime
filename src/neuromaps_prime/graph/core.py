@@ -244,9 +244,7 @@ class NeuromapsGraph(nx.MultiDiGraph):
             ``None`` if not found.
         """
         return self._cache.get_volume_atlas(
-            space=space,
-            resolution=resolution,
-            resource_type=resource_type,
+            space=space, resolution=resolution, resource_type=resource_type
         )
 
     def fetch_surface_to_surface_transform(

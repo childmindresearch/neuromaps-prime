@@ -42,8 +42,7 @@ class TestSetupRunner:
                 "singularity",
                 SingularityRunner,
                 marks=pytest.mark.skipif(
-                    os.name == "nt",
-                    reason="SingularityRunner not supported on Windows",
+                    os.name == "nt", reason="SingularityRunner not supported on Windows"
                 ),
             ),
         ],

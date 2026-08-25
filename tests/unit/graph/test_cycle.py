@@ -345,15 +345,12 @@ class TestGraphCycle:
         transformations compose to identity, the returned metric should closely
         match the original metric.
         """
-        workdir = tmp_path / "output"
-        workdir.mkdir()
-
         results = run_cycle_test(
             rotation_graph,
             "A",
             rotation_metric,
             self.HEMISPHERE,
-            workdir,
+            workdir=tmp_path,
             density=self.DENSITY,
         )
 
@@ -379,16 +376,13 @@ class TestGraphCycle:
 
         This validates transform composition independently of cycle closure.
         """
-        workdir = tmp_path / "output"
-        workdir.mkdir()
-
         # Transform metric directly from A to C.
         direct = roundtrip_metric(
             rotation_graph,
             rotation_metric,
             ("A", "C"),
             self.HEMISPHERE,
-            workdir,
+            workdir=tmp_path,
             density=self.DENSITY,
         )
 
@@ -398,13 +392,12 @@ class TestGraphCycle:
             rotation_metric,
             ("A", "B", "C"),
             self.HEMISPHERE,
-            workdir,
+            workdir=tmp_path,
             density=self.DENSITY,
         )
 
         pearson_r, max_abs_diff = score_roundtrip(
-            direct.final_metric,
-            concatenated.final_metric,
+            direct.final_metric, concatenated.final_metric
         )
 
         assert pearson_r == pytest.approx(1.0, abs=1e-3)

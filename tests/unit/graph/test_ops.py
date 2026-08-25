@@ -32,8 +32,7 @@ class TestTwoHops:
 
     @pytest.fixture
     def mock_transforms(
-        self,
-        mock_surface_transform_factory: Callable[..., MagicMock],
+        self, mock_surface_transform_factory: Callable[..., MagicMock]
     ) -> dict[str, MagicMock]:
         """Create mock transforms with fetchable paths."""
         first = mock_surface_transform_factory(source_space="A", target_space="B")
@@ -81,10 +80,7 @@ class TestTwoHops:
         assert not any("falling back" in r.message for r in caplog.records)
 
     def test_missing_first_transform_raises(
-        self,
-        ops: SurfaceTransformOps,
-        tmp_path: Path,
-        caplog: pytest.LogCaptureFixture,
+        self, ops: SurfaceTransformOps, tmp_path: Path, caplog: pytest.LogCaptureFixture
     ) -> None:
         """Test ValueError raised when first transform not found."""
         ops.cache.get_surface_transform.return_value = None

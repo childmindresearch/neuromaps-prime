@@ -212,8 +212,7 @@ class TestVolumeToSurfaceTransformer:
         mock_transformer.volume_ops.cache.require_surface_atlas.assert_called_once()
 
     @pytest.mark.parametrize(
-        ("failing_call", "missing_surface"),
-        [(2, "white"), (3, "pial")],
+        ("failing_call", "missing_surface"), [(2, "white"), (3, "pial")]
     )
     def test_no_ribbon_surface(
         self,

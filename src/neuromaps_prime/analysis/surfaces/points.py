@@ -330,8 +330,7 @@ def make_surf_graph(
         edges, weights = edges[keep], weights[keep]
 
     return csr_matrix(
-        (weights, (edges[:, 0], edges[:, 1])),
-        shape=(len(vertices), len(vertices)),
+        (weights, (edges[:, 0], edges[:, 1])), shape=(len(vertices), len(vertices))
     )
 
 

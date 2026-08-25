@@ -18,7 +18,7 @@ INTERP_PARAMS: dict[str, Callable[..., Any]] = {
     "lanczosWindowedSinc": ants.ants_apply_transforms_lanczos_windowed_sinc,
 }
 INTERP_NOPARAMS: dict[str, Callable[..., Any]] = {
-    "multiLabel": ants.ants_apply_transforms_multi_labelnoparams,
+    "multiLabel": ants.ants_apply_transforms_multi_labelnoparams
 }
 
 

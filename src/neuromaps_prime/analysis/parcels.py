@@ -157,10 +157,7 @@ def parcel_reduce(
     values = np.full((unique.size, n_features), np.nan, dtype=float)
 
     if unique.size:
-        with (
-            np.errstate(invalid="ignore", divide="ignore"),
-            warnings.catch_warnings(),
-        ):
+        with np.errstate(invalid="ignore", divide="ignore"), warnings.catch_warnings():
             # Empty or all-NaN regions are resolved to NaN via min_valid below;
             # scipy/numpy warnings about them would just be noise.
             warnings.simplefilter("ignore", RuntimeWarning)
