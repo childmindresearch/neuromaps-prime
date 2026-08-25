@@ -268,8 +268,6 @@ def _get_plot_origins(
     return [origin for origin in origins if origin in available_origins]
 
 
-
-
 def _get_marker_map(
     origins: list[str],
 ) -> dict[str, MarkerStyle]:
@@ -278,7 +276,8 @@ def _get_marker_map(
 
     for origin, marker in zip(
         origins,
-        MarkerStyle.markers, strict=False,
+        MarkerStyle.markers,
+        strict=False,
     ):
         style = MarkerStyle(marker)
 
