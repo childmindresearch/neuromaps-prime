@@ -672,7 +672,7 @@ def _collect_summary_rows(
 
 def _calculate_all_values(
     run_dir: Path,
-    r: dict[tuple[str, str], float],
+    pearson_r: dict[tuple[str, str], float],
 ) -> tuple[
     dict[tuple[str, str], float],
     list[dict[str, object]],
@@ -720,7 +720,7 @@ def _calculate_all_values(
             }
         )
 
-        pearson_r = r[("all", hemisphere)]
+        pearson_r = pearson_r[("all", hemisphere)]
         difference = mean_r - pearson_r
         minimum_allowed = pearson_r - ALLOWED_REGRESSION
 
@@ -865,7 +865,7 @@ def _save_all_summary(
 
     _log_final_regression_status(
         current_all_values=current_all_values,
-        r=r,
+        pearson_r=pearson_r,
     )
 
     return current_all_values
