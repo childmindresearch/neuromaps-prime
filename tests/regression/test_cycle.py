@@ -33,6 +33,7 @@ from typing import Final
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.markers import MarkerStyle
 from tests.cycle import (
     Hemisphere,
     find_return_paths,
@@ -165,7 +166,7 @@ def test_cycle_roundtrip() -> None:
     graph = NeuromapsGraph()
     dir = Path(__file__).resolve().parent
 
-    r = load_latest_cycle_values(
+    csv = load_latest_cycle_values(
         dir=dir,
     )
 
@@ -198,7 +199,7 @@ def test_cycle_roundtrip() -> None:
 
     current_all_values = _save_all_summary(
         run_dir=OUTPUT_DIR,
-        r=r,
+        r=csv,
     )
 
     current_values.update(current_all_values)
@@ -212,7 +213,7 @@ def test_cycle_roundtrip() -> None:
     plot_run_summaries(
         run_dir=OUTPUT_DIR,
         current_values=current_values,
-        r=r,
+        r=csv,
     )
 
     logger.info(
@@ -220,11 +221,6 @@ def test_cycle_roundtrip() -> None:
         current_values[("all", "left")],
         current_values[("all", "right")],
     )
-
-
-# -------------------------------------------------------------------------
-# Plot
-# -------------------------------------------------------------------------
 
 
 # -------------------------------------------------------------------------
@@ -272,29 +268,39 @@ def _get_plot_origins(
     return [origin for origin in origins if origin in available_origins]
 
 
+
+
 def _get_marker_map(
     origins: list[str],
-) -> dict[str, str]:
-    """Return a unique marker for each origin."""
-    markers = (
-        "o",
-        "s",
-        "^",
-        "D",
-        "P",
-        "X",
-        "*",
-        "v",
-        "<",
-        ">",
-        "p",
-        "h",
-        "8",
-    )
+) -> dict[str, MarkerStyle]:
+    """Return deterministic markers with consistent visual size."""
+    markers = {}
 
-    return {
-        origin: markers[index % len(markers)] for index, origin in enumerate(origins)
-    }
+    for origin, marker in zip(
+        origins,
+        MarkerStyle.markers, strict=False,
+    ):
+        style = MarkerStyle(marker)
+
+        if style.get_path().vertices.size == 0:
+            continue
+
+        path = style.get_path().transformed(style.get_transform())
+
+        vertices = path.vertices
+
+        width = vertices[:, 0].max() - vertices[:, 0].min()
+        height = vertices[:, 1].max() - vertices[:, 1].min()
+        scale = max(width, height)
+
+        if scale:
+            vertices = vertices / scale
+
+        path = path.cleaned()
+
+        markers[origin] = MarkerStyle(path)
+
+    return markers
 
 
 def _get_color_map(
@@ -507,11 +513,6 @@ def _plot_species_summary(
         fig=fig,
         output_file=output_file,
     )
-
-
-# -------------------------------------------------------------------------
-# Species helpers
-# -------------------------------------------------------------------------
 
 
 def _find_origins(

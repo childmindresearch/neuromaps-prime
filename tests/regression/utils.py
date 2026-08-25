@@ -353,7 +353,7 @@ def load_latest_cycle_values(
         if not required_columns.issubset(frame.columns):
             continue
 
-        r_values: dict[tuple[str, str], float] = {}
+        csv: dict[tuple[str, str], float] = {}
 
         for _, row in frame.iterrows():
             key = (
@@ -361,17 +361,17 @@ def load_latest_cycle_values(
                 str(row["hemisphere"]),
             )
 
-            if key in r_values:
+            if key in csv:
                 raise ValueError(f"Duplicate pearson r entry in {file}: {key}")
 
-            r_values[key] = float(row["mean_pearson_r"])
+            csv[key] = float(row["mean_pearson_r"])
 
         logger.info(
             "Using cycle pearson r: %s",
             file,
         )
 
-        return r_values
+        return csv
 
     raise FileNotFoundError(f"No valid cycle pearson CSV found in {dir}.")
 
