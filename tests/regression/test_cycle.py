@@ -115,6 +115,9 @@ def _collect_cycle_values(
     origin spaces, rather than from the mean of the per-origin means.
     """
     values: dict[tuple[str, str], float] = {}
+    frames_by_hemisphere: dict[str, list[pd.DataFrame]] = {
+        hemisphere: [] for hemisphere in HEMISPHERES
+    }
 
     for origin in origins:
         for hemisphere in HEMISPHERES:
@@ -132,20 +135,9 @@ def _collect_cycle_values(
                 frame["pearson_r"].mean(),
             )
 
-    for hemisphere in HEMISPHERES:
-        frames: list[pd.DataFrame] = []
+            frames_by_hemisphere[hemisphere].append(frame)
 
-        for origin in origins:
-            csv_path = run_dir / f"cycle_{origin}_{hemisphere}.csv"
-
-            if not csv_path.exists():
-                continue
-
-            frame = pd.read_csv(csv_path)
-
-            if not frame.empty:
-                frames.append(frame)
-
+    for hemisphere, frames in frames_by_hemisphere.items():
         if not frames:
             continue
 
@@ -166,18 +158,9 @@ def test_cycle_roundtrip() -> None:
     graph = NeuromapsGraph()
     dir = Path(__file__).resolve().parent
 
-    r = load_latest_cycle_values(
+    pearson_r, input_csv = load_latest_cycle_values(
         dir=dir,
     )
-
-    input_csv = _find_latest_csv(
-        run_dir=dir,
-    )
-
-    if input_csv is None:
-        raise FileNotFoundError(
-            f"No cycle summary CSV found in {dir}.",
-        )
 
     origins = sorted(graph.nodes)
     total_usable_paths = 0
@@ -208,7 +191,7 @@ def test_cycle_roundtrip() -> None:
 
     current_all_values = _save_all_summary(
         run_dir=OUTPUT_DIR,
-        r=r,
+        pearson_r=pearson_r,
         input_csv=input_csv,
     )
 
@@ -223,7 +206,7 @@ def test_cycle_roundtrip() -> None:
     plot_run_summaries(
         run_dir=OUTPUT_DIR,
         current_values=current_values,
-        r=r,
+        pearson_r=pearson_r,
     )
 
     logger.info(
@@ -261,7 +244,7 @@ def _load_cycle_summary_data(
                 {
                     "origin": origin,
                     "hemisphere": hemisphere,
-                    "pearson_r": float(frame["pearson_r"].mean()),
+                    "pearson_r": frame["pearson_r"].mean(),
                 }
             )
 
@@ -560,53 +543,22 @@ def _find_origins(
     return origins
 
 
-def _find_latest_csv(
-    run_dir: Path,
-) -> Path | None:
-    """Find the most recently modified Pearson CSV."""
-    files = sorted(
-        run_dir.glob("cycle_*.csv"),
-        key=lambda path: path.stat().st_mtime,
-        reverse=True,
-    )
-
-    required_columns = {
-        "origin",
-        "species",
-        "hemisphere",
-        "mean_pearson_r",
-    }
-
-    for file in files:
-        try:
-            frame = pd.read_csv(file)
-        except (
-            OSError,
-            pd.errors.ParserError,
-        ):
-            continue
-
-        if required_columns.issubset(frame.columns):
-            return file
-
-    return None
-
-
 def _load_species_origins(
     file: Path,
     origins: list[str],
 ) -> dict[str, list[str]]:
-    """Group run origins by species using the Pearson r CSV."""
+    """Group run origins by species using the cycle summary CSV."""
     frame = pd.read_csv(file)
+
+    frame = frame[frame["origin"].isin(origins)][
+        ["origin", "species"]
+    ].drop_duplicates()
 
     species_origins: dict[str, list[str]] = {}
 
     for _, row in frame.iterrows():
-        origin = str(row["origin"])
         species = str(row["species"])
-
-        if origin == "all" or origin not in origins:
-            continue
+        origin = str(row["origin"])
 
         species_origins.setdefault(
             species,
@@ -614,7 +566,7 @@ def _load_species_origins(
         ).append(origin)
 
     return {
-        species: sorted(set(species_origins[species])) for species in species_origins
+        species: sorted(origin_list) for species, origin_list in species_origins.items()
     }
 
 
@@ -645,11 +597,11 @@ def plot_run_summaries(
     )
 
     # Species-specific summaries.
-    file = _find_latest_csv(run_dir)
+    summary_file = run_dir / "cycle_summary.csv"
 
-    if file is not None:
+    if summary_file.exists():
         species_origins = _load_species_origins(
-            file=file,
+            file=summary_file,
             origins=origins,
         )
 

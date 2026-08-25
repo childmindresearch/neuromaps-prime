@@ -120,9 +120,6 @@ def relabel_gifti(
 
     Raises:
         ValueError: If loaded image is not a GiftiImage.
-
-    Raises:
-        ValueError: If loaded image is not a GiftiImage.
     """
     data, img = load_data(parcellation, return_image=True)
     if not isinstance(img, nib.GiftiImage):

@@ -365,8 +365,8 @@ def write_transform_manifest(
 
 def load_latest_cycle_values(
     dir: Path,
-) -> dict[tuple[str, str], float]:
-    """Load the most recent valid cycle pearson r CSV."""
+) -> tuple[dict[tuple[str, str], float], Path]:
+    """Load the most recent valid cycle Pearson r CSV."""
     files = sorted(
         dir.glob("cycle_*.csv"),
         key=lambda path: path.stat().st_mtime,
@@ -389,7 +389,7 @@ def load_latest_cycle_values(
         if not required_columns.issubset(frame.columns):
             continue
 
-        csv: dict[tuple[str, str], float] = {}
+        values: dict[tuple[str, str], float] = {}
 
         for _, row in frame.iterrows():
             key = (
@@ -397,19 +397,23 @@ def load_latest_cycle_values(
                 str(row["hemisphere"]),
             )
 
-            if key in csv:
-                raise ValueError(f"Duplicate pearson r entry in {file}: {key}")
+            if key in values:
+                raise ValueError(
+                    f"Duplicate pearson r entry in {file}: {key}",
+                )
 
-            csv[key] = float(row["mean_pearson_r"])
+            values[key] = float(row["mean_pearson_r"])
 
         logger.info(
             "Using cycle pearson r: %s",
             file,
         )
 
-        return csv
+        return values, file
 
-    raise FileNotFoundError(f"No valid cycle pearson CSV found in {dir}.")
+    raise FileNotFoundError(
+        f"No valid cycle pearson CSV found in {dir}.",
+    )
 
 
 def save_cycle(
