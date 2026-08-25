@@ -166,9 +166,18 @@ def test_cycle_roundtrip() -> None:
     graph = NeuromapsGraph()
     dir = Path(__file__).resolve().parent
 
-    csv = load_latest_cycle_values(
+    r = load_latest_cycle_values(
         dir=dir,
     )
+
+    input_csv = _find_latest_csv(
+        run_dir=dir,
+    )
+
+    if input_csv is None:
+        raise FileNotFoundError(
+            f"No cycle summary CSV found in {dir}.",
+        )
 
     origins = sorted(graph.nodes)
     total_usable_paths = 0
@@ -199,7 +208,8 @@ def test_cycle_roundtrip() -> None:
 
     current_all_values = _save_all_summary(
         run_dir=OUTPUT_DIR,
-        r=csv,
+        r=r,
+        input_csv=input_csv,
     )
 
     current_values.update(current_all_values)
@@ -213,7 +223,7 @@ def test_cycle_roundtrip() -> None:
     plot_run_summaries(
         run_dir=OUTPUT_DIR,
         current_values=current_values,
-        r=csv,
+        r=r,
     )
 
     logger.info(
@@ -872,9 +882,13 @@ def _log_final_regression_status(
 def _save_all_summary(
     run_dir: Path,
     r: dict[tuple[str, str], float],
+    input_csv: Path,
 ) -> dict[tuple[str, str], float]:
     """Calculate and save cycle Pearson r summaries."""
-    summary_rows = _collect_summary_rows(run_dir)
+    summary_rows = _collect_summary_rows(
+        run_dir=run_dir,
+        input_csv=input_csv,
+    )
 
     (
         current_all_values,
