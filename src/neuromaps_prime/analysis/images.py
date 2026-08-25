@@ -155,9 +155,6 @@ def relabel_gifti(
         data,
         intent="NIFTI_INTENT_LABEL",
         datatype="NIFTI_TYPE_INT32",
-        data,
-        intent="NIFTI_INTENT_LABEL",
-        datatype="NIFTI_TYPE_INT32",
     )
     labeltable = nib.gifti.GiftiLabelTable()
     labeltable.labels = new_labels
