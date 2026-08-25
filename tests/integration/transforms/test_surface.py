@@ -54,10 +54,39 @@ class TestSurfaceTransformIntegration:
 
         return output
 
+    @pytest.fixture
+    def label_metric(self, graph: NeuromapsGraph, tmp_path: Path) -> Path:
+        """Create a label file from highest-density surface available for given space.
+
+        Each vertex is assigned one of N consecutive integer labels so
+        the file is a valid parcellation-like label for label resampling.
+        """
+        density = graph.find_highest_density(self.ORIGIN)
+        sphere = graph.fetch_surface_atlas(
+            self.ORIGIN,
+            density,
+            self.HEMISPHERE,
+            "sphere",
+        )
+
+        assert sphere is not None
+        if not sphere.file_path.exists():
+            sphere.fetch()
+
+        data = load_data(sphere.file_path)
+        n_vertices = data.array[0].shape[0]
+        labels = np.arange(n_vertices, dtype=np.int32) % 7 + 1  # 7 labels
+        output = tmp_path / f"{self.ORIGIN}_{density}_label.func.gii"
+
+        darr = GiftiDataArray(
+            labels, intent="NIFTI_INTENT_LABEL", datatype="NIFTI_TYPE_INT32"
+        )
+        nib.save(GiftiImage(darrays=[darr]), output)
+
+        return output
+
     def test_single_hop_surface_transform(
-        self,
-        graph: NeuromapsGraph,
-        surface_metric: Path,
+        self, graph: NeuromapsGraph, surface_metric: Path
     ) -> None:
         """Verify Workbench executes a real single-hop surface transformation."""
         target = "Yerkes19"
@@ -67,7 +96,7 @@ class TestSurfaceTransformIntegration:
             transformer_type="metric",
             input_file=surface_metric,
             source_space=self.ORIGIN,
-            target_space=target,
+            target_space="Yerkes19",
             hemisphere=self.HEMISPHERE,
             output_file_path=output,
             add_edge=False,
@@ -81,9 +110,7 @@ class TestSurfaceTransformIntegration:
         assert np.all(np.isfinite(transformed))
 
     def test_multihop_surface_transform(
-        self,
-        graph: NeuromapsGraph,
-        surface_metric: Path,
+        self, graph: NeuromapsGraph, surface_metric: Path
     ) -> None:
         """Verify Workbench executes a real multi-hop surface transformation."""
         target = "fsLR"
@@ -110,9 +137,29 @@ class TestSurfaceTransformIntegration:
     def test_metric_resample(self) -> None:
         """Test metric resampling."""
 
-    @pytest.mark.skip(reason="No label data for resampling integration test")
-    def test_label_resample(self) -> None:
-        """Test label resampling."""
+    def test_label_resample(self, graph: NeuromapsGraph, label_metric: Path) -> None:
+        """Verify Workbench executes a real single-hop label resampling."""
+        target = "Yerkes19"
+        output = f"{self.ORIGIN}_to_{target}.label.gii"
+
+        result = graph.surface_to_surface_transformer(
+            transformer_type="label",
+            input_file=label_metric,
+            source_space=self.ORIGIN,
+            target_space=target,
+            hemisphere=self.HEMISPHERE,
+            output_file_path=output,
+            add_edge=False,
+        )
+
+        assert result.path is not None
+        assert result.path.exists()
+
+        labels = load_data(result.path).array
+        assert labels.size > 0
+        assert np.all(np.isfinite(labels))
+        # Label resampling preserves discrete (whole-number) labels.
+        assert np.all(labels == np.rint(labels))
 
     def test_surface_sphere_project_unproject(
         self, tmp_path: Path, graph: NeuromapsGraph
