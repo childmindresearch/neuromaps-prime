@@ -350,9 +350,6 @@ def rotation_graph(tmp_path: Path) -> NeuromapsGraph:
         },
     )
 
-    metric = tmp_path / "metric.func.gii"
-    _save_metric(metric, vertices.sum(axis=1))
-
     return graph
 
 
