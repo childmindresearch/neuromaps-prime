@@ -833,7 +833,7 @@ def _log_final_regression_status(
 
 def _save_all_summary(
     run_dir: Path,
-    r: dict[tuple[str, str], float],
+    pearson_r: dict[tuple[str, str], float],
     input_csv: Path,
 ) -> dict[tuple[str, str], float]:
     """Calculate and save cycle Pearson r summaries."""
@@ -848,7 +848,7 @@ def _save_all_summary(
         summaries,
     ) = _calculate_all_values(
         run_dir=run_dir,
-        r=r,
+        pearson_r=pearson_r,
     )
 
     summary_rows.extend(all_summary_rows)
