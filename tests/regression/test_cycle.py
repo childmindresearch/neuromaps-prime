@@ -565,7 +565,7 @@ def _find_latest_csv(
 ) -> Path | None:
     """Find the most recently modified Pearson CSV."""
     files = sorted(
-        run_dir.parent.glob("cycle_*.csv"),
+        run_dir.glob("cycle_*.csv"),
         key=lambda path: path.stat().st_mtime,
         reverse=True,
     )
