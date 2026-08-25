@@ -4,12 +4,12 @@
     Neuromaps:
       41k:
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1700c4e0d5737206829c59?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1700c5d06c4774c98294e9?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1700c4e0d5737206829c59
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1700c5d06c4774c98294e9
       164k:
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1700c56d01f8af2c829920?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1700c6346bfaa8ef809d16?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1700c56d01f8af2c829920
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1700c6346bfaa8ef809d16
       references:
       - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
         doi: 10.1038/s41592-022-01625-w
@@ -21,12 +21,12 @@
     Neuromaps:
       41k:
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17033581dec3a3edfdfb6b?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17033481dec3a3edfdfb69?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17033581dec3a3edfdfb6b
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17033481dec3a3edfdfb69
       164k:
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17033788c420c552cc6f0e?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a170336a9eebf8f0f82902d?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17033788c420c552cc6f0e
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a170336a9eebf8f0f82902d
       references:
       - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
         doi: 10.1038/s41592-022-01625-w
@@ -38,8 +38,8 @@
     Neuromaps:
       32k:
         sphere:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17044383ffd4e634cc6e33?view_only=b214f40525fe44b5bea3103478d08d0d
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1704435720fc8dbacc710f?view_only=b214f40525fe44b5bea3103478d08d0d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a17044383ffd4e634cc6e33
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1704435720fc8dbacc710f
       references:
       - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
         doi: 10.1038/s41592-022-01625-w
