@@ -27,6 +27,17 @@ class TestSurfaceTransformIntegration:
     ORIGIN = "D99"
     HEMISPHERE: Literal["left"] = "left"
 
+    def _sphere_vertices(self, graph: NeuromapsGraph) -> np.ndarray:
+        """Highest-density ORIGIN sphere vertex array (fetch if needed)."""
+        density = graph.find_highest_density(self.ORIGIN)
+        sphere = graph.fetch_surface_atlas(
+            self.ORIGIN, density, self.HEMISPHERE, "sphere"
+        )
+        assert sphere is not None
+        if not sphere.file_path.exists():
+            sphere.fetch()
+        return load_data(sphere.file_path).array[0]
+
     @pytest.fixture
     def surface_metric(self, graph: NeuromapsGraph, tmp_path: Path) -> Path:
         """Create a metric from highest-density surface available for given space.
@@ -34,56 +45,25 @@ class TestSurfaceTransformIntegration:
         The metric is constructed by summing the x, y, and z coordinates of each
         given surface vertex.
         """
-        density = graph.find_highest_density(self.ORIGIN)
-        sphere = graph.fetch_surface_atlas(
-            self.ORIGIN,
-            density,
-            self.HEMISPHERE,
-            "sphere",
-        )
-
-        assert sphere is not None
-        if not sphere.file_path.exists():
-            sphere.fetch()
-
-        data = load_data(sphere.file_path)
-        coords = data.array[0]
-        metric = coords.sum(axis=1, dtype=np.float32)
-        output = tmp_path / f"{self.ORIGIN}_{density}_metric.func.gii"
-
+        metric = self._sphere_vertices(graph).sum(axis=1, dtype=np.float32)
+        output = tmp_path / f"{self.ORIGIN}_metric.func.gii"
         nib.save(GiftiImage(darrays=[GiftiDataArray(metric)]), output)
-
         return output
 
     @pytest.fixture
-    def label_metric(self, graph: NeuromapsGraph, tmp_path: Path) -> Path:
+    def surface_label(self, graph: NeuromapsGraph, tmp_path: Path) -> Path:
         """Create a label file from highest-density surface available for given space.
 
         Each vertex is assigned one of N consecutive integer labels so
         the file is a valid parcellation-like label for label resampling.
         """
-        density = graph.find_highest_density(self.ORIGIN)
-        sphere = graph.fetch_surface_atlas(
-            self.ORIGIN,
-            density,
-            self.HEMISPHERE,
-            "sphere",
-        )
-
-        assert sphere is not None
-        if not sphere.file_path.exists():
-            sphere.fetch()
-
-        data = load_data(sphere.file_path)
-        n_vertices = data.array[0].shape[0]
-        labels = np.arange(n_vertices, dtype=np.int32) % 7 + 1  # 7 labels
-        output = tmp_path / f"{self.ORIGIN}_{density}_label.func.gii"
-
+        n = self._sphere_vertices(graph).shape[0]
+        labels = np.arange(n, dtype=np.int32) % 7 + 1
+        output = tmp_path / f"{self.ORIGIN}_label.func.gii"
         darr = GiftiDataArray(
-            labels, intent="NIFTI_INTENT_LABEL", datatype="NIFTI_TYPE_INT32"
+            labels, intent="NIFTIN_INTENT_LABEL", datatype="NIFTI_TYPE_INT32"
         )
         nib.save(GiftiImage(darrays=[darr]), output)
-
         return output
 
     def test_single_hop_surface_transform(
