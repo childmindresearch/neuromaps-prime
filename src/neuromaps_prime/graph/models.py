@@ -27,35 +27,52 @@ class _SerializedEntry(TypedDict, total=False):
 
 
 class Resource(BaseModel):
-    """Base model for resources in the neuromaps_prime graph."""
+    """Base model for resources in the neuromaps_prime graph.
+
+    ``file_path`` is the location of the resource file on local disk. It is
+    ``None`` until the file is known to exist locally (a local ``uri``, or a
+    completed download); :meth:`fetch` sets it and returns it.
+    """
 
     name: str
     description: str | None
-    file_path: Path
+    file_path: Path | None = None
     uri: str | None = None
+    data_dir: Path | None = None
     references: Sequence[str | dict[str, str]] | None = None
     notes: Sequence[str] | None = None
 
     def fetch(self) -> Path:
-        """Return the path to this resource's file, downloading if necessary.
+        """Return the local path to this resource's file, downloading if needed.
+
+        Resolution order:
+        1. ``file_path`` if set and the file exists (already resolved).
+        2. ``uri`` if it points to an existing local file.
+        3. Remote download into ``data_dir`` (named from storage metadata);
+           the result is stored on ``file_path``.
 
         Returns:
             Path to the resource file.
 
         Raises:
-            FileNotFoundError: if file cannot be fetched
+            FileNotFoundError: if the file cannot be resolved or fetched.
+            ValueError: if a remote fetch is required but no ``data_dir`` is set.
         """
-        if self.file_path.exists():
+        if self.file_path is not None and self.file_path.exists():
             return self.file_path
         if self.uri is None:
             raise FileNotFoundError("File does not exist and cannot be fetched.")
         if (local_file := Path(self.uri)).exists():
             self.file_path = local_file
-        else:
-            _logger.info(f"Fetching {self.file_path.name} from remote server.")
-            download_and_validate(uri=self.uri, dest=self.file_path)
-            if not self.file_path.exists():
-                raise FileNotFoundError("File does not exist.")
+            return local_file
+        if self.data_dir is None:
+            raise ValueError(f"Cannot fetch {self.name!r}: no data_dir configured.")
+        _logger.info(
+            "Fetching %s from remote server into %s.", self.name, self.data_dir
+        )
+        self.file_path = download_and_validate(uri=self.uri, dest_dir=self.data_dir)
+        if self.file_path is None or not self.file_path.exists():
+            raise FileNotFoundError("File does not exist.")
         return self.file_path
 
     def __repr__(self) -> str:

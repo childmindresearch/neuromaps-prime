@@ -323,7 +323,7 @@ class SurfaceTransformOps(BaseModel):
                 )
                 output_path = workbench.label_to_volume_mapping(
                     label=surface_result.path,
-                    surface=target_surface.file_path,
+                    surface=target_surface.fetch(),
                     volume_space=ref_volume,
                     volume_out=output_file_path,
                     ribbon_constrained=ribbon_surfs,
@@ -334,7 +334,7 @@ class SurfaceTransformOps(BaseModel):
                 )
                 output_path = workbench.metric_to_volume_mapping(
                     metric=surface_result.path,
-                    surface=target_surface.file_path,
+                    surface=target_surface.fetch(),
                     volume_space=ref_volume,
                     volume_out=output_file_path,
                     ribbon_constrained=ribbon_surfs,

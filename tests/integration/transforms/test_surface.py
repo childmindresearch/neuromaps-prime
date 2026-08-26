@@ -31,9 +31,7 @@ class TestSurfaceTransformIntegration:
             self.ORIGIN, density, self.HEMISPHERE, "sphere"
         )
         assert sphere is not None
-        if not sphere.file_path.exists():
-            sphere.fetch()
-        return load_data(sphere.file_path).array[0]
+        return load_data(sphere.fetch()).array[0]
 
     @pytest.fixture
     def surface_metric(self, graph: NeuromapsGraph, tmp_path: Path) -> Path:

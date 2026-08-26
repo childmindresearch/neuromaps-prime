@@ -128,9 +128,8 @@ class TestGitHubStorage:
         """Test download writes correct bytes to dest when checksum matches."""
         mock_download = MagicMock(iter_content=MagicMock(return_value=[MOCK_CONTENT]))
         mock_get.side_effect = [mock_meta_response, mock_download]
-        dest = tmp_path / "test.txt"
-        GitHubStorage().download(MOCK_RAW_URL, dest)
-        assert dest.read_bytes() == MOCK_CONTENT
+        GitHubStorage().download(MOCK_RAW_URL, tmp_path)
+        assert (tmp_path / "test.txt").read_bytes() == MOCK_CONTENT
 
     @patch("neuromaps_prime.remote.github.requests.get")
     def test_download_checksum_mismatch(
@@ -142,7 +141,7 @@ class TestGitHubStorage:
         )
         mock_get.side_effect = [mock_meta_response, mock_download]
         with pytest.raises(ValueError, match="Checksum mismatch"):
-            GitHubStorage().download(MOCK_RAW_URL, tmp_path / "test.txt")
+            GitHubStorage().download(MOCK_RAW_URL, tmp_path)
 
     def test_default_chunk_size(self) -> None:
         """Test chunk_size defaults to 8192."""
