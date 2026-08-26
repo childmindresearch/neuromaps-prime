@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import nibabel.nifti1
 import pytest
 
 from neuromaps_prime.transforms.volume import vol_to_vol
@@ -18,10 +19,8 @@ class TestVolumetricTransformIntegration:
     """Integration tests calling ANTs and using real data."""
 
     @staticmethod
-    def _extract_res(nii_file: Path) -> tuple[float]:
+    def _extract_res(nii_file: Path) -> tuple[float, ...]:
         """Extract voxel spacing from a NIfTI file."""
-        import nibabel.nifti1
-
         img = nibabel.nifti1.load(nii_file)
         return img.header.get_zooms()[:3]
 
