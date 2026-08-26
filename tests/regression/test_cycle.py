@@ -34,6 +34,7 @@ from typing import Final
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pytest
 from matplotlib.markers import MarkerStyle
 from tests.cycle import (
     Hemisphere,
@@ -75,6 +76,13 @@ HEMISPHERES = (
 )
 
 MAX_CYCLE_LENGTH: Final = 4
+
+
+@pytest.fixture
+def graph() -> NeuromapsGraph:
+    """Return the Neuromaps-PRIME transformation graph."""
+    return NeuromapsGraph()
+
 
 # -------------------------------------------------------------------------
 # Main regression test
@@ -214,9 +222,10 @@ def _summarize(
     )
 
 
-def test_cycle_roundtrip() -> None:
+def test_cycle_roundtrip(
+    graph: NeuromapsGraph,
+) -> None:
     """Round-trip synthetic metrics through real transformation cycles."""
-    graph = NeuromapsGraph()
     dir = Path(__file__).resolve().parent
 
     previous = load_latest_cycle_values(
