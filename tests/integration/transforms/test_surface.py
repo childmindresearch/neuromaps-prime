@@ -61,7 +61,7 @@ class TestSurfaceTransformIntegration:
         labels = np.arange(n, dtype=np.int32) % 7 + 1
         output = tmp_path / f"{self.ORIGIN}_label.func.gii"
         darr = GiftiDataArray(
-            labels, intent="NIFTIN_INTENT_LABEL", datatype="NIFTI_TYPE_INT32"
+            labels, intent="NIFTI_INTENT_LABEL", datatype="NIFTI_TYPE_INT32"
         )
         nib.save(GiftiImage(darrays=[darr]), output)
         return output
@@ -72,7 +72,7 @@ class TestSurfaceTransformIntegration:
     def test_surface_transform(
         self, graph: NeuromapsGraph, surface_metric: Path, target: str
     ) -> None:
-        """Verify Workbench executes a real surface transformations."""
+        """Verify Workbench executes a real metric surface transformations."""
         output = f"{self.ORIGIN}_to_{target}.func.gii"
         result = graph.surface_to_surface_transformer(
             transformer_type="metric",
@@ -91,14 +91,14 @@ class TestSurfaceTransformIntegration:
 
     # Metric resample tested as part of surface transformation test
 
-    def test_label_resample(self, graph: NeuromapsGraph, label_metric: Path) -> None:
+    def test_label_resample(self, graph: NeuromapsGraph, surface_label: Path) -> None:
         """Verify Workbench executes a real single-hop label resampling."""
         target = "Yerkes19"
         output = f"{self.ORIGIN}_to_{target}.label.gii"
 
         result = graph.surface_to_surface_transformer(
             transformer_type="label",
-            input_file=label_metric,
+            input_file=surface_label,
             source_space=self.ORIGIN,
             target_space=target,
             hemisphere=self.HEMISPHERE,
