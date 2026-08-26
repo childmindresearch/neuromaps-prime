@@ -568,18 +568,6 @@ def _plot_species_summary(
     )
 
 
-def _species_map(
-    input_csv: Path,
-) -> dict[str, str]:
-    """Return the species associated with each origin."""
-    frame = pd.read_csv(input_csv)
-
-    return (
-        frame[["origin", "species"]]
-        .drop_duplicates("origin")
-        .set_index("origin")["species"]
-        .to_dict()
-    )
 
 
 # -------------------------------------------------------------------------
