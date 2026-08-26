@@ -1,4 +1,4 @@
-"""Tests for surface transformations."""
+"""Tests for volume transformations."""
 
 from __future__ import annotations
 
