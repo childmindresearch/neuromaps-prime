@@ -47,7 +47,6 @@ from tests.regression.utils import (
     load_latest_cycle_values,
     make_sphere,
     plot_cycle_cortical_surfaces,
-    save_cycle,
 )
 
 from neuromaps_prime.graph import NeuromapsGraph
@@ -359,15 +358,6 @@ def _get_marker_map(
             continue
 
         path = style.get_path().transformed(style.get_transform())
-
-        vertices = path.vertices
-
-        width = vertices[:, 0].max() - vertices[:, 0].min()
-        height = vertices[:, 1].max() - vertices[:, 1].min()
-        scale = max(width, height)
-
-        if scale:
-            vertices = vertices / scale
 
         path = path.cleaned()
 
@@ -837,7 +827,6 @@ def _save_cycle_results(
     origin: str,
     hemisphere: Hemisphere,
     rows: list[dict[str, object]],
-    plot_dir: Path,
 ) -> int:
     """Save CSV/TXT cycle results and validate regression output."""
     if not rows:
@@ -909,7 +898,6 @@ def _save_cycle_results(
 
     logger.info("Saved CSV: %s", csv_path)
     logger.info("Saved TXT summary: %s", txt_path)
-    logger.info("Saved path results: %s", plot_dir)
 
     return len(rows)
 
@@ -1104,5 +1092,4 @@ def _run_origin_hemisphere(
         origin=origin,
         hemisphere=hemisphere,
         rows=rows,
-        plot_dir=plot_dir,
     )
