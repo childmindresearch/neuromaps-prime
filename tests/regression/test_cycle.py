@@ -638,32 +638,15 @@ def plot_run_summaries(
     )
 
 
-def _save_cycle_summary_csv(
-    run_dir: Path,
-    rows: list[dict[str, object]],
-) -> None:
-    """Save per-origin and all-space Pearson r summary."""
-    if not rows:
-        return
-
-    summary_frame = pd.DataFrame(
-        rows,
-        columns=[
-            "origin",
-            "species",
-            "hemisphere",
-            "mean_pearson_r",
-        ],
-    )
-
-    summary_frame.to_csv(
-        run_dir / "cycle_summary.csv",
-        index=False,
-    )
-
-    logger.info(
-        "Saved cycle summary CSV: %s",
-        run_dir / "cycle_summary.csv",
+def _summary_frame(rows: list[dict[str, object]]) -> pd.DataFrame:
+    """Build the canonical per-origin + all-space summary frame."""
+    return (
+        pd.DataFrame(
+            rows,
+            coluumns=["origin", "species", "hemisphere", "mean_pearson_r"],
+        )
+        .sort_values(["species", "origin", "hemisphere"], kind="stable")
+        .reset_index(drop=True)
     )
 
 
