@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 import nibabel as nib
@@ -14,6 +13,8 @@ from nibabel.gifti.gifti import GiftiDataArray
 from neuromaps_prime.analysis.images import load_data
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from neuromaps_prime.graph import NeuromapsGraph
 
 from neuromaps_prime.transforms import utils
@@ -192,12 +193,13 @@ class TestSurfaceTransformIntegration:
         assert sphere_in is not None
         assert sphere_project_to is not None
         assert sphere_unproject_from is not None
+        sphere_in_path = sphere_in.fetch()
         result = surface_sphere_project_unproject(
-            sphere_in=sphere_in.fetch(),
+            sphere_in=sphere_in_path,
             sphere_project_to=sphere_project_to.fetch(),
             sphere_unproject_from=sphere_unproject_from.fetch(),
             sphere_out=str(sphere_out),
         )
-        assert utils.get_vertex_count(
-            Path(sphere_in.fetch())
-        ) == utils.get_vertex_count(result.sphere_out)
+        assert utils.get_vertex_count(sphere_in_path) == utils.get_vertex_count(
+            result.sphere_out
+        )
