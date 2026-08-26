@@ -218,9 +218,7 @@ def test_cycle_roundtrip() -> None:
     graph = NeuromapsGraph()
     dir = Path(__file__).resolve().parent
 
-    previous, input_csv = load_latest_cycle_values(
-        dir=dir,
-    )
+    previous = load_latest_cycle_values(dir=dir)
 
     origins = sorted(graph.nodes)
     total_usable_paths = 0
@@ -244,18 +242,12 @@ def test_cycle_roundtrip() -> None:
         "for any configured origin/hemisphere."
     )
 
-    species_by_origin = _species_map(input_csv)
-
     frames = _read_cycle_frames(
         run_dir=OUTPUT_DIR,
         origins=origins,
     )
 
-    summary = _summarize(
-        frames=frames,
-        species_by_origin=species_by_origin,
-        previous=previous,
-    )
+    summary = _summarize(frames=frames, previous=previous)
 
     for hemisphere in HEMISPHERES:
         key = ("all", hemisphere)
