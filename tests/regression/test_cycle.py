@@ -206,6 +206,13 @@ def _summarize(
             f"  Difference: {difference:+.6f}\n"
         )
 
+    return _CycleSummary(
+        pearson_r=pearson_r,
+        origin_rows=origin_rows,
+        all_rows=all_rows,
+        summaries=summaries,
+    )
+
 
 def test_cycle_roundtrip() -> None:
     """Round-trip synthetic metrics through real transformation cycles."""
