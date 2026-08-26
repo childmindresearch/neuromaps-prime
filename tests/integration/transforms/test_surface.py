@@ -66,37 +66,14 @@ class TestSurfaceTransformIntegration:
         nib.save(GiftiImage(darrays=[darr]), output)
         return output
 
-    def test_single_hop_surface_transform(
-        self, graph: NeuromapsGraph, surface_metric: Path
+    @pytest.mark.parametrize(
+        "target", ["Yerkes19", "fsLR"], ids=["single_hop", "multi_hop"]
+    )
+    def test_surface_transform(
+        self, graph: NeuromapsGraph, surface_metric: Path, target: str
     ) -> None:
-        """Verify Workbench executes a real single-hop surface transformation."""
-        target = "Yerkes19"
+        """Verify Workbench executes a real surface transformations."""
         output = f"{self.ORIGIN}_to_{target}.func.gii"
-
-        result = graph.surface_to_surface_transformer(
-            transformer_type="metric",
-            input_file=surface_metric,
-            source_space=self.ORIGIN,
-            target_space="Yerkes19",
-            hemisphere=self.HEMISPHERE,
-            output_file_path=output,
-            add_edge=False,
-        )
-
-        assert result.path is not None
-        assert result.path.exists()
-
-        transformed = load_data(result.path).array
-        assert transformed.size > 0
-        assert np.all(np.isfinite(transformed))
-
-    def test_multihop_surface_transform(
-        self, graph: NeuromapsGraph, surface_metric: Path
-    ) -> None:
-        """Verify Workbench executes a real multi-hop surface transformation."""
-        target = "fsLR"
-        output = f"{self.ORIGIN}_to_{target}.func.gii"
-
         result = graph.surface_to_surface_transformer(
             transformer_type="metric",
             input_file=surface_metric,
@@ -106,10 +83,8 @@ class TestSurfaceTransformIntegration:
             output_file_path=output,
             add_edge=False,
         )
-
         assert result.path is not None
         assert result.path.exists()
-
         transformed = load_data(result.path).array
         assert transformed.size > 0
         assert np.all(np.isfinite(transformed))
