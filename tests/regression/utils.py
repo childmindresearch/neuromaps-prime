@@ -7,12 +7,10 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
-import nibabel as nib
 import numpy as np
 import pandas as pd
 from matplotlib_surface_plotting import plot_surf
-from nibabel.gifti import GiftiDataArray, GiftiImage
-from tests.cycle import Hemisphere, RoundtripResult, path_token
+from tests.cycle import Hemisphere, path_token, write_metric
 
 from neuromaps_prime.analysis.images import load_data
 
@@ -26,36 +24,6 @@ logger = logging.getLogger(__name__)
 # -------------------------------------------------------------------------
 # Metric generation
 # -------------------------------------------------------------------------
-
-
-def write_metric(
-    metric_file: Path,
-    values: np.ndarray,
-) -> Path:
-    """Write one scalar value per vertex as a GIFTI metric."""
-    image = GiftiImage(
-        darrays=[
-            GiftiDataArray(
-                np.asarray(
-                    values,
-                    dtype=np.float32,
-                ),
-                intent="NIFTI_INTENT_NONE",
-            )
-        ]
-    )
-
-    metric_file.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    nib.save(
-        image,
-        metric_file,
-    )
-
-    return metric_file
 
 
 def make_sphere(
@@ -331,36 +299,6 @@ def plot_cycle_cortical_surfaces(
                 space,
                 hemisphere,
             )
-
-
-# -------------------------------------------------------------------------
-# Transform manifests
-# -------------------------------------------------------------------------
-
-
-def write_transform_manifest(
-    roundtrip: RoundtripResult,
-    output_file: Path,
-) -> None:
-    """Write a per-path manifest describing the executed transformations."""
-    lines = ["source_space,target_space,area_resource,output_file"]
-
-    lines.extend(
-        ",".join(
-            [
-                hop.source,
-                hop.target,
-                hop.area_resource,
-                str(hop.output_file),
-            ]
-        )
-        for hop in roundtrip.hops
-    )
-
-    output_file.write_text(
-        "\n".join(lines) + "\n",
-        encoding="utf-8",
-    )
 
 
 def load_latest_cycle_values(

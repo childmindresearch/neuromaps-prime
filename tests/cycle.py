@@ -85,11 +85,6 @@ class RoundtripResult:
     final_metric: Path
     hops: tuple[HopResult, ...]
 
-    @property
-    def intermediates(self) -> tuple[tuple[str, Path], ...]:
-        """Return destination-space metric files for every hop."""
-        return tuple((hop.target, hop.output_file) for hop in self.hops)
-
 
 @dataclass(frozen=True)
 class CycleResult:
@@ -98,11 +93,6 @@ class CycleResult:
     path: tuple[str, ...]
     pearson_r: float
     max_abs_diff: float
-
-    @property
-    def label(self) -> str:
-        """Return a human-readable path label."""
-        return " -> ".join(self.path)
 
 
 # -------------------------------------------------------------------------
@@ -253,6 +243,37 @@ def find_return_paths(
 # -------------------------------------------------------------------------
 # Metrics
 # -------------------------------------------------------------------------
+
+
+def write_metric(
+    metric_file: str | Path,
+    values: np.ndarray,
+) -> Path:
+    """Write one scalar value per vertex as a GIFTI metric."""
+    image = nib.GiftiImage(
+        darrays=[
+            nib.gifti.GiftiDataArray(
+                np.asarray(
+                    values,
+                    dtype=np.float32,
+                ),
+                intent="NIFTI_INTENT_NONE",
+            )
+        ]
+    )
+
+    metric_file = Path(metric_file)
+    metric_file.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    nib.save(
+        image,
+        metric_file,
+    )
+
+    return metric_file
 
 
 def load_metric(

@@ -106,7 +106,6 @@ def relabel_gifti(
     Loads the parcellation file, zeroes out any background labels found in
     the label table, then remaps the remaining indices to consecutive
     integers starting at ``1``. Returns a new ``GiftiImage`` with an
-    integers starting at ``1``. Returns a new ``GiftiImage`` with an
     updated data array and label table.
 
     Args:

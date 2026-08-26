@@ -75,7 +75,6 @@ HEMISPHERES = (
 )
 
 MAX_CYCLE_LENGTH: Final = 4
-MAX_PATHS: Final[int | None] = None
 ALLOWED_REGRESSION: Final = 1e-4
 
 # -------------------------------------------------------------------------
@@ -311,36 +310,23 @@ def _plot_hemisphere_point(
     ax: plt.Axes,
     x_position: int,
     origin: str,
-    hemisphere: str,
+    hemisphere: Hemisphere,
     mean_r: float,
     marker: str,
     color: str,
 ) -> None:
     """Plot one hemisphere's cycle summary point."""
-    if hemisphere == "left":
-        ax.scatter(
-            x_position,
-            mean_r,
-            s=120,
-            marker=marker,
-            facecolors=color,
-            edgecolors=color,
-            linewidths=1.5,
-            label=f"{origin} (L)",
-            zorder=3,
-        )
-    else:
-        ax.scatter(
-            x_position,
-            mean_r,
-            s=120,
-            marker=marker,
-            facecolors="none",
-            edgecolors=color,
-            linewidths=2.0,
-            label=f"{origin} (R)",
-            zorder=3,
-        )
+    ax.scatter(
+        x_position,
+        mean_r,
+        s=120,
+        marker=marker,
+        facecolors=color,
+        edgecolors=color,
+        linewidths=1.5,
+        label=f"{origin} {hemisphere.upper()[0]}",
+        zorder=3,
+    )
 
 
 def _configure_species_summary_plot(
@@ -524,9 +510,6 @@ def _find_origins(
 
     for csv_file in csv_files:
         name = csv_file.name
-
-        if not name.startswith("cycle_"):
-            continue
 
         origin = name[len("cycle_") : -len("_left.csv")]
 
@@ -1206,7 +1189,7 @@ def _run_origin_hemisphere(
         origin,
         max_length=MAX_CYCLE_LENGTH,
         allow_revisits=True,
-        max_paths=MAX_PATHS,
+        max_paths=None,
     )
 
     logger.info(
