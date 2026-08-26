@@ -642,7 +642,7 @@ def _summary_frame(rows: list[dict[str, object]]) -> pd.DataFrame:
     return (
         pd.DataFrame(
             rows,
-            coluumns=["origin", "species", "hemisphere", "mean_pearson_r"],
+            columns=["origin", "species", "hemisphere", "mean_pearson_r"],
         )
         .sort_values(["species", "origin", "hemisphere"], kind="stable")
         .reset_index(drop=True)
