@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import nibabel.nifti1
+import nibabel
 import pytest
 
 from neuromaps_prime.transforms.volume import vol_to_vol
@@ -24,7 +24,7 @@ class TestVolumetricTransformIntegration:
         img = nibabel.nifti1.load(nii_file)
         return img.header.get_zooms()[:3]
 
-    def test_vol_to_vol_real_data(self, tmp_path: Path, graph: NeuromapsGraph) -> None:
+    def test_vol_to_vol_real_data(self, graph: NeuromapsGraph) -> None:
         """Integration test with real ANTs processing using actual file paths."""
         source_atlas = graph.fetch_volume_atlas(
             space="D99", resolution="250um", resource_type="T1w"
@@ -40,22 +40,18 @@ class TestVolumetricTransformIntegration:
         result = vol_to_vol(
             source=source_path,
             target=target_path,
-            out_fpath=str(tmp_path / "test.nii.gz"),
+            out_fpath="test.nii.gz",
             interp="linear",
         )
         assert result.exists()
         assert self._extract_res(result) == self._extract_res(target_path)
 
-    def test_vol_to_vol_transformer(
-        self, tmp_path: Path, graph: NeuromapsGraph
-    ) -> None:
+    def test_vol_to_vol_transformer(self, graph: NeuromapsGraph) -> None:
         """Test volume_to_volume transformer."""
         _source_space = "Yerkes19"
-        _resolution = ("250um",)
-        _resource_type = "T1w"
 
         input_file = graph.fetch_volume_atlas(
-            space=_source_space, resolution=_resolution, resource_type=_resource_type
+            space=_source_space, resolution="500um", resource_type="T1w"
         )
         assert input_file is not None
         input_fpath = input_file.fetch()
@@ -63,9 +59,9 @@ class TestVolumetricTransformIntegration:
             input_file=input_fpath,
             source_space=_source_space,
             target_space="NMT2Sym",
-            resolution=_resolution,
-            resource_type=_resource_type,
-            output_file_path=str(tmp_path / "test_output.nii"),
+            resolution="250um",
+            resource_type="composite",
+            output_file_path="test_output.nii.gz",
         )
         assert output.exists()
 
