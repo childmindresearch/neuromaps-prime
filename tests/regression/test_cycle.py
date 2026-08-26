@@ -206,6 +206,7 @@ def _summarize(
             f"  Difference: {difference:+.6f}\n"
         )
 
+
 def test_cycle_roundtrip() -> None:
     """Round-trip synthetic metrics through real transformation cycles."""
     graph = NeuromapsGraph()
@@ -566,8 +567,6 @@ def _plot_species_summary(
         fig=fig,
         output_file=output_file,
     )
-
-
 
 
 # -------------------------------------------------------------------------
