@@ -89,9 +89,7 @@ class TestSurfaceTransformIntegration:
         assert transformed.size > 0
         assert np.all(np.isfinite(transformed))
 
-    @pytest.mark.skip(reason="Tested as part of single / multi-hop surface transform")
-    def test_metric_resample(self) -> None:
-        """Test metric resampling."""
+    # Metric resample tested as part of surface transformation test
 
     def test_label_resample(self, graph: NeuromapsGraph, label_metric: Path) -> None:
         """Verify Workbench executes a real single-hop label resampling."""
