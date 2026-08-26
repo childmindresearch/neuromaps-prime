@@ -300,9 +300,7 @@ def plot_cycle_cortical_surfaces(
             )
 
 
-def load_latest_cycle_values(
-    dir: Path,
-) -> tuple[dict[tuple[str, str], float], Path]:
+def load_latest_cycle_values(dir: Path) -> dict[tuple[str, str], float]
     """Load the most recent valid cycle Pearson r CSV."""
     files = sorted(
         dir.glob("cycle_*.csv"),
@@ -346,7 +344,7 @@ def load_latest_cycle_values(
             file,
         )
 
-        return values, file
+        return values
 
     raise FileNotFoundError(
         f"No valid cycle pearson CSV found in {dir}.",
