@@ -17,9 +17,6 @@ if TYPE_CHECKING:
 
     from neuromaps_prime.graph import NeuromapsGraph
 
-from neuromaps_prime.transforms import utils
-from neuromaps_prime.transforms.surface import surface_sphere_project_unproject
-
 
 class TestSurfaceTransformIntegration:
     """Integration tests calling Workbench and using real data."""
@@ -115,44 +112,29 @@ class TestSurfaceTransformIntegration:
         # Label resampling preserves discrete (whole-number) labels.
         assert np.all(labels == np.rint(labels))
 
-    def test_surface_sphere_project_unproject(
-        self, tmp_path: Path, graph: NeuromapsGraph
-    ) -> None:
-        """Integration test of surface_sphere_project_unproject.
+    def test_computed_edge(self, graph: NeuromapsGraph, surface_metric: Path) -> None:
+        """Test fetching transform with computed edge; also tests project_unproject."""
+        target = "fsLR"
+        output = f"{self.ORIGIN}_to_{target}.func.gii"
 
-        Note: hard code source / targets to ensure method called.
-        """
-        sphere_in = graph.fetch_surface_to_surface_transform(
-            source="fsLR",
-            target="Yerkes19",
-            density="32k",
+        _ = graph.surface_to_surface_transformer(
+            transformer_type="metric",
+            input_file=surface_metric,
+            source_space=self.ORIGIN,
+            target_space=target,
             hemisphere=self.HEMISPHERE,
-            resource_type="sphere",
+            output_file_path=output,
         )
-        sphere_project_to = graph.fetch_surface_atlas(
-            space="Yerkes19",
-            density="32k",
-            hemisphere=self.HEMISPHERE,
-            resource_type="sphere",
+        assert graph.has_edge(self.ORIGIN, target, key=graph.surface_to_surface_key)
+
+        path = graph.find_path(
+            source=self.ORIGIN, target=target, edge_type=graph.surface_to_surface_key
         )
-        sphere_unproject_from = graph.fetch_surface_to_surface_transform(
-            source="Yerkes19",
-            target="D99",
-            density="32k",
-            hemisphere=self.HEMISPHERE,
-            resource_type="sphere",
+        assert len(path) == 2
+
+        source = "MEBRAINS"
+        shortest_path = graph.find_path(
+            source, target, edge_type=graph.surface_to_surface_key
         )
-        sphere_out = tmp_path / "out_sphere.surf.gii"
-        assert sphere_in is not None
-        assert sphere_project_to is not None
-        assert sphere_unproject_from is not None
-        sphere_in_path = sphere_in.fetch()
-        result = surface_sphere_project_unproject(
-            sphere_in=sphere_in_path,
-            sphere_project_to=sphere_project_to.fetch(),
-            sphere_unproject_from=sphere_unproject_from.fetch(),
-            sphere_out=str(sphere_out),
-        )
-        assert utils.get_vertex_count(sphere_in_path) == utils.get_vertex_count(
-            result.sphere_out
-        )
+        assert len(shortest_path) > 2
+        assert self.ORIGIN not in shortest_path

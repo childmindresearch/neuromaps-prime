@@ -16,6 +16,7 @@ from pydantic import BaseModel, PrivateAttr
 from neuromaps_prime.graph.cache import GraphCache  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.graph.metadata import format_reference
 from neuromaps_prime.graph.models import (
+    Edge,
     HopMetadataDict,
     SurfaceTransform,
     TransformMetadata,
@@ -537,6 +538,13 @@ class SurfaceTransformOps(BaseModel):
         )
         if add_edge:
             self.cache.add_surface_transform(new_transform)
+            self.utils.graph.add_edge(
+                new_transform.source_space,
+                new_transform.target_space,
+                key=self.surface_to_surface_key,
+                data=Edge(surface_transforms=[new_transform], volume_transforms=[]),
+                weight=new_transform.weight,
+            )
 
         return new_transform
 

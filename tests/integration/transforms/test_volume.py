@@ -46,6 +46,29 @@ class TestVolumetricTransformIntegration:
         assert result.exists()
         assert self._extract_res(result) == self._extract_res(target_path)
 
+    def test_vol_to_vol_transformer(
+        self, tmp_path: Path, graph: NeuromapsGraph
+    ) -> None:
+        """Test volume_to_volume transformer."""
+        _source_space = "Yerkes19"
+        _resolution = ("250um",)
+        _resource_type = "T1w"
+
+        input_file = graph.fetch_volume_atlas(
+            space=_source_space, resolution=_resolution, resource_type=_resource_type
+        )
+        assert input_file is not None
+        input_fpath = input_file.fetch()
+        output = graph.volume_to_volume_transformer(
+            input_file=input_fpath,
+            source_space=_source_space,
+            target_space="NMT2Sym",
+            resolution=_resolution,
+            resource_type=_resource_type,
+            output_file_path=str(tmp_path / "test_output.nii"),
+        )
+        assert output.exists()
+
 
 @pytest.mark.skip(reason="No volumetric data to project.")
 class TestVolumeToSurfaceProjectionIntegration:
