@@ -206,20 +206,14 @@ def _summarize(
             f"  Difference: {difference:+.6f}\n"
         )
 
-    return _CycleSummary(
-        pearson_r=pearson_r,
-        origin_rows=origin_rows,
-        all_rows=all_rows,
-        summaries=summaries,
-    )
-
-
 def test_cycle_roundtrip() -> None:
     """Round-trip synthetic metrics through real transformation cycles."""
     graph = NeuromapsGraph()
     dir = Path(__file__).resolve().parent
 
-    previous = load_latest_cycle_values(dir=dir)
+    previous = load_latest_cycle_values(
+        dir=dir,
+    )
 
     origins = sorted(graph.nodes)
     total_usable_paths = 0
@@ -243,12 +237,20 @@ def test_cycle_roundtrip() -> None:
         "for any configured origin/hemisphere."
     )
 
+    species_by_origin = {
+        origin: graph.get_node_data(origin).species for origin in origins
+    }
+
     frames = _read_cycle_frames(
         run_dir=OUTPUT_DIR,
         origins=origins,
     )
 
-    summary = _summarize(frames=frames, previous=previous)
+    summary = _summarize(
+        frames=frames,
+        species_by_origin=species_by_origin,
+        previous=previous,
+    )
 
     for hemisphere in HEMISPHERES:
         key = ("all", hemisphere)
@@ -264,20 +266,36 @@ def test_cycle_roundtrip() -> None:
             f"threshold={previous_r - 1e-4:.6f}"
         )
 
-    _save_cycle_summary_csv(
-        run_dir=OUTPUT_DIR,
-        rows=summary.origin_rows + summary.all_rows,
+    frame = _summary_frame(
+        summary.origin_rows + summary.all_rows,
+    )
+
+    baseline_path = dir / f"cycle_{datetime.now():%Y%m%d_%H%M}.csv"
+    summary_path = OUTPUT_DIR / "cycle_summary.csv"
+
+    frame.to_csv(
+        baseline_path,
+        index=False,
+    )
+
+    frame.to_csv(
+        summary_path,
+        index=False,
+    )
+
+    logger.info(
+        "Saved baseline CSV: %s",
+        baseline_path,
+    )
+
+    logger.info(
+        "Saved cycle summary CSV: %s",
+        summary_path,
     )
 
     _save_all_summary_txt(
         run_dir=OUTPUT_DIR,
         summaries=summary.summaries,
-    )
-
-    save_cycle(
-        dir=dir,
-        values=summary.pearson_r,
-        graph=graph,
     )
 
     plot_run_summaries(
