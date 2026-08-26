@@ -189,6 +189,7 @@ def _summarize(
         all_rows.append(
             {
                 "origin": "all",
+                "species": "all",
                 "hemisphere": hemisphere,
                 "mean_pearson_r": mean_r,
             }
