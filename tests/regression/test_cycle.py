@@ -26,6 +26,7 @@ Run with:
 """
 
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Final
@@ -75,7 +76,6 @@ HEMISPHERES = (
 )
 
 MAX_CYCLE_LENGTH: Final = 4
-ALLOWED_REGRESSION: Final = 1e-4
 
 # -------------------------------------------------------------------------
 # Main regression test
@@ -104,19 +104,22 @@ def _log_progress(
     )
 
 
-def _collect_cycle_values(
+@dataclass(frozen=True)
+class _CycleSummary:
+    """Aggregated cycle means and derived report rows."""
+
+    pearson_r: dict[tuple[str, str], float]
+    origin_rows: list[dict[str, object]]
+    all_rows: list[dict[str, object]]
+    summaries: list[str]
+
+
+def _read_cycle_frames(
     run_dir: Path,
     origins: list[str],
-) -> dict[tuple[str, str], float]:
-    """Collect mean Pearson r values for each origin and hemisphere.
-
-    The ``all`` value is calculated from every executable cycle across all
-    origin spaces, rather than from the mean of the per-origin means.
-    """
-    values: dict[tuple[str, str], float] = {}
-    frames_by_hemisphere: dict[str, list[pd.DataFrame]] = {
-        hemisphere: [] for hemisphere in HEMISPHERES
-    }
+) -> dict[tuple[str, str], pd.DataFrame]:
+    """Read each cycle CSV once, keyed by origin and hemisphere."""
+    frames: dict[tuple[str, str], pd.DataFrame] = {}
 
     for origin in origins:
         for hemisphere in HEMISPHERES:
@@ -130,26 +133,85 @@ def _collect_cycle_values(
             if frame.empty:
                 continue
 
-            values[(origin, hemisphere)] = float(
-                frame["pearson_r"].mean(),
-            )
+            frames[(origin, hemisphere)] = frame
 
-            frames_by_hemisphere[hemisphere].append(frame)
+    return frames
 
-    for hemisphere, frames in frames_by_hemisphere.items():
-        if not frames:
+
+def _summarize(
+    frames: dict[tuple[str, str], pd.DataFrame],
+    species_by_origin: dict[str, str],
+    previous: dict[tuple[str, str], float],
+) -> _CycleSummary:
+    """Calculate cycle means and derived summary rows."""
+    pearson_r: dict[tuple[str, str], float] = {}
+    origin_rows: list[dict[str, object]] = []
+    all_rows: list[dict[str, object]] = []
+    summaries: list[str] = []
+
+    by_hemi: dict[str, list[pd.DataFrame]] = {
+        hemisphere: [] for hemisphere in HEMISPHERES
+    }
+
+    for (origin, hemisphere), frame in sorted(frames.items()):
+        mean_r = float(frame["pearson_r"].mean())
+
+        pearson_r[(origin, hemisphere)] = mean_r
+
+        origin_rows.append(
+            {
+                "origin": origin,
+                "species": species_by_origin.get(
+                    origin,
+                    "all",
+                ),
+                "hemisphere": hemisphere,
+                "mean_pearson_r": mean_r,
+            }
+        )
+
+        by_hemi[hemisphere].append(frame)
+
+    for hemisphere in HEMISPHERES:
+        frames_for_hemisphere = by_hemi[hemisphere]
+
+        if not frames_for_hemisphere:
             continue
 
         combined = pd.concat(
-            frames,
+            frames_for_hemisphere,
             ignore_index=True,
         )
 
-        values[("all", hemisphere)] = float(
-            combined["pearson_r"].mean(),
+        mean_r = float(combined["pearson_r"].mean())
+
+        pearson_r[("all", hemisphere)] = mean_r
+
+        all_rows.append(
+            {
+                "origin": "all",
+                "hemisphere": hemisphere,
+                "mean_pearson_r": mean_r,
+            }
         )
 
-    return values
+        previous_r = previous[("all", hemisphere)]
+        difference = mean_r - previous_r
+
+        summaries.append(
+            f"All spaces ({hemisphere}):\n"
+            f"  Total executable cycles: {len(combined)}\n"
+            f"  Mean Pearson r: {mean_r:.6f}\n"
+            f"  Previous Pearson r: {previous_r:.6f}\n"
+            f"  Difference: {difference:+.6f}\n"
+        )
+
+    return _CycleSummary(
+        pearson_r=pearson_r,
+        origin_rows=origin_rows,
+        all_rows=all_rows,
+        summaries=summaries,
+    )
 
 
 def test_cycle_roundtrip() -> None:
@@ -157,7 +219,7 @@ def test_cycle_roundtrip() -> None:
     graph = NeuromapsGraph()
     dir = Path(__file__).resolve().parent
 
-    pearson_r, input_csv = load_latest_cycle_values(
+    previous, input_csv = load_latest_cycle_values(
         dir=dir,
     )
 
@@ -183,35 +245,60 @@ def test_cycle_roundtrip() -> None:
         "for any configured origin/hemisphere."
     )
 
-    current_values = _collect_cycle_values(
+    species_by_origin = _species_map(input_csv)
+
+    frames = _read_cycle_frames(
         run_dir=OUTPUT_DIR,
         origins=origins,
     )
 
-    current_all_values = _save_all_summary(
-        run_dir=OUTPUT_DIR,
-        pearson_r=pearson_r,
-        input_csv=input_csv,
+    summary = _summarize(
+        frames=frames,
+        species_by_origin=species_by_origin,
+        previous=previous,
     )
 
-    current_values.update(current_all_values)
+    for hemisphere in HEMISPHERES:
+        key = ("all", hemisphere)
+
+        current_r = summary.pearson_r[key]
+        previous_r = previous[key]
+
+        assert current_r >= previous_r - 1e-4, (
+            f"Average round-trip correlation regressed: "
+            f"origin=all, hemisphere={hemisphere}, "
+            f"mean r={current_r:.6f}, "
+            f"previous={previous_r:.6f}, "
+            f"threshold={previous_r - 1e-4:.6f}"
+        )
+
+    _save_cycle_summary_csv(
+        run_dir=OUTPUT_DIR,
+        rows=summary.origin_rows + summary.all_rows,
+    )
+
+    _save_all_summary_txt(
+        run_dir=OUTPUT_DIR,
+        summaries=summary.summaries,
+    )
 
     save_cycle(
         dir=dir,
-        values=current_values,
+        values=summary.pearson_r,
         graph=graph,
     )
 
     plot_run_summaries(
         run_dir=OUTPUT_DIR,
-        current_values=current_values,
-        pearson_r=pearson_r,
+        current_values=summary.pearson_r,
+        pearson_r=previous,
+        summary_rows=summary.origin_rows,
     )
 
     logger.info(
         "NEW PEARSON R VALUES: left=%.6f, right=%.6f",
-        current_values[("all", "left")],
-        current_values[("all", "right")],
+        summary.pearson_r[("all", "left")],
+        summary.pearson_r[("all", "right")],
     )
 
 
@@ -220,34 +307,29 @@ def test_cycle_roundtrip() -> None:
 # -------------------------------------------------------------------------
 
 
-def _load_cycle_summary_data(
-    run_dir: Path,
-    origins: list[str],
+def _summary_rows_to_frame(
+    summary_rows: list[dict[str, object]],
 ) -> pd.DataFrame:
-    """Load mean Pearson r values from per-origin cycle CSV files."""
-    rows: list[dict[str, object]] = []
+    """Convert per-origin summary rows to a plotting dataframe."""
+    if not summary_rows:
+        return pd.DataFrame(
+            columns=[
+                "origin",
+                "hemisphere",
+                "pearson_r",
+            ]
+        )
 
-    for origin in origins:
-        for hemisphere in HEMISPHERES:
-            csv_path = run_dir / f"cycle_{origin}_{hemisphere}.csv"
-
-            if not csv_path.exists():
-                continue
-
-            frame = pd.read_csv(csv_path)
-
-            if frame.empty:
-                continue
-
-            rows.append(
-                {
-                    "origin": origin,
-                    "hemisphere": hemisphere,
-                    "pearson_r": frame["pearson_r"].mean(),
-                }
-            )
-
-    return pd.DataFrame(rows)
+    return pd.DataFrame(
+        [
+            {
+                "origin": row["origin"],
+                "hemisphere": row["hemisphere"],
+                "pearson_r": row["mean_pearson_r"],
+            }
+            for row in summary_rows
+        ]
+    )
 
 
 def _get_plot_origins(
@@ -312,16 +394,18 @@ def _plot_hemisphere_point(
     origin: str,
     hemisphere: Hemisphere,
     mean_r: float,
-    marker: str,
+    marker: MarkerStyle,
     color: str,
 ) -> None:
     """Plot one hemisphere's cycle summary point."""
+    facecolor = color if hemisphere == "left" else "none"
+
     ax.scatter(
         x_position,
         mean_r,
         s=120,
         marker=marker,
-        facecolors=color,
+        facecolors=facecolor,
         edgecolors=color,
         linewidths=1.5,
         label=f"{origin} {hemisphere.upper()[0]}",
@@ -417,21 +501,11 @@ def _save_species_summary_plot(
 
 def _plot_species_summary(
     run_dir: Path,
+    frame: pd.DataFrame,
     origins: list[str],
     species: str | None = None,
 ) -> None:
     """Create a cycle round-trip summary plot."""
-    frame = _load_cycle_summary_data(
-        run_dir=run_dir,
-        origins=origins,
-    )
-
-    if frame.empty:
-        logger.warning(
-            "No cycle results found for summary plot.",
-        )
-        return
-
     unique_origins = _get_plot_origins(
         frame=frame,
         origins=origins,
@@ -493,64 +567,18 @@ def _plot_species_summary(
     )
 
 
-def _find_origins(
-    run_dir: Path,
-) -> list[str]:
-    """Find origin spaces represented by cycle CSV files."""
-    csv_files = sorted(
-        run_dir.glob("cycle_*_left.csv"),
+def _species_map(
+    input_csv: Path,
+) -> dict[str, str]:
+    """Return the species associated with each origin."""
+    frame = pd.read_csv(input_csv)
+
+    return (
+        frame[["origin", "species"]]
+        .drop_duplicates("origin")
+        .set_index("origin")["species"]
+        .to_dict()
     )
-
-    if not csv_files:
-        raise FileNotFoundError(
-            f"No cycle CSV files found in {run_dir}.",
-        )
-
-    origins = []
-
-    for csv_file in csv_files:
-        name = csv_file.name
-
-        origin = name[len("cycle_") : -len("_left.csv")]
-
-        if origin != "all":
-            origins.append(origin)
-
-    origins = sorted(set(origins))
-
-    if not origins:
-        raise ValueError(
-            f"No origin spaces found in {run_dir}.",
-        )
-
-    return origins
-
-
-def _load_species_origins(
-    file: Path,
-    origins: list[str],
-) -> dict[str, list[str]]:
-    """Group run origins by species using the cycle summary CSV."""
-    frame = pd.read_csv(file)
-
-    frame = frame[frame["origin"].isin(origins)][
-        ["origin", "species"]
-    ].drop_duplicates()
-
-    species_origins: dict[str, list[str]] = {}
-
-    for _, row in frame.iterrows():
-        species = str(row["species"])
-        origin = str(row["origin"])
-
-        species_origins.setdefault(
-            species,
-            [],
-        ).append(origin)
-
-    return {
-        species: sorted(origin_list) for species, origin_list in species_origins.items()
-    }
 
 
 # -------------------------------------------------------------------------
@@ -562,6 +590,7 @@ def plot_run_summaries(
     run_dir: str | Path,
     current_values: dict[tuple[str, str], float],
     pearson_r: dict[tuple[str, str], float],
+    summary_rows: list[dict[str, object]],
 ) -> None:
     """Create overall and species-specific cycle summary plots."""
     run_dir = Path(run_dir)
@@ -571,31 +600,46 @@ def plot_run_summaries(
             f"Run directory does not exist: {run_dir}",
         )
 
-    origins = _find_origins(run_dir)
+    origins = sorted(
+        {str(row["origin"]) for row in summary_rows if row["origin"] != "all"}
+    )
+
+    frame = _summary_rows_to_frame(summary_rows)
 
     # Overall summary.
     _plot_species_summary(
         run_dir=run_dir,
+        frame=frame,
         origins=origins,
     )
 
     # Species-specific summaries.
-    summary_file = run_dir / "cycle_summary.csv"
+    species_origins: dict[str, list[str]] = {}
 
-    if summary_file.exists():
-        species_origins = _load_species_origins(
-            file=summary_file,
-            origins=origins,
+    for row in summary_rows:
+        origin = str(row["origin"])
+
+        if origin == "all":
+            continue
+
+        species = str(row.get("species", "all"))
+
+        species_origins.setdefault(
+            species,
+            [],
+        ).append(origin)
+
+    for species, species_origins_list in sorted(
+        species_origins.items(),
+    ):
+        species_origins_list = sorted(set(species_origins_list))
+
+        _plot_species_summary(
+            run_dir=run_dir,
+            frame=frame,
+            origins=species_origins_list,
+            species=species,
         )
-
-        for species, species_origins_list in sorted(
-            species_origins.items(),
-        ):
-            _plot_species_summary(
-                run_dir=run_dir,
-                origins=species_origins_list,
-                species=species,
-            )
 
     # Current versus previous comparison.
     _plot_pearson_comparison(
@@ -603,131 +647,6 @@ def plot_run_summaries(
         current_values=current_values,
         pearson_r=pearson_r,
     )
-
-
-def _collect_summary_rows(
-    run_dir: Path,
-    input_csv: Path,
-) -> list[dict[str, object]]:
-    """Collect mean Pearson r for each origin and hemisphere."""
-    rows: list[dict[str, object]] = []
-
-    input_frame = pd.read_csv(input_csv)
-
-    species_by_origin = (
-        input_frame[["origin", "species"]]
-        .drop_duplicates("origin")
-        .set_index("origin")["species"]
-    )
-
-    for csv_file in sorted(run_dir.glob("cycle_*_*.csv")):
-        stem = csv_file.stem
-
-        if stem.startswith("cycle_all_"):
-            continue
-
-        parts = stem.removeprefix("cycle_").rsplit("_", 1)
-
-        if len(parts) != 2:
-            continue
-
-        origin, hemisphere = parts
-
-        if hemisphere not in HEMISPHERES:
-            continue
-
-        frame = pd.read_csv(csv_file)
-
-        if frame.empty:
-            continue
-
-        rows.append(
-            {
-                "origin": origin,
-                "species": species_by_origin[origin],
-                "hemisphere": hemisphere,
-                "mean_pearson_r": float(frame["pearson_r"].mean()),
-            }
-        )
-
-    return rows
-
-
-def _calculate_all_values(
-    run_dir: Path,
-    pearson_r: dict[tuple[str, str], float],
-) -> tuple[
-    dict[tuple[str, str], float],
-    list[dict[str, object]],
-    list[str],
-]:
-    """Calculate all-space Pearson r values and validate regression."""
-    current_all_values: dict[tuple[str, str], float] = {}
-    summary_rows: list[dict[str, object]] = []
-    summaries: list[str] = []
-
-    for hemisphere in HEMISPHERES:
-        frames: list[pd.DataFrame] = []
-
-        for csv_file in sorted(
-            run_dir.glob(f"cycle_*_{hemisphere}.csv"),
-        ):
-            if csv_file.stem.startswith("cycle_all_"):
-                continue
-
-            frame = pd.read_csv(csv_file)
-
-            if not frame.empty:
-                frames.append(frame)
-
-        if not frames:
-            logger.warning(
-                "No cycle results found for all-space %s summary.",
-                hemisphere,
-            )
-            continue
-
-        combined = pd.concat(
-            frames,
-            ignore_index=True,
-        )
-
-        mean_r = float(combined["pearson_r"].mean())
-        current_all_values[("all", hemisphere)] = mean_r
-
-        summary_rows.append(
-            {
-                "origin": "all",
-                "hemisphere": hemisphere,
-                "mean_pearson_r": mean_r,
-            }
-        )
-
-        previous_r = pearson_r[("all", hemisphere)]
-        difference = mean_r - previous_r
-        minimum_allowed = previous_r - ALLOWED_REGRESSION
-
-        summaries.append(
-            f"All spaces ({hemisphere}):\n"
-            f"  Total executable cycles: {len(combined)}\n"
-            f"  Mean Pearson r: {mean_r:.6f}\n"
-            f"  Previous Pearson r: {previous_r:.6f}\n"
-            f"  Difference: {difference:+.6f}\n"
-            f"  Minimum allowed Pearson r: {minimum_allowed:.6f}\n"
-        )
-
-        assert mean_r >= minimum_allowed, (
-            "Average round-trip correlation regressed for all spaces: "
-            f"hemisphere={hemisphere}, "
-            f"current r={mean_r:.6f}, "
-            f"previous pearson r={previous_r:.6f}, "
-            f"difference={difference:+.6f}, "
-            f"minimum allowed={minimum_allowed:.6f}, "
-            f"allowed regression={ALLOWED_REGRESSION:.6f}. "
-            f"Inspect outputs in {run_dir}."
-        )
-
-    return current_all_values, summary_rows, summaries
 
 
 def _save_cycle_summary_csv(
@@ -785,73 +704,6 @@ def _save_all_summary_txt(
         "Saved all-space summary: %s",
         output_file,
     )
-
-
-def _log_final_regression_status(
-    current_all_values: dict[tuple[str, str], float],
-    pearson_r: dict[tuple[str, str], float],
-) -> None:
-    """Log final all-space regression status."""
-    for hemisphere in HEMISPHERES:
-        key = ("all", hemisphere)
-
-        if key not in current_all_values:
-            continue
-
-        current_r = current_all_values[key]
-        previous_r = pearson_r[key]
-        difference = current_r - previous_r
-        minimum_allowed = previous_r - ALLOWED_REGRESSION
-
-        logger.info(
-            "FINAL ALL-SPACE MEAN — %s: current=%.6f, "
-            "previous=%.6f, difference=%+.6f, minimum allowed=%.6f",
-            hemisphere,
-            current_r,
-            previous_r,
-            difference,
-            minimum_allowed,
-        )
-
-
-def _save_all_summary(
-    run_dir: Path,
-    pearson_r: dict[tuple[str, str], float],
-    input_csv: Path,
-) -> dict[tuple[str, str], float]:
-    """Calculate and save cycle Pearson r summaries."""
-    summary_rows = _collect_summary_rows(
-        run_dir=run_dir,
-        input_csv=input_csv,
-    )
-
-    (
-        current_all_values,
-        all_summary_rows,
-        summaries,
-    ) = _calculate_all_values(
-        run_dir=run_dir,
-        pearson_r=pearson_r,
-    )
-
-    summary_rows.extend(all_summary_rows)
-
-    _save_cycle_summary_csv(
-        run_dir=run_dir,
-        rows=summary_rows,
-    )
-
-    _save_all_summary_txt(
-        run_dir=run_dir,
-        summaries=summaries,
-    )
-
-    _log_final_regression_status(
-        current_all_values=current_all_values,
-        pearson_r=pearson_r,
-    )
-
-    return current_all_values
 
 
 def _plot_pearson_comparison(
