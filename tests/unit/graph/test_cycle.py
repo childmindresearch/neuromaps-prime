@@ -510,8 +510,8 @@ def test_concatenated_transform_matches_direct_transform(
     )
 
     pearson_r, max_abs_diff = score_roundtrip(
-        direct,
-        concatenated,
+        direct.final_metric,
+        concatenated.final_metric,
     )
 
     assert pearson_r == pytest.approx(1.0, abs=1e-3)
