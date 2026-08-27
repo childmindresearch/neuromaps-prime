@@ -421,7 +421,7 @@ Yerkes19:
           - https://doi.org/10.1016/j.neuron.2021.08.024
           - https://balsa.wustl.edu/study/P2Nql
           notes:
-          - - Anatomical cortical hierarchy. Complements the intrinsic timescale (Manea et al.) map. 32k surface density.
+          - Anatomical cortical hierarchy. Complements the intrinsic timescale (Manea et al.) map. 32k surface density.
         DM_treeSize:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f48eac14e371e50e3a1c5
           references:
