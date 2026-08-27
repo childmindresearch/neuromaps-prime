@@ -411,7 +411,6 @@ Yerkes19:
           notes:
           - HTR1A (serotonin 1A receptor) gene expression map. Derived from the Allen Human Brain Atlas (AHBA), mapped from human to macaque. 
           - Represents a single gene only, included as a worked example of a cross-species expression annotation.
-          - 'source (human fsLR) file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f544d23eb0a53831f5fba'
 
   volumes:
     500um:
