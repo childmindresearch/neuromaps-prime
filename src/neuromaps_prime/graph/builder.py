@@ -39,8 +39,8 @@ class GraphBuilder(BaseModel):
     Attributes:
         cache: The :class:`GraphCache` instance that will be populated during
             build.
-        data_dir: Optional root directory prepended to all relative file paths
-            found in the YAML. When ``None``, paths are used as-is.
+        data_dir: Directory into which remote resources are downloaded
+            (resources are stored there under their storage-side names).
     """
 
     model_config = {"arbitrary_types_allowed": True}
@@ -223,7 +223,6 @@ class GraphBuilder(BaseModel):
                 if hemi in ("notes", "references"):
                     continue
                 name = f"{prefix}_{density}_{hemi}_{annot}"
-                ext = "func.gii" if "PC" in annot else "label.gii"
                 annotations.append(
                     SurfaceAnnotation(
                         name=name,
@@ -232,7 +231,7 @@ class GraphBuilder(BaseModel):
                         density=density,
                         hemisphere=hemi,
                         uri=path,
-                        file_path=self.data_dir / f"{name}.{ext}",
+                        data_dir=self.data_dir,
                         references=references,
                         notes=notes,
                     )
@@ -272,9 +271,9 @@ class GraphBuilder(BaseModel):
         extra = {"provider": provider} if cls is SurfaceTransform else {}
         return [
             cls(
-                name=(name := f"{prefix}_{density}_{hemi}_{surf_type}"),
+                name=f"{prefix}_{density}_{hemi}_{surf_type}",
                 uri=path,
-                file_path=self.data_dir / f"{name}.surf.gii",
+                data_dir=self.data_dir,
                 density=density,
                 hemisphere=hemi,  # type: ignore[arg-type]
                 resource_type=surf_type,
@@ -404,7 +403,7 @@ class GraphBuilder(BaseModel):
                                     label=annot_key,
                                     resolution=res,
                                     uri=annot_dict.get("uri"),
-                                    file_path=self.data_dir / f"{name}.nii.gz",
+                                    data_dir=self.data_dir,
                                     references=annot_dict.get("references"),
                                     notes=annot_dict.get("notes"),
                                 )
@@ -417,7 +416,7 @@ class GraphBuilder(BaseModel):
                         cls(
                             name=name,
                             uri=vol_value,
-                            file_path=self.data_dir / f"{name}.nii.gz",
+                            data_dir=self.data_dir,
                             resolution=res,
                             resource_type=vol_type,
                             references=transform_refs,

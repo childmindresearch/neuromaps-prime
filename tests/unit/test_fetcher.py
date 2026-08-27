@@ -2,16 +2,47 @@
 
 from __future__ import annotations
 
+import hashlib
+import logging
 from typing import TYPE_CHECKING
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from neuromaps_prime import remote
 from neuromaps_prime.fetcher import download_and_validate, id_storage
+from neuromaps_prime.remote.github import GitHubFileMeta
+from neuromaps_prime.remote.osf import OSFFileMeta
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+
+def _osf_meta(payload: bytes, name: str = "file.surf.gii") -> OSFFileMeta:
+    """Build an :class:`OSFFileMeta` whose MD5 matches ``payload``."""
+    return OSFFileMeta(
+        name=name,
+        size=len(payload),
+        extra={
+            "hashes": {"md5": hashlib.md5(payload, usedforsecurity=False).hexdigest()}
+        },
+    )
+
+
+def _github_meta(payload: bytes, name: str = "file.surf.gii") -> GitHubFileMeta:
+    """Build a :class:`GitHubFileMeta` whose blob SHA matches ``payload``."""
+    header = f"blob {len(payload)}\0".encode()
+    sha = hashlib.sha1(header + payload, usedforsecurity=False).hexdigest()
+    return GitHubFileMeta(
+        name=name, size=len(payload), sha=sha, download_url=f"https://raw/{name}"
+    )
+
+
+def _fake_stream(payload: bytes) -> MagicMock:
+    """Build a fake ``requests.get`` serving ``payload`` for any url."""
+    resp = MagicMock()
+    resp.iter_content.return_value = [payload]
+    return MagicMock(return_value=resp)
 
 
 class TestIDStorage:
@@ -21,7 +52,6 @@ class TestIDStorage:
         ("storage", "expected"),
         [
             ("https://osf.io/project", "osf"),
-            ("https://github.com/owner", "github"),
             (
                 "https://raw.githubusercontent.com/owner/repo/refs/tags/v1.0/file.txt",
                 "github",
@@ -47,13 +77,12 @@ class TestDownloadAndValidate:
     def test_unknown_uri_raises(self, tmp_path: Path) -> None:
         """Test unidentifiable uri raises ValueError."""
         with pytest.raises(ValueError, match="Could not identify storage"):
-            download_and_validate("https://google.com", tmp_path / "invalid.txt")
+            download_and_validate("https://google.com", tmp_path)
 
     @pytest.mark.parametrize(
         ("storage_cls", "mock_uri"),
         [
             (remote.OSFStorage, "https://files.osf.io/v1/resources/abcde"),
-            (remote.GitHubStorage, "https://github.com/owner/repo/blob/v1.0/file.txt"),
             (
                 remote.GitHubStorage,
                 "https://raw.githubusercontent.com/owner/repo/refs/tags/v1.0/file.txt",
@@ -63,8 +92,119 @@ class TestDownloadAndValidate:
     def test_valid_calls_download(
         self, storage_cls: object, mock_uri: str, tmp_path: Path
     ) -> None:
-        """Test valid download."""
-        dest = tmp_path / "out.surf.gii"
+        """Test valid uri dispatches to the storage backend."""
         with patch.object(storage_cls, "download") as mock_download:
-            download_and_validate(mock_uri, dest)
-        mock_download.assert_called_once_with(mock_uri, dest)
+            download_and_validate(mock_uri, tmp_path)
+        mock_download.assert_called_once_with(mock_uri, tmp_path)
+
+    def test_returns_stored_path(self, tmp_path: Path) -> None:
+        """Test the stored path returned by the backend is passed through."""
+        stored = tmp_path / "file.surf.gii"
+        with patch.object(remote.OSFStorage, "download", return_value=stored):
+            result = download_and_validate(
+                "https://files.osf.io/v1/resources/abcde", tmp_path
+            )
+        assert result == stored
+
+
+class TestOSFDownload:
+    """Test suite for OSFStorage.download naming and cache behavior."""
+
+    def test_stores_under_storage_name(self, tmp_path: Path) -> None:
+        """File lands in dest_dir under its exact storage-side name."""
+        payload = b"surface data"
+        with (
+            patch.object(
+                remote.OSFStorage, "get_meta", return_value=_osf_meta(payload)
+            ),
+            patch("neuromaps_prime.remote.osf.requests.get", _fake_stream(payload)),
+        ):
+            result = remote.OSFStorage().download("https://u1", tmp_path)
+        assert result == tmp_path / "file.surf.gii"
+        assert result.read_bytes() == payload
+
+    def test_cache_hit_reuses_verified_file(self, tmp_path: Path) -> None:
+        """A verifying existing file is returned without downloading."""
+        payload = b"surface data"
+        stored = tmp_path / "file.surf.gii"
+        stored.write_bytes(payload)
+        with (
+            patch.object(
+                remote.OSFStorage, "get_meta", return_value=_osf_meta(payload)
+            ),
+            patch("neuromaps_prime.remote.osf.requests.get") as mock_get,
+        ):
+            result = remote.OSFStorage().download("https://u1", tmp_path)
+        assert result == stored
+        mock_get.assert_not_called()
+
+    def test_mismatch_warns_and_overwrites(
+        self, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """A non-matching existing file is overwritten, with a warning."""
+        old, new = b"stale bytes", b"fresh bytes"
+        stored = tmp_path / "file.surf.gii"
+        stored.write_bytes(old)
+        with (
+            caplog.at_level(logging.WARNING),
+            patch.object(remote.OSFStorage, "get_meta", return_value=_osf_meta(new)),
+            patch("neuromaps_prime.remote.osf.requests.get", _fake_stream(new)),
+        ):
+            result = remote.OSFStorage().download("https://u1", tmp_path)
+        assert result == stored
+        assert stored.read_bytes() == new
+        assert any(
+            "already exists and is being overwritten" in record.getMessage()
+            for record in caplog.records
+        )
+
+
+class TestGitHubDownload:
+    """Test suite for GitHubStorage.download naming and cache behavior."""
+
+    def test_stores_under_storage_name(self, tmp_path: Path) -> None:
+        """File lands in dest_dir under its exact storage-side name."""
+        payload = b"surface data"
+        meta = _github_meta(payload)
+        with (
+            patch.object(remote.GitHubStorage, "get_meta", return_value=meta),
+            patch("neuromaps_prime.remote.github.requests.get", _fake_stream(payload)),
+        ):
+            result = remote.GitHubStorage().download("https://u1", tmp_path)
+        assert result == tmp_path / "file.surf.gii"
+        assert result.read_bytes() == payload
+
+    def test_cache_hit_reuses_verified_file(self, tmp_path: Path) -> None:
+        """A verifying existing file is returned without downloading."""
+        payload = b"surface data"
+        meta = _github_meta(payload)
+        stored = tmp_path / "file.surf.gii"
+        stored.write_bytes(payload)
+        with (
+            patch.object(remote.GitHubStorage, "get_meta", return_value=meta),
+            patch("neuromaps_prime.remote.github.requests.get") as mock_get,
+        ):
+            result = remote.GitHubStorage().download("https://u1", tmp_path)
+        assert result == stored
+        mock_get.assert_not_called()
+
+    def test_mismatch_warns_and_overwrites(
+        self, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """A non-matching existing file is overwritten, with a warning."""
+        old, new = b"stale bytes", b"fresh bytes"
+        meta = _github_meta(new)
+        stored = tmp_path / "file.surf.gii"
+        stored.write_bytes(old)
+        with (
+            caplog.at_level(logging.WARNING),
+            patch.object(remote.GitHubStorage, "get_meta", return_value=meta),
+            patch("neuromaps_prime.remote.github.requests.get", _fake_stream(new)),
+        ):
+            result = remote.GitHubStorage().download("https://u1", tmp_path)
+        assert result == stored
+        assert stored.read_bytes() == new
+        assert any(
+            "already exists and is being overwritten" in record.getMessage()
+            for record in caplog.records
+        )

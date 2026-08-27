@@ -87,9 +87,8 @@ class TestOSFStorage:
         content = b"test content"
         mock_download = MagicMock(iter_content=MagicMock(return_value=[content]))
         mock_get.side_effect = [mock_meta_response, mock_download]
-        dest = tmp_path / "test.txt"
-        OSFStorage().download("https://files.osf.io/v1/resources/abcde", dest)
-        assert dest.read_bytes() == content
+        OSFStorage().download("https://files.osf.io/v1/resources/abcde", tmp_path)
+        assert (tmp_path / "test.txt").read_bytes() == content
 
     @patch("neuromaps_prime.remote.osf.requests.get")
     def test_download_checksum_mismatch(
@@ -101,9 +100,7 @@ class TestOSFStorage:
         )
         mock_get.side_effect = [mock_meta_response, mock_download]
         with pytest.raises(ValueError, match="Checksum mismatch"):
-            OSFStorage().download(
-                "https://files.osf.io/v1/resources/abcde", tmp_path / "test.txt"
-            )
+            OSFStorage().download("https://files.osf.io/v1/resources/abcde", tmp_path)
 
     def test_default_chunk_size(self) -> None:
         """Test chunk_size defaults to 8192."""

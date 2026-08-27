@@ -8,7 +8,6 @@ from neuromaps_prime import remote
 _STORAGES = {"osf": remote.OSFStorage(), "github": remote.GitHubStorage()}
 _HOST_MAP = {
     "osf.io": _STORAGES["osf"],
-    "github.com": _STORAGES["github"],
     "raw.githubusercontent.com": _STORAGES["github"],
 }
 
@@ -32,12 +31,17 @@ def id_storage(uri: str) -> str | None:
     return None
 
 
-def download_and_validate(uri: str, dest: str | Path) -> None:
+def download_and_validate(uri: str, dest_dir: str | Path) -> Path:
     """Download and validate the file.
+
+    The file is stored in ``dest_dir`` under its storage-side name.
 
     Args:
         uri: Remote URI to fetch data from
-        dest: Output file path name
+        dest_dir: Directory to download the file into
+
+    Returns:
+        Path to the downloaded (or cached) file.
 
     Raises:
         ValueError: if storage cannot be identified from provided URI
@@ -52,4 +56,4 @@ def download_and_validate(uri: str, dest: str | Path) -> None:
 
     if storage is None:
         raise ValueError(f"Could not identify storage from uri: {uri}")
-    storage.download(uri, Path(dest))  # type: ignore[attr-defined]
+    return storage.download(uri, Path(dest_dir))  # type: ignore[attr-defined]

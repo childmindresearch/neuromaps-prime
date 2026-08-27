@@ -1,11 +1,14 @@
 """Model for fetching from GitHub repos (tag/branch/commit)."""
 
 import hashlib
+import logging
 import re
 from pathlib import Path
 
 import requests
 from pydantic import BaseModel
+
+_logger = logging.getLogger(__name__)
 
 
 class GitHubFileMeta(BaseModel):
@@ -46,14 +49,29 @@ class GitHubStorage(BaseModel):
         r.raise_for_status()
         return GitHubFileMeta(**r.json())
 
-    def download(self, url: str, dest: Path) -> None:
-        """Download remote GitHub file (given blob URL)."""
+    def download(self, url: str, dest_dir: Path) -> Path:
+        """Download the file into ``dest_dir`` and return its local path.
+
+        The file is stored under its storage-side name. An existing file is
+        reused only if it verifies against the blob SHA; otherwise a warning
+        is logged and the file is overwritten.
+        """
         meta = self.get_meta(url)
-        r = requests.get(meta.download_url, stream=True, timeout=90)
+        target = dest_dir / meta.name
+        if target.exists():
+            if self._verify(target, meta):
+                return target
+            _logger.warning("%s already exists and is being overwritten.", target)
+        self._download_to(meta.download_url, target, meta)
+        return target
+
+    def _download_to(self, url: str, target: Path, meta: GitHubFileMeta) -> None:
+        """Stream the file to ``target`` and verify its blob SHA."""
+        r = requests.get(url, stream=True, timeout=90)
         r.raise_for_status()
 
         content = bytearray()
-        with dest.open("wb") as f:
+        with target.open("wb") as f:
             for chunk in r.iter_content(self.chunk_size):
                 f.write(chunk)
                 content.extend(chunk)
@@ -64,3 +82,13 @@ class GitHubStorage(BaseModel):
         ).hexdigest()
         if actual != meta.sha:
             raise ValueError(f"Checksum mismatch: {actual} != {meta.sha}")
+
+    @staticmethod
+    def _verify(path: Path, meta: GitHubFileMeta) -> bool:
+        """Check that ``path`` matches the storage-side size and blob SHA."""
+        if path.stat().st_size != meta.size:
+            return False
+        content = path.read_bytes()
+        header = f"blob {len(content)}\0".encode()
+        actual = hashlib.sha1(header + content, usedforsecurity=False).hexdigest()
+        return actual == meta.sha

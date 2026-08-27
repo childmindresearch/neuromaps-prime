@@ -148,18 +148,53 @@ class TestResources:
         self, mock_download: MagicMock, tmp_path: Path
     ) -> None:
         """Test fetch raises if download doesn't produce file."""
-        dest = tmp_path / "file.txt"
         obj = models.SurfaceAnnotation(
             name="test",
-            file_path=dest,
+            uri="https://files.osf.io/v1/resources/abcde",
+            data_dir=tmp_path,
+            space="Yerkes19",
+            density="32k",
+            hemisphere="left",
+            label="myelin",
+        )
+        mock_download.return_value = tmp_path / "missing.txt"
+        with pytest.raises(FileNotFoundError, match="does not exist"):
+            obj.fetch()
+
+    @patch("neuromaps_prime.graph.models.download_and_validate")
+    def test_fetch_stores_download_result(
+        self, mock_download: MagicMock, tmp_path: Path
+    ) -> None:
+        """Test fetch repoints file_path at the stored file and caches it."""
+        stored = tmp_path / "src-CIVETNMT_den-41k_hemi-L_sphere.surf.gii"
+        stored.touch()
+        mock_download.return_value = stored
+        obj = models.SurfaceAnnotation(
+            name="test",
+            uri="https://files.osf.io/v1/resources/abcde",
+            data_dir=tmp_path,
+            space="Yerkes19",
+            density="32k",
+            hemisphere="left",
+            label="myelin",
+        )
+        assert obj.file_path is None
+        assert obj.fetch() == stored
+        assert obj.file_path == stored
+        obj.fetch()  # already resolved — must not re-download
+        mock_download.assert_called_once()
+
+    def test_fetch_remote_without_data_dir_raises(self) -> None:
+        """Test remote fetch without a data_dir raises ValueError."""
+        obj = models.SurfaceAnnotation(
+            name="test",
             uri="https://files.osf.io/v1/resources/abcde",
             space="Yerkes19",
             density="32k",
             hemisphere="left",
             label="myelin",
         )
-        mock_download.return_value = None
-        with pytest.raises(FileNotFoundError, match="does not exist"):
+        with pytest.raises(ValueError, match="no data_dir"):
             obj.fetch()
 
     def test_description_optional(self, tmp_file: Path) -> None:
