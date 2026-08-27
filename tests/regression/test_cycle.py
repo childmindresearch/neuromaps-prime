@@ -55,38 +55,45 @@ HEMISPHERES = ("left", "right")
 MAX_CYCLE_LENGTH: Final = 4
 
 
-def _resolve_output_dir(tmp_path: Path) -> Path:
+def _resolve_output_dir(base_dir: Path) -> Path:
     """Resolve and create the directory for cycle regression outputs.
 
-    By default, artifacts are written to ``tmp_path / "cycle_outputs"`` so
+    By default, artifacts are written to ``base_dir / "cycle_outputs"`` so
     they follow pytest's temporary-directory policy. Set the
     ``NEUROMAPS_CYCLE_OUTPUT_DIR`` environment variable to store them
     elsewhere instead.
     """
     return resolve_artifact_dir(
-        tmp_path / "cycle_outputs", env_var="NEUROMAPS_CYCLE_OUTPUT_DIR"
+        base_dir / "cycle_outputs", env_var="NEUROMAPS_CYCLE_OUTPUT_DIR"
     )
 
 
-@pytest.fixture
-def graph() -> NeuromapsGraph:
-    """Return the Neuromaps-PRIME transformation graph."""
-    return NeuromapsGraph()
-
-
 # -------------------------------------------------------------------------
-# Main regression test
+# Result containers
 # -------------------------------------------------------------------------
 
 
 @dataclass(frozen=True)
-class _CycleSummary:
+class CycleSummary:
     """Aggregated cycle means and derived report rows."""
 
     pearson_r: dict[tuple[str, str], float]
     origin_rows: list[dict[str, object]]
     all_rows: list[dict[str, object]]
     summaries: list[str]
+
+
+@dataclass(frozen=True)
+class CycleRunResult:
+    """One executed cycle run: artifact location and per-path results.
+
+    ``frames`` maps each (origin, hemisphere) that produced results to the
+    per-path metrics read back from the run's CSVs; the summary CSV, TXT,
+    and plots are written to ``output_dir`` as part of the run.
+    """
+
+    output_dir: Path
+    frames: dict[tuple[str, str], pd.DataFrame]
 
 
 def _read_cycle_frames(
@@ -114,7 +121,7 @@ def _read_cycle_frames(
 
 def _summarize(
     frames: dict[tuple[str, str], pd.DataFrame], species_by_origin: dict[str, str]
-) -> _CycleSummary:
+) -> CycleSummary:
     """Calculate cycle means and derived summary rows."""
     pearson_r: dict[tuple[str, str], float] = {}
     origin_rows: list[dict[str, object]] = []
@@ -168,71 +175,11 @@ def _summarize(
             f"  Mean Pearson r: {mean_r:.6f}\n"
         )
 
-    return _CycleSummary(
+    return CycleSummary(
         pearson_r=pearson_r,
         origin_rows=origin_rows,
         all_rows=all_rows,
         summaries=summaries,
-    )
-
-
-def test_cycle_roundtrip(graph: NeuromapsGraph, tmp_path: Path) -> None:
-    """Round-trip synthetic metrics through real transformation cycles."""
-    dir = Path(__file__).resolve().parent
-
-    output_dir = _resolve_output_dir(tmp_path)
-
-    logger.info("Cycle outputs will be written to: %s", output_dir)
-
-    origins = sorted(graph.nodes)
-    total_usable_paths = 0
-
-    for origin in origins:
-        for hemisphere in HEMISPHERES:
-            logger.info("\n=== CYCLE ROUND-TRIP TEST: %s (%s) ===", origin, hemisphere)
-
-            total_usable_paths += _run_origin_hemisphere(
-                graph=graph, origin=origin, hemisphere=hemisphere, output_dir=output_dir
-            )
-
-    assert total_usable_paths > 0, (
-        "No executable surface transformation cycles were found "
-        "for any configured origin/hemisphere."
-    )
-
-    species_by_origin = {
-        origin: graph.get_node_data(origin).species for origin in origins
-    }
-
-    frames = _read_cycle_frames(run_dir=output_dir, origins=origins)
-
-    summary = _summarize(frames=frames, species_by_origin=species_by_origin)
-
-    frame = _summary_frame(summary.origin_rows + summary.all_rows)
-
-    baseline_path = dir / f"cycle_{datetime.now():%Y%m%d_%H%M}.csv"
-    summary_path = output_dir / "cycle_summary.csv"
-
-    frame.to_csv(baseline_path, index=False)
-
-    frame.to_csv(summary_path, index=False)
-
-    logger.info("Saved baseline CSV: %s", baseline_path)
-
-    logger.info("Saved cycle summary CSV: %s", summary_path)
-
-    _save_all_summary_txt(run_dir=output_dir, summaries=summary.summaries)
-
-    plot_run_summaries(
-        run_dir=output_dir,
-        current_values=summary.pearson_r,
-        summary_rows=summary.origin_rows,
-    )
-
-    logger.info(
-        "NEW PEARSON R VALUES: left=%.6f, right=%.6f",
-        summary.pearson_r[("all", "left")],
-        summary.pearson_r[("all", "right")],
     )
 
 
@@ -409,11 +356,6 @@ def _plot_species_summary(
     output_file = _get_species_summary_output(run_dir=run_dir, species=species)
 
     _save_species_summary_plot(fig=fig, output_file=output_file)
-
-
-# -------------------------------------------------------------------------
-# Plot
-# -------------------------------------------------------------------------
 
 
 def plot_run_summaries(
@@ -695,3 +637,110 @@ def _run_origin_hemisphere(
     return _save_cycle_results(
         origin=origin, hemisphere=hemisphere, rows=rows, output_dir=output_dir
     )
+
+
+# -------------------------------------------------------------------------
+# Test suite
+# -------------------------------------------------------------------------
+
+
+class TestCycleRoundtrip:
+    """Round-trip cycle regression on the real Neuromaps-PRIME graph.
+
+    One class-scoped run propagates deterministic seed metrics through every
+    executable surface-transformation cycle (all origins, both hemispheres)
+    and records this run's artifacts. The suite is a pure producer: it reads
+    no previous baseline and makes no cross-run comparison — those are CI
+    concerns.
+
+    Outputs land under the pytest temporary directory
+    (``<base>/cycle_outputs``) unless the ``NEUROMAPS_CYCLE_OUTPUT_DIR``
+    environment variable is set; the resolved location is logged at run
+    start. Point the variable at a persistent location to accumulate run
+    summaries across runs.
+    """
+
+    @pytest.fixture(scope="class")
+    def graph(self) -> NeuromapsGraph:
+        """Return the Neuromaps-PRIME transformation graph."""
+        return NeuromapsGraph()
+
+    @pytest.fixture(scope="class")
+    def cycle_run(
+        self, graph: NeuromapsGraph, tmp_path_factory: pytest.TempPathFactory
+    ) -> CycleRunResult:
+        """Execute every cycle once and record this run's artifacts."""
+        output_dir = _resolve_output_dir(tmp_path_factory.getbasetemp())
+
+        logger.info("Cycle outputs will be written to: %s", output_dir)
+
+        origins = sorted(graph.nodes)
+
+        for origin in origins:
+            for hemisphere in HEMISPHERES:
+                logger.info(
+                    "\n=== CYCLE ROUND-TRIP RUN: %s (%s) ===", origin, hemisphere
+                )
+
+                _run_origin_hemisphere(
+                    graph=graph,
+                    origin=origin,
+                    hemisphere=hemisphere,
+                    output_dir=output_dir,
+                )
+
+        species_by_origin = {
+            origin: graph.get_node_data(origin).species for origin in origins
+        }
+
+        frames = _read_cycle_frames(run_dir=output_dir, origins=origins)
+
+        summary = _summarize(frames=frames, species_by_origin=species_by_origin)
+
+        frame = _summary_frame(summary.origin_rows + summary.all_rows)
+
+        summary_name = f"cycle_{datetime.now():%Y%m%d_%H%M%S}.csv"
+        summary_path = output_dir / summary_name
+
+        frame.to_csv(summary_path, index=False)
+
+        logger.info("Saved run summary CSV: %s", summary_path)
+
+        _save_all_summary_txt(run_dir=output_dir, summaries=summary.summaries)
+
+        plot_run_summaries(
+            run_dir=output_dir,
+            current_values=summary.pearson_r,
+            summary_rows=summary.origin_rows,
+        )
+
+        logger.info(
+            "NEW PEARSON R VALUES: left=%.6f, right=%.6f",
+            summary.pearson_r.get(("all", "left"), float("nan")),
+            summary.pearson_r.get(("all", "right"), float("nan")),
+        )
+
+        return CycleRunResult(output_dir=output_dir, frames=frames)
+
+    def test_cycles_executed(self, cycle_run: CycleRunResult) -> None:
+        """At least one transformation cycle executed end-to-end."""
+        executed = sum(len(frame) for frame in cycle_run.frames.values())
+
+        assert executed > 0, (
+            "No executable surface transformation cycles were found for any "
+            "origin/hemisphere."
+        )
+
+    def test_cycle_metrics_well_formed(self, cycle_run: CycleRunResult) -> None:
+        """Every reported cycle has a finite, in-range correlation."""
+        for (origin, hemisphere), frame in cycle_run.frames.items():
+            assert not frame.empty
+
+            assert frame["pearson_r"].between(-1.0, 1.0).all(), (
+                f"Pearson r out of [-1, 1] for {origin} ({hemisphere})."
+            )
+
+            assert np.isfinite(frame["max_abs_diff"]).all(), (
+                f"Non-finite max_abs_diff for {origin} ({hemisphere}) — "
+                "degenerate metric (e.g. all-NaN round-trip)."
+            )

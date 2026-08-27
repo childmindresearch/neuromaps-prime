@@ -39,10 +39,7 @@ def make_sphere(
     if sphere is None:
         raise ValueError(f"No sphere atlas for {origin} at {density} ({hemisphere}).")
 
-    if not sphere.file_path.exists():
-        sphere.fetch()
-
-    data = load_data(sphere.file_path)
+    data = load_data(sphere.fetch())
     coords = data.array[0]
 
     values = np.prod(coords, axis=1)
@@ -71,10 +68,7 @@ def find_matching_surface(
 
     for atlas in atlases:
         try:
-            if not atlas.file_path.exists():
-                atlas.fetch()
-
-            data = load_data(atlas.file_path)
+            data = load_data(atlas.fetch())
             coords = data.array[0]
         except (ValueError, FileNotFoundError, OSError) as exc:
             logger.warning(
