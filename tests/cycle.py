@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import os
 import tempfile
 from dataclasses import dataclass
 from itertools import pairwise
@@ -320,19 +321,34 @@ def _execute_hop(
 # -------------------------------------------------------------------------
 
 
-def _resolve_workdir(workdir: str | Path | None) -> Path:
-    """Resolve and create the artifact directory for cycle outputs.
+# Default artifact location outside of pytest (per-path cycle outputs).
+DEFAULT_WORKDIR = Path(tempfile.gettempdir()) / "neuromaps_prime" / "cycles"
 
-    Callers running under pytest should pass the test's ``tmp_path`` so
-    artifacts follow pytest's temporary-file retention policy. Otherwise a
-    shared directory under the system temporary area is used.
+
+def resolve_artifact_dir(
+    default: str | Path,
+    *,
+    explicit: str | Path | None = None,
+    env_var: str | None = None,
+) -> Path:
+    """Resolve and create an artifact directory.
+
+    Resolution order: ``explicit`` > ``$env_var`` (when set and non-empty) >
+    ``default``. Callers running under pytest should base the resolution on
+    the test's ``tmp_path`` so artifacts follow pytest's temporary-file
+    retention policy.
     """
-    resolved = (
-        Path(workdir)
-        if workdir is not None
-        else Path(tempfile.gettempdir()) / "neuromaps_prime" / "cycles"
-    )
+    override = os.environ.get(env_var) if env_var is not None else None
+
+    if explicit is not None:
+        resolved = Path(explicit)
+    elif override:
+        resolved = Path(override)
+    else:
+        resolved = Path(default)
+
     resolved.mkdir(parents=True, exist_ok=True)
+
     return resolved
 
 
@@ -382,7 +398,7 @@ def roundtrip_metric(
         RuntimeError: If any hop cannot be executed.
         FileNotFoundError: If a transformation output cannot be recovered.
     """
-    workdir = _resolve_workdir(workdir)
+    workdir = resolve_artifact_dir(DEFAULT_WORKDIR, explicit=workdir)
 
     current = Path(metric_file)
     token = path_token(path)
@@ -491,9 +507,10 @@ def run_cycle_test(
 ) -> list[CycleResult]:
     """Execute and score all return paths from an origin.
 
-    This is a lightweight orchestration helper intended primarily for unit
-    tests. Individual paths that cannot be executed are skipped, allowing the
-    caller to inspect all successfully executed cycles.
+    Shared execution engine for cycle testing: unit tests drive it against a
+    synthetic graph, while regression tests drive it against the real
+    transformation graph. Individual paths that cannot be executed are
+    skipped, allowing the caller to inspect all successfully executed cycles.
 
     Args:
         graph: Populated :class:`NeuromapsGraph`.
@@ -512,7 +529,7 @@ def run_cycle_test(
         A list of :class:`CycleResult` objects for successfully executed
         return paths.
     """
-    workdir = _resolve_workdir(workdir)
+    workdir = resolve_artifact_dir(DEFAULT_WORKDIR, explicit=workdir)
 
     paths = find_return_paths(
         graph, origin, max_length=max_length, allow_revisits=allow_revisits
@@ -523,6 +540,8 @@ def run_cycle_test(
     for path in paths:
         token = path_token(path)
         path_workdir = workdir / f"path_{token}"
+
+        logger.info("Executing cycle %s (%s)", " -> ".join(path), hemisphere)
 
         try:
             roundtrip = roundtrip_metric(
@@ -550,6 +569,13 @@ def run_cycle_test(
 
         results.append(
             CycleResult(path=path, pearson_r=pearson_r, max_abs_diff=max_abs_diff)
+        )
+
+        logger.info(
+            "cycle %s: r=%.6f max|delta|=%.3e",
+            " -> ".join(path),
+            pearson_r,
+            max_abs_diff,
         )
 
     return results

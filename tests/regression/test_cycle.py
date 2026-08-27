@@ -27,7 +27,6 @@ Run with:
 """
 
 import logging
-import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -38,15 +37,8 @@ import numpy as np
 import pandas as pd
 import pytest
 from matplotlib.markers import MarkerStyle
-from tests.cycle import (
-    Hemisphere,
-    find_return_paths,
-    load_metric,
-    path_token,
-    roundtrip_metric,
-    score_roundtrip,
-)
-from tests.regression.utils import make_sphere, plot_cycle_cortical_surfaces
+from tests.cycle import Hemisphere, resolve_artifact_dir, run_cycle_test
+from tests.regression.utils import make_sphere
 
 from neuromaps_prime.graph import NeuromapsGraph
 
@@ -71,10 +63,9 @@ def _resolve_output_dir(tmp_path: Path) -> Path:
     ``NEUROMAPS_CYCLE_OUTPUT_DIR`` environment variable to store them
     elsewhere instead.
     """
-    override = os.environ.get("NEUROMAPS_CYCLE_OUTPUT_DIR")
-    resolved = Path(override) if override else tmp_path / "cycle_outputs"
-    resolved.mkdir(parents=True, exist_ok=True)
-    return resolved
+    return resolve_artifact_dir(
+        tmp_path / "cycle_outputs", env_var="NEUROMAPS_CYCLE_OUTPUT_DIR"
+    )
 
 
 @pytest.fixture
@@ -86,28 +77,6 @@ def graph() -> NeuromapsGraph:
 # -------------------------------------------------------------------------
 # Main regression test
 # -------------------------------------------------------------------------
-
-
-def _log_progress(
-    *,
-    completed: int,
-    total: int,
-    origin: str,
-    hemisphere: Hemisphere,
-    path: tuple[str, ...],
-) -> None:
-    """Log overall cycle regression progress."""
-    percentage = 100.0 * completed / total if total else 100.0
-
-    logger.info(
-        "CYCLE PROGRESS: %d/%d (%.1f%%) | origin=%s | hemisphere=%s | path=%s",
-        completed,
-        total,
-        percentage,
-        origin,
-        hemisphere,
-        " -> ".join(path),
-    )
 
 
 @dataclass(frozen=True)
@@ -669,71 +638,11 @@ def _save_cycle_results(
     return len(rows)
 
 
-def _run_cycle_path(
-    graph: NeuromapsGraph,
-    metric_file: Path,
-    original_metric: np.ndarray,
-    path: tuple[str, ...],
-    hemisphere: Hemisphere,
-    path_workdir: Path,
-    plot_dir: Path,
-) -> dict[str, object] | None:
-    """Execute, score, and plot one transformation cycle."""
-    path_label = " -> ".join(path)
-
-    try:
-        roundtrip = roundtrip_metric(
-            graph=graph,
-            metric_file=metric_file,
-            path=path,
-            hemisphere=hemisphere,
-            workdir=path_workdir,
-            density=None,
-            add_edge=False,
-        )
-
-        pearson_r, max_abs_diff = score_roundtrip(metric_file, roundtrip.final_metric)
-
-    except (RuntimeError, FileNotFoundError, ValueError) as exc:
-        logger.warning(
-            "Skipping non-executable cycle %s (%s): %s", path_label, hemisphere, exc
-        )
-        return None
-
-    try:
-        metrics_by_hop = [(path[0], original_metric)] + [
-            (hop.target, hop.metric_values) for hop in roundtrip.hops
-        ]
-
-        plot_cycle_cortical_surfaces(
-            graph=graph,
-            path=path,
-            metrics_by_hop=metrics_by_hop,
-            hemisphere=hemisphere,
-            pearson_r=pearson_r,
-            plot_dir=plot_dir,
-        )
-
-    except Exception as exc:
-        logger.warning("Failed to create surface plots for %s: %s", path_label, exc)
-
-    logger.info("cycle %s: r=%.6f max|delta|=%.3e", path_label, pearson_r, max_abs_diff)
-
-    return {
-        "path": path_label,
-        "n_hops": len(path) - 1,
-        "pearson_r": pearson_r,
-        "max_abs_diff": max_abs_diff,
-    }
-
-
 def _run_origin_hemisphere(
     graph: NeuromapsGraph, origin: str, hemisphere: Hemisphere, output_dir: Path
 ) -> int:
-    """Run all cycles for one origin and hemisphere."""
-    work_dir = output_dir / f"work_{origin}_{hemisphere}"
-
-    work_dir.mkdir(parents=True, exist_ok=True)
+    """Run all cycles for one origin and hemisphere via the shared engine."""
+    work_dir = resolve_artifact_dir(output_dir / f"work_{origin}_{hemisphere}")
 
     try:
         density = graph.find_highest_density(origin)
@@ -761,51 +670,27 @@ def _run_origin_hemisphere(
         )
         return 0
 
-    original_metric = load_metric(metric_file)
-
-    paths = find_return_paths(
-        graph, origin, max_length=MAX_CYCLE_LENGTH, allow_revisits=True
+    results = run_cycle_test(
+        graph,
+        origin,
+        metric_file,
+        hemisphere,
+        workdir=work_dir,
+        max_length=MAX_CYCLE_LENGTH,
+        allow_revisits=True,
     )
 
-    logger.info("Found %d return paths from %s", len(paths), origin)
+    logger.info("Executed %d cycles for %s (%s)", len(results), origin, hemisphere)
 
-    if not paths:
-        logger.warning("No return paths from %s; skipping %s.", origin, hemisphere)
-        return 0
-
-    plot_dir = output_dir / f"origin-{origin}_cycle-{hemisphere}"
-
-    plot_dir.mkdir(parents=True, exist_ok=True)
-
-    rows: list[dict[str, object]] = []
-
-    total_paths = len(paths)
-
-    logger.info("Starting %d cycles for %s (%s)", total_paths, origin, hemisphere)
-
-    for completed, path in enumerate(paths, start=1):
-        _log_progress(
-            completed=completed,
-            total=total_paths,
-            origin=origin,
-            hemisphere=hemisphere,
-            path=path,
-        )
-
-        token = path_token(path)
-
-        row = _run_cycle_path(
-            graph=graph,
-            metric_file=metric_file,
-            original_metric=original_metric,
-            path=path,
-            hemisphere=hemisphere,
-            path_workdir=work_dir / f"path_{token}",
-            plot_dir=plot_dir,
-        )
-
-        if row is not None:
-            rows.append(row)
+    rows = [
+        {
+            "path": " -> ".join(result.path),
+            "n_hops": len(result.path) - 1,
+            "pearson_r": result.pearson_r,
+            "max_abs_diff": result.max_abs_diff,
+        }
+        for result in results
+    ]
 
     return _save_cycle_results(
         origin=origin, hemisphere=hemisphere, rows=rows, output_dir=output_dir
