@@ -3,9 +3,10 @@
 Adds end-to-end cycle regression testing on the real Neuromaps graph
 to validate transform roundtrip quality across multi-hop paths.
 
-Resulting files are written to a run-specific directory:
-
-    tests/regression/cycle_outputs_<datetime>/
+Resulting files are written to a run-specific directory under the pytest
+temporary directory (``<tmp_path>/cycle_outputs``). Set the
+``NEUROMAPS_CYCLE_OUTPUT_DIR`` environment variable to store them elsewhere
+instead. The resolved location is logged at the start of the test.
 
 Each run may contain:
 
@@ -26,6 +27,7 @@ Run with:
 """
 
 import logging
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -59,17 +61,24 @@ logger = logging.getLogger(__name__)
 # Run configuration
 # -------------------------------------------------------------------------
 
-_RUN_SUFFIX = datetime.now().strftime("%Y%m%d_%H%M")
-
-OUTPUT_DIR = Path(__file__).resolve().parent / f"cycle_outputs_{_RUN_SUFFIX}"
-
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
 # Always test every configured origin space.
 
 HEMISPHERES = ("left", "right")
-
 MAX_CYCLE_LENGTH: Final = 4
+
+
+def _resolve_output_dir(tmp_path: Path) -> Path:
+    """Resolve and create the directory for cycle regression outputs.
+
+    By default, artifacts are written to ``tmp_path / "cycle_outputs"`` so
+    they follow pytest's temporary-directory policy. Set the
+    ``NEUROMAPS_CYCLE_OUTPUT_DIR`` environment variable to store them
+    elsewhere instead.
+    """
+    override = os.environ.get("NEUROMAPS_CYCLE_OUTPUT_DIR")
+    resolved = Path(override) if override else tmp_path / "cycle_outputs"
+    resolved.mkdir(parents=True, exist_ok=True)
+    return resolved
 
 
 @pytest.fixture
@@ -209,9 +218,13 @@ def _summarize(
     )
 
 
-def test_cycle_roundtrip(graph: NeuromapsGraph) -> None:
+def test_cycle_roundtrip(graph: NeuromapsGraph, tmp_path: Path) -> None:
     """Round-trip synthetic metrics through real transformation cycles."""
     dir = Path(__file__).resolve().parent
+
+    output_dir = _resolve_output_dir(tmp_path)
+
+    logger.info("Cycle outputs will be written to: %s", output_dir)
 
     previous = load_latest_cycle_values(dir=dir)
 
@@ -223,7 +236,7 @@ def test_cycle_roundtrip(graph: NeuromapsGraph) -> None:
             logger.info("\n=== CYCLE ROUND-TRIP TEST: %s (%s) ===", origin, hemisphere)
 
             total_usable_paths += _run_origin_hemisphere(
-                graph=graph, origin=origin, hemisphere=hemisphere
+                graph=graph, origin=origin, hemisphere=hemisphere, output_dir=output_dir
             )
 
     assert total_usable_paths > 0, (
@@ -235,7 +248,7 @@ def test_cycle_roundtrip(graph: NeuromapsGraph) -> None:
         origin: graph.get_node_data(origin).species for origin in origins
     }
 
-    frames = _read_cycle_frames(run_dir=OUTPUT_DIR, origins=origins)
+    frames = _read_cycle_frames(run_dir=output_dir, origins=origins)
 
     summary = _summarize(
         frames=frames, species_by_origin=species_by_origin, previous=previous
@@ -258,7 +271,7 @@ def test_cycle_roundtrip(graph: NeuromapsGraph) -> None:
     frame = _summary_frame(summary.origin_rows + summary.all_rows)
 
     baseline_path = dir / f"cycle_{datetime.now():%Y%m%d_%H%M}.csv"
-    summary_path = OUTPUT_DIR / "cycle_summary.csv"
+    summary_path = output_dir / "cycle_summary.csv"
 
     frame.to_csv(baseline_path, index=False)
 
@@ -268,10 +281,10 @@ def test_cycle_roundtrip(graph: NeuromapsGraph) -> None:
 
     logger.info("Saved cycle summary CSV: %s", summary_path)
 
-    _save_all_summary_txt(run_dir=OUTPUT_DIR, summaries=summary.summaries)
+    _save_all_summary_txt(run_dir=output_dir, summaries=summary.summaries)
 
     plot_run_summaries(
-        run_dir=OUTPUT_DIR,
+        run_dir=output_dir,
         current_values=summary.pearson_r,
         pearson_r=previous,
         summary_rows=summary.origin_rows,
@@ -621,7 +634,7 @@ def _plot_pearson_comparison(
 
 
 def _save_cycle_results(
-    origin: str, hemisphere: Hemisphere, rows: list[dict[str, object]]
+    origin: str, hemisphere: Hemisphere, rows: list[dict[str, object]], output_dir: Path
 ) -> int:
     """Save CSV/TXT cycle results and validate regression output."""
     if not rows:
@@ -633,7 +646,7 @@ def _save_cycle_results(
         ["pearson_r", "path"], ascending=[False, True]
     )
 
-    csv_path = OUTPUT_DIR / f"cycle_{origin}_{hemisphere}.csv"
+    csv_path = output_dir / f"cycle_{origin}_{hemisphere}.csv"
 
     frame.to_csv(csv_path, index=False)
 
@@ -671,7 +684,7 @@ def _save_cycle_results(
         [separator, f"Total cycles: {len(rows)}", f"Mean Pearson r: {mean_r:.6f}"]
     )
 
-    txt_path = OUTPUT_DIR / f"cycle_{origin}_{hemisphere}.txt"
+    txt_path = output_dir / f"cycle_{origin}_{hemisphere}.txt"
 
     txt_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -740,10 +753,10 @@ def _run_cycle_path(
 
 
 def _run_origin_hemisphere(
-    graph: NeuromapsGraph, origin: str, hemisphere: Hemisphere
+    graph: NeuromapsGraph, origin: str, hemisphere: Hemisphere, output_dir: Path
 ) -> int:
     """Run all cycles for one origin and hemisphere."""
-    work_dir = OUTPUT_DIR / f"work_{origin}_{hemisphere}"
+    work_dir = output_dir / f"work_{origin}_{hemisphere}"
 
     work_dir.mkdir(parents=True, exist_ok=True)
 
@@ -785,7 +798,7 @@ def _run_origin_hemisphere(
         logger.warning("No return paths from %s; skipping %s.", origin, hemisphere)
         return 0
 
-    plot_dir = OUTPUT_DIR / f"origin-{origin}_cycle-{hemisphere}"
+    plot_dir = output_dir / f"origin-{origin}_cycle-{hemisphere}"
 
     plot_dir.mkdir(parents=True, exist_ok=True)
 
@@ -819,4 +832,6 @@ def _run_origin_hemisphere(
         if row is not None:
             rows.append(row)
 
-    return _save_cycle_results(origin=origin, hemisphere=hemisphere, rows=rows)
+    return _save_cycle_results(
+        origin=origin, hemisphere=hemisphere, rows=rows, output_dir=output_dir
+    )
