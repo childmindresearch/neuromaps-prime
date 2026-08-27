@@ -342,8 +342,7 @@ class SurfaceTransformOps(BaseModel):
 
         # Propagate metadata from the surface result, wrapping updated path
         return TransformResult(
-            output_path=output_path,
-            metadata=surface_result.metadata,
+            output_path=output_path, metadata=surface_result.metadata
         )
 
     # ------------------------------------------------------------------ #
@@ -596,7 +595,7 @@ class SurfaceTransformOps(BaseModel):
             self._logger.warning(
                 f"Provider {provider!r} not found for hop {source_space!r} to "
                 f"{mid_space!r}; falling back to {first_transform.provider!r}. The "
-                "composed transform will use mixed providers.",
+                "composed transform will use mixed providers."
             )
         sphere_in = first_transform.fetch()
 
@@ -629,7 +628,7 @@ class SurfaceTransformOps(BaseModel):
             self._logger.warning(
                 f"Provider {provider!r} not found for hop {mid_space!r} to "
                 f"{target_space!r}; falling back to {unproject_transform.provider!r}. "
-                "The composed transform will use mixed providers.",
+                "The composed transform will use mixed providers."
             )
         sphere_unproject_from = unproject_transform.fetch()
 
@@ -742,8 +741,7 @@ class SurfaceTransformOps(BaseModel):
             fwd = f"{sep}{sep.join(space)}{sep}"
             if fwd in sep_paths:
                 self._logger.warning(
-                    "Experimental transformation found: %s",
-                    " -> ".join(space),
+                    "Experimental transformation found: %s", " -> ".join(space)
                 )
                 continue
 

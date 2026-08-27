@@ -34,10 +34,7 @@ def make_sphere(
 ) -> Path:
     """Create a deterministic synthetic metric from sphere coordinates."""
     sphere = graph.fetch_surface_atlas(
-        space=origin,
-        density=density,
-        hemisphere=hemisphere,
-        resource_type="sphere",
+        space=origin, density=density, hemisphere=hemisphere, resource_type="sphere"
     )
 
     if sphere is None:
@@ -49,17 +46,11 @@ def make_sphere(
     data = load_data(sphere.file_path)
     coords = data.array[0]
 
-    values = np.prod(
-        coords,
-        axis=1,
-    )
+    values = np.prod(coords, axis=1)
 
     metric_file = output_dir / f"metric_{origin}_{density}_{hemisphere}.func.gii"
 
-    return write_metric(
-        metric_file,
-        values,
-    )
+    return write_metric(metric_file, values)
 
 
 # -------------------------------------------------------------------------
@@ -76,9 +67,7 @@ def find_matching_surface(
 ) -> object | None:
     """Find a surface whose vertex count matches the metric."""
     atlases = graph.utils.cache.get_surface_atlases(
-        space=space,
-        hemisphere=hemisphere,
-        resource_type=resource_type,
+        space=space, hemisphere=hemisphere, resource_type=resource_type
     )
 
     for atlas in atlases:
@@ -88,11 +77,7 @@ def find_matching_surface(
 
             data = load_data(atlas.file_path)
             coords = data.array[0]
-        except (
-            ValueError,
-            FileNotFoundError,
-            OSError,
-        ) as exc:
+        except (ValueError, FileNotFoundError, OSError) as exc:
             logger.warning(
                 "Could not load %s surface for %s (%s): %s",
                 resource_type,
@@ -131,11 +116,7 @@ def plot_single_surface(
 ) -> bool:
     """Plot one metric on one cortical surface."""
     surface_atlas = find_matching_surface(
-        graph,
-        space,
-        hemisphere,
-        resource_type,
-        metric_values.shape[0],
+        graph, space, hemisphere, resource_type, metric_values.shape[0]
     )
 
     if surface_atlas is None:
@@ -151,24 +132,15 @@ def plot_single_surface(
     try:
         surface_file = surface_atlas.fetch()
 
-        data = load_data(
-            surface_file,
-            return_image=True,
-        )
+        data = load_data(surface_file, return_image=True)
 
         if data.image is None:
-            raise ValueError(
-                f"Could not load surface image: {surface_file}",
-            )
+            raise ValueError(f"Could not load surface image: {surface_file}")
 
         coords = data.image.darrays[0].data
         faces = data.image.darrays[1].data
 
-    except (
-        ValueError,
-        FileNotFoundError,
-        OSError,
-    ) as exc:
+    except (ValueError, FileNotFoundError, OSError) as exc:
         logger.warning(
             "Could not load %s mesh for %s (%s): %s",
             resource_type,
@@ -209,19 +181,12 @@ def plot_single_surface(
 
         fig = plt.gcf()
 
-        fig.savefig(
-            output_file,
-            dpi=200,
-            bbox_inches="tight",
-        )
+        fig.savefig(output_file, dpi=200, bbox_inches="tight")
 
     finally:
         plt.close(fig)
 
-    logger.info(
-        "Saved surface plot: %s",
-        output_file,
-    )
+    logger.info("Saved surface plot: %s", output_file)
 
     return True
 
@@ -248,10 +213,7 @@ def plot_cycle_cortical_surfaces(
         finite = np.isfinite(metric_values)
 
         if np.any(finite):
-            vmin, vmax = np.percentile(
-                metric_values[finite],
-                [2, 98],
-            )
+            vmin, vmax = np.percentile(metric_values[finite], [2, 98])
         else:
             vmin, vmax = 0.0, 1.0
 
@@ -264,11 +226,7 @@ def plot_cycle_cortical_surfaces(
             source = path[hop_index - 1]
             target = path[hop_index]
 
-        for resource_type in (
-            "midthickness",
-            "pial",
-            "white",
-        ):
+        for resource_type in ("midthickness", "pial", "white"):
             output_file = plot_dir / f"{token}_hop-{hop_index}_{resource_type}.png"
 
             if plot_single_surface(
@@ -303,17 +261,10 @@ def plot_cycle_cortical_surfaces(
 def load_latest_cycle_values(dir: Path) -> dict[tuple[str, str], float]:
     """Load the most recent valid cycle Pearson r CSV."""
     files = sorted(
-        dir.glob("cycle_*.csv"),
-        key=lambda path: path.stat().st_mtime,
-        reverse=True,
+        dir.glob("cycle_*.csv"), key=lambda path: path.stat().st_mtime, reverse=True
     )
 
-    required_columns = {
-        "origin",
-        "species",
-        "hemisphere",
-        "mean_pearson_r",
-    }
+    required_columns = {"origin", "species", "hemisphere", "mean_pearson_r"}
 
     for file in files:
         try:
@@ -327,25 +278,15 @@ def load_latest_cycle_values(dir: Path) -> dict[tuple[str, str], float]:
         values: dict[tuple[str, str], float] = {}
 
         for _, row in frame.iterrows():
-            key = (
-                str(row["origin"]),
-                str(row["hemisphere"]),
-            )
+            key = (str(row["origin"]), str(row["hemisphere"]))
 
             if key in values:
-                raise ValueError(
-                    f"Duplicate pearson r entry in {file}: {key}",
-                )
+                raise ValueError(f"Duplicate pearson r entry in {file}: {key}")
 
             values[key] = float(row["mean_pearson_r"])
 
-        logger.info(
-            "Using cycle pearson r: %s",
-            file,
-        )
+        logger.info("Using cycle pearson r: %s", file)
 
         return values
 
-    raise FileNotFoundError(
-        f"No valid cycle pearson CSV found in {dir}.",
-    )
+    raise FileNotFoundError(f"No valid cycle pearson CSV found in {dir}.")

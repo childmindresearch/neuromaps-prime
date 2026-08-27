@@ -17,12 +17,7 @@ def simple_sphere(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Simple 4-vertex sphere-like surface."""
     p = tmp_path_factory.mktemp("data") / "sphere.surf.gii"
     coords = np.array(
-        [
-            [1.0, 1.0, 1.0],
-            [1.0, -1.0, -1.0],
-            [-1.0, 1.0, -1.0],
-            [-1.0, -1.0, 1.0],
-        ],
+        [[1.0, 1.0, 1.0], [1.0, -1.0, -1.0], [-1.0, 1.0, -1.0], [-1.0, -1.0, 1.0]],
         dtype=np.float32,
     )
     coords = coords / np.linalg.norm(coords, axis=1, keepdims=True)

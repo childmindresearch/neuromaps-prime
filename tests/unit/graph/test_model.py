@@ -430,13 +430,8 @@ class TestTransformResult:
     ) -> None:
         """References property flattens space and hop references."""
         meta = models.TransformMetadata(
-            transforms=[
-                {"references": ["Hop ref 1"]},
-                {"references": ["Hop ref 2"]},
-            ],
-            spaces=[
-                {"references": ["Space ref 1"]},
-            ],
+            transforms=[{"references": ["Hop ref 1"]}, {"references": ["Hop ref 2"]}],
+            spaces=[{"references": ["Space ref 1"]}],
         )
         result = models.TransformResult(output_path=tmp_path / "out.nii", metadata=meta)
         assert result.references == ["Space ref 1", "Hop ref 1", "Hop ref 2"]
@@ -444,10 +439,7 @@ class TestTransformResult:
     def test_backward_compat_notes_flattens_hops(self, tmp_path: Path) -> None:
         """Notes property flattens hop notes."""
         meta = models.TransformMetadata(
-            transforms=[
-                {"notes": ["Note 1"]},
-                {"notes": ["Note 2"]},
-            ],
+            transforms=[{"notes": ["Note 1"]}, {"notes": ["Note 2"]}]
         )
         result = models.TransformResult(output_path=tmp_path / "out.nii", metadata=meta)
         assert result.notes == ["Note 1", "Note 2"]

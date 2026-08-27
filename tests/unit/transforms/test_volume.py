@@ -175,10 +175,7 @@ class TestVolumeToSurfaceProjection:
         output = str(tmp_path / "annotation.surf.gii")
 
         return Vol2SurfOutput(
-            volume=volume,
-            surface=surface,
-            ribbon_surfs=ribbon_surfs,
-            output=output,
+            volume=volume, surface=surface, ribbon_surfs=ribbon_surfs, output=output
         )
 
     @pytest.fixture

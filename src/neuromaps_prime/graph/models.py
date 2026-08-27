@@ -263,9 +263,7 @@ class TransformResult:
     """
 
     def __init__(
-        self,
-        output_path: Path | None = None,
-        metadata: TransformMetadata | None = None,
+        self, output_path: Path | None = None, metadata: TransformMetadata | None = None
     ) -> None:
         """Initialize TransformResult.
 
@@ -374,10 +372,7 @@ class TransformResult:
 
     # --- Disk serialization ---
 
-    def save_metadata(
-        self,
-        metadata_path: Path | None = None,
-    ) -> Path:
+    def save_metadata(self, metadata_path: Path | None = None) -> Path:
         """Save per-hop and node-level metadata to disk.
 
         Format is inferred from the file extension:
@@ -422,9 +417,7 @@ class TransformResult:
 
         return metadata_path
 
-    def _serialize_spaces(
-        self,
-    ) -> list[_SerializedEntry] | None:
+    def _serialize_spaces(self) -> list[_SerializedEntry] | None:
         """Convert space metadata to serializable dicts."""
         if self.metadata is None or not self.metadata.spaces:
             return None
@@ -440,9 +433,7 @@ class TransformResult:
             result.append(entry)
         return result
 
-    def _serialize_transforms(
-        self,
-    ) -> list[_SerializedEntry] | None:
+    def _serialize_transforms(self) -> list[_SerializedEntry] | None:
         """Convert transform hop metadata to serializable dicts."""
         if self.metadata is None or not self.metadata.transforms:
             return None

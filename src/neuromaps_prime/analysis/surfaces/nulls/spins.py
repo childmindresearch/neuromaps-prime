@@ -216,10 +216,7 @@ def _gen_rotation(seed: int | None = None) -> Rotation:
     return Rotation(left=rot_l, right=rot_r)
 
 
-def _validate_spin_inputs(
-    coords: np.ndarray,
-    hemi_id: np.ndarray,
-) -> None:
+def _validate_spin_inputs(coords: np.ndarray, hemi_id: np.ndarray) -> None:
     """Validate shape and hemisphere designation arrays."""
     if coords.shape[-1] != 3 or coords.squeeze().ndim != 2:
         raise ValueError(

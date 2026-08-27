@@ -3,9 +3,10 @@
 Adds end-to-end cycle regression testing on the real Neuromaps graph
 to validate transform roundtrip quality across multi-hop paths.
 
-Resulting files are written to a run-specific directory:
-
-    tests/regression/cycle_outputs_<datetime>/
+Resulting files are written to a run-specific directory under the pytest
+temporary directory (``<tmp_path>/cycle_outputs``). Set the
+``NEUROMAPS_CYCLE_OUTPUT_DIR`` environment variable to store them elsewhere
+instead. The resolved location is logged at the start of the test.
 
 Each run may contain:
 
@@ -26,6 +27,7 @@ Run with:
 """
 
 import logging
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -59,23 +61,24 @@ logger = logging.getLogger(__name__)
 # Run configuration
 # -------------------------------------------------------------------------
 
-_RUN_SUFFIX = datetime.now().strftime("%Y%m%d_%H%M")
-
-OUTPUT_DIR = Path(__file__).resolve().parent / f"cycle_outputs_{_RUN_SUFFIX}"
-
-OUTPUT_DIR.mkdir(
-    parents=True,
-    exist_ok=True,
-)
-
 # Always test every configured origin space.
 
-HEMISPHERES = (
-    "left",
-    "right",
-)
-
+HEMISPHERES = ("left", "right")
 MAX_CYCLE_LENGTH: Final = 4
+
+
+def _resolve_output_dir(tmp_path: Path) -> Path:
+    """Resolve and create the directory for cycle regression outputs.
+
+    By default, artifacts are written to ``tmp_path / "cycle_outputs"`` so
+    they follow pytest's temporary-directory policy. Set the
+    ``NEUROMAPS_CYCLE_OUTPUT_DIR`` environment variable to store them
+    elsewhere instead.
+    """
+    override = os.environ.get("NEUROMAPS_CYCLE_OUTPUT_DIR")
+    resolved = Path(override) if override else tmp_path / "cycle_outputs"
+    resolved.mkdir(parents=True, exist_ok=True)
+    return resolved
 
 
 @pytest.fixture
@@ -122,8 +125,7 @@ class _CycleSummary:
 
 
 def _read_cycle_frames(
-    run_dir: Path,
-    origins: list[str],
+    run_dir: Path, origins: list[str]
 ) -> dict[tuple[str, str], pd.DataFrame]:
     """Read each cycle CSV once, keyed by origin and hemisphere."""
     frames: dict[tuple[str, str], pd.DataFrame] = {}
@@ -168,10 +170,7 @@ def _summarize(
         origin_rows.append(
             {
                 "origin": origin,
-                "species": species_by_origin.get(
-                    origin,
-                    "all",
-                ),
+                "species": species_by_origin.get(origin, "all"),
                 "hemisphere": hemisphere,
                 "mean_pearson_r": mean_r,
             }
@@ -185,10 +184,7 @@ def _summarize(
         if not frames_for_hemisphere:
             continue
 
-        combined = pd.concat(
-            frames_for_hemisphere,
-            ignore_index=True,
-        )
+        combined = pd.concat(frames_for_hemisphere, ignore_index=True)
 
         mean_r = float(combined["pearson_r"].mean())
 
@@ -222,31 +218,25 @@ def _summarize(
     )
 
 
-def test_cycle_roundtrip(
-    graph: NeuromapsGraph,
-) -> None:
+def test_cycle_roundtrip(graph: NeuromapsGraph, tmp_path: Path) -> None:
     """Round-trip synthetic metrics through real transformation cycles."""
     dir = Path(__file__).resolve().parent
 
-    previous = load_latest_cycle_values(
-        dir=dir,
-    )
+    output_dir = _resolve_output_dir(tmp_path)
+
+    logger.info("Cycle outputs will be written to: %s", output_dir)
+
+    previous = load_latest_cycle_values(dir=dir)
 
     origins = sorted(graph.nodes)
     total_usable_paths = 0
 
     for origin in origins:
         for hemisphere in HEMISPHERES:
-            logger.info(
-                "\n=== CYCLE ROUND-TRIP TEST: %s (%s) ===",
-                origin,
-                hemisphere,
-            )
+            logger.info("\n=== CYCLE ROUND-TRIP TEST: %s (%s) ===", origin, hemisphere)
 
             total_usable_paths += _run_origin_hemisphere(
-                graph=graph,
-                origin=origin,
-                hemisphere=hemisphere,
+                graph=graph, origin=origin, hemisphere=hemisphere, output_dir=output_dir
             )
 
     assert total_usable_paths > 0, (
@@ -258,15 +248,10 @@ def test_cycle_roundtrip(
         origin: graph.get_node_data(origin).species for origin in origins
     }
 
-    frames = _read_cycle_frames(
-        run_dir=OUTPUT_DIR,
-        origins=origins,
-    )
+    frames = _read_cycle_frames(run_dir=output_dir, origins=origins)
 
     summary = _summarize(
-        frames=frames,
-        species_by_origin=species_by_origin,
-        previous=previous,
+        frames=frames, species_by_origin=species_by_origin, previous=previous
     )
 
     for hemisphere in HEMISPHERES:
@@ -283,40 +268,23 @@ def test_cycle_roundtrip(
             f"threshold={previous_r - 1e-4:.6f}"
         )
 
-    frame = _summary_frame(
-        summary.origin_rows + summary.all_rows,
-    )
+    frame = _summary_frame(summary.origin_rows + summary.all_rows)
 
     baseline_path = dir / f"cycle_{datetime.now():%Y%m%d_%H%M}.csv"
-    summary_path = OUTPUT_DIR / "cycle_summary.csv"
+    summary_path = output_dir / "cycle_summary.csv"
 
-    frame.to_csv(
-        baseline_path,
-        index=False,
-    )
+    frame.to_csv(baseline_path, index=False)
 
-    frame.to_csv(
-        summary_path,
-        index=False,
-    )
+    frame.to_csv(summary_path, index=False)
 
-    logger.info(
-        "Saved baseline CSV: %s",
-        baseline_path,
-    )
+    logger.info("Saved baseline CSV: %s", baseline_path)
 
-    logger.info(
-        "Saved cycle summary CSV: %s",
-        summary_path,
-    )
+    logger.info("Saved cycle summary CSV: %s", summary_path)
 
-    _save_all_summary_txt(
-        run_dir=OUTPUT_DIR,
-        summaries=summary.summaries,
-    )
+    _save_all_summary_txt(run_dir=output_dir, summaries=summary.summaries)
 
     plot_run_summaries(
-        run_dir=OUTPUT_DIR,
+        run_dir=output_dir,
         current_values=summary.pearson_r,
         pearson_r=previous,
         summary_rows=summary.origin_rows,
@@ -334,18 +302,10 @@ def test_cycle_roundtrip(
 # -------------------------------------------------------------------------
 
 
-def _summary_rows_to_frame(
-    summary_rows: list[dict[str, object]],
-) -> pd.DataFrame:
+def _summary_rows_to_frame(summary_rows: list[dict[str, object]]) -> pd.DataFrame:
     """Convert per-origin summary rows to a plotting dataframe."""
     if not summary_rows:
-        return pd.DataFrame(
-            columns=[
-                "origin",
-                "hemisphere",
-                "pearson_r",
-            ]
-        )
+        return pd.DataFrame(columns=["origin", "hemisphere", "pearson_r"])
 
     return pd.DataFrame(
         [
@@ -359,27 +319,18 @@ def _summary_rows_to_frame(
     )
 
 
-def _get_plot_origins(
-    frame: pd.DataFrame,
-    origins: list[str],
-) -> list[str]:
+def _get_plot_origins(frame: pd.DataFrame, origins: list[str]) -> list[str]:
     """Return origins that have cycle summary data."""
     available_origins = set(frame["origin"])
 
     return [origin for origin in origins if origin in available_origins]
 
 
-def _get_marker_map(
-    origins: list[str],
-) -> dict[str, MarkerStyle]:
+def _get_marker_map(origins: list[str]) -> dict[str, MarkerStyle]:
     """Return deterministic markers with consistent visual size."""
     markers = {}
 
-    for origin, marker in zip(
-        origins,
-        MarkerStyle.markers,
-        strict=False,
-    ):
+    for origin, marker in zip(origins, MarkerStyle.markers, strict=False):
         style = MarkerStyle(marker)
 
         if style.get_path().vertices.size == 0:
@@ -394,9 +345,7 @@ def _get_marker_map(
     return markers
 
 
-def _get_color_map(
-    origins: list[str],
-) -> dict[str, str]:
+def _get_color_map(origins: list[str]) -> dict[str, str]:
     """Return a consistent color for each origin."""
     color_cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
@@ -432,63 +381,32 @@ def _plot_hemisphere_point(
 
 
 def _configure_species_summary_plot(
-    ax: plt.Axes,
-    frame: pd.DataFrame,
-    origins: list[str],
-    species: str | None,
+    ax: plt.Axes, frame: pd.DataFrame, origins: list[str], species: str | None
 ) -> None:
     """Configure axes, labels, title, grid, and legend."""
-    ax.axhline(
-        1.0,
-        linestyle="--",
-        linewidth=1,
-    )
+    ax.axhline(1.0, linestyle="--", linewidth=1)
 
     ax.set_xticks(range(len(origins)))
-    ax.set_xticklabels(
-        origins,
-        rotation=45,
-        ha="right",
-    )
+    ax.set_xticklabels(origins, rotation=45, ha="right")
 
     ax.set_xlabel("Origin space")
     ax.set_ylabel("Mean Pearson r")
 
-    ax.set_ylim(
-        min(
-            0.0,
-            frame["pearson_r"].min() - 0.05,
-        ),
-        1.01,
-    )
+    ax.set_ylim(min(0.0, frame["pearson_r"].min() - 0.05), 1.01)
 
     if species is None:
         title = "Surface transformation cycle round-trip accuracy"
     else:
         title = f"Surface transformation cycle round-trip accuracy — {species}"
 
-    ax.set_title(
-        title,
-        fontsize=16,
-    )
+    ax.set_title(title, fontsize=16)
 
-    ax.grid(
-        axis="y",
-        linestyle=":",
-        alpha=0.5,
-    )
+    ax.grid(axis="y", linestyle=":", alpha=0.5)
 
-    ax.legend(
-        title="Origin / hemisphere",
-        bbox_to_anchor=(1.02, 1),
-        loc="upper left",
-    )
+    ax.legend(title="Origin / hemisphere", bbox_to_anchor=(1.02, 1), loc="upper left")
 
 
-def _get_species_summary_output(
-    run_dir: Path,
-    species: str | None,
-) -> Path:
+def _get_species_summary_output(run_dir: Path, species: str | None) -> Path:
     """Return the output path for a species summary plot."""
     if species is None:
         return run_dir / "cycle_summary.png"
@@ -496,57 +414,35 @@ def _get_species_summary_output(
     return run_dir / f"cycle_summary_{species.lower()}.png"
 
 
-def _save_species_summary_plot(
-    fig: plt.Figure,
-    output_file: Path,
-) -> None:
+def _save_species_summary_plot(fig: plt.Figure, output_file: Path) -> None:
     """Save and close a species summary plot."""
     try:
         fig.tight_layout()
-        fig.savefig(
-            output_file,
-            dpi=200,
-            bbox_inches="tight",
-        )
+        fig.savefig(output_file, dpi=200, bbox_inches="tight")
     finally:
         plt.close(fig)
 
-    logger.info(
-        "Saved cycle summary plot: %s",
-        output_file,
-    )
+    logger.info("Saved cycle summary plot: %s", output_file)
 
 
 def _plot_species_summary(
-    run_dir: Path,
-    frame: pd.DataFrame,
-    origins: list[str],
-    species: str | None = None,
+    run_dir: Path, frame: pd.DataFrame, origins: list[str], species: str | None = None
 ) -> None:
     """Create a cycle round-trip summary plot."""
-    unique_origins = _get_plot_origins(
-        frame=frame,
-        origins=origins,
-    )
+    unique_origins = _get_plot_origins(frame=frame, origins=origins)
 
     if not unique_origins:
         logger.warning(
-            "No matching origins found for %s summary plot.",
-            species or "all",
+            "No matching origins found for %s summary plot.", species or "all"
         )
         return
 
     marker_map = _get_marker_map(unique_origins)
     color_map = _get_color_map(unique_origins)
 
-    fig_width = max(
-        8,
-        1.25 * len(unique_origins),
-    )
+    fig_width = max(8, 1.25 * len(unique_origins))
 
-    fig, ax = plt.subplots(
-        figsize=(fig_width, 7),
-    )
+    fig, ax = plt.subplots(figsize=(fig_width, 7))
 
     for x_position, origin in enumerate(unique_origins):
         for hemisphere in HEMISPHERES:
@@ -568,21 +464,12 @@ def _plot_species_summary(
             )
 
     _configure_species_summary_plot(
-        ax=ax,
-        frame=frame,
-        origins=unique_origins,
-        species=species,
+        ax=ax, frame=frame, origins=unique_origins, species=species
     )
 
-    output_file = _get_species_summary_output(
-        run_dir=run_dir,
-        species=species,
-    )
+    output_file = _get_species_summary_output(run_dir=run_dir, species=species)
 
-    _save_species_summary_plot(
-        fig=fig,
-        output_file=output_file,
-    )
+    _save_species_summary_plot(fig=fig, output_file=output_file)
 
 
 # -------------------------------------------------------------------------
@@ -600,9 +487,7 @@ def plot_run_summaries(
     run_dir = Path(run_dir)
 
     if not run_dir.is_dir():
-        raise FileNotFoundError(
-            f"Run directory does not exist: {run_dir}",
-        )
+        raise FileNotFoundError(f"Run directory does not exist: {run_dir}")
 
     origins = sorted(
         {str(row["origin"]) for row in summary_rows if row["origin"] != "all"}
@@ -611,11 +496,7 @@ def plot_run_summaries(
     frame = _summary_rows_to_frame(summary_rows)
 
     # Overall summary.
-    _plot_species_summary(
-        run_dir=run_dir,
-        frame=frame,
-        origins=origins,
-    )
+    _plot_species_summary(run_dir=run_dir, frame=frame, origins=origins)
 
     # Species-specific summaries.
     species_origins: dict[str, list[str]] = {}
@@ -628,28 +509,18 @@ def plot_run_summaries(
 
         species = str(row.get("species", "all"))
 
-        species_origins.setdefault(
-            species,
-            [],
-        ).append(origin)
+        species_origins.setdefault(species, []).append(origin)
 
-    for species, species_origins_list in sorted(
-        species_origins.items(),
-    ):
+    for species, species_origins_list in sorted(species_origins.items()):
         species_origins_list = sorted(set(species_origins_list))
 
         _plot_species_summary(
-            run_dir=run_dir,
-            frame=frame,
-            origins=species_origins_list,
-            species=species,
+            run_dir=run_dir, frame=frame, origins=species_origins_list, species=species
         )
 
     # Current versus previous comparison.
     _plot_pearson_comparison(
-        run_dir=run_dir,
-        current_values=current_values,
-        pearson_r=pearson_r,
+        run_dir=run_dir, current_values=current_values, pearson_r=pearson_r
     )
 
 
@@ -657,40 +528,25 @@ def _summary_frame(rows: list[dict[str, object]]) -> pd.DataFrame:
     """Build the canonical per-origin + all-space summary frame."""
     return (
         pd.DataFrame(
-            rows,
-            columns=["origin", "species", "hemisphere", "mean_pearson_r"],
+            rows, columns=["origin", "species", "hemisphere", "mean_pearson_r"]
         )
         .sort_values(["species", "origin", "hemisphere"], kind="stable")
         .reset_index(drop=True)
     )
 
 
-def _save_all_summary_txt(
-    run_dir: Path,
-    summaries: list[str],
-) -> None:
+def _save_all_summary_txt(run_dir: Path, summaries: list[str]) -> None:
     """Save the all-space cycle summary text file."""
     if not summaries:
         return
 
     output_file = run_dir / "cycle_all_summary.txt"
 
-    lines = [
-        "Cycle test results — all origin spaces",
-        "=" * 60,
-        "",
-        *summaries,
-    ]
+    lines = ["Cycle test results — all origin spaces", "=" * 60, "", *summaries]
 
-    output_file.write_text(
-        "\n".join(lines),
-        encoding="utf-8",
-    )
+    output_file.write_text("\n".join(lines), encoding="utf-8")
 
-    logger.info(
-        "Saved all-space summary: %s",
-        output_file,
-    )
+    logger.info("Saved all-space summary: %s", output_file)
 
 
 def _plot_pearson_comparison(
@@ -703,54 +559,32 @@ def _plot_pearson_comparison(
         key
         for key in sorted(
             current_values,
-            key=lambda key: (
-                key[0] == "all",
-                key[0],
-                HEMISPHERES.index(key[1]),
-            ),
+            key=lambda key: (key[0] == "all", key[0], HEMISPHERES.index(key[1])),
         )
         if key in pearson_r
     ]
 
     if not keys:
-        logger.warning(
-            "No current/pearson values available for comparison plot.",
-        )
+        logger.warning("No current/pearson values available for comparison plot.")
         return
 
     labels = [f"{origin} {hemisphere[0].upper()}" for origin, hemisphere in keys]
 
     y_positions = np.arange(len(keys))
 
-    pearson_values = np.array(
-        [pearson_r[key] for key in keys],
-        dtype=float,
-    )
+    pearson_values = np.array([pearson_r[key] for key in keys], dtype=float)
 
-    current_values_array = np.array(
-        [current_values[key] for key in keys],
-        dtype=float,
-    )
+    current_values_array = np.array([current_values[key] for key in keys], dtype=float)
 
     fig_height = max(8, 0.45 * len(keys))
 
-    fig, ax = plt.subplots(
-        figsize=(12, fig_height),
-    )
+    fig, ax = plt.subplots(figsize=(12, fig_height))
 
     try:
         for y, pearson_r, current_r in zip(
-            y_positions,
-            pearson_values,
-            current_values_array,
-            strict=True,
+            y_positions, pearson_values, current_values_array, strict=True
         ):
-            ax.plot(
-                [pearson_r, current_r],
-                [y, y],
-                linewidth=2,
-                alpha=0.7,
-            )
+            ax.plot([pearson_r, current_r], [y, y], linewidth=2, alpha=0.7)
 
         ax.scatter(
             pearson_values,
@@ -770,86 +604,54 @@ def _plot_pearson_comparison(
             zorder=3,
         )
 
-        ax.axvline(
-            1.0,
-            linestyle="--",
-            linewidth=1,
-        )
+        ax.axvline(1.0, linestyle="--", linewidth=1)
 
         ax.set_yticks(y_positions)
         ax.set_yticklabels(labels)
 
-        ax.set_xlim(
-            0.45,
-            1.01,
-        )
+        ax.set_xlim(0.45, 1.01)
 
         ax.set_xlabel("Mean Pearson r")
         ax.set_ylabel("Origin / hemisphere")
 
         ax.set_title(
-            "Cycle round-trip accuracy: current vs previous Pearson r",
-            fontsize=16,
+            "Cycle round-trip accuracy: current vs previous Pearson r", fontsize=16
         )
 
-        ax.grid(
-            axis="x",
-            linestyle=":",
-            alpha=0.5,
-        )
+        ax.grid(axis="x", linestyle=":", alpha=0.5)
 
-        ax.legend(
-            loc="lower right",
-        )
+        ax.legend(loc="lower right")
 
         fig.tight_layout()
 
         output_file = run_dir / "cycle_comparison.png"
 
-        fig.savefig(
-            output_file,
-            dpi=200,
-            bbox_inches="tight",
-        )
+        fig.savefig(output_file, dpi=200, bbox_inches="tight")
     finally:
         plt.close(fig)
 
-    logger.info(
-        "Saved cycle comparison plot: %s",
-        output_file,
-    )
+    logger.info("Saved cycle comparison plot: %s", output_file)
 
 
 def _save_cycle_results(
-    origin: str,
-    hemisphere: Hemisphere,
-    rows: list[dict[str, object]],
+    origin: str, hemisphere: Hemisphere, rows: list[dict[str, object]], output_dir: Path
 ) -> int:
     """Save CSV/TXT cycle results and validate regression output."""
     if not rows:
-        logger.warning(
-            "No executable paths for %s (%s).",
-            origin,
-            hemisphere,
-        )
+        logger.warning("No executable paths for %s (%s).", origin, hemisphere)
 
         return 0
 
     frame = pd.DataFrame(rows).sort_values(
-        ["pearson_r", "path"],
-        ascending=[False, True],
+        ["pearson_r", "path"], ascending=[False, True]
     )
 
-    csv_path = OUTPUT_DIR / f"cycle_{origin}_{hemisphere}.csv"
+    csv_path = output_dir / f"cycle_{origin}_{hemisphere}.csv"
 
-    frame.to_csv(
-        csv_path,
-        index=False,
-    )
+    frame.to_csv(csv_path, index=False)
 
     path_width = max(
-        len("Transformation path"),
-        max(len(str(row["path"])) for row in rows),
+        len("Transformation path"), max(len(str(row["path"])) for row in rows)
     )
 
     header = (
@@ -879,19 +681,12 @@ def _save_cycle_results(
     mean_r = float(frame["pearson_r"].mean())
 
     lines.extend(
-        [
-            separator,
-            f"Total cycles: {len(rows)}",
-            f"Mean Pearson r: {mean_r:.6f}",
-        ]
+        [separator, f"Total cycles: {len(rows)}", f"Mean Pearson r: {mean_r:.6f}"]
     )
 
-    txt_path = OUTPUT_DIR / f"cycle_{origin}_{hemisphere}.txt"
+    txt_path = output_dir / f"cycle_{origin}_{hemisphere}.txt"
 
-    txt_path.write_text(
-        "\n".join(lines) + "\n",
-        encoding="utf-8",
-    )
+    txt_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     logger.info("Saved CSV: %s", csv_path)
     logger.info("Saved TXT summary: %s", txt_path)
@@ -922,31 +717,17 @@ def _run_cycle_path(
             add_edge=False,
         )
 
-        pearson_r, max_abs_diff = score_roundtrip(
-            metric_file,
-            roundtrip.final_metric,
-        )
+        pearson_r, max_abs_diff = score_roundtrip(metric_file, roundtrip.final_metric)
 
-    except (
-        RuntimeError,
-        FileNotFoundError,
-        ValueError,
-    ) as exc:
+    except (RuntimeError, FileNotFoundError, ValueError) as exc:
         logger.warning(
-            "Skipping non-executable cycle %s (%s): %s",
-            path_label,
-            hemisphere,
-            exc,
+            "Skipping non-executable cycle %s (%s): %s", path_label, hemisphere, exc
         )
         return None
 
     try:
         metrics_by_hop = [(path[0], original_metric)] + [
-            (
-                hop.target,
-                hop.metric_values,
-            )
-            for hop in roundtrip.hops
+            (hop.target, hop.metric_values) for hop in roundtrip.hops
         ]
 
         plot_cycle_cortical_surfaces(
@@ -959,18 +740,9 @@ def _run_cycle_path(
         )
 
     except Exception as exc:
-        logger.warning(
-            "Failed to create surface plots for %s: %s",
-            path_label,
-            exc,
-        )
+        logger.warning("Failed to create surface plots for %s: %s", path_label, exc)
 
-    logger.info(
-        "cycle %s: r=%.6f max|delta|=%.3e",
-        path_label,
-        pearson_r,
-        max_abs_diff,
-    )
+    logger.info("cycle %s: r=%.6f max|delta|=%.3e", path_label, pearson_r, max_abs_diff)
 
     return {
         "path": path_label,
@@ -981,17 +753,12 @@ def _run_cycle_path(
 
 
 def _run_origin_hemisphere(
-    graph: NeuromapsGraph,
-    origin: str,
-    hemisphere: Hemisphere,
+    graph: NeuromapsGraph, origin: str, hemisphere: Hemisphere, output_dir: Path
 ) -> int:
     """Run all cycles for one origin and hemisphere."""
-    work_dir = OUTPUT_DIR / f"work_{origin}_{hemisphere}"
+    work_dir = output_dir / f"work_{origin}_{hemisphere}"
 
-    work_dir.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    work_dir.mkdir(parents=True, exist_ok=True)
 
     try:
         density = graph.find_highest_density(origin)
@@ -1022,44 +789,24 @@ def _run_origin_hemisphere(
     original_metric = load_metric(metric_file)
 
     paths = find_return_paths(
-        graph,
-        origin,
-        max_length=MAX_CYCLE_LENGTH,
-        allow_revisits=True,
-        max_paths=None,
+        graph, origin, max_length=MAX_CYCLE_LENGTH, allow_revisits=True
     )
 
-    logger.info(
-        "Found %d return paths from %s",
-        len(paths),
-        origin,
-    )
+    logger.info("Found %d return paths from %s", len(paths), origin)
 
     if not paths:
-        logger.warning(
-            "No return paths from %s; skipping %s.",
-            origin,
-            hemisphere,
-        )
+        logger.warning("No return paths from %s; skipping %s.", origin, hemisphere)
         return 0
 
-    plot_dir = OUTPUT_DIR / f"origin-{origin}_cycle-{hemisphere}"
+    plot_dir = output_dir / f"origin-{origin}_cycle-{hemisphere}"
 
-    plot_dir.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    plot_dir.mkdir(parents=True, exist_ok=True)
 
     rows: list[dict[str, object]] = []
 
     total_paths = len(paths)
 
-    logger.info(
-        "Starting %d cycles for %s (%s)",
-        total_paths,
-        origin,
-        hemisphere,
-    )
+    logger.info("Starting %d cycles for %s (%s)", total_paths, origin, hemisphere)
 
     for completed, path in enumerate(paths, start=1):
         _log_progress(
@@ -1086,7 +833,5 @@ def _run_origin_hemisphere(
             rows.append(row)
 
     return _save_cycle_results(
-        origin=origin,
-        hemisphere=hemisphere,
-        rows=rows,
+        origin=origin, hemisphere=hemisphere, rows=rows, output_dir=output_dir
     )

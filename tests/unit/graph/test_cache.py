@@ -88,11 +88,7 @@ def _make_surface_transform(
 
 
 def _make_surface_annotation(
-    f: Path,
-    space: str,
-    label: str,
-    density: str,
-    hemisphere: Literal["left", "right"],
+    f: Path, space: str, label: str, density: str, hemisphere: Literal["left", "right"]
 ) -> models.SurfaceAnnotation:
     return models.SurfaceAnnotation(
         name=f"{space}_{density}_{hemisphere}_{label}",

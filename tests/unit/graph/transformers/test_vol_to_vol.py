@@ -88,12 +88,10 @@ class TestVolumeToVolumeTransformer:
             mock_volume_atlas
         )
 
-        with (
-            patch(
-                "neuromaps_prime.graph.transforms.volume.vol_to_vol",
-                return_value=expected_output,
-            ) as mock_vol_to_vol,
-        ):
+        with patch(
+            "neuromaps_prime.graph.transforms.volume.vol_to_vol",
+            return_value=expected_output,
+        ) as mock_vol_to_vol:
             result = mock_transformer.volume_to_volume_transformer(
                 **basic_params._asdict()
             )

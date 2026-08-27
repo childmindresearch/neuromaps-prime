@@ -66,8 +66,7 @@ class TestCollectSpaceMetadata:
         utils.get_node_data.return_value = self._make_node(references=["Citation A"])
 
         result = GraphUtils.collect_space_metadata(  # type: ignore[arg-type]
-            utils,
-            ["A", "B", "A", "C"],
+            utils, ["A", "B", "A", "C"]
         )
 
         assert result is not None

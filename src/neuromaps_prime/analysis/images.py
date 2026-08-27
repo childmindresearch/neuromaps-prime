@@ -19,11 +19,7 @@ if TYPE_CHECKING:
 
     from numpy.typing import ArrayLike, DTypeLike
 
-__all__ = [
-    "PARC_IGNORE",
-    "load_data",
-    "relabel_gifti",
-]
+__all__ = ["PARC_IGNORE", "load_data", "relabel_gifti"]
 
 # Default parcellation labels to ignore (unknown regions, medial wall, etc.)
 PARC_IGNORE = frozenset(
@@ -98,8 +94,7 @@ def load_data(
 
 
 def relabel_gifti(
-    parcellation: str | Path,
-    background: Iterable[str] | None = None,
+    parcellation: str | Path, background: Iterable[str] | None = None
 ) -> nib.GiftiImage:
     """Relabel a GIFTI parcellation so that label indices are consecutive.
 
@@ -148,9 +143,7 @@ def relabel_gifti(
 
     # Build updated GIFTI image
     darr = nib.gifti.GiftiDataArray(
-        data,
-        intent="NIFTI_INTENT_LABEL",
-        datatype="NIFTI_TYPE_INT32",
+        data, intent="NIFTI_INTENT_LABEL", datatype="NIFTI_TYPE_INT32"
     )
     labeltable = nib.gifti.GiftiLabelTable()
     labeltable.labels = new_labels

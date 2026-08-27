@@ -26,10 +26,7 @@ from neuromaps_prime.analysis.surfaces.points import get_surface_distance
 
 __all__ = ["alexander_bloch", "baum", "burt2018", "cornblath", "hungarian", "vasa"]
 
-_DataT = tuple[
-    str | Path | nib.GiftiImage,
-    str | Path | nib.GiftiImage,
-]
+_DataT = tuple[str | Path | nib.GiftiImage, str | Path | nib.GiftiImage]
 _SpinMethod = Literal["original", "vasa", "hungarian"]
 _CentroidMethod = Literal["average", "surface", "geodesic"]
 
@@ -108,11 +105,7 @@ def _generate_spins(
     centroid_coords = np.vstack(centroid_list)
     hemi_ids = np.hstack(hemi_list)
     spin_matrix = gen_spin_samples(
-        centroid_coords,
-        hemi_ids,
-        n_rotate=n_perm,
-        method=spin_method,
-        seed=seed,
+        centroid_coords, hemi_ids, n_rotate=n_perm, method=spin_method, seed=seed
     ).spin
     return spin_matrix, len(centroid_coords)
 
@@ -375,12 +368,7 @@ def baum(
         Baum et al. (2020). PNAS, 117(1), 771-778.
     """
     result = spin_parcels(
-        surface,
-        parcellation,
-        method=method,
-        n_rotate=n_perm,
-        spins=spins,
-        seed=seed,
+        surface, parcellation, method=method, n_rotate=n_perm, spins=spins, seed=seed
     )
     spin_matrix = result.spin
     n_parcels = spin_matrix.shape[0]
@@ -536,10 +524,7 @@ def burt2018(
             hdist = distmat[hemi] if isinstance(distmat, tuple) else distmat
         else:
             hdist = get_surface_distance(
-                surf,
-                parcellation=hparc_path,
-                drop=PARC_IGNORE,
-                n_proc=n_proc,
+                surf, parcellation=hparc_path, drop=PARC_IGNORE, n_proc=n_proc
             )
         # Mask out medial wall (via ``drop=PARC_IGNORE``)
         med = np.isinf(hdist + np.diag([np.inf] * len(hdist))).all(axis=1)

@@ -117,10 +117,7 @@ class TestOSFDownload:
             patch.object(
                 remote.OSFStorage, "get_meta", return_value=_osf_meta(payload)
             ),
-            patch(
-                "neuromaps_prime.remote.osf.requests.get",
-                _fake_stream(payload),
-            ),
+            patch("neuromaps_prime.remote.osf.requests.get", _fake_stream(payload)),
         ):
             result = remote.OSFStorage().download("https://u1", tmp_path)
         assert result == tmp_path / "file.surf.gii"
@@ -151,10 +148,7 @@ class TestOSFDownload:
         with (
             caplog.at_level(logging.WARNING),
             patch.object(remote.OSFStorage, "get_meta", return_value=_osf_meta(new)),
-            patch(
-                "neuromaps_prime.remote.osf.requests.get",
-                _fake_stream(new),
-            ),
+            patch("neuromaps_prime.remote.osf.requests.get", _fake_stream(new)),
         ):
             result = remote.OSFStorage().download("https://u1", tmp_path)
         assert result == stored
@@ -174,10 +168,7 @@ class TestGitHubDownload:
         meta = _github_meta(payload)
         with (
             patch.object(remote.GitHubStorage, "get_meta", return_value=meta),
-            patch(
-                "neuromaps_prime.remote.github.requests.get",
-                _fake_stream(payload),
-            ),
+            patch("neuromaps_prime.remote.github.requests.get", _fake_stream(payload)),
         ):
             result = remote.GitHubStorage().download("https://u1", tmp_path)
         assert result == tmp_path / "file.surf.gii"
@@ -208,10 +199,7 @@ class TestGitHubDownload:
         with (
             caplog.at_level(logging.WARNING),
             patch.object(remote.GitHubStorage, "get_meta", return_value=meta),
-            patch(
-                "neuromaps_prime.remote.github.requests.get",
-                _fake_stream(new),
-            ),
+            patch("neuromaps_prime.remote.github.requests.get", _fake_stream(new)),
         ):
             result = remote.GitHubStorage().download("https://u1", tmp_path)
         assert result == stored

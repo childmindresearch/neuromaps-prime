@@ -392,9 +392,7 @@ class TestMultiHopPathFinding:
             }
 
         graph = NeuromapsGraph(
-            runner="local",
-            data_dir=tmp_path / ".cache",
-            _testing=True,
+            runner="local", data_dir=tmp_path / ".cache", _testing=True
         )
         graph._builder.build_from_dict(
             graph,
