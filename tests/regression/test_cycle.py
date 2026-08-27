@@ -661,11 +661,6 @@ class TestCycleRoundtrip:
     """
 
     @pytest.fixture(scope="class")
-    def graph(self) -> NeuromapsGraph:
-        """Return the Neuromaps-PRIME transformation graph."""
-        return NeuromapsGraph()
-
-    @pytest.fixture(scope="class")
     def cycle_run(
         self, graph: NeuromapsGraph, tmp_path_factory: pytest.TempPathFactory
     ) -> CycleRunResult:
