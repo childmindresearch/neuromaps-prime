@@ -661,8 +661,9 @@ class TestCycleRoundtrip:
     """
 
     @pytest.fixture(scope="class")
+    @classmethod
     def cycle_run(
-        self, graph: NeuromapsGraph, tmp_path_factory: pytest.TempPathFactory
+        cls, graph: NeuromapsGraph, tmp_path_factory: pytest.TempPathFactory
     ) -> CycleRunResult:
         """Execute every cycle once and record this run's artifacts."""
         output_dir = _resolve_output_dir(tmp_path_factory.getbasetemp())

@@ -600,8 +600,9 @@ class TestSurfaceTransformMatrix:
     """
 
     @pytest.fixture(scope="class")
+    @classmethod
     def matrix_run(
-        self, graph: NeuromapsGraph, tmp_path_factory: pytest.TempPathFactory
+        cls, graph: NeuromapsGraph, tmp_path_factory: pytest.TempPathFactory
     ) -> SurfaceMatrixResult:
         """Compute the matrix once; write this run's artifacts and plots."""
         output_dir = resolve_artifact_dir(
