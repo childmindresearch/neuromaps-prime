@@ -41,6 +41,7 @@ from typing import TYPE_CHECKING, Literal
 import networkx as nx
 import nibabel as nib
 import numpy as np
+from niwrap import StyxRuntimeError
 
 from neuromaps_prime.analysis.images import load_data
 from neuromaps_prime.graph import NeuromapsGraph
@@ -299,7 +300,14 @@ def _execute_hop(
                 metric_values=metric_values,
             )
 
-        except (RuntimeError, FileNotFoundError, OSError, ValueError, TypeError) as exc:
+        except (
+            StyxRuntimeError,
+            RuntimeError,
+            FileNotFoundError,
+            OSError,
+            ValueError,
+            TypeError,
+        ) as exc:
             logger.debug(
                 "Area surface '%s' failed for %s -> %s (%s): %s",
                 area_resource,
@@ -558,7 +566,13 @@ def run_cycle_test(
                 metric_file, roundtrip.final_metric
             )
 
-        except (RuntimeError, FileNotFoundError, OSError, ValueError) as exc:
+        except (
+            StyxRuntimeError,
+            RuntimeError,
+            FileNotFoundError,
+            OSError,
+            ValueError,
+        ) as exc:
             logger.warning(
                 "Skipping non-executable cycle %s (%s): %s",
                 " -> ".join(path),
