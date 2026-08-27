@@ -12,6 +12,7 @@ import pandas as pd
 from niwrap import workbench
 
 from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.transforms.utils import relocate_output
 
 logger = logging.getLogger(__name__)
 
@@ -145,23 +146,25 @@ def test_surface_transform_matrix(tmp_path: Path) -> None:
         area_surfs = {"current-area": src_surface, "new-area": dst_surface}
 
         # resample because the surfaces are not the same mesh
-        workbench.surface_resample(
+        resampled = workbench.surface_resample(
             surface_in=src_surface,
             current_sphere=src_sphere,
             new_sphere=dst_sphere,
             method="ADAP_BARY_AREA",
             area_surfs=area_surfs,
-            surface_out=str(out_surface),
+            surface_out=out_surface.name,
         )
+        relocate_output(resampled.surface_out, out_surface)
 
         # compute error between resampled surface and target surface
         error_file = tmp_path / f"{src}_to_{dst}_error.func.gii"
 
         # now compute vertex-wise signed distance from the
         # resampled surface to the target surface
-        workbench.signed_distance_to_surface(
-            surface_comp=out_surface, surface_ref=dst_surface, metric=str(error_file)
+        distance = workbench.signed_distance_to_surface(
+            surface_comp=out_surface, surface_ref=dst_surface, metric=error_file.name
         )
+        relocate_output(distance.metric, error_file)
         gii = nib.load(error_file)
         vertex_errors = np.abs(gii.darrays[0].data)
         all_errors.append(vertex_errors)

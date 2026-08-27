@@ -1,9 +1,30 @@
 """Utility functions for working with GIFTI files and surface projections."""
 
+import shutil
 from functools import lru_cache
 from pathlib import Path
 
 import nibabel as nib
+
+
+def relocate_output(written: str | Path, requested: str | Path) -> Path:
+    """Move a container-produced output file to the requested host location.
+
+    Container runners can only write inside their per-run output directory,
+    so an output requested at an absolute host path is moved there after
+    execution.
+
+    Args:
+        written: Host location of the file as produced by the runner.
+        requested: Host location the caller asked for.
+
+    Returns:
+        The requested location.
+    """
+    final_path = Path(requested)
+    final_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(written), final_path)
+    return final_path
 
 
 def estimate_surface_density(surface_file: Path) -> str:

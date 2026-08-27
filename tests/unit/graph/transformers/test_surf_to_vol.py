@@ -94,12 +94,14 @@ class TestTransformSurfaceToVolume:
         )
 
         expected_out = Path(basic_params.output_file_path)
+        produced = tmp_path / "runner_output" / "out.nii.gz"
+        produced.parent.mkdir(parents=True, exist_ok=True)
+        produced.touch()
+
         wb_fn_name = f"{transformer_type}_to_volume_mapping"
         wb_patch = f"neuromaps_prime.graph.transforms.surface.workbench.{wb_fn_name}"
 
-        with patch(
-            wb_patch, return_value=MagicMock(volume_out=expected_out)
-        ) as mock_wb:
+        with patch(wb_patch, return_value=MagicMock(volume_out=produced)) as mock_wb:
             result = mock_ops.surface_ops.transform_surface_to_volume(
                 transformer_type=transformer_type, **basic_params._asdict()
             )
@@ -128,9 +130,12 @@ class TestTransformSurfaceToVolume:
             "neuromaps_prime.graph.transforms.surface.workbench"
             ".metric_to_volume_mapping"
         )
-        with patch(
-            wb_patch, return_value=MagicMock(volume_out=tmp_path / "out.nii.gz")
-        ):
+        # Simulate the runner having written the output inside its own
+        # per-run output directory; the wrapper relocates it.
+        produced = tmp_path / "runner_output" / "out.nii.gz"
+        produced.parent.mkdir(parents=True, exist_ok=True)
+        produced.touch()
+        with patch(wb_patch, return_value=MagicMock(volume_out=produced)):
             mock_ops.surface_ops.transform_surface_to_volume(
                 transformer_type="metric", **params._asdict()
             )

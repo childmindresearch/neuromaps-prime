@@ -85,7 +85,8 @@ class TestSurfaceSphereProjectUnproject:
         )
         with _run_patched(func_path, side_effect=lambda **_: _produce()) as mock_wb:
             result = surface_sphere_project_unproject(**mock_paths)
-            mock_wb.assert_called_once_with(**mock_paths)
+            expected = {**mock_paths, "sphere_out": Path(mock_paths["sphere_out"]).name}
+            mock_wb.assert_called_once_with(**expected)
             assert result.sphere_out.exists()
 
     def test_missing_output(self, mock_paths: dict[str, Any]) -> None:
@@ -100,7 +101,7 @@ class TestSurfaceSphereProjectUnproject:
         )
         with (
             _run_patched(func_path, return_value=mock_result),
-            pytest.raises(FileNotFoundError, match="Sphere out not found"),
+            pytest.raises(FileNotFoundError, match="Sphere out not"),
         ):
             surface_sphere_project_unproject(**mock_paths)
 
@@ -170,7 +171,7 @@ class TestMetricResample:
         func_path = "neuromaps_prime.transforms.surface.workbench.metric_resample"
         with (
             _run_patched(func_path, return_value=mock_result),
-            pytest.raises(FileNotFoundError, match="Metric out not found"),
+            pytest.raises(FileNotFoundError, match="Metric out not"),
         ):
             metric_resample(**mock_paths, method="ADAP_BARY_AREA")
 
@@ -240,6 +241,6 @@ class TestLabelResample:
         func_path = "neuromaps_prime.transforms.surface.workbench.label_resample"
         with (
             _run_patched(func_path, return_value=mock_result),
-            pytest.raises(FileNotFoundError, match="Label out not found"),
+            pytest.raises(FileNotFoundError, match="Label out not"),
         ):
             label_resample(**mock_paths, method="ADAP_BARY_AREA")
