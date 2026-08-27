@@ -29,7 +29,7 @@ Yerkes19:
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
           notes:
-          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 10k surface density.
+          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 
           - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a680941e7c8fa7ad49'
           - 'right lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a34572881301679ab8'
         PC_Yeo17Networks:
@@ -38,189 +38,149 @@ Yerkes19:
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
           notes:
-          - Yeo2011 17 Network parcellation (N=1000). Human-to-monkey. 10k surface density.
+          - Yeo2011 17 Network parcellation (N=1000). Human-to-monkey.
         PC_Markov:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37da771710ca7abbd
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a580941e7c8fa7ad47
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
           notes:
-          - Markov monkey cortical parcellation, 10k surface density.
+          - Markov monkey cortical parcellation.
         PC_B05:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb79d9a36f6de28bf7c
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba879a4dae5d374bd5
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
           notes:
-          - B05 monkey cortical parcellation, 10k surface density.
+          - B05 monkey cortical parcellation.
         PC_Glasser2016:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb98dac1b881128c0d4
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbbdef9a8f7755a79ab
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
           notes:
-          - Glasser 2016 multi-modal parcellation. Human-to-monkey. 10k surface density.
+          - Glasser 2016 multi-modal parcellation. Human-to-monkey.
         PC_Broddman09:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905309bf55aeca1f9300ef
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a90530a441f17df1392feeb
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
           notes:
-          - Brodmann 1909 areal parcellation. Human-to-monkey. 10k surface density.
+          - Brodmann 1909 areal parcellation. Human-to-monkey. 
         PC_Schaefer7Networks_100:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb71614316345a7577
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba79a37b24f6374aa8
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 100-parcel, 7-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer7Networks_200:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbadef9a8f7755a79a6
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb18a30f74a028bd46
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 200-parcel, 7-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer7Networks_300:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb8dac1b881128c0d8
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbc79a37b24f6374ab0
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 300-parcel, 7-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer7Networks_400:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb18a30f74a028bd44
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba17fc47ad57374c15
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 400-parcel, 7-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer7Networks_500:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb9fd26577264374c10
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbbdef9a8f7755a79a9
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 500-parcel, 7-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer7Networks_600:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb71614316345a7575
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba9c41aeb6ea5a770a
           references: 
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 600-parcel, 7-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer7Networks_700:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb9879a4dae5d374bd0
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbaa36044701d28bc99
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 700-parcel, 7-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer7Networks_800:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba9d9a36f6de28bf86
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb9def9a8f7755a79a4
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 800-parcel, 7-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer7Networks_900:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbc879a4dae5d374bdc
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba9d9a36f6de28bf8a
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 900-parcel, 7-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer7Networks_1000:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba9d9a36f6de28bf88
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb0569bfb8965a77ae
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 1000-parcel, 7-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer17Networks_100:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba18a30f74a028bd42
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb818a30f74a028bd3f
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 100-parcel, 17-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer17Networks_200:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbafd26577264374c15
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb79a37b24f6374aae
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 200-parcel, 17-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer17Networks_300:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb879a4dae5d374bda
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb17fc47ad57374c19
           references: 
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 300-parcel, 17-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer17Networks_400:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbcfd26577264374c1f
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb79a37b24f6374aab
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 400-parcel, 17-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer17Networks_500:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb99c41aeb6ea5a7707
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbafd26577264374c13
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 500-parcel, 17-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer17Networks_600:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb917fc47ad57374c0e
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbc79a37b24f6374ab2
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 600-parcel, 17-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer17Networks_700:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba17fc47ad57374c13
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba17fc47ad57374c11
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 700-parcel, 17-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer17Networks_800:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb9d9a36f6de28bf8d
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba8dac1b881128c0d6
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 800-parcel, 17-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer17Networks_900:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbc0569bfb8965a77b0
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb9879a4dae5d374bd2
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 900-parcel, 17-network parcellation. Human-to-monkey. 10k surface density.
         PC_Schaefer17Networks_1000:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb9c41aeb6ea5a770f
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba71614316345a7571
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
-          notes:
-          - Schaefer2018 1000-parcel, 17-network parcellation. Human-to-monkey. 10k surface density.
         AE:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9076bd108c949d505a774f
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9076bc1564d9fbd31364d9
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
           notes:
-          - Relative surface area expansion, macaque-to-human. 10k surface density.
+          - Relative surface area expansion.
         FHI:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9076acf17fd92acb1366e8
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9076ac975e8fa7985a75f8
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
           notes:
-          - Functional connectivity homology index. Cross-species similarity of FC gradient profiles; high in sensory, low in association cortex. 10k surface density.
+          - Functional connectivity homology index. Cross-species similarity of FC gradient profiles; high in sensory, low in association cortex.
         
         
     32k:
@@ -344,14 +304,14 @@ Yerkes19:
           - https://doi.org/10.1038/s41593-023-01351-2
           - https://balsa.wustl.edu/study/P2Nql
           notes:
-          - Receptor density per neuron, summed across all receptor types (companion to the individual per-tracer receptor maps). 32k surface density.
+          - Receptor density per neuron, summed across all receptor types (companion to the individual per-tracer receptor maps).
         RM_raw:
           left: https://files.us.osf.io/v1/resources/c9zab/providers/osfstorage/6a8f4a80c09f7e48516b124d?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
           - https://doi.org/10.1038/s41593-023-01351-2
           - https://balsa.wustl.edu/study/P2Nql
           notes:
-          - Raw (non-normalized) receptor density, summed across all receptor types. 32k surface density.
+          - Raw (non-normalized) receptor density, summed across all receptor types. 
         RG_perNeuron:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f4b0e02afd164fce3a045
           references:
@@ -359,7 +319,7 @@ Yerkes19:
           - https://balsa.wustl.edu/study/P2Nql
           notes:
           - Receptor density gradients (per-neuron normalized). 
-          - Multi-map - PC1 is the principal receptor gradient, PC2 is 5-HT1A-driven. 32k surface density.
+          - Multi-map - PC1 is the principal receptor gradient, PC2 is 5-HT1A-driven.
         RG_raw:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f4b0879d2d292ee6b1255
           references:
@@ -367,7 +327,7 @@ Yerkes19:
           - https://balsa.wustl.edu/study/P2Nql
           notes:
           - Receptor density gradients (raw, non-normalized). 
-          - Multi-map - PC1 is the principal receptor gradient, PC2 is 5-HT1A-driven. 32k surface density.
+          - Multi-map - PC1 is the principal receptor gradient, PC2 is 5-HT1A-driven.
         MM:
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52947a752a710f2c2b26
           references:
@@ -398,7 +358,7 @@ Yerkes19:
         PC_Yeo7Networks:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0
           notes:
-          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 32k surface density.
+          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 
           - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a3d0d28dc642a7afe5'
         PC_Julich:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f50174012993bc0e3a12f
@@ -406,7 +366,7 @@ Yerkes19:
           - https://doi.org/10.1038/s41593-023-01351-2
           - https://balsa.wustl.edu/study/P2Nql
           notes:
-          - Julich cytoarchitectonic parcellation, 109 areas. 32k surface density.
+          - Julich cytoarchitectonic parcellation, 109 areas.
           - 'border file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f5012977fe396586b11ef'
         ND:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f448611ea4340aae3a481
@@ -414,42 +374,43 @@ Yerkes19:
           - https://doi.org/10.1073/pnas.1010356107
           - https://balsa.wustl.edu/study/P2Nql
           notes:
-          - Neuron density. 32k surface density.
+          - Neuron density.
         CH:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f47bcc14e371e50e3a122
           references:
           - https://doi.org/10.1016/j.neuron.2021.08.024
           - https://balsa.wustl.edu/study/P2Nql
           notes:
-          - Anatomical cortical hierarchy. Complements the intrinsic timescale (Manea et al.) map. 32k surface density.
+          - Anatomical cortical hierarchy. Complements the intrinsic timescale (Manea et al.) map. 
         DM_treeSize:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f48eac14e371e50e3a1c5
           references:
           - https://doi.org/10.1016/B0-12-370878-8/00164-6
           - https://balsa.wustl.edu/study/P2Nql
           notes:
-          - Dendritic tree size, layer III pyramidal cells. 32k surface density.
+          - Dendritic tree size, layer III pyramidal cells.
         DM_spineCount:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f48eec14e371e50e3a1c7
           references:
           - https://doi.org/10.1016/B0-12-370878-8/00164-6
           - https://balsa.wustl.edu/study/P2Nql
           notes:
-          - Dendritic spine count, layer III pyramidal cells. 32k surface density.
+          - Dendritic spine count, layer III pyramidal cells.
         FG:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f4c0621d2d3ad7e6b14c7
           references:
           - https://doi.org/10.1016/j.neuroimage.2020.117346
           - https://balsa.wustl.edu/study/P2Nql
           notes:
-          - Functional connectivity gradients 1-15 (multi-map, 15 gradients in one file). 32k surface density.
+          - Functional connectivity gradients 1-15 (multi-map, 15 gradients in one file).
         HTR1A:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f526e5e77f8cea96b11cf
           references:
           - https://doi.org/10.1038/s41593-023-01351-2
           - https://balsa.wustl.edu/study/P2Nql
           notes:
-          - HTR1A gene expression, human-to-monkey (AHBA-derived). 32k surface density.
+          - HTR1A (serotonin 1A receptor) gene expression map. Derived from the Allen Human Brain Atlas (AHBA), mapped from human to macaque. 
+          - Represents a single gene only, included as a worked example of a cross-species expression annotation.
           - 'source (human fsLR) file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f544d23eb0a53831f5fba'
 
   volumes:
