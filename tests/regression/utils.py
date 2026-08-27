@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from matplotlib_surface_plotting import plot_surf
 from tests.cycle import Hemisphere, path_token, write_metric
 
@@ -256,37 +255,3 @@ def plot_cycle_cortical_surfaces(
                 space,
                 hemisphere,
             )
-
-
-def load_latest_cycle_values(dir: Path) -> dict[tuple[str, str], float]:
-    """Load the most recent valid cycle Pearson r CSV."""
-    files = sorted(
-        dir.glob("cycle_*.csv"), key=lambda path: path.stat().st_mtime, reverse=True
-    )
-
-    required_columns = {"origin", "species", "hemisphere", "mean_pearson_r"}
-
-    for file in files:
-        try:
-            frame = pd.read_csv(file)
-        except (OSError, pd.errors.ParserError):
-            continue
-
-        if not required_columns.issubset(frame.columns):
-            continue
-
-        values: dict[tuple[str, str], float] = {}
-
-        for _, row in frame.iterrows():
-            key = (str(row["origin"]), str(row["hemisphere"]))
-
-            if key in values:
-                raise ValueError(f"Duplicate pearson r entry in {file}: {key}")
-
-            values[key] = float(row["mean_pearson_r"])
-
-        logger.info("Using cycle pearson r: %s", file)
-
-        return values
-
-    raise FileNotFoundError(f"No valid cycle pearson CSV found in {dir}.")

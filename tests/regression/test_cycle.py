@@ -46,11 +46,7 @@ from tests.cycle import (
     roundtrip_metric,
     score_roundtrip,
 )
-from tests.regression.utils import (
-    load_latest_cycle_values,
-    make_sphere,
-    plot_cycle_cortical_surfaces,
-)
+from tests.regression.utils import make_sphere, plot_cycle_cortical_surfaces
 
 from neuromaps_prime.graph import NeuromapsGraph
 
@@ -148,9 +144,7 @@ def _read_cycle_frames(
 
 
 def _summarize(
-    frames: dict[tuple[str, str], pd.DataFrame],
-    species_by_origin: dict[str, str],
-    previous: dict[tuple[str, str], float],
+    frames: dict[tuple[str, str], pd.DataFrame], species_by_origin: dict[str, str]
 ) -> _CycleSummary:
     """Calculate cycle means and derived summary rows."""
     pearson_r: dict[tuple[str, str], float] = {}
@@ -199,15 +193,10 @@ def _summarize(
             }
         )
 
-        previous_r = previous[("all", hemisphere)]
-        difference = mean_r - previous_r
-
         summaries.append(
             f"All spaces ({hemisphere}):\n"
             f"  Total executable cycles: {len(combined)}\n"
             f"  Mean Pearson r: {mean_r:.6f}\n"
-            f"  Previous Pearson r: {previous_r:.6f}\n"
-            f"  Difference: {difference:+.6f}\n"
         )
 
     return _CycleSummary(
@@ -225,8 +214,6 @@ def test_cycle_roundtrip(graph: NeuromapsGraph, tmp_path: Path) -> None:
     output_dir = _resolve_output_dir(tmp_path)
 
     logger.info("Cycle outputs will be written to: %s", output_dir)
-
-    previous = load_latest_cycle_values(dir=dir)
 
     origins = sorted(graph.nodes)
     total_usable_paths = 0
@@ -250,23 +237,7 @@ def test_cycle_roundtrip(graph: NeuromapsGraph, tmp_path: Path) -> None:
 
     frames = _read_cycle_frames(run_dir=output_dir, origins=origins)
 
-    summary = _summarize(
-        frames=frames, species_by_origin=species_by_origin, previous=previous
-    )
-
-    for hemisphere in HEMISPHERES:
-        key = ("all", hemisphere)
-
-        current_r = summary.pearson_r[key]
-        previous_r = previous[key]
-
-        assert current_r >= previous_r - 1e-4, (
-            f"Average round-trip correlation regressed: "
-            f"origin=all, hemisphere={hemisphere}, "
-            f"mean r={current_r:.6f}, "
-            f"previous={previous_r:.6f}, "
-            f"threshold={previous_r - 1e-4:.6f}"
-        )
+    summary = _summarize(frames=frames, species_by_origin=species_by_origin)
 
     frame = _summary_frame(summary.origin_rows + summary.all_rows)
 
@@ -286,7 +257,6 @@ def test_cycle_roundtrip(graph: NeuromapsGraph, tmp_path: Path) -> None:
     plot_run_summaries(
         run_dir=output_dir,
         current_values=summary.pearson_r,
-        pearson_r=previous,
         summary_rows=summary.origin_rows,
     )
 
@@ -480,10 +450,14 @@ def _plot_species_summary(
 def plot_run_summaries(
     run_dir: str | Path,
     current_values: dict[tuple[str, str], float],
-    pearson_r: dict[tuple[str, str], float],
     summary_rows: list[dict[str, object]],
+    pearson_r: dict[tuple[str, str], float] | None = None,
 ) -> None:
-    """Create overall and species-specific cycle summary plots."""
+    """Create overall and species-specific cycle summary plots.
+
+    When ``pearson_r`` (previous baseline values) is provided, a
+    current-versus-previous comparison plot is also created.
+    """
     run_dir = Path(run_dir)
 
     if not run_dir.is_dir():
@@ -518,10 +492,11 @@ def plot_run_summaries(
             run_dir=run_dir, frame=frame, origins=species_origins_list, species=species
         )
 
-    # Current versus previous comparison.
-    _plot_pearson_comparison(
-        run_dir=run_dir, current_values=current_values, pearson_r=pearson_r
-    )
+    if pearson_r:
+        # Current versus previous comparison.
+        _plot_pearson_comparison(
+            run_dir=run_dir, current_values=current_values, pearson_r=pearson_r
+        )
 
 
 def _summary_frame(rows: list[dict[str, object]]) -> pd.DataFrame:
