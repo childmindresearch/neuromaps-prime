@@ -52,9 +52,7 @@ class TestOSFFileMeta:
     def test_valid(self) -> None:
         """Test metadata fields are correctly assigned on instantiation."""
         meta = OSFFileMeta(
-            name="test.txt",
-            size=12,
-            extra=OSFFileExtra(hashes=OSFHashes(md5=MOCK_MD5)),
+            name="test.txt", size=12, extra=OSFFileExtra(hashes=OSFHashes(md5=MOCK_MD5))
         )
         assert meta.name == "test.txt"
         assert meta.extra.hashes.md5 == MOCK_MD5
@@ -71,9 +69,7 @@ class TestOSFStorage:
         assert meta.name == "test.txt"
         assert meta.extra.hashes.md5 == MOCK_MD5
         mock_get.assert_called_once_with(
-            "https://files.osf.io/v1/resources/abcde",
-            params={"meta": ""},
-            timeout=90,
+            "https://files.osf.io/v1/resources/abcde", params={"meta": ""}, timeout=90
         )
 
     @patch("neuromaps_prime.remote.osf.requests.get")

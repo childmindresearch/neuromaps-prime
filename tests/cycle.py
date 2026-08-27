@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import tempfile
 from dataclasses import dataclass
 from itertools import pairwise
 from pathlib import Path
@@ -101,9 +102,7 @@ class CycleResult:
 
 
 def _iter_roundtrip_paths(
-    subgraph: nx.DiGraph,
-    origin: str,
-    max_length: int,
+    subgraph: nx.DiGraph, origin: str, max_length: int
 ) -> Iterator[tuple[str, ...]]:
     """Yield bounded round-trip paths from an origin node.
 
@@ -113,57 +112,28 @@ def _iter_roundtrip_paths(
 
     A node may therefore occur once on each leg, allowing legitimate
     bidirectional round trips through bridge spaces while avoiding arbitrary
-    graph walks and ping-ponging.
+    graph walks and ping-ponging. Because each leg is a simple path and the
+    turn node is not the origin, every path visits the origin exactly twice
+    and uses at most ``max_length`` hops, so no further filtering is needed.
     """
     turn_nodes = sorted(node for node in subgraph.nodes if node != origin)
 
     for turn in turn_nodes:
         outbound_paths = nx.all_simple_paths(
-            subgraph,
-            source=origin,
-            target=turn,
-            cutoff=max_length - 1,
+            subgraph, source=origin, target=turn, cutoff=max_length - 1
         )
 
-        for outbound in sorted(outbound_paths):
+        for outbound in outbound_paths:
             out_hops = len(outbound) - 1
 
-            if out_hops < 1:
-                continue
-
-            remaining = max_length - out_hops
-
-            if remaining < 1:
-                continue
-
+            # Inbound leg gets the remaining budget so the full path
+            # never exceeds max_length hops.
             inbound_paths = nx.all_simple_paths(
-                subgraph,
-                source=turn,
-                target=origin,
-                cutoff=remaining,
+                subgraph, source=turn, target=origin, cutoff=max_length - out_hops
             )
 
-            for inbound in sorted(inbound_paths):
-                in_hops = len(inbound) - 1
-                total_hops = out_hops + in_hops
-
-                if total_hops < 2 or total_hops > max_length:
-                    continue
-
-                path = tuple(outbound + inbound[1:])
-
-                if path.count(origin) != 2:
-                    continue
-
-                counts: dict[str, int] = {}
-
-                for node in path:
-                    counts[node] = counts.get(node, 0) + 1
-
-                if any(node != origin and count > 2 for node, count in counts.items()):
-                    continue
-
-                yield path
+            for inbound in inbound_paths:
+                yield tuple(outbound + inbound[1:])
 
 
 def find_return_paths(
@@ -173,7 +143,6 @@ def find_return_paths(
     edge_type: str = NeuromapsGraph.surface_to_surface_key,
     max_length: int | None = None,
     allow_revisits: bool = False,
-    max_paths: int | None = None,
 ) -> list[tuple[str, ...]]:
     """Enumerate directed return paths from an origin space.
 
@@ -187,7 +156,6 @@ def find_return_paths(
         edge_type: Graph edge layer to traverse.
         max_length: Maximum number of transformation hops.
         allow_revisits: Allow nodes to occur once on each leg.
-        max_paths: Optional maximum number of paths returned.
 
     Returns:
         Paths sorted by hop count (length) and then lexicographically.
@@ -204,18 +172,9 @@ def find_return_paths(
         if max_length is None:
             raise ValueError("max_length is required when allow_revisits=True.")
 
-        paths = set(
-            _iter_roundtrip_paths(
-                subgraph,
-                origin,
-                max_length,
-            )
-        )
+        paths = set(_iter_roundtrip_paths(subgraph, origin, max_length))
     else:
-        cycles = nx.simple_cycles(
-            subgraph,
-            length_bound=max_length,
-        )
+        cycles = nx.simple_cycles(subgraph, length_bound=max_length)
 
         paths = set()
 
@@ -229,15 +188,7 @@ def find_return_paths(
 
             paths.add(tuple(rotated))
 
-    ordered = sorted(
-        paths,
-        key=lambda path: (len(path) - 1, path),
-    )
-
-    if max_paths is not None:
-        ordered = ordered[:max_paths]
-
-    return ordered
+    return sorted(paths, key=lambda path: (len(path) - 1, path))
 
 
 # -------------------------------------------------------------------------
@@ -245,46 +196,27 @@ def find_return_paths(
 # -------------------------------------------------------------------------
 
 
-def write_metric(
-    metric_file: str | Path,
-    values: np.ndarray,
-) -> Path:
+def write_metric(metric_file: str | Path, values: np.ndarray) -> Path:
     """Write one scalar value per vertex as a GIFTI metric."""
     image = nib.GiftiImage(
         darrays=[
             nib.gifti.GiftiDataArray(
-                np.asarray(
-                    values,
-                    dtype=np.float32,
-                ),
-                intent="NIFTI_INTENT_NONE",
+                np.asarray(values, dtype=np.float32), intent="NIFTI_INTENT_NONE"
             )
         ]
     )
 
     metric_file = Path(metric_file)
-    metric_file.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    metric_file.parent.mkdir(parents=True, exist_ok=True)
 
-    nib.save(
-        image,
-        metric_file,
-    )
+    nib.save(image, metric_file)
 
     return metric_file
 
 
-def load_metric(
-    metric_file: str | Path,
-) -> np.ndarray:
+def load_metric(metric_file: str | Path) -> np.ndarray:
     """Load a scalar GIFTI metric as a one-dimensional array."""
-    data, image = load_data(
-        metric_file,
-        dtype=np.float64,
-        return_image=True,
-    )
+    data, image = load_data(metric_file, dtype=np.float64, return_image=True)
 
     if not isinstance(image, nib.GiftiImage):
         raise ValueError(f"Expected GIFTI metric file, got {type(image)}.")
@@ -308,7 +240,7 @@ def _execute_hop(
     source: str,
     target: str,
     hemisphere: Hemisphere,
-    output_name: str,
+    output_file: Path,
     *,
     density: str | None,
     add_edge: bool,
@@ -319,11 +251,7 @@ def _execute_hop(
     by pial and white if the requested area resource cannot produce a usable
     output.
     """
-    for area_resource in (
-        "midthickness",
-        "pial",
-        "white",
-    ):
+    for area_resource in ("midthickness", "pial", "white"):
         try:
             result = graph.surface_to_surface_transformer(
                 transformer_type="metric",
@@ -331,7 +259,7 @@ def _execute_hop(
                 source_space=source,
                 target_space=target,
                 hemisphere=hemisphere,
-                output_file_path=output_name,
+                output_file_path=output_file,
                 source_density=density,
                 target_density=density,
                 area_resource=area_resource,
@@ -370,13 +298,7 @@ def _execute_hop(
                 metric_values=metric_values,
             )
 
-        except (
-            RuntimeError,
-            FileNotFoundError,
-            OSError,
-            ValueError,
-            TypeError,
-        ) as exc:
+        except (RuntimeError, FileNotFoundError, OSError, ValueError, TypeError) as exc:
             logger.debug(
                 "Area surface '%s' failed for %s -> %s (%s): %s",
                 area_resource,
@@ -398,13 +320,29 @@ def _execute_hop(
 # -------------------------------------------------------------------------
 
 
+def _resolve_workdir(workdir: str | Path | None) -> Path:
+    """Resolve and create the artifact directory for cycle outputs.
+
+    Callers running under pytest should pass the test's ``tmp_path`` so
+    artifacts follow pytest's temporary-file retention policy. Otherwise a
+    shared directory under the system temporary area is used.
+    """
+    resolved = (
+        Path(workdir)
+        if workdir is not None
+        else Path(tempfile.gettempdir()) / "neuromaps_prime" / "cycles"
+    )
+    resolved.mkdir(parents=True, exist_ok=True)
+    return resolved
+
+
 def roundtrip_metric(
     graph: NeuromapsGraph,
     metric_file: str | Path,
     path: tuple[str, ...],
     hemisphere: Hemisphere,
-    workdir: str | Path,
     *,
+    workdir: str | Path | None = None,
     density: str | None = None,
     add_edge: bool = False,
 ) -> RoundtripResult:
@@ -429,7 +367,9 @@ def roundtrip_metric(
         metric_file: Seed metric.
         path: Closed transformation path.
         hemisphere: Hemisphere being tested.
-        workdir: Directory for intermediate artifacts.
+        workdir: Directory for intermediate artifacts. When ``None``, a
+            shared directory under the system temporary area is used; pass
+            the test's pytest ``tmp_path`` in tests.
         density: Optional fixed density. ``None`` delegates density handling
             to the production transformer.
         add_edge: Whether transformations may mutate the graph.
@@ -442,25 +382,19 @@ def roundtrip_metric(
         RuntimeError: If any hop cannot be executed.
         FileNotFoundError: If a transformation output cannot be recovered.
     """
-    workdir = Path(workdir)
-    workdir.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    workdir = _resolve_workdir(workdir)
 
     current = Path(metric_file)
     token = path_token(path)
     hops: list[HopResult] = []
 
     for hop_number, (source, target) in enumerate(pairwise(path)):
-        output_name = f"cycle_{token}_hop{hop_number:02d}_{source}-to-{target}.func.gii"
+        output_file = (
+            workdir / f"cycle_{token}_hop{hop_number:02d}_{source}-to-{target}.func.gii"
+        )
 
         logger.info(
-            "Executing hop %d: %s -> %s (%s)",
-            hop_number,
-            source,
-            target,
-            hemisphere,
+            "Executing hop %d: %s -> %s (%s)", hop_number, source, target, hemisphere
         )
 
         hop_result = _execute_hop(
@@ -469,7 +403,7 @@ def roundtrip_metric(
             source=source,
             target=target,
             hemisphere=hemisphere,
-            output_name=output_name,
+            output_file=output_file,
             density=density,
             add_edge=add_edge,
         )
@@ -485,11 +419,7 @@ def roundtrip_metric(
             hop_result.area_resource,
         )
 
-    return RoundtripResult(
-        path=path,
-        final_metric=current,
-        hops=tuple(hops),
-    )
+    return RoundtripResult(path=path, final_metric=current, hops=tuple(hops))
 
 
 # -------------------------------------------------------------------------
@@ -498,8 +428,7 @@ def roundtrip_metric(
 
 
 def score_roundtrip(
-    original_file: str | Path,
-    roundtrip_file: str | Path,
+    original_file: str | Path, roundtrip_file: str | Path
 ) -> tuple[float, float]:
     """Return ``(pearson_r, max_abs_diff)``."""
     original = load_metric(original_file)
@@ -512,57 +441,38 @@ def score_roundtrip(
         )
 
     finite_mask = np.isfinite(original) & np.isfinite(roundtrip)
-
-    if np.any(finite_mask):
-        max_abs_diff = float(
-            np.max(np.abs(original[finite_mask] - roundtrip[finite_mask]))
-        )
-    else:
-        logger.warning("Round-trip metric contains no finite values.")
-        max_abs_diff = np.nan
-
     finite_count = int(np.count_nonzero(finite_mask))
 
-    if finite_count < 2:
-        logger.warning(
-            "Fewer than two finite values available for Pearson correlation."
-        )
+    if finite_count == 0:
+        logger.warning("Round-trip metric contains no finite values.")
+        return 0.0, np.nan
 
-        if finite_count > 0 and np.allclose(
-            original,
-            roundtrip,
-            equal_nan=True,
-        ):
-            return 1.0, max_abs_diff
-
-        return 0.0, max_abs_diff
+    max_abs_diff = float(np.max(np.abs(original[finite_mask] - roundtrip[finite_mask])))
 
     original_finite = original[finite_mask]
     roundtrip_finite = roundtrip[finite_mask]
 
-    original_std = np.std(original_finite)
-    roundtrip_std = np.std(roundtrip_finite)
-
-    vectors_equal = bool(
-        np.allclose(
-            original,
-            roundtrip,
-            equal_nan=True,
-        )
+    # Pearson correlation is undefined for a constant vector or for fewer
+    # than two values; fall back to exact vector agreement.
+    constant = bool(
+        np.isclose(np.std(original_finite), 0.0)
+        or np.isclose(np.std(roundtrip_finite), 0.0)
     )
 
-    if np.isclose(original_std, 0.0) or np.isclose(roundtrip_std, 0.0):
-        pearson_r = 1.0 if vectors_equal else 0.0
-    else:
-        pearson_r = float(
-            np.corrcoef(
-                original_finite,
-                roundtrip_finite,
-            )[0, 1]
+    if finite_count < 2 or constant:
+        if finite_count < 2:
+            logger.warning(
+                "Fewer than two finite values available for Pearson correlation."
+            )
+        return (
+            1.0 if np.allclose(original, roundtrip, equal_nan=True) else 0.0,
+            max_abs_diff,
         )
 
-        if np.isnan(pearson_r) and vectors_equal:
-            pearson_r = 1.0
+    pearson_r = float(np.corrcoef(original_finite, roundtrip_finite)[0, 1])
+
+    if np.isnan(pearson_r) and np.allclose(original, roundtrip, equal_nan=True):
+        pearson_r = 1.0
 
     return pearson_r, max_abs_diff
 
@@ -572,12 +482,11 @@ def run_cycle_test(
     origin: str,
     metric_file: str | Path,
     hemisphere: Hemisphere,
-    workdir: str | Path,
     *,
+    workdir: str | Path | None = None,
     density: str | None = None,
     max_length: int | None = None,
     allow_revisits: bool = False,
-    max_paths: int | None = None,
     add_edge: bool = False,
 ) -> list[CycleResult]:
     """Execute and score all return paths from an origin.
@@ -591,30 +500,29 @@ def run_cycle_test(
         origin: Starting and ending space.
         metric_file: Seed metric.
         hemisphere: Hemisphere being tested.
-        workdir: Directory for transformation artifacts.
+        workdir: Directory for transformation artifacts. When ``None``, a
+            shared directory under the system temporary area is used; pass
+            the test's pytest ``tmp_path`` in tests.
         density: Optional fixed surface density.
         max_length: Maximum number of transformation hops.
         allow_revisits: Allow bridge nodes to occur once on each leg.
-        max_paths: Optional maximum number of paths to execute.
         add_edge: Whether transformations may mutate the graph.
 
     Returns:
         A list of :class:`CycleResult` objects for successfully executed
         return paths.
     """
+    workdir = _resolve_workdir(workdir)
+
     paths = find_return_paths(
-        graph,
-        origin,
-        max_length=max_length,
-        allow_revisits=allow_revisits,
-        max_paths=max_paths,
+        graph, origin, max_length=max_length, allow_revisits=allow_revisits
     )
 
     results: list[CycleResult] = []
 
     for path in paths:
         token = path_token(path)
-        path_workdir = Path(workdir) / f"path_{token}"
+        path_workdir = workdir / f"path_{token}"
 
         try:
             roundtrip = roundtrip_metric(
@@ -628,16 +536,10 @@ def run_cycle_test(
             )
 
             pearson_r, max_abs_diff = score_roundtrip(
-                metric_file,
-                roundtrip.final_metric,
+                metric_file, roundtrip.final_metric
             )
 
-        except (
-            RuntimeError,
-            FileNotFoundError,
-            OSError,
-            ValueError,
-        ) as exc:
+        except (RuntimeError, FileNotFoundError, OSError, ValueError) as exc:
             logger.warning(
                 "Skipping non-executable cycle %s (%s): %s",
                 " -> ".join(path),
@@ -647,11 +549,7 @@ def run_cycle_test(
             continue
 
         results.append(
-            CycleResult(
-                path=path,
-                pearson_r=pearson_r,
-                max_abs_diff=max_abs_diff,
-            )
+            CycleResult(path=path, pearson_r=pearson_r, max_abs_diff=max_abs_diff)
         )
 
     return results

@@ -35,10 +35,7 @@ class TestSurfaceTransformIntegration:
         """
         density = graph.find_highest_density(self.ORIGIN)
         sphere = graph.fetch_surface_atlas(
-            self.ORIGIN,
-            density,
-            self.HEMISPHERE,
-            "sphere",
+            self.ORIGIN, density, self.HEMISPHERE, "sphere"
         )
 
         assert sphere is not None
@@ -63,10 +60,7 @@ class TestSurfaceTransformIntegration:
         """
         density = graph.find_highest_density(self.ORIGIN)
         sphere = graph.fetch_surface_atlas(
-            self.ORIGIN,
-            density,
-            self.HEMISPHERE,
-            "sphere",
+            self.ORIGIN, density, self.HEMISPHERE, "sphere"
         )
 
         assert sphere is not None

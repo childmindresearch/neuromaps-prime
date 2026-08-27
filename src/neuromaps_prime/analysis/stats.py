@@ -25,10 +25,7 @@ _NAN_POLICY = get_args(_NAN_POLICY_TYPE)
 
 
 def _chk2_asarray(
-    a: ArrayLike,
-    b: ArrayLike,
-    *,
-    axis: int | None = None,
+    a: ArrayLike, b: ArrayLike, *, axis: int | None = None
 ) -> tuple[np.ndarray, np.ndarray, int]:
     """Convert two inputs into 1-D NumPy arrays.
 
@@ -244,9 +241,7 @@ class PermResult(NamedTuple):
     nulls: np.ndarray | float | None = None
 
 
-def _is_callable_metric(
-    m: _METRIC_TYPE | Callable,
-) -> TypeGuard[Callable]:
+def _is_callable_metric(m: _METRIC_TYPE | Callable) -> TypeGuard[Callable]:
     """Return True if *m* is a callable metric rather than a string literal."""
     return callable(m)
 
@@ -338,11 +333,7 @@ def permtest_metric(
 
 
 def _make_compare_mask(
-    src: np.ndarray,
-    trg: np.ndarray,
-    *,
-    ignore_zero: bool,
-    nan_policy: _NAN_POLICY_TYPE,
+    src: np.ndarray, trg: np.ndarray, *, ignore_zero: bool, nan_policy: _NAN_POLICY_TYPE
 ) -> np.ndarray:
     """Build a boolean mask of valid (non-zero, non-NaN) elements for comparison.
 
@@ -364,9 +355,7 @@ def _make_compare_mask(
 
 
 def _compute_observed(
-    src: np.ndarray,
-    trg: np.ndarray,
-    metric: _METRIC_TYPE | Callable,
+    src: np.ndarray, trg: np.ndarray, metric: _METRIC_TYPE | Callable
 ) -> np.ndarray | float:
     """Compute the observed similarity metric between two masked arrays."""
     if _is_callable_metric(metric):

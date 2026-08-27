@@ -17,8 +17,7 @@ VERTEX_CNT = 32_492
 def mock_gifti() -> MagicMock:
     """Mock GIFTI image."""
     return MagicMock(
-        spec=nib.GiftiImage,
-        darrays=[MagicMock(data=MagicMock(shape=(VERTEX_CNT,)))],
+        spec=nib.GiftiImage, darrays=[MagicMock(data=MagicMock(shape=(VERTEX_CNT,)))]
     )
 
 
@@ -49,12 +48,7 @@ def test_estimate_surface_density(mock_count: MagicMock) -> None:
 
 
 @pytest.mark.parametrize(
-    ("value", "expected"),
-    [
-        ("32k", 32000),
-        (" 10k ", 10000),
-        ("128", 128),
-    ],
+    ("value", "expected"), [("32k", 32000), (" 10k ", 10000), ("128", 128)]
 )
 def test_get_density_key(value: str, expected: int) -> None:
     """Test estimated density correctly grabbed."""

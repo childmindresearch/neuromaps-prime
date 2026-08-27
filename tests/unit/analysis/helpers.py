@@ -16,9 +16,7 @@ def _make_gifti_surface(coords: np.ndarray, faces: np.ndarray, path: Path) -> No
 
 
 def _make_gifti_parc(
-    data: np.ndarray,
-    labels: list[tuple[int, str]],
-    path: Path,
+    data: np.ndarray, labels: list[tuple[int, str]], path: Path
 ) -> None:
     """Write a GIFTI parcellation file with label table."""
     darr = nib.gifti.GiftiDataArray(
