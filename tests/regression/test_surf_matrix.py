@@ -10,11 +10,9 @@ the target.
 The suite is a pure producer: one class-scoped run executes the transforms,
 computes the directed matrix and its derived (asymmetric / symmetric) forms
 plus the off-diagonal statistics, and writes this run's artifacts (the matrix
-CSV, one raw error GIFTI per ordered pair, a human-readable summary, and the
-heatmap / histogram plots). It reads no previous baseline and makes no
-cross-run comparison — those are CI concerns (see
-``.notes/rf_regression_test/plan.md``, Deferred). Plots are currently written
-inline and move to ``scripts/plot_surf_matrix.py`` in Phase 4.
+CSV, one raw error GIFTI per ordered pair, and a human-readable summary).
+Plots can be rendered separately from a finished run's artifacts by
+``scripts/plot_surf_matrix.py``.
 
 Outputs land under the pytest temporary directory
 (``<tmp_path>/surface_matrix_outputs``) unless the
@@ -33,10 +31,8 @@ import logging
 from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
-import matplotlib.axes._axes as mpl_axes
-import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
 import pandas as pd
@@ -52,7 +48,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 # The matrix is evaluated for a single hemisphere (matching the original test).
-HEMISPHERE = "right"
+HEMISPHERE: Literal["right"] = "right"
 
 
 # -------------------------------------------------------------------------
@@ -84,9 +80,8 @@ class SurfaceMatrixResult:
     ``matrix`` is directed: rows are the source space, columns the target
     space, each entry the median absolute signed distance after resampling.
     ``asymmetry`` is ``matrix - matrix.T`` (directionality bias); ``symmetric``
-    is ``(matrix + matrix.T) / 2`` (undirected distance). ``all_errors`` is the
-    concatenation of every pair's vertex-wise absolute signed distance (the
-    histogram input). ``output_dir`` is where this run's artifacts were written.
+    is ``(matrix + matrix.T) / 2`` (undirected distance). ``output_dir`` is
+    where this run's artifacts were written.
     """
 
     hemisphere: str
@@ -94,7 +89,6 @@ class SurfaceMatrixResult:
     matrix: pd.DataFrame
     asymmetry: pd.DataFrame
     symmetric: pd.DataFrame
-    all_errors: np.ndarray
     off_diag: OffDiagStats
     output_dir: Path
     csv_path: Path
@@ -173,16 +167,17 @@ def _compute_pair(
     hemisphere: str,
     workdir: Path,
     errors_dir: Path,
-) -> tuple[float, np.ndarray]:
+) -> float:
     """Resample ``src`` midthickness onto ``dst`` and measure the error.
 
     The source midthickness surface is resampled onto the destination sphere,
     and the vertex-wise absolute signed distance from that resampled surface to
     the destination midthickness surface is measured. The raw per-pair error is
-    persisted under ``errors_dir`` so it can be rebuilt for post-hoc plotting.
+    persisted under ``errors_dir`` so the histogram can be rebuilt for
+    post-hoc plotting.
 
     Returns:
-        ``(median_error, vertex_errors)`` for the ordered pair ``src -> dst``.
+        The median vertex-wise absolute signed distance for ``src -> dst``.
     """
     src_density = graph.find_highest_density(src)
     dst_density = graph.find_highest_density(dst)
@@ -227,7 +222,7 @@ def _compute_pair(
         float(np.std(vertex_errors)),
     )
 
-    return median_err, vertex_errors
+    return median_err
 
 
 # -------------------------------------------------------------------------
@@ -386,12 +381,11 @@ def run_surface_matrix(
     logger.info("=== BUILDING SURFACE TRANSFORM MATRIX (%s) ===", hemisphere)
 
     results: dict[tuple[str, str], float] = {}
-    all_errors: list[np.ndarray] = []
 
     for src, dst in product(spaces, spaces):
         logger.info("=== %s -> %s ===", src, dst)
 
-        median_err, vertex_errors = _compute_pair(
+        results[(src, dst)] = _compute_pair(
             graph=graph,
             src=src,
             dst=dst,
@@ -399,9 +393,6 @@ def run_surface_matrix(
             workdir=workdir,
             errors_dir=errors_dir,
         )
-
-        results[(src, dst)] = median_err
-        all_errors.append(vertex_errors)
 
     matrix = pd.DataFrame(index=spaces, columns=spaces, dtype=float)
 
@@ -411,7 +402,6 @@ def run_surface_matrix(
     asymmetry = matrix - matrix.T
     symmetric = (matrix + matrix.T) / 2.0
     off_diag = _off_diag_stats(spaces, matrix)
-    concatenated = np.concatenate(all_errors) if all_errors else np.array([])
 
     csv_path = output_dir / "surface_transform_matrix.csv"
     matrix.to_csv(csv_path)
@@ -431,155 +421,11 @@ def run_surface_matrix(
         matrix=matrix,
         asymmetry=asymmetry,
         symmetric=symmetric,
-        all_errors=concatenated,
         off_diag=off_diag,
         output_dir=output_dir,
         csv_path=csv_path,
         summary_path=summary_path,
     )
-
-
-# -------------------------------------------------------------------------
-# Plotting (moves to scripts/plot_surf_matrix.py in Phase 4)
-# -------------------------------------------------------------------------
-
-
-def annotate_heatmap(ax: mpl_axes.Axes, mat: np.ndarray) -> None:
-    """Annotate a heatmap with the numeric value in each cell."""
-    for i in range(mat.shape[0]):
-        for j in range(mat.shape[1]):
-            ax.text(
-                j,
-                i,
-                f"{mat[i, j]:.2f}",
-                ha="center",
-                va="center",
-                color="white",
-                fontsize=7,
-            )
-
-
-def _style_matrix_axes(ax: mpl_axes.Axes, spaces: list[str]) -> None:
-    """Apply the shared axis configuration to a matrix heatmap."""
-    n = len(spaces)
-
-    ax.set_xticks(range(n))
-    ax.set_yticks(range(n))
-    ax.set_xlabel("Target template space", labelpad=12)
-    ax.set_ylabel("Source template space", labelpad=12)
-    ax.set_xticklabels(spaces, rotation=45, ha="right")
-    ax.set_yticklabels(spaces)
-
-
-def _plot_matrix_heatmaps(result: SurfaceMatrixResult, output_dir: Path) -> None:
-    """Write the full-scale and NHP-scaled transform-error heatmaps."""
-    mat = result.matrix.to_numpy()
-    spaces = result.spaces
-    nhp_spaces = [s for s in spaces if s != "fsLR"]
-
-    # Full-scale heatmap.
-    fig1, ax1 = plt.subplots(figsize=(8, 6))
-    im1 = ax1.imshow(mat, interpolation="nearest", cmap="turbo")
-    annotate_heatmap(ax1, mat)
-    _style_matrix_axes(ax1, spaces)
-    ax1.set_title(
-        "Surface Transform Error Matrix (Full Scale, Including fsLR)",
-        fontweight="bold",
-        color="#0044AA",
-        pad=10,
-    )
-    cbar1 = fig1.colorbar(im1, ax=ax1)
-    cbar1.set_label("Median absolute signed-distance error", rotation=90, labelpad=12)
-    fig1.tight_layout()
-    full_caption = (
-        "Figure 3. Heatmap of pairwise surface-to-surface transform error "
-        "between atlas spaces. Each matrix entry represents the median "
-        "vertex-wise absolute signed-distance error after resampling one "
-        "midthickness surface onto another using sphere-based barycentric "
-        "registration."
-    )
-    fig1.subplots_adjust(left=0.10, bottom=0.30)
-    fig1.text(
-        0.5, 0.02, full_caption, ha="center", fontsize=9, fontstyle="italic", wrap=True
-    )
-    full_path = output_dir / "surface_transform_matrix_full.png"
-    fig1.savefig(full_path, dpi=200)
-    plt.close(fig1)
-    logger.info("Saved full-scale heatmap: %s", full_path)
-
-    # NHP-scaled heatmap: clip the color scale to the NHP value range so the
-    # interspecies (fsLR) cells do not dominate the colormap.
-    nhp_sub = (
-        result.matrix.loc[nhp_spaces, nhp_spaces].to_numpy() if nhp_spaces else mat
-    )
-    vmin = 0.0
-    vmax = float(np.nanpercentile(nhp_sub, 95))
-
-    fig2, ax2 = plt.subplots(figsize=(8, 6))
-    im2 = ax2.imshow(mat, interpolation="nearest", cmap="turbo", vmin=vmin, vmax=vmax)
-    annotate_heatmap(ax2, mat)
-    _style_matrix_axes(ax2, spaces)
-    ax2.set_title(
-        "Surface Transform Error Matrix (NHP-Scaled View; fsLR clipped)",
-        fontweight="bold",
-        color="#0044AA",
-        pad=10,
-    )
-    cbar2 = fig2.colorbar(im2, ax=ax2)
-    cbar2.set_label("Median absolute signed-distance error", rotation=90, labelpad=12)
-    fig2.tight_layout()
-    nhp_caption = (
-        "Figure 3. Heatmap of pairwise surface-to-surface transform error "
-        "between atlas spaces. Each matrix entry represents the median "
-        "vertex-wise absolute signed-distance error after resampling one "
-        "midthickness surface onto another using sphere-based barycentric "
-        "registration. Color scaling is clipped to the 95th percentile of "
-        "non-human primate (NHP) values to improve visualization of "
-        "interspecies differences."
-    )
-    fig2.subplots_adjust(left=0.10, bottom=0.30)
-    fig2.text(
-        0.5, 0.02, nhp_caption, ha="center", fontsize=9, fontstyle="italic", wrap=True
-    )
-    nhp_path = output_dir / "surface_transform_matrix_nhp_scaled.png"
-    fig2.savefig(nhp_path, dpi=200)
-    plt.close(fig2)
-    logger.info("Saved NHP-scaled heatmap: %s", nhp_path)
-
-
-def _plot_error_histogram(result: SurfaceMatrixResult, output_dir: Path) -> None:
-    """Write the vertex-wise transform-error histogram."""
-    all_errors = result.all_errors
-
-    if all_errors.size == 0:
-        logger.warning("No vertex errors available; skipping the histogram.")
-        return
-
-    fig, ax = plt.subplots(figsize=(8, 6))
-    max_val = float(np.nanmax(all_errors))
-    ax.hist(all_errors, bins=200)
-    ax.set_xlim(0, max_val)
-    ax.set_title(
-        "Vertex-wise Surface Transform Error Distribution",
-        fontweight="bold",
-        color="#0044AA",
-        pad=10,
-    )
-    ax.set_xlabel("Absolute signed distance error", labelpad=12)
-    ax.set_ylabel("Vertex count", labelpad=12)
-
-    fig4_caption = (
-        "Figure 4. Distribution of vertex-wise absolute signed-distance errors"
-        " across all pairwise surface transformations."
-    )
-    fig.subplots_adjust(left=0.15, bottom=0.30)
-    fig.text(
-        0.5, 0.02, fig4_caption, ha="center", fontsize=9, fontstyle="italic", wrap=True
-    )
-    hist_path = output_dir / "surface_transform_histogram.png"
-    fig.savefig(hist_path, dpi=200)
-    plt.close(fig)
-    logger.info("Saved global histogram: %s", hist_path)
 
 
 # -------------------------------------------------------------------------
@@ -592,11 +438,9 @@ class TestSurfaceTransformMatrix:
 
     One class-scoped run computes the full directed matrix for every ordered
     pair of valid atlas spaces (a single hemisphere) and records this run's
-    artifacts (matrix CSV, per-pair error GIFTIs, summary, and the inline
-    heatmap / histogram plots). The suite is a pure producer: it reads no
-    previous baseline and makes no cross-run comparison — those are CI
-    concerns. The test methods assert the run's outcomes only; writing the
-    artifacts is part of the run flow, not an object of the assertions.
+    artifacts (matrix CSV, per-pair error GIFTIs, and summary). The test
+    methods assert the run's outcomes only; writing the artifacts is part of
+    the run flow, not an object of the assertions.
     """
 
     @pytest.fixture(scope="class")
@@ -604,7 +448,7 @@ class TestSurfaceTransformMatrix:
     def matrix_run(
         cls, graph: NeuromapsGraph, tmp_path_factory: pytest.TempPathFactory
     ) -> SurfaceMatrixResult:
-        """Compute the matrix once; write this run's artifacts and plots."""
+        """Compute the matrix once; write this run's artifacts."""
         output_dir = resolve_artifact_dir(
             tmp_path_factory.getbasetemp() / "surface_matrix_outputs",
             env_var="NEUROMAPS_SURF_MATRIX_OUTPUT_DIR",
@@ -614,12 +458,8 @@ class TestSurfaceTransformMatrix:
 
         result = run_surface_matrix(graph, HEMISPHERE, output_dir=output_dir)
 
-        _plot_matrix_heatmaps(result, output_dir)
-        _plot_error_histogram(result, output_dir)
-
         logger.info(
-            "Generate plots with: uv run --group tests "
-            "scripts/plot_surf_matrix.py --run-dir %s",
+            "Generate plots with: uv run scripts/plot_surf_matrix.py --run-dir %s",
             output_dir,
         )
 
