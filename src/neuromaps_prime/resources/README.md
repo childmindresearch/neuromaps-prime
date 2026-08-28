@@ -57,7 +57,6 @@ These codes appear after `desc-` in the filename and indicate the kind of data s
 | **RM** | Receptor Maps | Spatial maps of neurotransmitter receptor density or binding potential, derived from PET or autoradiography imaging (e.g., radioligand binding densities per-neuron or raw). |
 | **SD** | Sulcal Depth | Vertex-wise measure of the depth of cortical folds, defined as the distance between the cortical surface and a reference surface. |
 | **SMM** | Smoothed Myelin Maps | Spatially smoothed versions of myelin maps (e.g., using surface-based kernels) to improve signal-to-noise ratio and emphasize large-scale gradients. |
-| **TPL** | Templates | Reference anatomical volumes or surfaces defining a standard coordinate space to which other data are aligned (exception uses bare modality suffix, e.g., `T1w`). |
 | **TPM** | Tissue Probability Maps | Voxel-wise probabilistic maps indicating the likelihood that a given location belongs to a specific tissue class (e.g., gray matter, white matter, CSF; exception uses `probseg` suffix). |
 
 ---
