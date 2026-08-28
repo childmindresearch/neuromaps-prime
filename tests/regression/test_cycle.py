@@ -1,7 +1,11 @@
 """Cycle regression test on the real Neuromaps-PRIME graph.
 
-Adds end-to-end cycle regression testing on the real Neuromaps graph
-to validate transform roundtrip quality across multi-hop paths.
+End-to-end cycle regression: propagate a deterministic seed metric around
+each return path in the real transformation graph and score how well it
+round-trips, validating transform quality across multi-hop paths.
+
+Cycle testing covers surface transformations only; the graph has no
+volume-to-volume cycles in scope, so volume transforms are not exercised here.
 
 Resulting files are written to a run-specific directory under the pytest
 temporary directory (``<tmp_path>/cycle_outputs``). Set the

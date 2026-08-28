@@ -3,6 +3,9 @@
 These tests validate graph traversal and round-trip metric preservation for
 surface transformation cycles using a controlled synthetic graph.
 
+Cycle testing covers surface transformations only; volume transforms have no
+cycles in scope.
+
 The synthetic graph contains three spaces (A, B, and C) connected by known
 rotational surface transformations. Forward edges apply +120 degree rotations
 around the x-axis, while reverse edges apply -120 degree rotations.

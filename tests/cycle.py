@@ -1,5 +1,9 @@
 """Utilities for evaluating cyclic surface transformations.
 
+Cycle testing covers surface transformations only: the graph has no
+volume-to-volume cycles in scope, so volume transforms are not part of cycle
+evaluation.
+
 A cycle (or return path) is a path through the surface transformation graph
 that starts and ends at the same space, for example ``A -> B -> A`` or
 ``A -> B -> C -> A``. A vertex-wise metric propagated around such a path should
