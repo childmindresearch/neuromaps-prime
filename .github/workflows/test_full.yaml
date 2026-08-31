@@ -78,8 +78,8 @@ jobs:
         # Canonical history (bootstrap empty if absent) + this run's summary.
         rm -rf "$workdir"
         git init -q -b "$branch" "$workdir"
-        git -C "$workdir" config user.name  "GitHub Actions"
-        git -C "$workdir" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git -C "$workdir" config user.name  "github-actions[bot]"
+        git -C "$workdir" config user.email "github-actions[bot]@users.noreply.github.com"
         if git -C "$workdir" fetch -q --depth 1 "https://github.com/$repo" "$branch"; then
           git -C "$workdir" reset -q --hard FETCH_HEAD
         fi
