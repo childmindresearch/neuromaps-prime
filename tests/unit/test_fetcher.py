@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 
 from neuromaps_prime import remote
 from neuromaps_prime.fetcher import download_and_validate, id_storage
@@ -105,6 +106,52 @@ class TestDownloadAndValidate:
                 "https://files.osf.io/v1/resources/abcde", tmp_path
             )
         assert result == stored
+
+
+class TestDownloadAndValidateRetry:
+    """download_and_validate retries transient errors, else fails fast."""
+
+    def test_retries_transient_then_succeeds(self, tmp_path: Path) -> None:
+        """A transient 429 followed by success returns the stored path."""
+        stored = tmp_path / "file.surf.gii"
+        transient = requests.HTTPError(response=MagicMock(status_code=429, headers={}))
+        with (
+            patch.object(remote.OSFStorage, "download") as mock_download,
+            patch("neuromaps_prime.fetcher.time.sleep"),
+        ):
+            mock_download.side_effect = [transient, stored]
+            result = download_and_validate(
+                "https://files.osf.io/v1/resources/abcde", tmp_path
+            )
+        assert result == stored
+        assert mock_download.call_count == 2
+
+    def test_no_retry_on_permanent_error(self, tmp_path: Path) -> None:
+        """A non-retryable 404 propagates on the first attempt."""
+        not_found = requests.HTTPError(response=MagicMock(status_code=404, headers={}))
+        with patch.object(remote.OSFStorage, "download") as mock_download:
+            mock_download.side_effect = not_found
+            with pytest.raises(requests.HTTPError):
+                download_and_validate(
+                    "https://files.osf.io/v1/resources/abcde", tmp_path
+                )
+        assert mock_download.call_count == 1
+
+    def test_gives_up_after_max_attempts(self, tmp_path: Path) -> None:
+        """Persistent 503s exhaust the retry budget and raise."""
+        server_error = requests.HTTPError(
+            response=MagicMock(status_code=503, headers={})
+        )
+        with (
+            patch.object(remote.OSFStorage, "download") as mock_download,
+            patch("neuromaps_prime.fetcher.time.sleep"),
+        ):
+            mock_download.side_effect = server_error
+            with pytest.raises(requests.HTTPError):
+                download_and_validate(
+                    "https://files.osf.io/v1/resources/abcde", tmp_path
+                )
+        assert mock_download.call_count == 5  # == fetcher._MAX_ATTEMPTS
 
 
 class TestOSFDownload:
