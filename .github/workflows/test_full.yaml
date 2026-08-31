@@ -110,18 +110,14 @@ jobs:
           exit 0
         }
 
-        # Keep the PAT out of .git/config and the logs: the credential store
-        # lives under runner.temp and is wiped with the job workspace.
-        creds="$RUNNER_TEMP/git-credentials"
-        printf 'protocol=https\nhost=github.com\nusername=x-access-token\npassword=%s\n' "$HISTORY_PAT" > "$creds"
-        export GIT_CONFIG_COUNT=1
-        export GIT_CONFIG_KEY_0="credential.helper"
-        export GIT_CONFIG_VALUE_0="store --file=$creds"
+        # Push with the token in the URL — no credential-helper config source to
+        # miss on this box. GHA redacts the secret value everywhere in log output.
+        auth="https://x-access-token:${HISTORY_PAT}@github.com/$repo"
 
         # Dedicated per-PR ref: force push, no fast-forward or contention concerns.
         git -C "$workdir" add -A cycle_outputs history cycle_history.svg
         git -C "$workdir" commit -q -m "Preview cycle regression ${sha8} (PR #${PR_NUMBER})"
-        git -C "$workdir" push -q -f "https://github.com/$repo" "HEAD:refs/heads/${branch}/pr-${PR_NUMBER}"
+        git -C "$workdir" push -q -f "$auth" "HEAD:refs/heads/${branch}/pr-${PR_NUMBER}"
         echo "preview=true" >> "$GITHUB_OUTPUT"
 
     # The preview ref already holds this state for PRs; the artifact is the
@@ -214,11 +210,9 @@ jobs:
           echo "::error::HISTORY_PAT not set — cannot record."
           exit 1
         }
-        creds="$RUNNER_TEMP/git-credentials"
-        printf 'protocol=https\nhost=github.com\nusername=x-access-token\npassword=%s\n' "$HISTORY_PAT" > "$creds"
-        export GIT_CONFIG_COUNT=1
-        export GIT_CONFIG_KEY_0="credential.helper"
-        export GIT_CONFIG_VALUE_0="store --file=$creds"
+        # Push with the token in the URL — no credential-helper config source to
+        # miss on this box. GHA redacts the secret value everywhere in log output.
+        auth="https://x-access-token:${HISTORY_PAT}@github.com/$repo"
 
         # Canonical history (bootstrap empty if absent).
         rm -rf "$workdir"
@@ -257,7 +251,7 @@ jobs:
             ok=1
             break
           fi
-          if git -C "$workdir" push -q "https://github.com/$repo" "HEAD:refs/heads/$branch"; then
+          if git -C "$workdir" push -q "$auth" "HEAD:refs/heads/$branch"; then
             ok=1
             break
           fi
@@ -269,7 +263,7 @@ jobs:
         [ "$ok" -eq 1 ] || { echo "::error::Could not push to ${branch} after 3 attempts"; exit 1; }
 
         # The preview ref has served its purpose.
-        git -C "$workdir" push -q "https://github.com/$repo" ":${preview}" \
+        git -C "$workdir" push -q "$auth" ":${preview}" \
           || echo "::warning::could not delete preview ref ${preview}"
 
     - name: Find existing report comment
@@ -336,10 +330,7 @@ jobs:
       run: |
         set -euo pipefail
         [ -n "${HISTORY_PAT:-}" ] || { echo "no HISTORY_PAT — leaving any preview ref in place"; exit 0; }
-        creds="$RUNNER_TEMP/git-credentials"
-        printf 'protocol=https\nhost=github.com\nusername=x-access-token\npassword=%s\n' "$HISTORY_PAT" > "$creds"
-        export GIT_CONFIG_COUNT=1
-        export GIT_CONFIG_KEY_0="credential.helper"
-        export GIT_CONFIG_VALUE_0="store --file=$creds"
-        git push "https://github.com/childmindresearch/neuromaps-prime" ":refs/heads/cycle-history/pr-${PR_NUMBER}" \
+        # Push with the token in the URL — no credential-helper config source to miss.
+        auth="https://x-access-token:${HISTORY_PAT}@github.com/childmindresearch/neuromaps-prime"
+        git push "$auth" ":refs/heads/cycle-history/pr-${PR_NUMBER}" \
           || echo "preview ref not present — nothing to clean up"
