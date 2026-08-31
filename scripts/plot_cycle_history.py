@@ -319,7 +319,7 @@ def _plot_species_panel(
                 linestyle="-" if hemisphere == "left" else "--",
                 linewidth=1.5,
                 marker=marker,
-                markersize=8,
+                markersize=6,
                 markerfacecolor=color if hemisphere == "left" else "none",
                 markeredgecolor=color,
                 markeredgewidth=1.5,
