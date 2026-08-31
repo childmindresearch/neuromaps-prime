@@ -13,7 +13,10 @@ from neuromaps_prime import remote
 
 _logger = logging.getLogger(__name__)
 
-_STORAGES = {"osf": remote.OSFStorage(), "github": remote.GitHubStorage()}
+_STORAGES: dict[str, remote.OSFStorage | remote.GitHubStorage] = {
+    "osf": remote.OSFStorage(),
+    "github": remote.GitHubStorage(),
+}
 _HOST_MAP = {
     "osf.io": _STORAGES["osf"],
     "raw.githubusercontent.com": _STORAGES["github"],
@@ -113,16 +116,8 @@ def download_and_validate(uri: str, dest_dir: str | Path) -> Path:
         ValueError: if storage cannot be identified from provided URI
         requests.HTTPError: if the download keeps failing with a transient error
     """
-    host = urlparse(uri).hostname
-    storage = None
-    if host is not None:
-        host = host.lower()
-        storage = next(
-            (v for k, v in _HOST_MAP.items() if host == k or host.endswith(k)), None
-        )
-
-    if storage is None:
+    name = id_storage(uri)
+    if name is None:
         raise ValueError(f"Could not identify storage from uri: {uri}")
-    return _with_retries(
-        lambda: storage.download(uri, Path(dest_dir))  # type: ignore[attr-defined]
-    )
+    storage = _STORAGES[name]
+    return _with_retries(lambda: storage.download(uri, Path(dest_dir)))

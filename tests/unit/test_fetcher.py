@@ -46,6 +46,15 @@ def _fake_stream(payload: bytes) -> MagicMock:
     return MagicMock(return_value=resp)
 
 
+def _http_error(status: int) -> requests.HTTPError:
+    """Build an HTTPError with ``status`` set and no Retry-After header.
+
+    ``headers={}`` (not a bare MagicMock) stops ``_backoff`` from reading a
+    mock header value; with None it takes the capped-backoff path.
+    """
+    return requests.HTTPError(response=MagicMock(status_code=status, headers={}))
+
+
 class TestIDStorage:
     """Test suite for identifying storage location."""
 
@@ -114,7 +123,7 @@ class TestDownloadAndValidateRetry:
     def test_retries_transient_then_succeeds(self, tmp_path: Path) -> None:
         """A transient 429 followed by success returns the stored path."""
         stored = tmp_path / "file.surf.gii"
-        transient = requests.HTTPError(response=MagicMock(status_code=429, headers={}))
+        transient = _http_error(429)
         with (
             patch.object(remote.OSFStorage, "download") as mock_download,
             patch("neuromaps_prime.fetcher.time.sleep"),
@@ -128,7 +137,7 @@ class TestDownloadAndValidateRetry:
 
     def test_no_retry_on_permanent_error(self, tmp_path: Path) -> None:
         """A non-retryable 404 propagates on the first attempt."""
-        not_found = requests.HTTPError(response=MagicMock(status_code=404, headers={}))
+        not_found = _http_error(404)
         with patch.object(remote.OSFStorage, "download") as mock_download:
             mock_download.side_effect = not_found
             with pytest.raises(requests.HTTPError):
@@ -139,9 +148,7 @@ class TestDownloadAndValidateRetry:
 
     def test_gives_up_after_max_attempts(self, tmp_path: Path) -> None:
         """Persistent 503s exhaust the retry budget and raise."""
-        server_error = requests.HTTPError(
-            response=MagicMock(status_code=503, headers={})
-        )
+        server_error = _http_error(503)
         with (
             patch.object(remote.OSFStorage, "download") as mock_download,
             patch("neuromaps_prime.fetcher.time.sleep"),

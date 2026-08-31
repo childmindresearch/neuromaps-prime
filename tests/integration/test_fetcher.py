@@ -56,10 +56,10 @@ def _annotation_uri(graph: NeuromapsGraph, coords: tuple[str, str, str, str]) ->
     return annotation.uri
 
 
-def _fetch(uri: str, tmp_path: Path) -> Path:
+def _fetch(uri: str, tmp_path: Path) -> None:
     """Fetch ``uri`` through the production path into ``tmp_path``.
 
-    A successful return already implies the backend verified the file's hash
+    A successful call already implies the backend verified the file's hash
     (OSF MD5 / GitHub blob SHA) and parsed live metadata, so the assertions
     confirm a real, non-empty file landed in the requested directory.
     """
@@ -67,7 +67,6 @@ def _fetch(uri: str, tmp_path: Path) -> Path:
     assert result.parent == tmp_path
     assert result.is_file()
     assert result.stat().st_size > 0
-    return result
 
 
 class TestOSFStorage:
