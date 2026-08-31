@@ -24,19 +24,18 @@ jobs:
     runs-on: arcana
     environment: self-hosted-actions
     timeout-minutes: 180
-    env:
-      NEUROMAPS_CYCLE_OUTPUT_DIR: ${{ runner.temp }}/cycle_outputs
     steps:
     - uses: actions/checkout@v7
     - uses: astral-sh/setup-uv@v9.0.0
       with:
         enable-cache: true # not automatic on self-hosted runners
+    - run: echo "NEUROMAPS_CYCLE_OUTPUT_DIR=$RUNNER_TEMP/cycle_outputs" >> "$GITHUB_ENV"
     - run: uv sync --group tests --frozen
 
     - name: Refresh stale data cache (>7 days)
       run: |
         cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/neuromaps_prime"
-        [ -d "$cache_dir" ] || { echo "no data cache yet — first run will download from OSF"; exit 0; }
+        [ -d "$cache_dir" ] || { echo "no data cache yet — first run will download from remote servers"; exit 0; }
         # GH actions does not expire directory
         stale=$(find "$cache_dir" -type f -mtime +7 | wc -l)
         echo "data cache: $stale file(s) older than 7 days"
