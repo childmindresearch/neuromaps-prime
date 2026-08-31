@@ -42,11 +42,14 @@ jobs:
         echo "data cache: $stale file(s) older than 7 days"
         find "$cache_dir" -type f -mtime +7 -delete
 
-    - name: Run integration tests
-      run: uv run pytest -m integration --log-level=DEBUG --verbose
-
-    - name: Run regression tests
-      run: uv run pytest -m regression --log-level=DEBUG --verbose
+    - name: Run all tests
+      shell: bash
+      run: |
+        uv run pytest \
+          -n 8 \
+          --durations=0 \
+          --log-level=DEBUG \
+          --verbose
 
     - name: Locate run summary CSV
       id: summary
