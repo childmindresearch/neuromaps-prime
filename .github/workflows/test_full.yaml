@@ -32,15 +32,6 @@ jobs:
     - run: echo "NEUROMAPS_CYCLE_OUTPUT_DIR=$RUNNER_TEMP/cycle_outputs" >> "$GITHUB_ENV"
     - run: uv sync --group tests --frozen
 
-    - name: Refresh stale data cache (>7 days)
-      run: |
-        cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/neuromaps_prime"
-        [ -d "$cache_dir" ] || { echo "no data cache yet — first run will download from remote servers"; exit 0; }
-        # GH actions does not expire directory
-        stale=$(find "$cache_dir" -type f -mtime +7 | wc -l)
-        echo "data cache: $stale file(s) older than 7 days"
-        find "$cache_dir" -type f -mtime +7 -delete
-
     - name: Run all tests
       shell: bash
       run: |
