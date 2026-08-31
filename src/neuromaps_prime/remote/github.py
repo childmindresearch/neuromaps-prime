@@ -66,22 +66,36 @@ class GitHubStorage(BaseModel):
         return target
 
     def _download_to(self, url: str, target: Path, meta: GitHubFileMeta) -> None:
-        """Stream the file to ``target`` and verify its blob SHA."""
+        """Stream the file to a temp file and move it to ``target`` if valid.
+
+        The download lands in a sibling ``.part`` file and is only renamed
+        into place with :meth:`Path.replace` once the blob SHA verifies, so a
+        failed download never leaves a partial ``target`` behind.
+        """
+        part = target.with_name(target.name + ".part")
         r = requests.get(url, stream=True, timeout=90)
-        r.raise_for_status()
+        try:
+            r.raise_for_status()
 
-        content = bytearray()
-        with target.open("wb") as f:
-            for chunk in r.iter_content(self.chunk_size):
-                f.write(chunk)
-                content.extend(chunk)
+            content = bytearray()
+            with part.open("wb") as f:
+                for chunk in r.iter_content(self.chunk_size):
+                    f.write(chunk)
+                    content.extend(chunk)
 
-        header = f"blob {len(content)}\0".encode()
-        actual = hashlib.sha1(
-            header + bytes(content), usedforsecurity=False
-        ).hexdigest()
-        if actual != meta.sha:
-            raise ValueError(f"Checksum mismatch: {actual} != {meta.sha}")
+            header = f"blob {len(content)}\0".encode()
+            actual = hashlib.sha1(
+                header + bytes(content), usedforsecurity=False
+            ).hexdigest()
+            if actual != meta.sha:
+                raise ValueError(f"Checksum mismatch: {actual} != {meta.sha}")
+
+            part.replace(target)
+        except BaseException:
+            part.unlink(missing_ok=True)
+            raise
+        finally:
+            r.close()
 
     @staticmethod
     def _verify(path: Path, meta: GitHubFileMeta) -> bool:

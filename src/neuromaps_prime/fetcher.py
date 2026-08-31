@@ -24,6 +24,12 @@ _HOST_MAP = {
 
 # Transient HTTP statuses worth retrying
 _RETRYABLE_STATUS = {403, 429, 500, 502, 503, 504}
+# Connection-level failures worth retrying (drops, timeouts, interrupted streams).
+_RETRYABLE_EXC = (
+    requests.ConnectionError,
+    requests.Timeout,
+    requests.exceptions.ChunkedEncodingError,
+)
 _MAX_ATTEMPTS = 5
 _MAX_DELAY_S = 15.0
 
@@ -47,7 +53,12 @@ def _backoff(response: requests.Response | None, attempt: int) -> float:
 
 
 def _with_retries(fn: Callable[[], T]) -> T:  # noqa: UP047
-    """Call ``fn``, retrying transient HTTP errors with backoff.
+    """Call ``fn``, retrying transient network errors with backoff.
+
+    A transient error is an HTTP status in ``_RETRYABLE_STATUS`` (rate
+    limiting, brief server errors) or a connection-level failure (a dropped
+    connection, a timeout, an interrupted stream). A non-retryable error
+    propagates immediately.
 
     Args:
         fn: Zero-argument callable performing the (possibly network-bound) work.
@@ -56,10 +67,11 @@ def _with_retries(fn: Callable[[], T]) -> T:  # noqa: UP047
         The value ``fn`` returns on the first attempt that is not retried.
 
     Raises:
-        requests.HTTPError: if the final attempt fails, or any attempt fails
-            with a non-retryable status.
+        requests.RequestException: if the final attempt fails with a transient
+            error, or any attempt fails with a non-retryable one.
     """
     for attempt in range(_MAX_ATTEMPTS):
+        response = None
         try:
             return fn()
         except requests.HTTPError as exc:
@@ -67,15 +79,20 @@ def _with_retries(fn: Callable[[], T]) -> T:  # noqa: UP047
             status = response.status_code if response is not None else None
             if status not in _RETRYABLE_STATUS or attempt == _MAX_ATTEMPTS - 1:
                 raise
-            delay = _backoff(response, attempt)
-            _logger.warning(
-                "Transient HTTP %s; retrying in %.1fs (attempt %d/%d)",
-                status,
-                delay,
-                attempt + 1,
-                _MAX_ATTEMPTS,
-            )
-            time.sleep(delay)
+            reason = f"HTTP {status}"
+        except _RETRYABLE_EXC as exc:
+            if attempt == _MAX_ATTEMPTS - 1:
+                raise
+            reason = type(exc).__name__
+        delay = _backoff(response, attempt)
+        _logger.warning(
+            "%s; retrying in %.1fs (attempt %d/%d)",
+            reason,
+            delay,
+            attempt + 1,
+            _MAX_ATTEMPTS,
+        )
+        time.sleep(delay)
     raise RuntimeError("_with_retries exhausted its attempts without a result")
 
 
@@ -102,8 +119,8 @@ def download_and_validate(uri: str, dest_dir: str | Path) -> Path:
     """Download and validate the file.
 
     The file is stored in ``dest_dir`` under its storage-side name. Transient
-    HTTP failures (rate-limiting, brief server errors) are retried with
-    backoff; a persistent failure raises.
+    network failures (rate-limiting, brief server errors, dropped connections,
+    timeouts) are retried with backoff; a persistent failure raises.
 
     Args:
         uri: Remote URI to fetch data from
@@ -114,7 +131,8 @@ def download_and_validate(uri: str, dest_dir: str | Path) -> Path:
 
     Raises:
         ValueError: if storage cannot be identified from provided URI
-        requests.HTTPError: if the download keeps failing with a transient error
+        requests.RequestException: if the download keeps failing with a
+            transient error
     """
     name = id_storage(uri)
     if name is None:
