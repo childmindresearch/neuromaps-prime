@@ -19,3 +19,14 @@ def pytest_collection_modifyitems(items: Sequence[pytest.Item]) -> None:
         test_path = Path(item.fspath)
         for marker in markers & set(test_path.parts):
             item.add_marker(getattr(pytest.mark, marker))
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    """Add option(s) to pytest parser."""
+    parser.addoption(
+        "--runner",
+        action="store",
+        default="auto",
+        help="Styx runner type to use: "
+        "['auto', 'local', 'docker', 'podman', 'singularity']",
+    )

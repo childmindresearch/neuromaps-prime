@@ -13,6 +13,7 @@ from neuromaps_prime.graph import NeuromapsGraph
 
 
 @pytest.fixture(scope="class")
-def graph() -> NeuromapsGraph:
-    """Return the Neuromaps-PRIME transformation graph."""
-    return NeuromapsGraph()
+def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
+    """Load the real transformation graph with automatic runner selection."""
+    runner = request.config.getoption("--runner").lower()
+    return NeuromapsGraph(runner=runner)

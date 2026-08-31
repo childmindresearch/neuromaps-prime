@@ -46,6 +46,7 @@ jobs:
       run: |
         uv run pytest \
           -n 8 \
+          --runner=podman \
           --durations=0 \
           --log-level=DEBUG \
           --verbose
