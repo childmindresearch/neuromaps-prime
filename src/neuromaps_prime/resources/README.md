@@ -41,7 +41,7 @@ These codes appear after `desc-` in the filename and indicate the kind of data s
 | Code | Annotation Type | Description |
 | :--- | :--- | :--- |
 | **AE** | Area Expansion | Relative surface area expansion. |
-| **BM** | Brain Masks | Binary or probabilistic maps defining which surface vertices or voxels correspond to valid cortical tissue (used for masking and analysis inclusion; exception uses `mask` suffix). |
+| **BM** | Brain Masks | Binary or probabilistic maps defining which surface vertices or voxels correspond to valid cortical tissue (used for masking and analysis inclusion; volumes (`.nii.gz` files) use the `mask` suffix). |
 | **CH** | Cortical Hierarchy | Anatomical cortical hierarchy estimates (e.g., hierarchy indices complementing intrinsic timescales). |
 | **CT** | Cortical Thickness | Vertex-wise estimates of the distance between the white matter and pial surfaces, reflecting local cortical thickness. |
 | **CV** | Curvature | Vertex-wise measures of cortical surface geometry (e.g., mean or Gaussian curvature) indicating gyral and sulcal folding patterns. |
@@ -79,4 +79,4 @@ The `subLabelCode-subLabel` portion of the filename identifies the specific sour
   `src-NCBR_res-0p40mm_desc-T1w_mask.nii`
   * **Space:** NCBR
   * **Resolution:** 0.40mm resolution
-  * **Annotation Type:** Brain Mask (`BM` exception)
+  * **Annotation Type:** Brain Mask (`BM`)
