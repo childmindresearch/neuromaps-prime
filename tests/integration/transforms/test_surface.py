@@ -136,3 +136,53 @@ class TestSurfaceTransformIntegration:
         )
         assert len(shortest_path) > 2
         assert self.ORIGIN not in shortest_path
+
+
+class TestSurfaceToVolumeProjectionIntegration:
+    """Integration tests for surface to volume projection."""
+
+    SOURCE = "Yerkes19"
+    TARGET = "D99"
+    HEMISPHERE: Literal["left"] = "left"
+
+    @pytest.mark.parametrize(
+        ("transformer_type", "annotation", "suffix"),
+        [("label", "PC_Yeo7Networks", "nii.gz"), ("metric", "SMM", "nii.gz")],
+        ids=["label", "metric"],
+    )
+    def test_surface_to_volume(
+        self, graph: NeuromapsGraph, transformer_type: str, annotation: str, suffix: str
+    ) -> None:
+        """Resample Yerkes19 surface annotation to D99 and project it to the volume."""
+        annotation_res = graph.fetch_surface_annotation(
+            space=self.SOURCE,
+            label=annotation,
+            density="32k",
+            hemisphere=self.HEMISPHERE,
+        )
+        assert annotation_res is not None
+        ref_volume_res = graph.fetch_volume_atlas(
+            space=self.TARGET, resolution="250um", resource_type="T1w"
+        )
+        assert ref_volume_res is not None
+
+        result = graph.surface_to_volume_transformer(
+            transformer_type=transformer_type,
+            input_file=annotation_res.fetch(),
+            ref_volume=ref_volume_res.fetch(),
+            source_space=self.SOURCE,
+            target_space=self.TARGET,
+            hemisphere=self.HEMISPHERE,
+            output_file_path=f"{self.SOURCE}_to_{self.TARGET}_{transformer_type}.{suffix}",
+            add_edge=False,
+        )
+        assert result.path is not None
+        assert result.path.exists()
+
+        data = load_data(result.path).array
+        assert data.size > 0
+        assert np.all(np.isfinite(data))
+        if (
+            transformer_type == "label"
+        ):  # projected parcellation keeps whole-number labels
+            assert np.allclose(data, np.rint(data))
