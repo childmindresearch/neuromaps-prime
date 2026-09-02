@@ -150,7 +150,7 @@ class TestNeuromapsGraph:
     def test_fetch_surface_annotation(self, graph: NeuromapsGraph) -> None:
         """Test fetching surface atlas."""
         atlas = graph.fetch_surface_annotation(
-            space="Yerkes19", density="10k", label="PC_MarkovMonkey", hemisphere="left"
+            space="Yerkes19", density="10k", label="PC_Markov", hemisphere="left"
         )
         assert isinstance(atlas, models.SurfaceAnnotation)
 
