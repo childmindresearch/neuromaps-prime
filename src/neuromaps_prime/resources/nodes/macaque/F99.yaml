@@ -1,0 +1,272 @@
+F99:
+  species: macaque
+  description: F99 Macaque Atlas
+  references:
+  - citation: Van Essen, D.C., 2002. Surface-based atlases of cerebellar cortex in the human, macaque, and mouse. Ann N Y Acad Sci. 978, 468-479.
+    doi: 10.1111/j.1749-6632.2002.tb07588.x
+    url: https://pubmed.ncbi.nlm.nih.gov/12582074/
+  surfaces:
+    32k:
+      annotation:
+        CB:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98804f59e851b0422a9d52
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9880608bef2ecbbe8fc927
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - XTRACT macaque connectivity blueprint (vertices x tracts). Cohort-averaged over 6 macaques.
+  volumes:
+    500um:
+      annotation:
+        WMT_af_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983782d1fb5955218ada9b
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Arcuate Fasciculus L tract probability map (XTRACT).
+        WMT_af_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983781e8338a48062a9d8c
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Arcuate Fasciculus R tract probability map (XTRACT).
+        WMT_ar_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983783f0964917a32a9d4b
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Acoustic Radiation L tract probability map (XTRACT).
+        WMT_ar_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377c4884775c478ad9ba
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Acoustic Radiation R tract probability map (XTRACT).
+        WMT_atr_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983783396d624f9d8fca6c
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Anterior Thalamic Radiation L tract probability map (XTRACT).
+        WMT_atr_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377c5fa8ab93ce8fcbad
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Anterior Thalamic Radiation R tract probability map (XTRACT).
+        WMT_cbd_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983782c61696fd4c8ad994
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Cingulum subsection | Dorsal L tract probability map (XTRACT).
+        WMT_cbd_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983783dc8e26a8532a9d7c
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Cingulum subsection | Dorsal R tract probability map (XTRACT).
+        WMT_cbp_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377b4884775c478ad9b8
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Cingulum subsection | Peri-genual L tract probability map (XTRACT).
+        WMT_cbp_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983782572618c4b98ada3b
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Cingulum subsection | Peri-genual R tract probability map (XTRACT).
+        WMT_cbt_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983782396d624f9d8fca6a
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Cingulum subsection | Temporal L tract probability map (XTRACT).
+        WMT_cbt_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377b21aefa465f2a9e3b
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Cingulum subsection | Temporal R tract probability map (XTRACT).
+        WMT_cst_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377cd1fb5955218ada92
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Corticospinal L tract probability map (XTRACT).
+        WMT_cst_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9837829026ea0f732a9dbf
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Corticospinal R tract probability map (XTRACT).
+        WMT_fa_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9837826417f3aa2c8fcba5
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Frontal Aslant L tract probability map (XTRACT).
+        WMT_fa_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377c21aefa465f2a9e3d
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Frontal Aslant R tract probability map (XTRACT).
+        WMT_fx_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983782e21b47cd8a8ad899
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Fornix L tract probability map (XTRACT).
+        WMT_fx_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983781572618c4b98ada39
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Fornix R tract probability map (XTRACT).
+        WMT_ifo_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983782dc8e26a8532a9d7a
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Inferior Fronto-Occipital L tract probability map (XTRACT).
+        WMT_ifo_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9837824884775c478ad9bd
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Inferior Fronto-Occipital R tract probability map (XTRACT). 
+        WMT_ilf_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377cf0964917a32a9d43
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Inferior Longitudinal Fasciculus L tract probability map (XTRACT).
+        WMT_ilf_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377c396d624f9d8fca61
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Inferior Longitudinal Fasciculus R tract probability map (XTRACT).
+        WMT_mdlf_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377c6417f3aa2c8fcb9f
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Middle Longitudinal Fasciculus L tract probability map (XTRACT).
+        WMT_mdlf_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983783e8338a48062a9d8f
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Middle Longitudinal Fasciculus R tract probability map (XTRACT).
+        WMT_or_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983782586399e1778ad9c6
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Optic Radiation L tract probability map (XTRACT).
+        WMT_or_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377ce8338a48062a9d89
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Optic Radiation R tract probability map (XTRACT).
+        WMT_slf1_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377c572618c4b98ada36
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Superior Longitudinal Fasciculus 1 L tract probability map (XTRACT).
+        WMT_slf1_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377c9026ea0f732a9db4
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Superior Longitudinal Fasciculus 1 R tract probability map (XTRACT).
+        WMT_slf2_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98378285d4eb57b98ada4b
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Superior Longitudinal Fasciculus 2 L tract probability map (XTRACT).
+        WMT_slf2_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9837819b944b95ac8fcc8a
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Superior Longitudinal Fasciculus 2 R tract probability map (XTRACT).
+        WMT_slf3_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377c85d4eb57b98ada48
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Superior Longitudinal Fasciculus 3 L tract probability map (XTRACT).
+        WMT_slf3_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377cc61696fd4c8ad989
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Superior Longitudinal Fasciculus 3 R tract probability map (XTRACT).
+        WMT_str_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9837819026ea0f732a9dbd
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Superior Thalamic Radiation L tract probability map (XTRACT).
+        WMT_str_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9837825fa8ab93ce8fcbb0
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Superior Thalamic Radiation R tract probability map (XTRACT).
+        WMT_uf_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377b9026ea0f732a9db2
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Uncinate Fasciculus L tract probability map (XTRACT).
+        WMT_uf_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377be8338a48062a9d87
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Uncinate Fasciculus R tract probability map (XTRACT).
+        WMT_vof_L:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377cdc8e26a8532a9d74
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Vertical Occipital Fasciculus L tract probability map (XTRACT).
+        WMT_vof_R:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983783cfc0cbe30b8fcc22
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Vertical Occipital Fasciculus R tract probability map (XTRACT).
+        WMT_ac:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377c586399e1778ad9c3
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Anterior Commissure tract probability map (XTRACT).
+        WMT_fma:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377f0492725bd98fcbf0
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Forceps Major tract probability map (XTRACT).
+        WMT_fmi:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a983781cfc0cbe30b8fcc20
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Forceps Minor tract probability map (XTRACT).
+        WMT_mcp:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98378221aefa465f2a9e43
+          references:
+          - https://doi.org/10.1016/j.neuroimage.2020.116923
+          notes:
+          - Middle Cerebellar Peduncle tract probability map (XTRACT).
