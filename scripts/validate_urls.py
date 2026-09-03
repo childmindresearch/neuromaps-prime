@@ -1,5 +1,8 @@
 r"""Validate URLs from YAML files using HEAD requests (no download).
 
+Every URL must be unique across the scanned files — a URL referenced by
+more than one resource aborts the run before any request is made.
+
 Usage::
     uv run scripts/validate_urls.py \\
         input_files ... \\
@@ -35,10 +38,7 @@ from urllib.parse import urlsplit
 import aiohttp
 import yaml
 
-_HEADERS: dict[str, str] = {
-    "User-Agent": "url-validator/1.0",
-    "Connection": "close",
-}
+_HEADERS: dict[str, str] = {"User-Agent": "url-validator/1.0", "Connection": "close"}
 _TIMEOUT = 90
 _MAX_RETRIES = 5
 _BACKOFF_BASE = 10.0
@@ -52,6 +52,24 @@ log = logging.getLogger("url-validator")
 
 
 @dataclass(frozen=True, slots=True)
+class UrlOccurrence:
+    """A single occurrence of a URL inside one YAML file.
+
+    Attributes:
+        source: Path of the YAML file containing the URL.
+        key_path: Dot-separated path of YAML keys from the file root to the
+            URL (e.g. ``Yerkes19.surfaces.43k.sphere.left``).
+    """
+
+    source: Path
+    key_path: str
+
+    def __str__(self) -> str:
+        """Render as ``file [key.path]``."""
+        return f"{self.source} [{self.key_path}]"
+
+
+@dataclass(frozen=True, slots=True)
 class CheckResult:
     """Outcome of a single URL probe.
 
@@ -59,45 +77,60 @@ class CheckResult:
         url: The URL that was checked.
         ok: True if the server responded with a non-error status.
         detail: Human-readable status string (e.g. ``"200"`` or ``"HTTP 404"``).
-        sources: YAML files the URL was found in.
+        sources: Occurrences of the URL in the YAML files (file + key path).
     """
 
     url: str
     ok: bool
     detail: str
-    sources: list[Path] = field(default_factory=list)
+    sources: list[UrlOccurrence] = field(default_factory=list)
 
 
 @dataclass(slots=True)
 class UrlIndex:
-    """Maps each unique URL to the YAML files it appears in.
+    """Maps each unique URL to every occurrence of it in the YAML files.
 
     Attributes:
-        _data: Internal mapping of URL → list of source paths.
+        _data: Internal mapping of URL → list of occurrences.
     """
 
-    _data: dict[str, list[Path]] = field(default_factory=dict)
+    _data: dict[str, list[UrlOccurrence]] = field(default_factory=dict)
 
-    def add(self, url: str, source: Path) -> None:
-        """Register *url* as originating from *source*.
+    def add(self, url: str, source: Path, key_path: str) -> None:
+        """Register an occurrence of *url* in *source* at *key_path*.
 
         Args:
             url: The URL string to index.
             source: Path of the YAML file containing the URL.
+            key_path: Dot-separated key path from the YAML root to the URL.
         """
-        self._data.setdefault(url, []).append(source)
+        self._data.setdefault(url, []).append(
+            UrlOccurrence(source=source, key_path=key_path)
+        )
 
     def urls(self) -> list[str]:
         """Return all unique URLs in insertion order."""
         return list(self._data)
 
-    def sources(self, url: str) -> list[Path]:
-        """Return every YAML file that contains *url*.
+    def sources(self, url: str) -> list[UrlOccurrence]:
+        """Return every occurrence of *url* (file and key path).
 
         Args:
             url: A URL previously registered via :meth:`add`.
         """
         return self._data[url]
+
+    def duplicate_urls(self) -> dict[str, list[UrlOccurrence]]:
+        """Return URLs that appear more than once, with all their occurrences.
+
+        A URL can be duplicated across files, or listed multiple times
+        within a single file — both show up as more than one occurrence.
+
+        Returns:
+            Mapping of duplicated URL to its occurrences, in index
+            insertion order.
+        """
+        return {url: srcs for url, srcs in self._data.items() if len(srcs) > 1}
 
     def __len__(self) -> int:
         """Return count of URLs."""
@@ -123,10 +156,7 @@ def _parse_retry_after(value: str | None) -> float | None:
         return float(value)
     try:
         dt = email.utils.parsedate_to_datetime(value)
-        return max(
-            0.0,
-            (dt - datetime.datetime.now(datetime.UTC)).total_seconds(),
-        )
+        return max(0.0, (dt - datetime.datetime.now(datetime.UTC)).total_seconds())
     except Exception:
         return None
 
@@ -151,7 +181,7 @@ async def _probe(
     *,
     url: str,
     method: str,
-    sources: list[Path],
+    sources: list[UrlOccurrence],
     range_header: bool = False,
     fallback: bool = False,
 ) -> CheckResult:
@@ -161,7 +191,7 @@ async def _probe(
         session: Shared :class:`aiohttp.ClientSession`.
         url: Target URL.
         method: HTTP method (``"HEAD"`` or ``"GET"``).
-        sources: YAML files the URL came from.
+        sources: Occurrences of the URL in the YAML files.
         range_header: If True, request only the first byte.
         fallback: If True, annotate a successful status as a GET fallback.
 
@@ -210,18 +240,10 @@ async def _probe(
                     detail = f"{response.status}"
                     if fallback:
                         detail = f"{detail} (GET fallback)"
-                    return CheckResult(
-                        url,
-                        ok=True,
-                        detail=detail,
-                        sources=sources,
-                    )
+                    return CheckResult(url, ok=True, detail=detail, sources=sources)
 
                 return CheckResult(
-                    url,
-                    ok=False,
-                    detail=f"HTTP {response.status}",
-                    sources=sources,
+                    url, ok=False, detail=f"HTTP {response.status}", sources=sources
                 )
 
         except TimeoutError:
@@ -235,9 +257,7 @@ async def _probe(
 
 
 async def _get_range(
-    session: aiohttp.ClientSession,
-    url: str,
-    sources: list[Path],
+    session: aiohttp.ClientSession, url: str, sources: list[UrlOccurrence]
 ) -> CheckResult:
     """Fallback probe: GET with ``Range: bytes=0-0`` to avoid body download.
 
@@ -246,7 +266,7 @@ async def _get_range(
     Args:
         session: Shared :class:`aiohttp.ClientSession`.
         url: Target URL.
-        sources: YAML files the URL came from.
+        sources: Occurrences of the URL in the YAML files.
 
     Returns:
         :class:`CheckResult` with ``ok=True`` on any non-error response.
@@ -283,9 +303,7 @@ def _is_github_blob_url(url: str) -> bool:
 
 
 async def check_url(
-    session: aiohttp.ClientSession,
-    url: str,
-    sources: list[Path],
+    session: aiohttp.ClientSession, url: str, sources: list[UrlOccurrence]
 ) -> CheckResult:
     """Validate *url* without downloading its body.
 
@@ -298,7 +316,7 @@ async def check_url(
     Args:
         session: Shared :class:`aiohttp.ClientSession`.
         url: The URL to validate.
-        sources: YAML files the URL came from.
+        sources: Occurrences of the URL in the YAML files.
 
     Returns:
         :class:`CheckResult` describing whether the URL is reachable.
@@ -317,27 +335,61 @@ async def check_url(
     return result
 
 
-def _extract_urls(node: Any, out: list[str]) -> None:  # noqa: ANN401
+def _list_label(item: Any, index: int) -> str:  # noqa: ANN401
+    """Return the key-path label for list item *index*.
+
+    Edge entries carry ``from``/``to`` — use them so paths read as
+    ``CIVETNMT→D99.surfaces...`` rather than a bare ``[i]``; anything
+    else falls back to the index.
+
+    Args:
+        item: The list element.
+        index: Position of the element in its list.
+
+    Returns:
+        One segment of a dot-separated key path.
+    """
+    if isinstance(item, dict) and "from" in item and "to" in item:
+        return f"{item['from']}→{item['to']}"
+    return f"[{index}]"
+
+
+def _join_path(path: str, key: str) -> str:
+    """Append *key* to a dot-separated *path* (or just *key* at the root).
+
+    Args:
+        path: Key path accumulated above the current node (empty at root).
+        key: The next path segment.
+
+    Returns:
+        The extended key path.
+    """
+    return f"{path}.{key}" if path else key
+
+
+def _extract_urls(node: Any, out: list[tuple[str, str]], path: str = "") -> None:  # noqa: ANN401
     """Recursively extract HTTP/HTTPS strings from an arbitrary YAML node.
 
-    Uses DFS with a caller-supplied *out* buffer to avoid per-call allocations.
-    Skip keys named "references" or "notes"
+    Uses DFS with a caller-supplied *out* buffer to avoid per-call
+    allocations. Skip keys named "references" or "notes". Each discovered
+    URL is paired with its dot-separated key path from the YAML root.
 
     Args:
         node: A YAML value — may be a str, dict, list, or scalar.
-        out: Mutable list to append discovered URLs into.
+        out: Mutable list of (url, key_path) tuples to append into.
+        path: Key path accumulated above *node* (empty at the root).
     """
     if isinstance(node, str):
         if node.startswith(("http://", "https://")):
-            out.append(node)
+            out.append((node, path))
     elif isinstance(node, dict):
         for k, v in node.items():
             if k in ("references", "notes"):
                 continue
-            _extract_urls(v, out)
+            _extract_urls(v, out, _join_path(path, str(k)))
     elif isinstance(node, list):
-        for item in node:
-            _extract_urls(item, out)
+        for i, item in enumerate(node):
+            _extract_urls(item, out, _join_path(path, _list_label(item, i)))
 
 
 def build_index(yaml_files: list[Path]) -> UrlIndex:
@@ -349,20 +401,37 @@ def build_index(yaml_files: list[Path]) -> UrlIndex:
         yaml_files: Paths to YAML files to scan.
 
     Returns:
-        :class:`UrlIndex` mapping each unique URL to its source file(s).
+        :class:`UrlIndex` mapping each unique URL to its occurrences
+        (file + key path).
     """
     index = UrlIndex()
-    raw: list[str] = []
+    raw: list[tuple[str, str]] = []
     for path in yaml_files:
         try:
             data = yaml.safe_load(path.read_text(encoding="utf-8"))
             raw.clear()
             _extract_urls(data, raw)
-            for url in raw:
-                index.add(url, path)
+            for url, key_path in raw:
+                index.add(url, path, key_path)
         except Exception as exc:
             log.warning("Could not parse %s: %s", path, exc)
     return index
+
+
+def _describe_duplicates(duplicates: dict[str, list[UrlOccurrence]]) -> str:
+    """Render a duplicate-URL report as a human-readable block.
+
+    Args:
+        duplicates: Mapping of duplicated URL to its occurrences.
+
+    Returns:
+        Multi-line report, each URL followed by its indented occurrences.
+    """
+    lines = [f"{len(duplicates)} URL(s) referenced more than once:"]
+    for url, occurrences in duplicates.items():
+        lines.append(f"  {url}")
+        lines.extend(f"      {occ}" for occ in occurrences)
+    return "\n".join(lines)
 
 
 def discover_yamls(roots: list[str]) -> list[Path]:
@@ -388,7 +457,7 @@ async def _bounded_check(
     session: aiohttp.ClientSession,
     semaphore: asyncio.Semaphore,
     url: str,
-    sources: list[Path],
+    sources: list[UrlOccurrence],
 ) -> CheckResult:
     """Probe *url* while respecting the concurrency semaphore."""
     async with semaphore:
@@ -403,15 +472,12 @@ async def _cancel_pending(pending: set[asyncio.Task[CheckResult]]) -> None:
         await asyncio.gather(*pending, return_exceptions=True)
 
 
-def _format_sources(sources: list[Path]) -> str:
-    """Return a comma-separated string of source paths, or 'unknown'."""
-    return ", ".join(str(p) for p in sources) if sources else "unknown"
+def _format_sources(sources: list[UrlOccurrence]) -> str:
+    """Render occurrences as ``file [key.path]`` entries, or 'unknown'."""
+    return ", ".join(map(str, sources)) or "unknown"
 
 
-async def _report_result(
-    result: CheckResult,
-    failed: list[CheckResult],
-) -> None:
+async def _report_result(result: CheckResult, failed: list[CheckResult]) -> None:
     """Log a single result and append to *failed* if it did not succeed."""
     srcs = _format_sources(result.sources)
     if result.ok:
@@ -421,12 +487,7 @@ async def _report_result(
         failed.append(result)
 
 
-async def run(
-    index: UrlIndex,
-    *,
-    workers: int,
-    fail_fast: bool,
-) -> list[CheckResult]:
+async def run(index: UrlIndex, *, workers: int, fail_fast: bool) -> list[CheckResult]:
     """Probe all URLs in *index* concurrently and return failed results.
 
     Uses ``asyncio`` with a bounded semaphore for concurrency. HTTP 429
@@ -449,8 +510,7 @@ async def run(
     async with aiohttp.ClientSession(connector=connector, headers=_HEADERS) as session:
         pending: set[asyncio.Task[CheckResult]] = {
             asyncio.create_task(
-                _bounded_check(session, semaphore, url, index.sources(url)),
-                name=url,
+                _bounded_check(session, semaphore, url, index.sources(url)), name=url
             )
             for url in index.urls()
         }
@@ -458,8 +518,7 @@ async def run(
         try:
             while pending:
                 done, pending = await asyncio.wait(
-                    pending,
-                    return_when=asyncio.FIRST_COMPLETED,
+                    pending, return_when=asyncio.FIRST_COMPLETED
                 )
                 for task in done:
                     await _report_result(task.result(), failed)
@@ -481,9 +540,7 @@ def _configure_logging(*, verbose: bool) -> None:
     """
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(
-        level=level,
-        format="%(levelname)-5s %(message)s",
-        stream=sys.stdout,
+        level=level, format="%(levelname)-5s %(message)s", stream=sys.stdout
     )
 
 
@@ -514,6 +571,10 @@ def main() -> None:
     if not index:
         log.info("No URLs found.")
         sys.exit(0)
+
+    if dups := index.duplicate_urls():
+        log.error("%s", _describe_duplicates(dups))
+        sys.exit(1)
 
     log.info("Checking %d unique URLs with %d workers...\n", len(index), args.workers)
 
