@@ -64,6 +64,10 @@ class UrlOccurrence:
     source: Path
     key_path: str
 
+    def __str__(self) -> str:
+        """Render as ``file [key.path]``."""
+        return f"{self.source} [{self.key_path}]"
+
 
 @dataclass(frozen=True, slots=True)
 class CheckResult:
@@ -350,6 +354,19 @@ def _list_label(item: Any, index: int) -> str:  # noqa: ANN401
     return f"[{index}]"
 
 
+def _join_path(path: str, key: str) -> str:
+    """Append *key* to a dot-separated *path* (or just *key* at the root).
+
+    Args:
+        path: Key path accumulated above the current node (empty at root).
+        key: The next path segment.
+
+    Returns:
+        The extended key path.
+    """
+    return f"{path}.{key}" if path else key
+
+
 def _extract_urls(node: Any, out: list[tuple[str, str]], path: str = "") -> None:  # noqa: ANN401
     """Recursively extract HTTP/HTTPS strings from an arbitrary YAML node.
 
@@ -369,11 +386,10 @@ def _extract_urls(node: Any, out: list[tuple[str, str]], path: str = "") -> None
         for k, v in node.items():
             if k in ("references", "notes"):
                 continue
-            _extract_urls(v, out, f"{path}.{k}" if path else str(k))
+            _extract_urls(v, out, _join_path(path, str(k)))
     elif isinstance(node, list):
         for i, item in enumerate(node):
-            label = _list_label(item, i)
-            _extract_urls(item, out, f"{path}.{label}" if path else label)
+            _extract_urls(item, out, _join_path(path, _list_label(item, i)))
 
 
 def build_index(yaml_files: list[Path]) -> UrlIndex:
@@ -385,7 +401,8 @@ def build_index(yaml_files: list[Path]) -> UrlIndex:
         yaml_files: Paths to YAML files to scan.
 
     Returns:
-        :class:`UrlIndex` mapping each unique URL to its source file(s).
+        :class:`UrlIndex` mapping each unique URL to its occurrences
+        (file + key path).
     """
     index = UrlIndex()
     raw: list[tuple[str, str]] = []
@@ -401,41 +418,20 @@ def build_index(yaml_files: list[Path]) -> UrlIndex:
     return index
 
 
-class DuplicateURLsError(ValueError):
-    """Raised when a URL is referenced by more than one resource.
-
-    Attributes:
-        duplicates: Mapping of duplicated URL to its occurrences.
-    """
-
-    duplicates: dict[str, list[UrlOccurrence]]
-
-    def __init__(self, duplicates: dict[str, list[UrlOccurrence]]) -> None:
-        """Build the error message from *duplicates*.
-
-        Args:
-            duplicates: Mapping of duplicated URL to its occurrences.
-        """
-        self.duplicates = duplicates
-        lines = [f"{len(duplicates)} URL(s) referenced more than once:"]
-        for url, occurrences in duplicates.items():
-            lines.append(f"  {url}")
-            lines.extend(f"      {occ.source} [{occ.key_path}]" for occ in occurrences)
-        super().__init__("\n".join(lines))
-
-
-def ensure_unique_urls(index: UrlIndex) -> None:
-    """Ensure every URL in *index* is referenced exactly once.
+def _describe_duplicates(duplicates: dict[str, list[UrlOccurrence]]) -> str:
+    """Render a duplicate-URL report as a human-readable block.
 
     Args:
-        index: URL index produced by :func:`build_index`.
+        duplicates: Mapping of duplicated URL to its occurrences.
 
-    Raises:
-        DuplicateURLsError: If any URL occurs more than once.
+    Returns:
+        Multi-line report, each URL followed by its indented occurrences.
     """
-    duplicates = index.duplicate_urls()
-    if duplicates:
-        raise DuplicateURLsError(duplicates)
+    lines = [f"{len(duplicates)} URL(s) referenced more than once:"]
+    for url, occurrences in duplicates.items():
+        lines.append(f"  {url}")
+        lines.extend(f"      {occ}" for occ in occurrences)
+    return "\n".join(lines)
 
 
 def discover_yamls(roots: list[str]) -> list[Path]:
@@ -478,9 +474,7 @@ async def _cancel_pending(pending: set[asyncio.Task[CheckResult]]) -> None:
 
 def _format_sources(sources: list[UrlOccurrence]) -> str:
     """Render occurrences as ``file [key.path]`` entries, or 'unknown'."""
-    if not sources:
-        return "unknown"
-    return ", ".join(f"{occ.source} [{occ.key_path}]" for occ in sources)
+    return ", ".join(map(str, sources)) or "unknown"
 
 
 async def _report_result(result: CheckResult, failed: list[CheckResult]) -> None:
@@ -578,10 +572,8 @@ def main() -> None:
         log.info("No URLs found.")
         sys.exit(0)
 
-    try:
-        ensure_unique_urls(index)
-    except DuplicateURLsError as exc:
-        log.error("%s", exc)
+    if dups := index.duplicate_urls():
+        log.error("%s", _describe_duplicates(dups))
         sys.exit(1)
 
     log.info("Checking %d unique URLs with %d workers...\n", len(index), args.workers)
