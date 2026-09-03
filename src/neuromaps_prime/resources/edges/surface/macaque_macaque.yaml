@@ -121,7 +121,7 @@
       - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
         doi: 10.5281/zenodo.15642801
         url: https://zenodo.org/records/15642801
-        
+
     CIVET:
       41k:
         midthickness:
@@ -312,7 +312,7 @@
       - citation: Lepage, C., et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
         url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
-      
+
 - from: NMT2Sym
   to: MEBRAINS
   surfaces:
@@ -367,8 +367,8 @@
     CIVET:
       41k:
         midthickness:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b1c63a718cdfb8d229
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d2bb422df79d9b8c8f1
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d2bb422df79d9b8c8f1
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4cf19b6fa812c2b8cd02
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d353e6dfd1a99b8c771
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d359bf888fc296b991e
