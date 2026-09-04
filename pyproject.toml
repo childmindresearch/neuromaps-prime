@@ -37,6 +37,7 @@ dev = [
   "pre-commit>=4.5.0",
   "pytest>=9.0.3",
   "pytest-cov>=7.0.0",
+  "pytest-xdist[psutil]>=3.8.0",
   "ruff>=0.15.15",
   "types-pyyaml>=6.0.12.20260518",
   "types-requests>=2.33.0.20260518"

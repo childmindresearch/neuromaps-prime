@@ -1,0 +1,336 @@
+name: Full testing suite
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened] # test + serve plot; no canonical write
+  pull_request_target:
+    types: [closed] # merged -> record; closed unmerged -> clean up the preview
+  workflow_dispatch: # test + artifact only
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TZ: UTC   # stable filename timestamps / timeline ordering
+
+jobs:
+  test:
+    if: github.event_name != 'pull_request_target'
+    runs-on: arcana
+    environment: self-hosted-actions
+    timeout-minutes: 180
+    steps:
+    - uses: actions/checkout@v7
+    - uses: astral-sh/setup-uv@v9.0.0
+      with:
+        enable-cache: true # not automatic on self-hosted runners
+    - run: echo "NEUROMAPS_CYCLE_OUTPUT_DIR=$RUNNER_TEMP/cycle_outputs" >> "$GITHUB_ENV"
+    - run: uv sync --group tests --frozen
+
+    - name: Run all tests
+      shell: bash
+      run: |
+        uv run pytest \
+          -n 8 \
+          --runner=podman \
+          --durations=0 \
+          --log-level=DEBUG \
+          --verbose
+
+    - name: Locate run summary CSV
+      id: summary
+      if: success()
+      shell: bash
+      run: |
+        set -euo pipefail
+        csv=$(ls -1 "$NEUROMAPS_CYCLE_OUTPUT_DIR"/cycle_[0-9]*.csv | sort | tail -n 1)
+        ts=${csv##*cycle_}
+        ts=${ts%.csv}
+        { echo "csv=$csv"; echo "ts=$ts"; } >> "$GITHUB_OUTPUT"
+
+    # Builds the combined state (canonical history + this run) for BOTH
+    # triggers. On pull_request it is published to a per-PR preview ref so the
+    # comment can render it inline; the canonical cycle-history branch is
+    # written only on merge (see the record job).
+    - name: Publish cycle history
+      id: publish
+      if: success() && steps.summary.outputs.csv != ''
+      shell: bash
+      env:
+        HISTORY_PAT: ${{ secrets.HISTORY_PAT }}
+        EVENT: ${{ github.event_name }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        set -euo pipefail
+        branch="cycle-history"
+        repo="childmindresearch/neuromaps-prime"
+        workdir="$RUNNER_TEMP/cycle_history_work"
+        sha8="${HEAD_SHA:0:8}"
+        csv="${{ steps.summary.outputs.csv }}"
+        ts="${{ steps.summary.outputs.ts }}"
+
+        # Canonical history (bootstrap empty if absent) + this run's summary.
+        rm -rf "$workdir"
+        git init -q -b "$branch" "$workdir"
+        git -C "$workdir" config user.name  "github-actions[bot]"
+        git -C "$workdir" config user.email "github-actions[bot]@users.noreply.github.com"
+        if git -C "$workdir" fetch -q --depth 1 "https://github.com/$repo" "$branch"; then
+          git -C "$workdir" reset -q --hard FETCH_HEAD
+        fi
+        mkdir -p "$workdir/history"
+        cp "$csv" "$workdir/history/cycle_${ts}_${sha8}.csv"
+
+        # This run's per-path detail, replacing the previous run's: rebuild the
+        # folder from scratch so an origin skipped in this run keeps no stale
+        # file. (Excludes the timestamped summary — under history/ — and the
+        # work_*/ GIFTI intermediates.)
+        rm -rf "$workdir/cycle_outputs"
+        mkdir -p "$workdir/cycle_outputs"
+        find "$NEUROMAPS_CYCLE_OUTPUT_DIR" -maxdepth 1 -type f \
+          \( -name 'cycle_*.csv' -o -name 'cycle_*.txt' \) ! -name 'cycle_[0-9]*.csv' \
+          -exec cp -t "$workdir/cycle_outputs" {} +
+
+        rm -f "$workdir"/cycle_history.svg # derived: regenerate from the full set
+        uv run scripts/plot_cycle_history.py --dir "$workdir/history" --output-dir "$workdir"
+
+        if [ "$EVENT" != "pull_request" ]; then
+          echo "Manual run — combined state built (not published)."
+          exit 0
+        fi
+
+        [ -n "${HISTORY_PAT:-}" ] || {
+          echo "HISTORY_PAT not set — repo secrets are unavailable to PRs from forks; the comment will link to the artifact."
+          echo "preview=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        }
+
+        # Push with the token in the URL — no credential-helper config source to
+        # miss on this box. GHA redacts the secret value everywhere in log output.
+        auth="https://x-access-token:${HISTORY_PAT}@github.com/$repo"
+
+        # Dedicated per-PR ref: force push, no fast-forward or contention concerns.
+        git -C "$workdir" add -A cycle_outputs history cycle_history.svg
+        git -C "$workdir" commit -q -m "Preview cycle regression ${sha8} (PR #${PR_NUMBER})"
+        git -C "$workdir" push -q -f "$auth" "HEAD:refs/heads/${branch}/pr-${PR_NUMBER}"
+        echo "preview=true" >> "$GITHUB_OUTPUT"
+
+    # The preview ref already holds this state for PRs; the artifact is the
+    # manual trigger's channel and the fallback when no preview was published.
+    - name: Upload artifact
+      if: always() && (github.event_name == 'workflow_dispatch' || steps.publish.outputs.preview != 'true')
+      uses: actions/upload-artifact@v7.0.1
+      with:
+        name: cycle-results
+        # The run's per-path CSV/TXT summaries (no work_*/ GIFTI intermediates)
+        # + the combined timeline.
+        path: |
+          ${{ runner.temp }}/cycle_outputs/cycle_*.csv
+          ${{ runner.temp }}/cycle_outputs/cycle_*.txt
+          ${{ runner.temp }}/cycle_history_work/cycle_history.svg
+        if-no-files-found: warn
+
+    - name: Build report body
+      if: always() && github.event_name == 'pull_request'
+      id: report
+      shell: bash
+      env:
+        RAW_BASE: https://raw.githubusercontent.com/childmindresearch/neuromaps-prime
+        ARTIFACTS_URL: https://github.com/childmindresearch/neuromaps-prime/actions/runs/${{ github.run_id }}/artifacts
+        PREVIEW_OK: ${{ steps.publish.outputs.preview }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        set -euo pipefail
+        {
+          echo "<!-- cycle-regression-report -->"
+          echo "## Cycle regression report"
+          echo
+          if [ "$PREVIEW_OK" = "true" ]; then
+            echo "This run (live preview — recorded on the \`cycle-history\` branch when the PR merges)."
+            echo
+            echo "![cycle_history timeline]($RAW_BASE/cycle-history%2Fpr-$PR_NUMBER/cycle_history.svg)"
+            echo
+            echo "Accumulated history: [cycle-history branch](https://github.com/childmindresearch/neuromaps-prime/tree/cycle-history/history)"
+          else
+            echo "Preview unavailable for this PR (fork PRs get no repo secrets)."
+            echo
+            echo "Results: [download artifacts]($ARTIFACTS_URL)"
+          fi
+        } > "$RUNNER_TEMP/report_body.md"
+
+    - name: Find existing report comment
+      if: github.event_name == 'pull_request' && steps.report.outcome == 'success'
+      id: find-comment
+      uses: peter-evans/find-comment@v4.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: github-actions[bot]
+        body-includes: <!-- cycle-regression-report -->
+
+    - name: Create or update PR comment
+      if: steps.find-comment.outcome == 'success'
+      uses: peter-evans/create-or-update-comment@v5.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-id: ${{ steps.find-comment.outputs.comment-id }}
+        body-path: ${{ runner.temp }}/report_body.md
+        edit-mode: replace
+
+  record:
+    name: Record on merge
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.merged
+    runs-on: arcana
+    environment: self-hosted-actions
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v7
+    - uses: astral-sh/setup-uv@v9.0.0
+
+    - name: Record cycle history
+      id: record
+      shell: bash
+      env:
+        HISTORY_PAT: ${{ secrets.HISTORY_PAT }}
+        MERGED_SHA: ${{ github.event.pull_request.head.sha }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        set -euo pipefail
+        branch="cycle-history"
+        repo="childmindresearch/neuromaps-prime"
+        workdir="$RUNNER_TEMP/cycle_history_work"
+        preview="refs/heads/${branch}/pr-${PR_NUMBER}"
+        sha8="${MERGED_SHA:0:8}"
+
+        [ -n "${HISTORY_PAT:-}" ] || {
+          echo "::error::HISTORY_PAT not set — cannot record."
+          exit 1
+        }
+        # Push with the token in the URL — no credential-helper config source to
+        # miss on this box. GHA redacts the secret value everywhere in log output.
+        auth="https://x-access-token:${HISTORY_PAT}@github.com/$repo"
+
+        # Canonical history (bootstrap empty if absent).
+        rm -rf "$workdir"
+        git init -q -b "$branch" "$workdir"
+        git -C "$workdir" config user.name  "GitHub Actions"
+        git -C "$workdir" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        if git -C "$workdir" fetch -q --depth 1 "https://github.com/$repo" "$branch"; then
+          git -C "$workdir" reset -q --hard FETCH_HEAD
+        fi
+
+        # This PR's final sync state, from its preview ref.
+        preview_dir="$RUNNER_TEMP/preview"
+        rm -rf "$preview_dir"
+        git init -q "$preview_dir"
+        git -C "$preview_dir" fetch -q --depth 1 "https://github.com/$repo" "$preview" \
+          || { echo "::error::Preview ref ${preview} not found — re-run the PR's last sync."; exit 1; }
+        git -C "$preview_dir" reset -q --hard FETCH_HEAD
+
+        apply_run() {  # newest summary for the merged sha + the final per-path detail
+          summary=$(ls -1 "$preview_dir/history"/cycle_*_"${sha8}".csv | sort | tail -n 1)
+          mkdir -p "$workdir/history"
+          cp "$summary" "$workdir/history/"
+          rm -rf "$workdir/cycle_outputs"
+          cp -r "$preview_dir/cycle_outputs" "$workdir/cycle_outputs"
+          rm -f "$workdir"/cycle_history.svg
+          uv run scripts/plot_cycle_history.py --dir "$workdir/history" --output-dir "$workdir"
+        }
+        apply_run
+
+        ok=0
+        for attempt in 1 2 3; do
+          # -A stages removals too (origins skipped in the final run).
+          git -C "$workdir" add -A cycle_outputs history cycle_history.svg
+          if ! git -C "$workdir" commit -q -m "Record cycle regression ${sha8} (PR #${PR_NUMBER})"; then
+            echo "Nothing to commit — history already up to date."
+            ok=1
+            break
+          fi
+          if git -C "$workdir" push -q "$auth" "HEAD:refs/heads/$branch"; then
+            ok=1
+            break
+          fi
+          echo "::warning::Push to ${branch} rejected (concurrent update); retry ${attempt}/3"
+          git -C "$workdir" fetch -q --depth 1 "https://github.com/$repo" "$branch"
+          git -C "$workdir" reset -q --hard FETCH_HEAD
+          apply_run
+        done
+        [ "$ok" -eq 1 ] || { echo "::error::Could not push to ${branch} after 3 attempts"; exit 1; }
+
+        # The preview ref has served its purpose.
+        git -C "$workdir" push -q "$auth" ":${preview}" \
+          || echo "::warning::could not delete preview ref ${preview}"
+
+    - name: Find existing report comment
+      if: steps.record.outcome == 'success'
+      id: find-comment
+      uses: peter-evans/find-comment@v4.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: github-actions[bot]
+        body-includes: <!-- cycle-regression-report -->
+
+    - name: Point PR comment at the recorded plot
+      if: steps.find-comment.outcome == 'success'
+      uses: peter-evans/create-or-update-comment@v5.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-id: ${{ steps.find-comment.outputs.comment-id }}
+        body: |
+          <!-- cycle-regression-report -->
+          ## Cycle regression report
+
+          Recorded on the `cycle-history` branch.
+
+          ![cycle_history timeline](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/cycle-history/cycle_history.svg)
+
+          Full history: [cycle-history branch](https://github.com/childmindresearch/neuromaps-prime/tree/cycle-history/history)
+        edit-mode: replace
+
+  cleanup:
+    name: Remove PR preview
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.merged == false
+    runs-on: arcana
+    environment: self-hosted-actions
+    timeout-minutes: 10
+    steps:
+    - name: Find existing report comment
+      id: find-comment
+      uses: peter-evans/find-comment@v4.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: github-actions[bot]
+        body-includes: <!-- cycle-regression-report -->
+
+    - name: Re-point PR comment
+      if: steps.find-comment.outcome == 'success'
+      uses: peter-evans/create-or-update-comment@v5.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-id: ${{ steps.find-comment.outputs.comment-id }}
+        body: |
+          <!-- cycle-regression-report -->
+          ## Cycle regression report
+
+          PR closed without merging — this run was not recorded.
+
+          Results: [Actions runs](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test_full.yaml)
+        edit-mode: replace
+
+    - name: Delete preview ref
+      shell: bash
+      env:
+        HISTORY_PAT: ${{ secrets.HISTORY_PAT }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        set -euo pipefail
+        [ -n "${HISTORY_PAT:-}" ] || { echo "no HISTORY_PAT — leaving any preview ref in place"; exit 0; }
+        # Push with the token in the URL — no credential-helper config source to miss.
+        auth="https://x-access-token:${HISTORY_PAT}@github.com/childmindresearch/neuromaps-prime"
+        git push "$auth" ":refs/heads/cycle-history/pr-${PR_NUMBER}" \
+          || echo "preview ref not present — nothing to clean up"
