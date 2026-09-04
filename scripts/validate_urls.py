@@ -281,25 +281,30 @@ async def _get_range(
     )
 
 
-def _is_github_blob_url(url: str) -> bool:
-    """Return True if *url* is a GitHub ``/blob/`` file-page URL.
+# Routes that render an HTML page instead of serving the raw file
+_VIEW_PAGE_ROUTES: dict[str, str] = {"github.com": "blob", "gin.g-node.org": "src"}
 
-    These are human-facing pages (e.g. ``github.com/owner/repo/blob/main/file``)
-    that render an HTML view rather than exposing the raw file, so they cannot
-    be consumed programmatically. Query strings and fragments are ignored.
+
+def _view_page_route(url: str) -> str | None:
+    """Return the host if *url* is a human-facing file-view (HTML) page.
+
+    Such pages render an HTML view rather than exposing the raw file.
+    Query strings and fragments are ignored.
 
     Args:
         url: A candidate URL string.
 
     Returns:
-        True if the URL points at a ``github.com`` blob page, else False.
+        The host (e.g. ``"github.com"``) when *url* is a known file-view page,
+        else ``None``.
     """
     parts = urlsplit(url)
     host = (parts.hostname or "").lower().removeprefix("www.")
-    if host != "github.com":
-        return False
+    marker = _VIEW_PAGE_ROUTES.get(host)
+    if marker is None:
+        return None
     segments = [s for s in parts.path.split("/") if s]
-    return len(segments) >= 3 and segments[2] == "blob"
+    return host if (len(segments) >= 3 and segments[2] == marker) else None
 
 
 async def check_url(
@@ -308,7 +313,7 @@ async def check_url(
     """Validate *url* without downloading its body.
 
     Strategy:
-        1. Reject unsupported URL types (GitHub ``/blob/`` pages) up front.
+        1. Reject unsupported URL types (human-facing view pages) up front.
         2. Send a HEAD request, retrying on HTTP 429 with backoff.
         3. On 403/405 (server rejects HEAD), fall back to :func:`_get_range`.
         4. Map any other HTTP/network error to a failed :class:`CheckResult`.
@@ -321,11 +326,11 @@ async def check_url(
     Returns:
         :class:`CheckResult` describing whether the URL is reachable.
     """
-    if _is_github_blob_url(url):
+    if host := _view_page_route(url):
         return CheckResult(
             url,
             ok=False,
-            detail="unsupported URL type: GitHub blob URL (use a raw file URL)",
+            detail=f"unsupported URL type: {host} view page (use a raw file URL)",
             sources=sources,
         )
 
