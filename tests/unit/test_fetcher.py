@@ -56,6 +56,10 @@ class TestIDStorage:
                 "https://raw.githubusercontent.com/owner/repo/refs/tags/v1.0/file.txt",
                 "github",
             ),
+            (
+                "https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/templates/D99/x.nii.gz",
+                "gin",
+            ),
         ],
     )
     def test_valid(self, storage: str, expected: str) -> None:
@@ -86,6 +90,10 @@ class TestDownloadAndValidate:
             (
                 remote.GitHubStorage,
                 "https://raw.githubusercontent.com/owner/repo/refs/tags/v1.0/file.txt",
+            ),
+            (
+                remote.GINStorage,
+                "https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/templates/D99/x.nii.gz",
             ),
         ],
     )

@@ -5,10 +5,15 @@ from urllib.parse import urlparse
 
 from neuromaps_prime import remote
 
-_STORAGES = {"osf": remote.OSFStorage(), "github": remote.GitHubStorage()}
+_STORAGES = {
+    "osf": remote.OSFStorage(),
+    "github": remote.GitHubStorage(),
+    "gin": remote.GINStorage(),
+}
 _HOST_MAP = {
     "osf.io": _STORAGES["osf"],
     "raw.githubusercontent.com": _STORAGES["github"],
+    "gin.g-node.org": _STORAGES["gin"],
 }
 
 
@@ -19,7 +24,7 @@ def id_storage(uri: str) -> str | None:
         uri: Remote URI to fetch data from
 
     Returns:
-        String indicating type of storage (one of 'osf', 'github')
+        String indicating type of storage (one of 'osf', 'github', 'gin')
     """
     host = urlparse(uri).hostname
     if host is None:
