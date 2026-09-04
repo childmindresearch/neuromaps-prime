@@ -5,8 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import nibabel
+import numpy as np
 import pytest
 
+from neuromaps_prime.analysis.images import load_data
 from neuromaps_prime.transforms.volume import vol_to_vol
 
 if TYPE_CHECKING:
@@ -66,6 +68,41 @@ class TestVolumetricTransformIntegration:
         assert output.exists()
 
 
-@pytest.mark.skip(reason="No volumetric data to project.")
 class TestVolumeToSurfaceProjectionIntegration:
     """Integration tests for volume to surface projection."""
+
+    SOURCE = "D99"
+    TARGET = "Yerkes19"
+
+    @pytest.mark.parametrize(
+        ("transformer_type", "annotation", "suffix"),
+        [("label", "PC_hemi_R", "label.gii"), ("metric", "MTR", "func.gii")],
+        ids=["label", "metric"],
+    )
+    def test_volume_to_surface(
+        self, graph: NeuromapsGraph, transformer_type: str, annotation: str, suffix: str
+    ) -> None:
+        """Project a D99 annotation onto the surface, then resample to Yerkes19."""
+        resource = graph.fetch_volume_annotation(
+            space=self.SOURCE, label=annotation, resolution="250um"
+        )
+        assert resource is not None
+        input_fpath = resource.fetch()
+
+        result = graph.volume_to_surface_transformer(
+            transformer_type=transformer_type,
+            input_file=input_fpath,
+            source_space=self.SOURCE,
+            target_space=self.TARGET,
+            hemisphere="right",
+            output_file_path=f"{self.SOURCE}_to_{self.TARGET}.{suffix}",
+            add_edge=False,
+        )
+        assert result.path is not None
+        assert result.path.exists()
+
+        data = load_data(result.path).array
+        assert data.size > 0
+        assert np.all(np.isfinite(data))
+        if transformer_type == "label":  # label resampling keeps whole-number labels
+            assert np.all(data == np.rint(data))
