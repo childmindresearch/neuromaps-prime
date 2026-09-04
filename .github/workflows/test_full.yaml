@@ -117,7 +117,7 @@ jobs:
         # Dedicated per-PR ref: force push, no fast-forward or contention concerns.
         git -C "$workdir" add -A cycle_outputs history cycle_history.svg
         git -C "$workdir" commit -q -m "Preview cycle regression ${sha8} (PR #${PR_NUMBER})"
-        git -C "$workdir" push -q -f "$auth" "HEAD:refs/heads/${branch}/pr-${PR_NUMBER}"
+        git -C "$workdir" push -q -f "$auth" "HEAD:refs/heads/cycle-preview/pr-${PR_NUMBER}"
         echo "preview=true" >> "$GITHUB_OUTPUT"
 
     # The preview ref already holds this state for PRs; the artifact is the
@@ -153,7 +153,7 @@ jobs:
           if [ "$PREVIEW_OK" = "true" ]; then
             echo "This run (live preview — recorded on the \`cycle-history\` branch when the PR merges)."
             echo
-            echo "![cycle_history timeline]($RAW_BASE/cycle-history%2Fpr-$PR_NUMBER/cycle_history.svg)"
+            echo "![cycle_history timeline]($RAW_BASE/cycle-preview%2Fpr-$PR_NUMBER/cycle_history.svg)"
             echo
             echo "Accumulated history: [cycle-history branch](https://github.com/childmindresearch/neuromaps-prime/tree/cycle-history/history)"
           else
@@ -184,8 +184,7 @@ jobs:
   record:
     name: Record on merge
     if: github.event_name == 'pull_request_target' && github.event.pull_request.merged
-    runs-on: arcana
-    environment: self-hosted-actions
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v7
@@ -203,7 +202,7 @@ jobs:
         branch="cycle-history"
         repo="childmindresearch/neuromaps-prime"
         workdir="$RUNNER_TEMP/cycle_history_work"
-        preview="refs/heads/${branch}/pr-${PR_NUMBER}"
+        preview="refs/heads/cycle-preview/pr-${PR_NUMBER}"
         sha8="${MERGED_SHA:0:8}"
 
         [ -n "${HISTORY_PAT:-}" ] || {
@@ -295,8 +294,7 @@ jobs:
   cleanup:
     name: Remove PR preview
     if: github.event_name == 'pull_request_target' && github.event.pull_request.merged == false
-    runs-on: arcana
-    environment: self-hosted-actions
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
     - name: Find existing report comment
@@ -332,5 +330,5 @@ jobs:
         [ -n "${HISTORY_PAT:-}" ] || { echo "no HISTORY_PAT — leaving any preview ref in place"; exit 0; }
         # Push with the token in the URL — no credential-helper config source to miss.
         auth="https://x-access-token:${HISTORY_PAT}@github.com/childmindresearch/neuromaps-prime"
-        git push "$auth" ":refs/heads/cycle-history/pr-${PR_NUMBER}" \
+        git push "$auth" ":refs/heads/cycle-preview/pr-${PR_NUMBER}" \
           || echo "preview ref not present — nothing to clean up"
