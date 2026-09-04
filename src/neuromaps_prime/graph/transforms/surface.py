@@ -30,6 +30,7 @@ from neuromaps_prime.transforms.surface import (
 )
 from neuromaps_prime.transforms.utils import (
     estimate_surface_density,
+    relocate_output,
     validate_surface_file,
 )
 
@@ -316,6 +317,8 @@ class SurfaceTransformOps(BaseModel):
             for surf_type in ("white", "pial")
         }
 
+        final_volume = Path(output_file_path)
+
         match transformer_type:
             case "label":
                 ribbon_surfs = workbench.label_to_volume_mapping_ribbon_constrained(
@@ -325,7 +328,7 @@ class SurfaceTransformOps(BaseModel):
                     label=surface_result.path,
                     surface=target_surface.fetch(),
                     volume_space=ref_volume,
-                    volume_out=output_file_path,
+                    volume_out=final_volume.name,
                     ribbon_constrained=ribbon_surfs,
                 ).volume_out
             case "metric":
@@ -336,9 +339,12 @@ class SurfaceTransformOps(BaseModel):
                     metric=surface_result.path,
                     surface=target_surface.fetch(),
                     volume_space=ref_volume,
-                    volume_out=output_file_path,
+                    volume_out=final_volume.name,
                     ribbon_constrained=ribbon_surfs,
                 ).volume_out
+
+        if final_volume.is_absolute():
+            output_path = relocate_output(output_path, final_volume)
 
         # Propagate metadata from the surface result, wrapping updated path
         return TransformResult(

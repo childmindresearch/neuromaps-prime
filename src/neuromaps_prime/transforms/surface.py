@@ -5,6 +5,8 @@ from typing import Literal
 
 from niwrap import workbench
 
+from neuromaps_prime.transforms.utils import relocate_output
+
 _RESAMPLE_METHODS = frozenset({"ADAP_BARY_AREA", "BARYCENTRIC"})
 
 
@@ -40,14 +42,25 @@ def surface_sphere_project_unproject(
         if not path.exists():
             raise FileNotFoundError(f"{desc} not found: {path}")
 
+    final_path = Path(sphere_out)
+
     result = workbench.surface_sphere_project_unproject(
         sphere_in=sphere_in,
         sphere_project_to=sphere_project_to,
         sphere_unproject_from=sphere_unproject_from,
-        sphere_out=str(sphere_out),
+        sphere_out=final_path.name,
     )
+
     if not result.sphere_out.exists():
-        raise FileNotFoundError(f"Sphere out not found: {sphere_out}")
+        raise FileNotFoundError(f"Sphere out not computed: {result.sphere_out}")
+
+    if final_path.is_absolute():
+        # The container can only write inside its per-run output directory;
+        # move the result to the requested host location.
+        relocate_output(result.sphere_out, final_path)
+        if not final_path.exists():
+            raise FileNotFoundError(f"Sphere out not found: {final_path}")
+        return result._replace(sphere_out=final_path)
     return result
 
 
@@ -93,16 +106,25 @@ def metric_resample(
             f"Resampling method '{method}' is not implemented in this function."
         )
 
+    final_path = Path(output_file_path)
+
     result = workbench.metric_resample(
         metric_in=input_file_path,
         current_sphere=current_sphere,
         new_sphere=new_sphere,
         method=method,
         area_surfs=area_surfs,
-        metric_out=str(output_file_path),
+        metric_out=final_path.name,
     )
+
     if not result.metric_out.exists():
-        raise FileNotFoundError(f"Metric out not found: {result.metric_out}")
+        raise FileNotFoundError(f"Metric out not computed: {result.metric_out}")
+
+    if final_path.is_absolute():
+        relocate_output(result.metric_out, final_path)
+        if not final_path.exists():
+            raise FileNotFoundError(f"Metric out not found: {final_path}")
+        return result._replace(metric_out=final_path)
     return result
 
 
@@ -148,14 +170,23 @@ def label_resample(
             f"Resampling method '{method}' is not implemented in this function."
         )
 
+    final_path = Path(output_file_path)
+
     result = workbench.label_resample(
         label_in=input_file_path,
         current_sphere=current_sphere,
         new_sphere=new_sphere,
         method=method,
         area_surfs=area_surfs,
-        label_out=str(output_file_path),
+        label_out=final_path.name,
     )
+
     if not result.label_out.exists():
-        raise FileNotFoundError(f"Label out not found: {result.label_out}")
+        raise FileNotFoundError(f"Label out not computed: {result.label_out}")
+
+    if final_path.is_absolute():
+        relocate_output(result.label_out, final_path)
+        if not final_path.exists():
+            raise FileNotFoundError(f"Label out not found: {final_path}")
+        return result._replace(label_out=final_path)
     return result
