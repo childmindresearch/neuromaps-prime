@@ -63,18 +63,34 @@ class OSFStorage(BaseModel, ABC):
         return target
 
     def _download_to(self, url: str, target: Path, meta: OSFFileMeta) -> None:
-        """Stream the file to ``target`` and verify its MD5."""
+        """Stream the file to a temp file and move it to ``target`` if valid.
+
+        The download lands in a sibling ``.part`` file and is only renamed
+        into place with :meth:`Path.replace` once the MD5 verifies, so a
+        failed download never leaves a partial ``target`` behind.
+        """
+        part = target.with_name(target.name + ".part")
         r = requests.get(url, stream=True, timeout=90)
-        r.raise_for_status()
+        try:
+            r.raise_for_status()
 
-        h = hashlib.md5(usedforsecurity=False)
-        with target.open("wb") as f:
-            for chunk in r.iter_content(self.chunk_size):
-                f.write(chunk)
-                h.update(chunk)
+            h = hashlib.md5(usedforsecurity=False)
+            with part.open("wb") as f:
+                for chunk in r.iter_content(self.chunk_size):
+                    f.write(chunk)
+                    h.update(chunk)
 
-        if (actual := h.hexdigest()) != meta.extra.hashes.md5:
-            raise ValueError(f"Checksum mismatch: {actual} != {meta.extra.hashes.md5}")
+            if (actual := h.hexdigest()) != meta.extra.hashes.md5:
+                raise ValueError(
+                    f"Checksum mismatch: {actual} != {meta.extra.hashes.md5}"
+                )
+
+            part.replace(target)
+        except BaseException:
+            part.unlink(missing_ok=True)
+            raise
+        finally:
+            r.close()
 
     @staticmethod
     def _verify(path: Path, meta: OSFFileMeta) -> bool:

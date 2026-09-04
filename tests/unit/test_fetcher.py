@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 
 from neuromaps_prime import remote
 from neuromaps_prime.fetcher import download_and_validate, id_storage
@@ -43,6 +44,15 @@ def _fake_stream(payload: bytes) -> MagicMock:
     resp = MagicMock()
     resp.iter_content.return_value = [payload]
     return MagicMock(return_value=resp)
+
+
+def _http_error(status: int) -> requests.HTTPError:
+    """Build an HTTPError with ``status`` set and no Retry-After header.
+
+    ``headers={}`` (not a bare MagicMock) stops ``_backoff`` from reading a
+    mock header value; with None it takes the capped-backoff path.
+    """
+    return requests.HTTPError(response=MagicMock(status_code=status, headers={}))
 
 
 class TestIDStorage:
@@ -107,6 +117,88 @@ class TestDownloadAndValidate:
         assert result == stored
 
 
+class TestDownloadAndValidateRetry:
+    """download_and_validate retries transient errors, else fails fast."""
+
+    def test_retries_transient_then_succeeds(self, tmp_path: Path) -> None:
+        """A transient 429 followed by success returns the stored path."""
+        stored = tmp_path / "file.surf.gii"
+        transient = _http_error(429)
+        with (
+            patch.object(remote.OSFStorage, "download") as mock_download,
+            patch("neuromaps_prime.fetcher.time.sleep"),
+        ):
+            mock_download.side_effect = [transient, stored]
+            result = download_and_validate(
+                "https://files.osf.io/v1/resources/abcde", tmp_path
+            )
+        assert result == stored
+        assert mock_download.call_count == 2
+
+    def test_no_retry_on_permanent_error(self, tmp_path: Path) -> None:
+        """A non-retryable 404 propagates on the first attempt."""
+        not_found = _http_error(404)
+        with patch.object(remote.OSFStorage, "download") as mock_download:
+            mock_download.side_effect = not_found
+            with pytest.raises(requests.HTTPError):
+                download_and_validate(
+                    "https://files.osf.io/v1/resources/abcde", tmp_path
+                )
+        assert mock_download.call_count == 1
+
+    def test_gives_up_after_max_attempts(self, tmp_path: Path) -> None:
+        """Persistent 503s exhaust the retry budget and raise."""
+        server_error = _http_error(503)
+        with (
+            patch.object(remote.OSFStorage, "download") as mock_download,
+            patch("neuromaps_prime.fetcher.time.sleep"),
+        ):
+            mock_download.side_effect = server_error
+            with pytest.raises(requests.HTTPError):
+                download_and_validate(
+                    "https://files.osf.io/v1/resources/abcde", tmp_path
+                )
+        assert mock_download.call_count == 5  # == fetcher._MAX_ATTEMPTS
+
+    def test_retries_connection_error_then_succeeds(self, tmp_path: Path) -> None:
+        """A dropped connection followed by success returns the stored path."""
+        stored = tmp_path / "file.surf.gii"
+        with (
+            patch.object(remote.OSFStorage, "download") as mock_download,
+            patch("neuromaps_prime.fetcher.time.sleep"),
+        ):
+            mock_download.side_effect = [requests.ConnectionError("dropped"), stored]
+            result = download_and_validate(
+                "https://files.osf.io/v1/resources/abcde", tmp_path
+            )
+        assert result == stored
+        assert mock_download.call_count == 2
+
+    def test_gives_up_after_max_connection_errors(self, tmp_path: Path) -> None:
+        """Persistent connection errors exhaust the retry budget and raise."""
+        with (
+            patch.object(remote.OSFStorage, "download") as mock_download,
+            patch("neuromaps_prime.fetcher.time.sleep"),
+        ):
+            mock_download.side_effect = requests.ConnectionError("dropped")
+            with pytest.raises(requests.ConnectionError):
+                download_and_validate(
+                    "https://files.osf.io/v1/resources/abcde", tmp_path
+                )
+        assert mock_download.call_count == 5  # == fetcher._MAX_ATTEMPTS
+
+    def test_no_retry_on_permanent_request_error(self, tmp_path: Path) -> None:
+        """A permanent request error propagates on the first attempt."""
+        bad_url = requests.exceptions.InvalidURL("not a valid url")
+        with patch.object(remote.OSFStorage, "download") as mock_download:
+            mock_download.side_effect = bad_url
+            with pytest.raises(requests.exceptions.InvalidURL):
+                download_and_validate(
+                    "https://files.osf.io/v1/resources/abcde", tmp_path
+                )
+        assert mock_download.call_count == 1
+
+
 class TestOSFDownload:
     """Test suite for OSFStorage.download naming and cache behavior."""
 
@@ -158,6 +250,26 @@ class TestOSFDownload:
             for record in caplog.records
         )
 
+    def test_failed_stream_keeps_existing_file(self, tmp_path: Path) -> None:
+        """A failed download stream keeps the existing file and leaves no partial."""
+        payload = b"surface data"
+        stored = tmp_path / "file.surf.gii"
+        stored.write_bytes(payload)  # a previously-good cached copy
+        resp = MagicMock()
+        resp.iter_content.side_effect = requests.exceptions.ChunkedEncodingError(
+            "stream truncated"
+        )
+        with (
+            patch.object(
+                remote.OSFStorage, "get_meta", return_value=_osf_meta(b"other")
+            ),
+            patch("neuromaps_prime.remote.osf.requests.get", return_value=resp),
+            pytest.raises(requests.exceptions.ChunkedEncodingError),
+        ):
+            remote.OSFStorage().download("https://u1", tmp_path)
+        assert stored.read_bytes() == payload
+        assert list(tmp_path.glob("*.part")) == []
+
 
 class TestGitHubDownload:
     """Test suite for GitHubStorage.download naming and cache behavior."""
@@ -208,3 +320,23 @@ class TestGitHubDownload:
             "already exists and is being overwritten" in record.getMessage()
             for record in caplog.records
         )
+
+    def test_failed_stream_keeps_existing_file(self, tmp_path: Path) -> None:
+        """A failed download stream keeps the existing file and leaves no partial."""
+        payload = b"surface data"
+        stored = tmp_path / "file.surf.gii"
+        stored.write_bytes(payload)  # a previously-good cached copy
+        resp = MagicMock()
+        resp.iter_content.side_effect = requests.exceptions.ChunkedEncodingError(
+            "stream truncated"
+        )
+        with (
+            patch.object(
+                remote.GitHubStorage, "get_meta", return_value=_github_meta(b"other")
+            ),
+            patch("neuromaps_prime.remote.github.requests.get", return_value=resp),
+            pytest.raises(requests.exceptions.ChunkedEncodingError),
+        ):
+            remote.GitHubStorage().download("https://u1", tmp_path)
+        assert stored.read_bytes() == payload
+        assert list(tmp_path.glob("*.part")) == []
