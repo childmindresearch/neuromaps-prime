@@ -424,12 +424,6 @@ def plot_history(history_dir: Path, output_dir: Path) -> None:
     for j in range(n, len(axes_flat)):
         axes_flat[j].axis("off")
 
-    # The run axis is shared by every panel; drop the redundant tick labels on
-    # all but the bottom row.
-    for i in range(nrows - 1):
-        for j in range(ncols):
-            axes[i][j].tick_params(axis="x", labelbottom=False)
-
     fig.suptitle("Cycle round-trip accuracy over runs", fontsize=15)
     fig.tight_layout(rect=(0, 0, 1, 0.94))
 
