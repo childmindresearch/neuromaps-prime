@@ -11,15 +11,15 @@ import requests
 
 from neuromaps_prime import remote
 
-_logger = logging.getLogger(__name__)
-
-_STORAGES: dict[str, remote.OSFStorage | remote.GitHubStorage] = {
+_STORAGES = {
     "osf": remote.OSFStorage(),
     "github": remote.GitHubStorage(),
+    "gin": remote.GINStorage(),
 }
 _HOST_MAP = {
     "osf.io": _STORAGES["osf"],
     "raw.githubusercontent.com": _STORAGES["github"],
+    "gin.g-node.org": _STORAGES["gin"],
 }
 
 # Transient HTTP statuses worth retrying
@@ -34,6 +34,8 @@ _MAX_ATTEMPTS = 5
 _MAX_DELAY_S = 15.0
 
 T = TypeVar("T")
+
+_logger = logging.getLogger(__name__)
 
 
 def _backoff(response: requests.Response | None, attempt: int) -> float:
@@ -103,7 +105,7 @@ def id_storage(uri: str) -> str | None:
         uri: Remote URI to fetch data from
 
     Returns:
-        String indicating type of storage (one of 'osf', 'github')
+        String indicating type of storage (one of 'osf', 'github', 'gin')
     """
     host = urlparse(uri).hostname
     if host is None:
@@ -138,4 +140,4 @@ def download_and_validate(uri: str, dest_dir: str | Path) -> Path:
     if name is None:
         raise ValueError(f"Could not identify storage from uri: {uri}")
     storage = _STORAGES[name]
-    return _with_retries(lambda: storage.download(uri, Path(dest_dir)))
+    return _with_retries(lambda: storage.download(uri, Path(dest_dir)))  # type: ignore[attr-defined]
