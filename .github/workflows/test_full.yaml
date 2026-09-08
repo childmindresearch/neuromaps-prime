@@ -9,6 +9,9 @@ on:
     types: [opened, synchronize, reopened] # test + serve plot; no canonical write
   pull_request_target:
     types: [closed] # merged -> record; closed unmerged -> clean up the preview
+  push:
+    tags:
+    - v*   # release -> promote the latest recorded run into the kept set
   workflow_dispatch: # test + artifact only
 
 concurrency:
@@ -20,7 +23,7 @@ env:
 
 jobs:
   test:
-    if: github.event_name != 'pull_request_target'
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     runs-on: arcana
     environment: self-hosted-actions
     timeout-minutes: 180
@@ -234,6 +237,11 @@ jobs:
           summary=$(ls -1 "$preview_dir/history"/cycle_*_"${sha8}".csv | sort | tail -n 1)
           mkdir -p "$workdir/history"
           cp "$summary" "$workdir/history/"
+          # Retention: keep only the latest main run (releases/ is kept).
+          keep=$(ls -1 "$workdir/history"/cycle_*.csv 2>/dev/null | sort | tail -n 1)
+          for f in "$workdir/history"/cycle_*.csv; do
+            [ -n "$keep" ] && [ "$f" != "$keep" ] && rm -f "$f"
+          done
           rm -rf "$workdir/cycle_outputs"
           cp -r "$preview_dir/cycle_outputs" "$workdir/cycle_outputs"
           rm -f "$workdir"/cycle_history.svg
@@ -290,6 +298,77 @@ jobs:
 
           Full history: [cycle-history branch](https://github.com/childmindresearch/neuromaps-prime/tree/cycle-history/history)
         edit-mode: replace
+
+  release:
+    name: Record tagged release
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v7
+    - uses: astral-sh/setup-uv@v9.0.0
+
+    - name: Promote latest run to release
+      shell: bash
+      env:
+        HISTORY_PAT: ${{ secrets.HISTORY_PAT }}
+        TAG: ${{ github.ref_name }}
+      run: |
+        set -euo pipefail
+        branch="cycle-history"
+        repo="childmindresearch/neuromaps-prime"
+        workdir="$RUNNER_TEMP/cycle_history_work"
+        tag="${TAG}"
+
+        [ -n "${HISTORY_PAT:-}" ] || {
+          echo "::error::HISTORY_PAT not set — cannot record release."
+          exit 1
+        }
+        # Push with the token in the URL; GHA redacts it from the logs.
+        auth="https://x-access-token:${HISTORY_PAT}@github.com/$repo"
+
+        # Canonical history (bootstrap empty if absent).
+        rm -rf "$workdir"
+        git init -q -b "$branch" "$workdir"
+        git -C "$workdir" config user.name  "GitHub Actions"
+        git -C "$workdir" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        if git -C "$workdir" fetch -q --depth 1 "https://github.com/$repo" "$branch"; then
+          git -C "$workdir" reset -q --hard FETCH_HEAD
+        fi
+
+        # Reuse the recorded run: promote the latest main run into releases/.
+        latest=$(ls -1 "$workdir/history"/cycle_*.csv 2>/dev/null | sort | tail -n 1 || true)
+        if [ -z "${latest}" ]; then
+          echo "::warning::No recorded main run to reuse for ${tag} — nothing to record."
+          exit 0
+        fi
+
+        promote() {
+          mkdir -p "$workdir/history/releases"
+          mv "$latest" "$workdir/history/releases/"
+          rm -f "$workdir"/cycle_history.svg
+          uv run scripts/plot_cycle_history.py --dir "$workdir/history" --output-dir "$workdir"
+        }
+        promote
+
+        ok=0
+        for attempt in 1 2 3; do
+          git -C "$workdir" add -A cycle_outputs history cycle_history.svg
+          if ! git -C "$workdir" commit -q -m "Record release ${tag} (reused latest main run)"; then
+            echo "Nothing to commit — release already recorded."
+            ok=1
+            break
+          fi
+          if git -C "$workdir" push -q "$auth" "HEAD:refs/heads/$branch"; then
+            ok=1
+            break
+          fi
+          echo "::warning::Push to ${branch} rejected (concurrent update); retry ${attempt}/3"
+          git -C "$workdir" fetch -q --depth 1 "https://github.com/$repo" "$branch"
+          git -C "$workdir" reset -q --hard FETCH_HEAD
+          promote
+        done
+        [ "$ok" -eq 1 ] || { echo "::error::Could not push to ${branch} after 3 attempts"; exit 1; }
 
   cleanup:
     name: Remove PR preview

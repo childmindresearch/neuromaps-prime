@@ -100,7 +100,7 @@ def _load_history(history_dir: Path) -> pd.DataFrame:
     """
     frames: list[pd.DataFrame] = []
 
-    for path in sorted(history_dir.glob("cycle_*.csv")):
+    for path in sorted(history_dir.rglob("cycle_*.csv")):
         parsed = _parse_summary_name(path.name)
 
         if parsed is None:
