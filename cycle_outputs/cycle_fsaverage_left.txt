@@ -1,0 +1,8 @@
+Cycle test results — origin: fsaverage, hemisphere: left
+----------------------------------------------------------------
+Transformation path             Hops   Pearson r     Max |delta|
+----------------------------------------------------------------
+fsaverage -> NCBR -> fsaverage     2    0.998140       3.139e+04
+----------------------------------------------------------------
+Total cycles: 1
+Mean Pearson r: 0.998140

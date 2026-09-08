@@ -1,0 +1,2 @@
+path,n_hops,pearson_r,max_abs_diff
+NCBR -> fsaverage -> NCBR,2,0.9987467386923522,0.013079589232802391
