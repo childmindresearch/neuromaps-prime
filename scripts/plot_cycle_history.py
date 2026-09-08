@@ -100,7 +100,7 @@ def _load_history(history_dir: Path) -> pd.DataFrame:
     """
     frames: list[pd.DataFrame] = []
 
-    for path in sorted(history_dir.glob("cycle_*.csv")):
+    for path in sorted(history_dir.rglob("cycle_*.csv")):
         parsed = _parse_summary_name(path.name)
 
         if parsed is None:
@@ -423,12 +423,6 @@ def plot_history(history_dir: Path, output_dir: Path) -> None:
     # Hide any panels left unused when the species count does not fill the grid.
     for j in range(n, len(axes_flat)):
         axes_flat[j].axis("off")
-
-    # The run axis is shared by every panel; drop the redundant tick labels on
-    # all but the bottom row.
-    for i in range(nrows - 1):
-        for j in range(ncols):
-            axes[i][j].tick_params(axis="x", labelbottom=False)
 
     fig.suptitle("Cycle round-trip accuracy over runs", fontsize=15)
     fig.tight_layout(rect=(0, 0, 1, 0.94))
