@@ -191,13 +191,13 @@ fsLR:
           notes:
           - Raichle
         cmrglc:
-          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff79ab8bca0226edd4a8
-          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff854e5ee5021029a186
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/65578943062a3e1d45edfde0
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6557895258788123a33e772d
           notes:
           - Raichle
         cmro2:
-          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff79ab8bca0226edd4a8
-          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff854e5ee5021029a186
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff624e5ee50218291365
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff6eaf610c0217dfeaa3
           notes:
           - Raichle
         cmruglu:
