@@ -1,0 +1,14 @@
+# Surfaces sourced from neuromaps OSF
+# (https://osf.io/4mw3a)
+# Annotations are direct URL
+BigBrain:
+  species: human
+  description: BigBrain Human Template
+  surfaces:
+    164k:
+      white:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb4baa9273e457bcf2ec
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb55aa9273e457bcf2f7
+      pial:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb5542c6a64a22adf344
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb55f6066b60a124bc74
