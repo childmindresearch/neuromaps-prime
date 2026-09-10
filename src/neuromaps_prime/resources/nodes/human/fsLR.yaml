@@ -6,6 +6,29 @@ fsLR:
     doi: 10.1093/cercor/bhr291
     url: https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
   surfaces:
+    4k:
+    # 4k surfaces all use neuromaps OSF (https://osf.io/4mw3a)
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1cf78cabf8c81c4a54
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1eef1ed96e4a384bf2
+      midthickness:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1fa9ff3bdf84a7624d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1e7f7b4eef4ca13328
+      inflated:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1922ba28dceea1339c
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1ea9ff3bdf84a7624b
+    8k:
+    # 8k surfaces all use neuromaps OSF (https://osf.io/4mw3a)
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa3b4a3d4a661aa761f2
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa34ef1ed96e4a384bf9
+      midthickness:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa3646fff21527a132c3
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa3bef1ed96e4a384bfe
+      inflated:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa364a3d4a661aa761f0
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa39cc6bd5c3d4a13347
+    
     10k:
       # 10K surfaces all use https://github.com/TingsterX/alignment_macaque-human
       sphere:
@@ -49,3 +72,35 @@ fsLR:
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7054a95a0300698ed257c
           notes:
           - Xu 2020
+        FChomology:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7055b53349e06925fa808
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7056b95a0300698ed25bb
+          notes:
+          - Xu 2020
+        SAaxis:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e06d4ac99ebd0254018176
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e06d3c466d150209d58122
+          notes:
+          - Sydnor 2021
+    164k:
+    # 164k surfaces all use neuromaps OSF (https://osf.io/4mw3a)
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa748f16d3ade3a132ea
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa75aeca6ab0b4384b09
+      midthickness:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa747adda46eb1a762e4
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa75fc066bf6fb384b36
+      inflated:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa763a3d3a046da762dd
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa749509bc49be1c49b9
+      annotation:
+        cbf:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff4b4e5ee50219291e73
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff58ab8bca0218ee532f
+          notes:
+          - Raichle
+        cbv:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff8faf610c0213dfd7ed
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff9bab8bca0226edd520
+          notes:
+          - Raichle
