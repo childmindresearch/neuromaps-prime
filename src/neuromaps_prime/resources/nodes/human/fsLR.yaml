@@ -6,6 +6,70 @@ fsLR:
     doi: 10.1093/cercor/bhr291
     url: https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
   surfaces:
+    4k:
+    # 4k surfaces all use neuromaps OSF (https://osf.io/4mw3a)
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1cf78cabf8c81c4a54
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1eef1ed96e4a384bf2
+      midthickness:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1fa9ff3bdf84a7624d
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1e7f7b4eef4ca13328
+      inflated:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1922ba28dceea1339c
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa1ea9ff3bdf84a7624b
+      annotation:
+        meggamma1:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe86af610c0217dfe770
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe7a4e5ee50219291b6e
+          notes:
+          - hcps1200
+        megalpha:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe62af610c0212dfd100
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe6fab8bca0226edd089
+          notes:
+          - hcps1200
+        megtheta:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe57af610c020ddfebd0
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe49ab8bca0225edc476
+          notes:
+          - hcps1200
+        thickness:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe34af610c0217dfe61a
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe40ab8bca0225edc458
+          notes:
+          - hcps1200
+        megbeta:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe90af610c0216dfde19
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe9caf610c0216dfde35
+          notes:
+          - hcps1200
+        megdelta:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130febeab8bca0226edd198
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fecbab8bca0226edd1c6
+          notes:
+          - hcps1200
+        meggamma2:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fea54e5ee502182911a0
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130feb4af610c0216dfde66
+          notes:
+          - hcps1200
+        megtimescale:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61aa56660db65905cf836093
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61aa5657c7d9fb0543eb52b8
+          notes:
+          - hcps1200
+    8k:
+    # 8k surfaces all use neuromaps OSF (https://osf.io/4mw3a)
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa3b4a3d4a661aa761f2
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa34ef1ed96e4a384bf9
+      midthickness:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa3646fff21527a132c3
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa3bef1ed96e4a384bfe
+      inflated:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa364a3d4a661aa761f0
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa39cc6bd5c3d4a13347
+    
     10k:
       # 10K surfaces all use https://github.com/TingsterX/alignment_macaque-human
       sphere:
@@ -43,3 +107,114 @@ fsLR:
       flat:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5240049b4c2d6503eccb7
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d524006846076e8371381c
+      annotation:
+        evoexp:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7053c53349e06925fa79c
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7054a95a0300698ed257c
+          notes:
+          - Xu 2020
+        FChomology:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7055b53349e06925fa808
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7056b95a0300698ed25bb
+          notes:
+          - Xu 2020
+        SAaxis:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e06d4ac99ebd0254018176
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e06d3c466d150209d58122
+          notes:
+          - Sydnor 2021
+        fcgradient01:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c22687f3ce9401fa24dc77
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c2267df3ce94020124c6f6
+          notes:
+          - Margulies 2016
+        fcgradient02:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c226f918f70b020ba7caac
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c226ee18f70b020aa7a77e
+          notes:
+          - Margulies 2016
+        fcgradient03:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c226b5da0ff201fd393ea0
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c226bf18f70b020ba7c982
+          notes:
+          - Margulies 2016
+        fcgradient04:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c226c918f70b0205a7bbab
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c226d318f70b020aa7a744
+          notes:
+          - Margulies 2016
+        fcgradient05:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c2270cda0ff201f8397977
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c22702f3ce94020124c985
+          notes:
+          - Margulies 2016
+        fcgradient06:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c22690f3ce9401ee24eae3
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c2269bf3ce94020124c79f
+          notes:
+          - Margulies 2016
+        fcgradient07:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c226a2da0ff201f3396029
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c226adf3ce9401ee24eaec
+          notes:
+          - Margulies 2016
+        fcgradient08:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c2271e18f70b020aa7a82c
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c22715da0ff201f2393840
+          notes:
+          - Margulies 2016
+        myelinmap:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe1c4e5ee50219291a2a
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe29af610c0216dfdd20
+          notes:
+          - hcps1200
+    164k:
+    # 164k surfaces all use neuromaps OSF (https://osf.io/4mw3a)
+      sphere:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa748f16d3ade3a132ea
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa75aeca6ab0b4384b09
+      midthickness:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa747adda46eb1a762e4
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa75fc066bf6fb384b36
+      inflated:
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa763a3d3a046da762dd
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa749509bc49be1c49b9
+      annotation:
+        cbf:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff4b4e5ee50219291e73
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff58ab8bca0218ee532f
+          notes:
+          - Raichle
+        cbv:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff8faf610c0213dfd7ed
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff9bab8bca0226edd520
+          notes:
+          - Raichle
+        cmrglc:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/65578943062a3e1d45edfde0
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6557895258788123a33e772d
+          notes:
+          - Raichle
+        cmro2:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff624e5ee50218291365
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff6eaf610c0217dfeaa3
+          notes:
+          - Raichle
+        cmruglu:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff79ab8bca0226edd4a8
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff854e5ee5021029a186
+          notes:
+          - Raichle
+        intersubjvar:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff274e5ee50219291de1
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff33ab8bca0225edc685
+          notes:
+          - Mueller 2013
+        devexp:
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff0d4e5ee50219291d77
+          notes:
+          - Hill 2010
+        evoexp:
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ff02ab8bca0212ee54f8
+          notes:
+          - Hill 2010
