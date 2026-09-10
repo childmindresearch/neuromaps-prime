@@ -43,3 +43,9 @@ fsLR:
       flat:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5240049b4c2d6503eccb7
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d524006846076e8371381c
+      annotation:
+        evoexp:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7053c53349e06925fa79c
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7054a95a0300698ed257c
+          notes:
+          - Xu 2020
