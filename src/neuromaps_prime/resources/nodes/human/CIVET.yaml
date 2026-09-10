@@ -53,3 +53,14 @@ CIVET:
       inflated:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f348ae88a491b17ee7d5
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f348bfa98ff448cc7569
+      annotation:
+        supragranular:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c2297df3ce9401fa24e6e3
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c22988da0ff201f8397e6e
+          notes:
+          - BigBrain
+        infragranular:
+          left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c22976f3ce9401f924c746
+          right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c2296bda0ff201fe39681e
+          notes:
+          - BigBrain
