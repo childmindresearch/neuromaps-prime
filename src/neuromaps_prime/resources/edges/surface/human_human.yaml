@@ -44,3 +44,29 @@
       - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
         doi: 10.1038/s41592-022-01625-w
         url: https://www.nature.com/articles/s41592-022-01625-w
+
+- from: BigBrain
+  to: fsLR
+  surfaces:
+    Neuromaps:
+      164k:
+        sphere:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb4af356ed8292bcfa57
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb55c516830c5824bb1f
+      references:
+      - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
+        doi: 10.1038/s41592-022-01625-w
+        url: https://www.nature.com/articles/s41592-022-01625-w
+
+- from: BigBrain
+  to: fsaverage
+  surfaces:
+    Neuromaps:
+      164k:
+        sphere:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb556118ae2af4adf1a2
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb58b4d2af8068addeb9
+      references:
+      - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
+        doi: 10.1038/s41592-022-01625-w
+        url: https://www.nature.com/articles/s41592-022-01625-w
