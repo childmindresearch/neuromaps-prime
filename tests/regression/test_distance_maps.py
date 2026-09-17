@@ -47,43 +47,38 @@ test, this suite is a pure producer: the pytest checks only confirm that
 transforms executed and that correlations are well-formed, leaving
 version-to-version comparison to the accumulated summaries and the history plot.
 
-The file runs two ways:
-
-* under pytest as part of the regression suite (needs Workbench + network, like
-  ``test_surf_matrix.py``);
-* standalone -- ``python tests/regression/test_distance_maps.py`` -- which writes
-  the same artifacts and logs the per-scope mean correlations.
-
 Seed vertices are chosen as extrema along the RAS anatomical axes
 (x = left-right, y = posterior-anterior, z = inferior-superior); adjust
 ``_SEED_AXES`` if a template's meshes use a different convention.
+
+Run with:
+
+    pytest tests/regression/test_distance_maps.py -v -s
 """
 
 from __future__ import annotations
 
 import logging
-import os
-import sys
-import tempfile
-from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
+from typing import TYPE_CHECKING, NamedTuple
 
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
 import pandas as pd
 import pytest
-from nibabel.gifti import GiftiDataArray, GiftiImage
+from tests.cycle import load_metric, resolve_artifact_dir, write_metric
+from tests.regression.utils import get_valid_spaces
 
-from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.analysis.stats import efficient_pearsonr
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+
+    from neuromaps_prime.graph import NeuromapsGraph
 
 logger = logging.getLogger(__name__)
-
-# Native maps, staged metric files, and densities, keyed by space.
-_Staged = tuple[
-    dict[str, dict[str, np.ndarray]], dict[str, dict[str, Path]], dict[str, str]
-]
 
 # --- configuration ---------------------------------------------------------- #
 SEEDS = ("caudal", "lateral", "dorsal")
@@ -96,18 +91,30 @@ SURFACE_EDGE = "surface_to_surface"
 OUTPUT_ENV_VAR = "NEUROMAPS_DISTANCE_OUTPUT_DIR"
 OUTPUT_SUBDIR = "distance_map_outputs"
 
+
+def _furthest(column: np.ndarray) -> int:
+    """Index of the vertex furthest from the mid-sagittal plane."""
+    return int(np.argmax(np.abs(column)))
+
+
 # Each seed is the extreme vertex along one RAS axis, measured from the mesh
-# centroid: (axis index, reducer). "absmax" picks the vertex furthest from the
-# mid-sagittal plane; "min"/"max" pick the signed extreme.
-_SEED_AXES: dict[str, tuple[int, str]] = {
-    "caudal": (1, "min"),  # most posterior (min y)
-    "lateral": (0, "absmax"),  # furthest from midline (|x|)
-    "dorsal": (2, "max"),  # most superior (max z)
+# centroid: (axis index, reducer).
+_SEED_AXES: dict[str, tuple[int, Callable[[np.ndarray], int]]] = {
+    "caudal": (1, np.argmin),  # most posterior (min y)
+    "lateral": (0, _furthest),  # furthest from midline (|x|)
+    "dorsal": (2, np.argmax),  # most superior (max z)
 }
 
 
-@dataclass(frozen=True)
-class DistanceMapResults:
+class StagedMaps(NamedTuple):
+    """Native seed maps, staged metric files, and densities, keyed by space."""
+
+    native: dict[str, dict[str, np.ndarray]]
+    files: dict[str, dict[str, Path]]
+    density: dict[str, str]
+
+
+class DistanceMapResults(NamedTuple):
     """Per-seed correlation matrices for both subtests.
 
     Attributes:
@@ -123,71 +130,25 @@ class DistanceMapResults:
     spaces: list[str]
 
 
-def resolve_output_dir(default: str | Path, *, env_var: str = OUTPUT_ENV_VAR) -> Path:
-    """Resolve and create the artifact directory.
-
-    Resolution order: ``$env_var`` (when set and non-empty) > ``default``. This
-    mirrors ``tests.cycle.resolve_artifact_dir`` so both regression suites share
-    one directory policy; set the env var to a persistent path to accumulate run
-    summaries across runs.
-
-    Args:
-        default: Fallback directory when the env var is unset.
-        env_var: Environment variable that overrides the default.
-
-    Returns:
-        The resolved, created directory.
-    """
-    override = os.environ.get(env_var)
-    resolved = Path(override) if override else Path(default)
-    resolved.mkdir(parents=True, exist_ok=True)
-    return resolved
-
-
-def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
-    """Return graph nodes exposing both a sphere and the seed surface."""
-    valid = []
-    for node in graph.nodes:
-        try:
-            density = graph.find_highest_density(node)
-            sphere = graph.fetch_surface_atlas(
-                space=node,
-                density=density,
-                hemisphere=hemisphere,
-                resource_type="sphere",
-            )
-            surface = graph.fetch_surface_atlas(
-                space=node,
-                density=density,
-                hemisphere=hemisphere,
-                resource_type=SURFACE_TYPE,
-            )
-            if sphere is not None and surface is not None:
-                valid.append(node)
-        except Exception as exc:
-            logger.debug("Skipping node %s due to error: %s", node, exc)
-    return valid
-
-
 def find_direct_pairs(graph: NeuromapsGraph, spaces: list[str]) -> set[tuple[str, str]]:
     """Return ordered space pairs joined by a single surface edge.
 
-    A pair is "direct" when the shortest surface path is a single hop, i.e. the
-    transform needs no concatenation. Computed from the unmutated graph.
+    A pair is "direct" when the surface layer has an edge between the two
+    spaces, i.e. the transform needs no concatenation. Computed from the
+    unmutated graph.
     """
-    direct: set[tuple[str, str]] = set()
-    for src in spaces:
-        for dst in spaces:
-            if src == dst:
-                continue
-            if len(graph.find_path(src, dst, edge_type=SURFACE_EDGE)) == 2:
-                direct.add((src, dst))
-    return direct
+    space_set = set(spaces)
+    subgraph = graph.utils.get_subgraph(SURFACE_EDGE)
+    return {
+        (u, v)
+        for u, v, _key in subgraph.edges
+        if u != v and u in space_set and v in space_set
+    }
 
 
 def load_surface_coords(path: str | Path) -> np.ndarray:
     """Return the ``(n, 3)`` point set from a surface GIFTI."""
-    for darray in nib.load(str(path)).darrays:
+    for darray in nib.load(path).darrays:
         if darray.data.ndim == 2 and darray.data.shape[1] == 3:
             return np.asarray(darray.data, np.float64)
     raise ValueError(f"No point set found in {path}")
@@ -203,16 +164,10 @@ def find_seed_vertices(coords: np.ndarray) -> dict[str, int]:
         Mapping of seed name to vertex index.
     """
     centered = coords - coords.mean(axis=0)
-    seeds: dict[str, int] = {}
-    for name, (axis, reducer) in _SEED_AXES.items():
-        column = centered[:, axis]
-        if reducer == "min":
-            seeds[name] = int(np.argmin(column))
-        elif reducer == "max":
-            seeds[name] = int(np.argmax(column))
-        else:  # absmax
-            seeds[name] = int(np.argmax(np.abs(column)))
-    return seeds
+    return {
+        name: int(reducer(centered[:, axis]))
+        for name, (axis, reducer) in _SEED_AXES.items()
+    }
 
 
 def distance_maps(
@@ -250,45 +205,30 @@ def compute_node_maps(
     return distance_maps(load_surface_coords(sphere.fetch()), seeds)
 
 
-def save_metric(path: Path, data: np.ndarray) -> None:
-    """Write a per-vertex scalar metric as a ``.func.gii``."""
-    img = GiftiImage()
-    img.add_gifti_data_array(
-        GiftiDataArray(np.asarray(data, np.float32), intent="NIFTI_INTENT_NONE")
-    )
-    nib.save(img, str(path))
-
-
-def load_metric(path: str | Path) -> np.ndarray:
-    """Return the 1-D scalar array from a metric GIFTI."""
-    return np.asarray(nib.load(str(path)).darrays[0].data, np.float64)
-
-
 def pearson(a: np.ndarray, b: np.ndarray) -> float:
     """Signed Pearson correlation; NaN when the vertex counts disagree."""
     if a.shape != b.shape:
         logger.warning("Shape mismatch %s vs %s; scoring NaN", a.shape, b.shape)
         return float("nan")
-    return float(np.corrcoef(a, b)[0, 1])
+    corr, _ = efficient_pearsonr(a, b, return_pval=False)
+    return float(corr)
 
 
 def _stage_native_maps(
     graph: NeuromapsGraph, spaces: list[str], hemisphere: str, workdir: Path
-) -> _Staged:
+) -> StagedMaps:
     """Compute native maps per space and stage each as a metric file."""
     native: dict[str, dict[str, np.ndarray]] = {}
     files: dict[str, dict[str, Path]] = {}
     density: dict[str, str] = {}
     for space in spaces:
         density[space] = graph.find_highest_density(space)
-        maps = compute_node_maps(graph, space, density[space], hemisphere)
-        native[space] = maps
-        files[space] = {}
-        for seed, data in maps.items():
-            path = workdir / f"{space}_{seed}_{hemisphere}.func.gii"
-            save_metric(path, data)
-            files[space][seed] = path
-    return native, files, density
+        native[space] = compute_node_maps(graph, space, density[space], hemisphere)
+        files[space] = {
+            seed: write_metric(workdir / f"{space}_{seed}_{hemisphere}.func.gii", data)
+            for seed, data in native[space].items()
+        }
+    return StagedMaps(native, files, density)
 
 
 def _transform_similarity(
@@ -330,12 +270,11 @@ def _build_seed_matrix(
     graph: NeuromapsGraph,
     spaces: list[str],
     seed: str,
-    staged: _Staged,
+    staged: StagedMaps,
     hemisphere: str,
     workdir: Path,
 ) -> pd.DataFrame:
     """Assemble the source-by-target correlation matrix for one seed map."""
-    native, files, density = staged
     matrix = pd.DataFrame(index=spaces, columns=spaces, dtype=float)
     for src in spaces:
         for dst in spaces:
@@ -347,9 +286,9 @@ def _build_seed_matrix(
                 graph,
                 src,
                 dst,
-                files[src][seed],
-                native[dst][seed],
-                density,
+                staged.files[src][seed],
+                staged.native[dst][seed],
+                staged.density,
                 hemisphere,
                 out,
             )
@@ -357,17 +296,13 @@ def _build_seed_matrix(
 
 
 def _direct_only(
-    connected: pd.DataFrame, direct_pairs: set[tuple[str, str]], spaces: list[str]
+    connected: pd.DataFrame, direct_pairs: set[tuple[str, str]]
 ) -> pd.DataFrame:
     """Copy a connected matrix, keeping only single-edge pairs (others NaN)."""
-    matrix = pd.DataFrame(index=spaces, columns=spaces, dtype=float)
-    for src in spaces:
-        for dst in spaces:
-            if src == dst:
-                matrix.loc[src, dst] = 1.0
-            elif (src, dst) in direct_pairs:
-                matrix.loc[src, dst] = connected.loc[src, dst]
-            else:
+    matrix = connected.copy()
+    for src in matrix.index:
+        for dst in matrix.columns:
+            if src != dst and (src, dst) not in direct_pairs:
                 matrix.loc[src, dst] = float("nan")
     return matrix
 
@@ -378,7 +313,8 @@ def _save_heatmap(matrix: pd.DataFrame, seed: str, kind: str, output_dir: Path) 
     size = 1.1 * len(matrix) + 2
     cmap = plt.get_cmap("nipy_spectral")
     fig, ax = plt.subplots(figsize=(size, size))
-    im = ax.imshow(mat, cmap=cmap, vmin=0.0, vmax=1.0)
+    # Fixed to the full signed range: a negative r is the warning, not noise.
+    im = ax.imshow(mat, cmap=cmap, vmin=-1.0, vmax=1.0)
     ax.set_xticks(range(len(matrix)), matrix.columns, rotation=90, fontsize=8)
     ax.set_yticks(range(len(matrix)), matrix.index, fontsize=8)
     ax.set_xlabel("target space (native map)")
@@ -389,7 +325,7 @@ def _save_heatmap(matrix: pd.DataFrame, seed: str, kind: str, output_dir: Path) 
             value = mat[i, j]
             if np.isnan(value):
                 continue
-            red, green, blue, _ = cmap(float(np.clip(value, 0.0, 1.0)))
+            red, green, blue, _ = cmap(float(np.clip(value, -1.0, 1.0)))
             luminance = 0.299 * red + 0.587 * green + 0.114 * blue
             ax.text(
                 j,
@@ -415,6 +351,17 @@ def _offdiag_values(matrix: pd.DataFrame) -> np.ndarray:
     return off_diagonal[np.isfinite(off_diagonal)]
 
 
+def _pooled_offdiag(matrices: dict[str, pd.DataFrame]) -> np.ndarray:
+    """Return all finite off-diagonal correlations across a scope's matrices."""
+    per_seed = [_offdiag_values(matrix) for matrix in matrices.values()]
+    return np.concatenate(per_seed) if per_seed else np.array([])
+
+
+def _mean_or_nan(values: np.ndarray) -> float:
+    """Mean of a value array; NaN when empty."""
+    return float(values.mean()) if values.size else float("nan")
+
+
 def summarize_run(results: DistanceMapResults, hemisphere: str) -> pd.DataFrame:
     """Build the canonical run-summary frame (seed x scope means).
 
@@ -423,31 +370,25 @@ def summarize_run(results: DistanceMapResults, hemisphere: str) -> pd.DataFrame:
     and read by ``scripts/plot_distance_history.py``.
     """
     rows: list[dict[str, object]] = []
-    scopes = (("connected", results.connected), ("direct", results.direct))
-    for scope, matrices in scopes:
-        pooled: list[np.ndarray] = []
+    for scope, matrices in (
+        ("connected", results.connected),
+        ("direct", results.direct),
+    ):
         for seed, matrix in matrices.items():
-            values = _offdiag_values(matrix)
-            pooled.append(values)
             rows.append(
                 {
                     "seed": seed,
                     "scope": scope,
                     "hemisphere": hemisphere,
-                    "mean_pearson_r": float(values.mean())
-                    if values.size
-                    else float("nan"),
+                    "mean_pearson_r": _mean_or_nan(_offdiag_values(matrix)),
                 }
             )
-        all_values = np.concatenate(pooled) if pooled else np.array([])
         rows.append(
             {
                 "seed": "all",
                 "scope": scope,
                 "hemisphere": hemisphere,
-                "mean_pearson_r": float(all_values.mean())
-                if all_values.size
-                else float("nan"),
+                "mean_pearson_r": _mean_or_nan(_pooled_offdiag(matrices)),
             }
         )
     return pd.DataFrame(rows, columns=["seed", "scope", "hemisphere", "mean_pearson_r"])
@@ -477,7 +418,7 @@ def run_distance_map_test(
     Returns:
         A :class:`DistanceMapResults`.
     """
-    spaces = get_valid_spaces(graph, hemisphere)
+    spaces = get_valid_spaces(graph, hemisphere, surface_type=SURFACE_TYPE)
     logger.info("Distance-map test over %d spaces: %s", len(spaces), spaces)
     if len(spaces) < 2:
         raise RuntimeError("Need at least two spaces with the seed surface.")
@@ -490,7 +431,7 @@ def run_distance_map_test(
     direct: dict[str, pd.DataFrame] = {}
     for seed in SEEDS:
         cmat = _build_seed_matrix(graph, spaces, seed, staged, hemisphere, workdir)
-        dmat = _direct_only(cmat, direct_pairs, spaces)
+        dmat = _direct_only(cmat, direct_pairs)
         connected[seed] = cmat
         direct[seed] = dmat
         for kind, matrix in (("connected", cmat), ("direct", dmat)):
@@ -504,80 +445,70 @@ def run_distance_map_test(
     write_run_summary(output_dir, summary)
     logger.info(
         "NEW MEAN R (all): connected=%.6f, direct=%.6f",
-        _lookup_all(summary, "connected"),
-        _lookup_all(summary, "direct"),
+        _mean_or_nan(_pooled_offdiag(results.connected)),
+        _mean_or_nan(_pooled_offdiag(results.direct)),
     )
     return results
 
 
-def _lookup_all(summary: pd.DataFrame, scope: str) -> float:
-    """Return the pooled ``seed='all'`` mean for a scope, or NaN."""
-    match = summary[(summary["seed"] == "all") & (summary["scope"] == scope)]
-    if match.empty:
-        return float("nan")
-    return float(match["mean_pearson_r"].iloc[0])
-
-
-def _pooled_offdiag(matrices: dict[str, pd.DataFrame]) -> np.ndarray:
-    """Return all finite off-diagonal correlations across a scope's matrices."""
-    per_seed = [_offdiag_values(matrix) for matrix in matrices.values()]
-    return np.concatenate(per_seed) if per_seed else np.array([])
-
-
-@pytest.fixture(scope="module")
-def distance_map_results(
-    tmp_path_factory: pytest.TempPathFactory,
-) -> DistanceMapResults:
-    """Run the transforms once and share the matrices across both subtests."""
-    logging.basicConfig(level=logging.INFO)
-    graph = NeuromapsGraph()
-    output_dir = resolve_output_dir(tmp_path_factory.getbasetemp() / OUTPUT_SUBDIR)
-    logger.info("Distance-map artifacts -> %s", output_dir)
-    workdir = tmp_path_factory.mktemp("distance_work")
-    return run_distance_map_test(graph, HEMISPHERE, workdir, output_dir)
-
-
-def test_distance_maps_all_connected(distance_map_results: DistanceMapResults) -> None:
-    """Connected transforms (including composed) run and score in range.
-
-    Pure producer: this records the connected matrices for cross-version
-    tracking and only checks the correlations are well-formed, not that they
-    clear any floor.
-    """
-    values = _pooled_offdiag(distance_map_results.connected)
-    assert values.size > 0, "No connected transforms were evaluated."
+def _assert_well_formed(values: np.ndarray, scope: str) -> None:
+    """Shared assertion: at least one scored, and all values within [-1, 1]."""
+    assert values.size > 0, f"No {scope} transforms were evaluated."
     assert np.all((values >= -1.0) & (values <= 1.0)), (
-        "Connected distance-map correlations fell outside [-1, 1]."
+        f"{scope.capitalize()} distance-map correlations fell outside [-1, 1]."
     )
 
 
-def test_distance_maps_direct_edges(distance_map_results: DistanceMapResults) -> None:
-    """Direct single-edge transforms run and score in range.
+class TestDistanceMaps:
+    """Distance-map alignment regression on the real Neuromaps-PRIME graph.
 
-    The direct matrices isolate individual edges (no concatenation), which is
-    what localises drift in the history plot. Well-formedness only, no floor.
+    One class-scoped run plants seed vertices at anatomical extremes, builds
+    smooth distance-from-seed maps, transforms each map into every other space,
+    and correlates each transformed map against the target's own native map,
+    scoring both the all-connected and the direct-edge scopes. The suite is a
+    pure producer: it records this run's artifacts and only checks that the
+    correlations are well-formed, leaving version-to-version comparison to the
+    accumulated summaries and ``scripts/plot_distance_history.py``.
+
+    Outputs land under the pytest temporary directory
+    (``<base>/distance_map_outputs``) unless the ``NEUROMAPS_DISTANCE_OUTPUT_DIR``
+    environment variable is set; the resolved location is logged at run start.
+    Point the variable at a persistent location to accumulate run summaries
+    across runs.
     """
-    values = _pooled_offdiag(distance_map_results.direct)
-    assert values.size > 0, "No direct (single-edge) transforms were evaluated."
-    assert np.all((values >= -1.0) & (values <= 1.0)), (
-        "Direct-edge distance-map correlations fell outside [-1, 1]."
-    )
 
+    @pytest.fixture(scope="class")
+    @classmethod
+    def distance_map_run(
+        cls, graph: NeuromapsGraph, tmp_path_factory: pytest.TempPathFactory
+    ) -> DistanceMapResults:
+        """Run the transforms once and share the matrices across both subtests."""
+        output_dir = resolve_artifact_dir(
+            tmp_path_factory.getbasetemp() / OUTPUT_SUBDIR, env_var=OUTPUT_ENV_VAR
+        )
+        logger.info("Distance-map artifacts -> %s", output_dir)
+        workdir = tmp_path_factory.mktemp("distance_work")
+        return run_distance_map_test(graph, HEMISPHERE, workdir, output_dir)
 
-def main() -> int:
-    """Standalone entry point: run both scopes and log the per-scope summary."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    graph = NeuromapsGraph()
-    output_dir = resolve_output_dir(Path.cwd() / OUTPUT_SUBDIR)
-    logger.info("Distance-map artifacts -> %s", output_dir)
+    def test_distance_maps_all_connected(
+        self, distance_map_run: DistanceMapResults
+    ) -> None:
+        """Connected transforms (including composed) run and score in range.
 
-    with tempfile.TemporaryDirectory() as tmp:
-        results = run_distance_map_test(graph, HEMISPHERE, Path(tmp), output_dir)
+        Pure producer: this records the connected matrices for cross-version
+        tracking and only checks the correlations are well-formed, not that they
+        clear any floor.
+        """
+        _assert_well_formed(_pooled_offdiag(distance_map_run.connected), "connected")
 
-    summary = summarize_run(results, HEMISPHERE)
-    logger.info("\nRun summary (mean Pearson r):\n%s", summary.to_string(index=False))
-    return 0
+    def test_distance_maps_direct_edges(
+        self, distance_map_run: DistanceMapResults
+    ) -> None:
+        """Direct single-edge transforms run and score in range.
 
-
-if __name__ == "__main__":
-    sys.exit(main())
+        The direct matrices isolate individual edges (no concatenation), which is
+        what localises drift in the history plot. Well-formedness only, no floor.
+        """
+        _assert_well_formed(
+            _pooled_offdiag(distance_map_run.direct), "direct (single-edge)"
+        )
