@@ -1,19 +1,12 @@
 """Render the distance-map history timeline from accumulated run summaries.
 
-Reads every ``distance_map_<YYYYmmdd_HHMMSS>[_<sha8>].csv`` run summary in a
-directory (the persistent folder pointed at by ``NEUROMAPS_DISTANCE_OUTPUT_DIR``
-when the regression test runs) and writes a single figure,
-``distance_map_history.svg``: one panel per scope present (``connected`` and
-``direct``), tracking the mean distance-map Pearson r for every seed across runs.
-
-Each panel's x-axis has one position per run, tick-labelled with the run date
-and, when the summary was tagged, the 8-character commit hash (runs without a
-hash show the date alone). Colours and marker shapes are assigned per seed; left
-hemispheres are drawn filled and right hemispheres open. The script reads no test
-data and performs no transformations -- it is a pure consumer of finished run
-summaries.
-
-Output is SVG (vector) so the plot stays crisp at any zoom.
+Reads every ``distance_map_<YYYYmmdd_HHMMSS>[_<sha8>].csv`` run summary under a
+directory and writes ``distance_map_history.svg``: one panel per scope
+(``connected``, ``direct``), tracking the mean Pearson r for every seed across
+runs. Each run is one x-axis tick, labelled with its date and commit hash (when
+tagged). Colours and markers distinguish seeds; left hemispheres are drawn
+filled, right hemispheres open. A pure consumer of finished summaries -- it
+reads no test data and performs no transforms.
 
 Run with:
 
@@ -68,11 +61,7 @@ LINE_ALPHA: Final = 0.6
 
 
 def _parse_summary_name(name: str) -> tuple[datetime, str | None] | None:
-    """Parse a summary file name into ``(timestamp, sha)``.
-
-    Returns ``None`` when the name does not match the run-summary pattern or
-    encodes an invalid date.
-    """
+    """Parse a summary file name into ``(timestamp, sha)``, or ``None`` on no match."""
     match = SUMMARY_NAME.match(name)
     if match is None:
         return None
@@ -86,13 +75,10 @@ def _parse_summary_name(name: str) -> tuple[datetime, str | None] | None:
 
 
 def _load_history(history_dir: Path) -> pd.DataFrame:
-    """Read every run summary in ``history_dir`` into one long frame.
+    """Read every run summary in history_dir into one long frame, sorted by time.
 
-    Returns a frame with columns
-    ``timestamp, sha, seed, scope, hemisphere, mean_pearson_r`` sorted by
-    timestamp. Unrecognised, unreadable, and empty files are skipped with a
-    warning; a summary missing required columns, or no valid summaries at all,
-    is a hard error (exit code 2).
+    Unrecognised, unreadable, and empty files are skipped; a summary missing
+    required columns, or no valid summaries at all, is a hard error (exit code 2).
     """
     frames: list[pd.DataFrame] = []
     # rglob so released runs under history/releases/ are included, matching the
@@ -100,8 +86,7 @@ def _load_history(history_dir: Path) -> pd.DataFrame:
     for path in sorted(history_dir.rglob("distance_map_*.csv")):
         parsed = _parse_summary_name(path.name)
         if parsed is None:
-            # Expected in the test's artifact dir, which also holds the
-            # per-seed matrix CSVs (distance_map_<seed>_<scope>.csv); stay quiet.
+            # The artifact dir also holds per-seed matrix CSVs; stay quiet.
             logger.debug("Skipping non-summary CSV: %s", path.name)
             continue
         timestamp, sha = parsed
@@ -162,11 +147,7 @@ def _get_marker_map(seeds: list[str]) -> dict[str, str]:
 
 
 def _get_color_map(seeds: list[str]) -> dict[str, str]:
-    """Return a distinct colour per seed, sampled from the nipy_spectral map.
-
-    Positions avoid the near-black and near-white extremes so every seed line
-    stays vivid and legible.
-    """
+    """Return a distinct colour per seed from nipy_spectral, avoiding its extremes."""
     cmap = plt.get_cmap("nipy_spectral")
     positions = np.linspace(0.1, 0.9, len(seeds)) if len(seeds) > 1 else np.array([0.5])
     return {seed: to_hex(cmap(pos)) for seed, pos in zip(seeds, positions, strict=True)}
@@ -210,11 +191,7 @@ def _seed_series(
     hemisphere: str,
     timestamps: list[datetime],
 ) -> np.ndarray:
-    """Return one seed/scope/hemisphere's values across ``timestamps``.
-
-    NaN at any run where this series was absent, so the connecting line breaks
-    across a gap instead of bridging it.
-    """
+    """Return one seed/scope/hemisphere's values across the runs; NaN where absent."""
     subset = history[
         (history["scope"] == scope)
         & (history["seed"] == seed)
@@ -285,8 +262,7 @@ def _plot_scope_panel(
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=7)
     ax.set_xlim(-0.5, len(timestamps) - 0.5)
-    # Correlations are signed and the test treats a near-zero or negative r as
-    # the warning, so keep the full [-1, 1] range.
+    # Keep the full signed [-1, 1] range: a low or negative r is the warning.
     ax.set_ylim(-1, 1)
     ax.set_xlabel("Run")
     ax.set_ylabel("Mean Pearson r")
@@ -314,11 +290,10 @@ def _save_figure(fig: Figure, output_file: Path) -> None:
 
 
 def plot_history(history_dir: Path, output_dir: Path) -> None:
-    """Write the multi-panel timeline figure ``distance_map_history.svg``.
+    """Write distance_map_history.svg: one panel per scope, tracking every seed.
 
-    One panel per scope present (``connected``, ``direct``), each tracking every
-    seed across the accumulated runs. The pooled ``seed='all'`` rows are omitted
-    from the panels (per-seed detail is what localises drift).
+    One panel per scope (``connected``, ``direct``) across the accumulated runs;
+    pooled ``seed='all'`` rows are omitted so per-seed detail localises drift.
     """
     history = _load_history(history_dir)
 
