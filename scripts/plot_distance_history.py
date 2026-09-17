@@ -95,7 +95,9 @@ def _load_history(history_dir: Path) -> pd.DataFrame:
     is a hard error (exit code 2).
     """
     frames: list[pd.DataFrame] = []
-    for path in sorted(history_dir.glob("distance_map_*.csv")):
+    # rglob so released runs under history/releases/ are included, matching the
+    # cycle script.
+    for path in sorted(history_dir.rglob("distance_map_*.csv")):
         parsed = _parse_summary_name(path.name)
         if parsed is None:
             # Expected in the test's artifact dir, which also holds the
