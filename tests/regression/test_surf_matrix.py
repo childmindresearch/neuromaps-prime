@@ -220,9 +220,7 @@ def _off_diag_stats(spaces: list[str], matrix: pd.DataFrame) -> OffDiagStats:
             nhp_mask[i, j] = True
 
     nhp_off_diag = mat[np.logical_and(mask, nhp_mask)]
-    nhp_median = (
-        float(np.nanmedian(nhp_off_diag)) if nhp_off_diag.size else float("nan")
-    )
+    nhp_median = float(np.nanmedian(nhp_off_diag)) if nhp_off_diag.size else np.nan
 
     human_nhp_vals = [
         float(mat[i, j])
