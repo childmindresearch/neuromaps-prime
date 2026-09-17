@@ -1,55 +1,18 @@
 """Anatomical distance-map regression test.
 
-This is a coarse alignment sanity check. For each node it plants three seed
-vertices at anatomical extremes of a surface (the caudal-most, lateral-most and
-dorsal-most vertices of the midthickness by default), builds a smooth
-distance-from-seed map over the *sphere* for each seed, transforms those maps
-into every other space, and correlates each transformed map against the target
-space's own native map. The result is one space-by-space correlation matrix per
-seed.
+For each space, plant three seeds at anatomical extremes (caudal, lateral,
+dorsal), build a great-circle distance map on the sphere for each, transform it
+into every other space, and correlate the result against that space's native
+map. Two scopes are scored over the same maps: **connected** (every reachable
+pair, including composed multi-hop transforms) and **direct** (single-edge
+pairs only). Transforms run with ``add_edge=False`` so the graph is left
+unmutated. Correlation is signed -- a low or negative r on a transform is the
+red flag this suite is meant to surface.
 
-The maps are deliberately smooth, low-frequency gradients: distance from the
-back of the brain, from the lateral convexity, and from the top. Cortical
-folding differs across species, so these will not correlate perfectly, but the
-gross layout is conserved -- the front of the brain stays the front. High
-correlation therefore does *not* prove an alignment is good, but a low
-correlation is a red flag that a transform may be misdirected or broken and
-warrants a look.
-
-Two subtests run over the same computed maps:
-
-* **all connected** -- every reachable ordered pair of spaces, including pairs
-  whose transform is a *concatenation* of several edges;
-* **direct edges** -- only pairs joined by a single surface edge (no
-  concatenation). When a composed path looks bad, the direct-edge matrix tells
-  you which individual edge to suspect, which a multi-hop result cannot isolate.
-
-Transforms run with ``add_edge=False`` so composing a multi-hop path never
-registers a new direct edge and blurs the direct/composed distinction; the graph
-is left unmutated.
-
-Distances are great-circle distances on the registration sphere (an exact
-geodesic for a spherical mesh), while the seeds are located on the anatomical
-midthickness. Correlation is signed: these gradients have a definite
-orientation, so a near-zero or negative correlation is itself the warning.
-
-Cross-version history
----------------------
-Like the cycle regression test, each run writes a timestamped run-summary CSV
-(``distance_map_<YYYYmmdd_HHMMSS>.csv``; columns ``seed, scope, hemisphere,
-mean_pearson_r``) into a resolved artifact directory. By default that directory
-is ephemeral (pytest's temp dir); set ``NEUROMAPS_DISTANCE_OUTPUT_DIR`` to a
-persistent location and the summaries accumulate, one per run. Render the
-timeline across runs with ``scripts/plot_distance_history.py``. This lets you
-watch whether a given transform's distance-map correlation drifts between
-versions -- the real value of this style of regression test. Like the cycle
-test, this suite is a pure producer: the pytest checks only confirm that
-transforms executed and that correlations are well-formed, leaving
-version-to-version comparison to the accumulated summaries and the history plot.
-
-Seed vertices are chosen as extrema along the RAS anatomical axes
-(x = left-right, y = posterior-anterior, z = inferior-superior); adjust
-``_SEED_AXES`` if a template's meshes use a different convention.
+This is a pure producer: it records per-seed matrices, heatmaps, and a
+timestamped run-summary CSV, and the pytest checks only confirm the
+correlations are well-formed; version-to-version comparison is left to the
+accumulated summaries and ``scripts/plot_distance_history.py``.
 
 Run with:
 
@@ -115,11 +78,11 @@ class StagedMaps(NamedTuple):
 
 
 class DistanceMapResults(NamedTuple):
-    """Per-seed correlation matrices for both subtests.
+    """Per-seed connected/direct matrices and the spaces they cover.
 
     Attributes:
-        connected: Seed -> full matrix over every reachable ordered pair.
-        direct: Seed -> matrix with only single-edge pairs scored (others NaN).
+        connected: Seed -> matrix over every reachable ordered pair.
+        direct: Seed -> single-edge pairs scored, others NaN.
         direct_pairs: Ordered pairs joined by a single surface edge.
         spaces: Spaces included in the matrices.
     """
@@ -131,12 +94,7 @@ class DistanceMapResults(NamedTuple):
 
 
 def find_direct_pairs(graph: NeuromapsGraph, spaces: list[str]) -> set[tuple[str, str]]:
-    """Return ordered space pairs joined by a single surface edge.
-
-    A pair is "direct" when the surface layer has an edge between the two
-    spaces, i.e. the transform needs no concatenation. Computed from the
-    unmutated graph.
-    """
+    """Return ordered space pairs joined by a single surface edge (no concatenation)."""
     space_set = set(spaces)
     subgraph = graph.utils.get_subgraph(SURFACE_EDGE)
     return {
@@ -155,14 +113,7 @@ def load_surface_coords(path: str | Path) -> np.ndarray:
 
 
 def find_seed_vertices(coords: np.ndarray) -> dict[str, int]:
-    """Locate the anatomical seed vertices on a surface.
-
-    Args:
-        coords: ``(n, 3)`` vertex coordinates in RAS millimetres.
-
-    Returns:
-        Mapping of seed name to vertex index.
-    """
+    """Locate the anatomical seed vertices as RAS-axis extrema on a surface."""
     centered = coords - coords.mean(axis=0)
     return {
         name: int(reducer(centered[:, axis]))
@@ -173,15 +124,7 @@ def find_seed_vertices(coords: np.ndarray) -> dict[str, int]:
 def distance_maps(
     sphere_coords: np.ndarray, seeds: dict[str, int]
 ) -> dict[str, np.ndarray]:
-    """Great-circle distance from each seed to every vertex, over the sphere.
-
-    Args:
-        sphere_coords: ``(n, 3)`` sphere vertex coordinates.
-        seeds: Mapping of seed name to vertex index.
-
-    Returns:
-        Mapping of seed name to a per-vertex distance map (millimetres).
-    """
+    """Great-circle distance from each seed to every sphere vertex, in mm."""
     radius = np.linalg.norm(sphere_coords, axis=1)
     unit = sphere_coords / radius[:, None]
     maps: dict[str, np.ndarray] = {}
@@ -241,10 +184,9 @@ def _transform_similarity(
     hemisphere: str,
     out: Path,
 ) -> float:
-    """Transform one map ``src -> dst`` and correlate against the native map.
+    """Transform one map ``src -> dst`` and correlate it against dst's native map.
 
-    Returns NaN when the pair is unreachable or the transform fails. Runs with
-    ``add_edge=False`` so the graph is never mutated.
+    Returns NaN when the pair is unreachable or the transform fails.
     """
     try:
         result = graph.surface_to_surface_transformer(
@@ -363,11 +305,10 @@ def _mean_or_nan(values: np.ndarray) -> float:
 
 
 def summarize_run(results: DistanceMapResults, hemisphere: str) -> pd.DataFrame:
-    """Build the canonical run-summary frame (seed x scope means).
+    """Build the run-summary frame read by scripts/plot_distance_history.py.
 
-    One row per (seed, scope) plus a pooled ``seed='all'`` row per scope, giving
-    the mean off-diagonal correlation. This is the schema accumulated across runs
-    and read by ``scripts/plot_distance_history.py``.
+    One row per (seed, scope) plus a pooled ``seed='all'`` row per scope, each
+    carrying the mean off-diagonal correlation.
     """
     rows: list[dict[str, object]] = []
     for scope, matrices in (
@@ -406,18 +347,7 @@ def write_run_summary(output_dir: Path, summary: pd.DataFrame) -> Path:
 def run_distance_map_test(
     graph: NeuromapsGraph, hemisphere: str, workdir: Path, output_dir: Path
 ) -> DistanceMapResults:
-    """Compute connected and direct-edge matrices per seed and record artifacts.
-
-    Args:
-        graph: A fully built :class:`NeuromapsGraph`.
-        hemisphere: ``'left'`` or ``'right'``.
-        workdir: Scratch directory for intermediate GIFTI files.
-        output_dir: Directory for per-seed CSVs, heatmaps, and the timestamped
-            run summary.
-
-    Returns:
-        A :class:`DistanceMapResults`.
-    """
+    """Compute the connected and direct matrices per seed and record artifacts."""
     spaces = get_valid_spaces(graph, hemisphere, surface_type=SURFACE_TYPE)
     logger.info("Distance-map test over %d spaces: %s", len(spaces), spaces)
     if len(spaces) < 2:
@@ -462,19 +392,14 @@ def _assert_well_formed(values: np.ndarray, scope: str) -> None:
 class TestDistanceMaps:
     """Distance-map alignment regression on the real Neuromaps-PRIME graph.
 
-    One class-scoped run plants seed vertices at anatomical extremes, builds
-    smooth distance-from-seed maps, transforms each map into every other space,
-    and correlates each transformed map against the target's own native map,
-    scoring both the all-connected and the direct-edge scopes. The suite is a
-    pure producer: it records this run's artifacts and only checks that the
-    correlations are well-formed, leaving version-to-version comparison to the
-    accumulated summaries and ``scripts/plot_distance_history.py``.
+    A class-scoped run scores both the connected and direct scopes across all
+    spaces, then records per-seed matrices, heatmaps, and a timestamped
+    run-summary CSV. The tests only confirm the correlations are well-formed;
+    version-to-version comparison is left to the accumulated summaries and
+    ``scripts/plot_distance_history.py``.
 
-    Outputs land under the pytest temporary directory
-    (``<base>/distance_map_outputs``) unless the ``NEUROMAPS_DISTANCE_OUTPUT_DIR``
-    environment variable is set; the resolved location is logged at run start.
-    Point the variable at a persistent location to accumulate run summaries
-    across runs.
+    Outputs land under ``<tmp>/distance_map_outputs`` unless
+    ``NEUROMAPS_DISTANCE_OUTPUT_DIR`` points at a persistent folder.
     """
 
     @pytest.fixture(scope="class")
@@ -493,22 +418,13 @@ class TestDistanceMaps:
     def test_distance_maps_all_connected(
         self, distance_map_run: DistanceMapResults
     ) -> None:
-        """Connected transforms (including composed) run and score in range.
-
-        Pure producer: this records the connected matrices for cross-version
-        tracking and only checks the correlations are well-formed, not that they
-        clear any floor.
-        """
+        """Connected transforms (including composed) run and score within [-1, 1]."""
         _assert_well_formed(_pooled_offdiag(distance_map_run.connected), "connected")
 
     def test_distance_maps_direct_edges(
         self, distance_map_run: DistanceMapResults
     ) -> None:
-        """Direct single-edge transforms run and score in range.
-
-        The direct matrices isolate individual edges (no concatenation), which is
-        what localises drift in the history plot. Well-formedness only, no floor.
-        """
+        """Direct single-edge transforms run and score within [-1, 1]."""
         _assert_well_formed(
             _pooled_offdiag(distance_map_run.direct), "direct (single-edge)"
         )
