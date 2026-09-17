@@ -152,7 +152,7 @@ def pearson(a: np.ndarray, b: np.ndarray) -> float:
     """Signed Pearson correlation; NaN when the vertex counts disagree."""
     if a.shape != b.shape:
         logger.warning("Shape mismatch %s vs %s; scoring NaN", a.shape, b.shape)
-        return float("nan")
+        return np.nan
     corr, _ = efficient_pearsonr(a, b, return_pval=False)
     return float(corr)
 
@@ -202,9 +202,9 @@ def _transform_similarity(
         )
     except Exception as exc:
         logger.debug("No transform %s -> %s: %s", src, dst, exc)
-        return float("nan")
+        return np.nan
     if result.path is None:
-        return float("nan")
+        return np.nan
     return pearson(load_metric(result.path), dst_native)
 
 
@@ -245,7 +245,7 @@ def _direct_only(
     for src in matrix.index:
         for dst in matrix.columns:
             if src != dst and (src, dst) not in direct_pairs:
-                matrix.loc[src, dst] = float("nan")
+                matrix.loc[src, dst] = np.nan
     return matrix
 
 
@@ -301,7 +301,7 @@ def _pooled_offdiag(matrices: dict[str, pd.DataFrame]) -> np.ndarray:
 
 def _mean_or_nan(values: np.ndarray) -> float:
     """Mean of a value array; NaN when empty."""
-    return float(values.mean()) if values.size else float("nan")
+    return float(values.mean()) if values.size else np.nan
 
 
 def summarize_run(results: DistanceMapResults, hemisphere: str) -> pd.DataFrame:
