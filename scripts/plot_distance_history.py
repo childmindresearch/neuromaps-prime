@@ -11,7 +11,7 @@ and, when the summary was tagged, the 8-character commit hash (runs without a
 hash show the date alone). Colours and marker shapes are assigned per seed; left
 hemispheres are drawn filled and right hemispheres open. The script reads no test
 data and performs no transformations -- it is a pure consumer of finished run
-summaries, mirroring ``plot_cycle_history.py``.
+summaries.
 
 Output is SVG (vector) so the plot stays crisp at any zoom.
 
@@ -34,7 +34,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import math
 import re
 from datetime import datetime
 from pathlib import Path
@@ -99,7 +98,9 @@ def _load_history(history_dir: Path) -> pd.DataFrame:
     for path in sorted(history_dir.glob("distance_map_*.csv")):
         parsed = _parse_summary_name(path.name)
         if parsed is None:
-            logger.warning("Skipping unrecognised summary file: %s", path.name)
+            # Expected in the test's artifact dir, which also holds the
+            # per-seed matrix CSVs (distance_map_<seed>_<scope>.csv); stay quiet.
+            logger.debug("Skipping non-summary CSV: %s", path.name)
             continue
         timestamp, sha = parsed
         try:
@@ -122,9 +123,7 @@ def _load_history(history_dir: Path) -> pd.DataFrame:
             logger.warning("Skipping empty summary file: %s", path.name)
             continue
         frame = frame.assign(timestamp=timestamp, sha=sha)
-        frames.append(
-            frame[["timestamp", "sha", "seed", "scope", "hemisphere", "mean_pearson_r"]]
-        )
+        frames.append(frame[["timestamp", "sha", *REQUIRED_COLUMNS]])
 
     if not frames:
         logger.error("No run summaries found in %s", history_dir)
@@ -153,8 +152,11 @@ def _run_labels(
 
 
 def _get_marker_map(seeds: list[str]) -> dict[str, str]:
-    """Return a distinct marker shape for each seed."""
-    return dict(zip(seeds, MARKER_SHAPES, strict=False))
+    """Return a distinct marker shape for each seed, cycling if shapes run out."""
+    return {
+        seed: MARKER_SHAPES[index % len(MARKER_SHAPES)]
+        for index, seed in enumerate(seeds)
+    }
 
 
 def _get_color_map(seeds: list[str]) -> dict[str, str]:
@@ -172,44 +174,30 @@ def _legend_handles(
     seeds: list[str], marker_map: dict[str, str], color_map: dict[str, str]
 ) -> list[Line2D]:
     """Build the panel legend: a fill-convention key plus one entry per seed."""
-    key = [
-        Line2D(
+
+    def entry(label: str, marker: str, facecolor: str, edgecolor: str) -> Line2D:
+        """One zero-length line styled as a legend marker."""
+        return Line2D(
             [0],
             [0],
-            marker="o",
             linestyle="none",
-            markerfacecolor="#888888",
-            markeredgecolor="#888888",
-            markersize=8,
-            label="Left hemisphere",
-        ),
-        Line2D(
-            [0],
-            [0],
-            marker="o",
-            linestyle="none",
-            markerfacecolor="none",
-            markeredgecolor="#888888",
+            marker=marker,
+            markerfacecolor=facecolor,
+            markeredgecolor=edgecolor,
             markeredgewidth=1.5,
             markersize=8,
-            label="Right hemisphere",
-        ),
-    ]
-    seed_entries = [
-        Line2D(
-            [0],
-            [0],
-            color=color_map[seed],
-            linestyle="none",
-            marker=marker_map[seed],
-            markerfacecolor=color_map[seed],
-            markeredgecolor=color_map[seed],
-            markersize=8,
-            label=seed,
+            label=label,
         )
-        for seed in seeds
+
+    gray = "#888888"
+    return [
+        entry("Left hemisphere", "o", gray, gray),
+        entry("Right hemisphere", "o", "none", gray),
+        *[
+            entry(seed, marker_map[seed], color_map[seed], color_map[seed])
+            for seed in seeds
+        ],
     ]
-    return [*key, *seed_entries]
 
 
 def _seed_series(
@@ -295,7 +283,9 @@ def _plot_scope_panel(
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=7)
     ax.set_xlim(-0.5, len(timestamps) - 0.5)
-    ax.set_ylim(0, 1)
+    # Correlations are signed and the test treats a near-zero or negative r as
+    # the warning, so keep the full [-1, 1] range.
+    ax.set_ylim(-1, 1)
     ax.set_xlabel("Run")
     ax.set_ylabel("Mean Pearson r")
     ax.grid(axis="y", linestyle=":", alpha=0.5)
@@ -315,7 +305,6 @@ def _plot_scope_panel(
 def _save_figure(fig: Figure, output_file: Path) -> None:
     """Save and close a figure as a vector SVG."""
     try:
-        fig.tight_layout()
         fig.savefig(output_file, bbox_inches="tight")
     finally:
         plt.close(fig)
@@ -350,10 +339,9 @@ def plot_history(history_dir: Path, output_dir: Path) -> None:
     marker_map = _get_marker_map(seeds)
     color_map = _get_color_map(seeds)
 
-    ncols = min(2, len(scopes))
-    nrows = math.ceil(len(scopes) / ncols)
+    # At most two scopes are ever produced, so the panels always fit one row.
     fig, axes = plt.subplots(
-        nrows, ncols, figsize=(7 * ncols, 5.5 * nrows), squeeze=False
+        1, len(scopes), figsize=(7 * len(scopes), 5.5), squeeze=False
     )
     axes_flat = axes.flatten()
 
@@ -368,9 +356,6 @@ def plot_history(history_dir: Path, output_dir: Path) -> None:
             marker_map=marker_map,
             color_map=color_map,
         )
-
-    for j in range(len(scopes), len(axes_flat)):
-        axes_flat[j].axis("off")
 
     fig.suptitle("Distance-map correlation over runs", fontsize=15)
     fig.tight_layout(rect=(0, 0, 1, 0.94))
