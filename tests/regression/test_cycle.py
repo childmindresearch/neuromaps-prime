@@ -404,8 +404,8 @@ class TestCycleRoundtrip:
 
         logger.info(
             "NEW PEARSON R VALUES: left=%.6f, right=%.6f",
-            summary.pearson_r.get(("all", "left"), float("nan")),
-            summary.pearson_r.get(("all", "right"), float("nan")),
+            summary.pearson_r.get(("all", "left"), np.nan),
+            summary.pearson_r.get(("all", "right"), np.nan),
         )
 
         return CycleRunResult(output_dir=output_dir, frames=frames)

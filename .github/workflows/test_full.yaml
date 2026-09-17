@@ -92,6 +92,8 @@ jobs:
         EVENT: ${{ github.event_name }}
         HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
+        CYCLE_CSV: ${{ steps.summary.outputs.csv }}
+        DIST_CSV: ${{ steps.distance-summary.outputs.csv }}
       run: |
         set -euo pipefail
         workdir="$RUNNER_TEMP/regression_history_work"
@@ -135,8 +137,8 @@ jobs:
             \( -name "${prefix}*.csv" -o -name "${prefix}*.txt" -o -name "${prefix}*.png" \) \
             ! -name "${prefix}[0-9]*.csv" -exec cp -t "$outdir" {} +
         }
-        apply_preview_suite cycle_        "$NEUROMAPS_CYCLE_OUTPUT_DIR"     "${steps.summary.outputs.csv}"
-        apply_preview_suite distance_map_ "$NEUROMAPS_DISTANCE_OUTPUT_DIR"  "${steps.distance-summary.outputs.csv}"
+        apply_preview_suite cycle_        "$NEUROMAPS_CYCLE_OUTPUT_DIR"     "$CYCLE_CSV"
+        apply_preview_suite distance_map_ "$NEUROMAPS_DISTANCE_OUTPUT_DIR"  "$DIST_CSV"
 
         # One timeline per suite, from the shared flat history/, svg at the preview root.
         rm -f "$workdir/cycle_history.svg" "$workdir/distance_map_history.svg"
