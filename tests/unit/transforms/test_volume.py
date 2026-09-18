@@ -209,7 +209,12 @@ class TestVolumeToSurfaceProjection:
             ribbon_surfs=mock_paths.ribbon_surfs,
             out_fpath=mock_paths.output,
         )
-        mock_wb_project.assert_called_once()
+        mock_wb_project.assert_called_once_with(
+            volume=mock_paths.volume,
+            surface=mock_paths.surface,
+            ribbon_constrained=mock_paths.ribbon_surfs,
+            metric_out=Path(mock_paths.output).name,
+        )
         assert str(result) == mock_paths.output
         assert result.exists()
 
@@ -233,6 +238,21 @@ class TestVolumeToSurfaceProjection:
                 ribbon_surfs=mock_paths.ribbon_surfs,
                 out_fpath=mock_paths.output,
             )
-        mock_wb.assert_called_once()
+        mock_wb.assert_called_once_with(
+            volume=mock_paths.volume,
+            surface=mock_paths.surface,
+            ribbon_constrained=mock_paths.ribbon_surfs,
+            label_out=Path(mock_paths.output).name,
+        )
         assert str(result) == mock_paths.output
         assert result.exists()
+
+    def test_label_ribbon_constrained_params(self, tmp_path: Path) -> None:
+        """Test the real label ribbon-constrained params dict keys and paths."""
+        inner = tmp_path / "inner.surf.gii"
+        outer = tmp_path / "outer.surf.gii"
+        ribbon = workbench.volume_label_to_surface_mapping_ribbon_constrained(
+            inner_surf=inner, outer_surf=outer
+        )
+        assert ribbon["inner-surf"] == inner
+        assert ribbon["outer-surf"] == outer

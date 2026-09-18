@@ -130,13 +130,23 @@ class TestVolumeToSurfaceTransformer:
             basic_params.source_space, basic_params.target_space
         )
         assert mock_transformer.volume_ops.cache.require_surface_atlas.call_count == 3
+        white = tmp_path / (
+            f"hemi-{basic_params.hemisphere}_den-{basic_params.source_density}_"
+            f"space-{basic_params.source_space}_white.surf.gii"
+        )
+        pial = tmp_path / (
+            f"hemi-{basic_params.hemisphere}_den-{basic_params.source_density}_"
+            f"space-{basic_params.source_space}_pial.surf.gii"
+        )
         if transformer_type == "metric":
-            mock_metric_ribbon.assert_called_once()
+            mock_metric_ribbon.assert_called_once_with(
+                inner_surf=white, outer_surf=pial
+            )
             mock_label_ribbon.assert_not_called()
             mock_metric_surface_project.assert_called_once()
             mock_label_surface_project.assert_not_called()
         else:
-            mock_label_ribbon.assert_called_once()
+            mock_label_ribbon.assert_called_once_with(inner_surf=white, outer_surf=pial)
             mock_metric_ribbon.assert_not_called()
             mock_label_surface_project.assert_called_once()
             mock_metric_surface_project.assert_not_called()
@@ -221,7 +231,19 @@ class TestVolumeToSurfaceTransformer:
             ),
         ):
             mock_transformer.volume_to_surface_transformer(**basic_params._asdict())
-        mock_transformer.volume_ops.surface_ops.transform_surface.assert_called_once()
+        mock_transformer.volume_ops.surface_ops.transform_surface.assert_called_once_with(
+            transformer_type=basic_params.transformer_type,
+            input_file=projected_file,
+            source_space=basic_params.source_space,
+            target_space=basic_params.target_space,
+            hemisphere=basic_params.hemisphere,
+            output_file_path=basic_params.output_file_path,
+            source_density=basic_params.source_density,
+            target_density=basic_params.target_density,
+            area_resource="midthickness",
+            add_edge=True,
+            provider=None,
+        )
 
     def test_no_source_surface_atlas(
         self, mock_transformer: NeuromapsGraph, basic_params: BasicParams
