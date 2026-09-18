@@ -1,7 +1,8 @@
-"""Render the cycle-history timeline from accumulated run summaries.
+"""Render the cycle regression timeline from accumulated run summaries.
 
 Reads every ``cycle_<YYYYmmdd_HHMMSS>[_<sha8>].csv`` run summary in a
-directory (the ``cycle_history/`` folder on the ``cycle-history`` branch) and
+directory (the ``cycle/history/`` folder on the ``regression-history`` branch)
+and
 writes a single multi-panel figure, ``cycle_history.svg``: one panel per
 species present, tracking the mean round-trip Pearson r for every origin space
 in that species across runs.
@@ -435,7 +436,7 @@ def plot_history(history_dir: Path, output_dir: Path) -> None:
 def main() -> int:
     """Parse arguments, load the accumulated summaries, and write the plot."""
     parser = argparse.ArgumentParser(
-        description="Render the cycle-history timeline from accumulated run summaries."
+        description="Render the cycle regression timeline from accumulated summaries."
     )
     parser.add_argument(
         "--dir",
