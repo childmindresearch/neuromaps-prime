@@ -18,11 +18,26 @@ from neuromaps_prime.transforms.volume import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Callable, Generator
     from typing import Any
 
 # Interpolators that are currently implemented and should work
 DEVELOPED_INTERPS = [*INTERP_PARAMS, *INTERP_NOPARAMS]
+
+
+def fake_workbench_result(
+    path: str | Path, output: MagicMock
+) -> Callable[..., MagicMock]:
+    """Build a side effect that touches ``path`` and returns an ``output`` mock."""
+
+    def create_output(
+        *args: Any,  # noqa: ANN401, ARG001
+        **kwargs: Any,  # noqa: ANN401, ARG001
+    ) -> MagicMock:
+        Path(path).touch()
+        return output
+
+    return create_output
 
 
 class TestVolumetricTransform:
@@ -48,18 +63,12 @@ class TestVolumetricTransform:
         with patch(
             "neuromaps_prime.transforms.volume.ants.ants_apply_transforms"
         ) as mock_ants:
-            mock_result = MagicMock(
-                output=MagicMock(output_image_outfile=str(mock_paths["output"]))
+            mock_ants.side_effect = fake_workbench_result(
+                mock_paths["output"],
+                MagicMock(
+                    output=MagicMock(output_image_outfile=str(mock_paths["output"]))
+                ),
             )
-
-            def create_output(
-                *args: Any,  # noqa: ANN401, ARG001
-                **kwargs: Any,  # noqa: ANN401, ARG001
-            ) -> MagicMock:
-                mock_paths["output"].touch()
-                return mock_result
-
-            mock_ants.side_effect = create_output
             yield mock_ants
 
     @pytest.mark.parametrize("interp", DEVELOPED_INTERPS)
@@ -122,18 +131,10 @@ class TestVolumetricTransform:
         """Test interpolation param is correctly called with args."""
         mock_get_params.return_value = {"mocked": "params"}
 
-        mock_result = MagicMock(
-            output=MagicMock(output_image_outfile=str(mock_paths["output"]))
+        mock_ants.side_effect = fake_workbench_result(
+            mock_paths["output"],
+            MagicMock(output=MagicMock(output_image_outfile=str(mock_paths["output"]))),
         )
-
-        def create_output(
-            *args: Any,  # noqa: ANN401, ARG001
-            **kwargs: Any,  # noqa: ANN401, ARG001
-        ) -> MagicMock:
-            mock_paths["output"].touch()
-            return mock_result
-
-        mock_ants.side_effect = create_output
 
         interp_params = {"sigma": 1.5, "alpha": 0.7}
         vol_to_vol(
@@ -187,16 +188,9 @@ class TestVolumeToSurfaceProjection:
         with patch(
             "neuromaps_prime.transforms.volume.workbench.volume_to_surface_mapping"
         ) as mock_wb:
-            mock_result = MagicMock(metric_out=mock_paths.output)
-
-            def create_output(
-                *args: Any,  # noqa: ANN401, ARG001
-                **kwargs: Any,  # noqa: ANN401, ARG001
-            ) -> MagicMock:
-                Path(mock_paths.output).touch()
-                return mock_result
-
-            mock_wb.side_effect = create_output
+            mock_wb.side_effect = fake_workbench_result(
+                mock_paths.output, MagicMock(metric_out=mock_paths.output)
+            )
             yield mock_wb
 
     def test_metric_surface_project(
@@ -220,17 +214,11 @@ class TestVolumeToSurfaceProjection:
 
     def test_label_surface_project(self, mock_paths: Vol2SurfOutput) -> None:
         """Test label volume-to-surface projection."""
-
-        def create_output(
-            *args: Any,  # noqa: ANN401, ARG001
-            **kwargs: Any,  # noqa: ANN401, ARG001
-        ) -> MagicMock:
-            Path(mock_paths.output).touch()
-            return MagicMock(label_out=mock_paths.output)
-
         with patch(
             "neuromaps_prime.transforms.volume.workbench.volume_label_to_surface_mapping",
-            side_effect=create_output,
+            side_effect=fake_workbench_result(
+                mock_paths.output, MagicMock(label_out=mock_paths.output)
+            ),
         ) as mock_wb:
             result = label_surface_project(
                 volume=mock_paths.volume,

@@ -250,8 +250,9 @@ class VolumeTransformOps(BaseModel):
         """Ribbon-constrained projection of input_file onto the surface.
 
         Args:
-            transformer_type: ``'metric'`` or ``'label'`` — determines the
-                output file extension.
+            transformer_type: ``'metric'`` or ``'label'`` — selects the
+                projection pipeline (niwrap mapping, ribbon builder, wrapper)
+                and the output file extension.
             input_file: NIfTI volume to project.
             source_space: Brain template space of the volume.
             source_density: Surface mesh density to use for projection.
@@ -299,7 +300,6 @@ class VolumeTransformOps(BaseModel):
                 ribbon_surfs=metric_ribbon_surfs,
                 out_fpath=out_fpath,
             )
-        # Label projection
         label_ribbon_surfs = (
             workbench.volume_label_to_surface_mapping_ribbon_constrained(
                 inner_surf=ribbon["white"], outer_surf=ribbon["pial"]
