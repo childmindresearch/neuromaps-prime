@@ -97,13 +97,13 @@ def metric_surface_project(
     """Project a volumetric image to a surface from source space to target space.
 
     Args:
-        volume: Path to the source NIfTI annotation to be projected.
+        volume: Path to the source NIfTI metric annotation to be projected.
         surface: Path to the target surface to project to.
         ribbon_surfs: Ribbon surfaces to constrain projections to.
         out_fpath: Full output file path to projected annotation.
 
     Returns:
-        Path to the projected surface annotation file written to disk.
+        Path to the projected surface metric annotation file written to disk.
 
     Raises:
         FileNotFoundError: If the output file is not created.
@@ -117,6 +117,47 @@ def metric_surface_project(
         metric_out=final_path.name,
     )
     written = Path(projected_vol.metric_out)
+
+    if not written.exists():
+        raise FileNotFoundError(f"Projected volume not computed: {written}")
+
+    if final_path.is_absolute():
+        relocate_output(written, final_path)
+        if not final_path.exists():
+            raise FileNotFoundError(f"Projected volume out not found: {final_path}")
+        return final_path
+    return written
+
+
+def label_surface_project(
+    volume: Path,
+    surface: Path,
+    ribbon_surfs: workbench.VolumeLabelToSurfaceMappingRibbonConstrainedParamsDict,  # type: ignore[valid-type]
+    out_fpath: str,
+) -> Path:
+    """Project a volumetric image to a surface from source space to target space.
+
+    Args:
+        volume: Path to the source NIfTI label annotation to be projected.
+        surface: Path to the target surface to project to.
+        ribbon_surfs: Ribbon surfaces to constrain projections to.
+        out_fpath: Full output file path to projected annotation.
+
+    Returns:
+        Path to the projected surface label annotation file written to disk.
+
+    Raises:
+        FileNotFoundError: If the output file is not created.
+    """
+    final_path = Path(out_fpath)
+
+    projected_vol = workbench.volume_label_to_surface_mapping(
+        volume=volume,
+        surface=surface,
+        ribbon_constrained=ribbon_surfs,
+        label_out=final_path.name,
+    )
+    written = Path(projected_vol.label_out)
 
     if not written.exists():
         raise FileNotFoundError(f"Projected volume not computed: {written}")

@@ -12,6 +12,7 @@ from niwrap import workbench
 from neuromaps_prime.transforms.volume import (
     INTERP_NOPARAMS,
     INTERP_PARAMS,
+    label_surface_project,
     metric_surface_project,
     vol_to_vol,
 )
@@ -209,5 +210,29 @@ class TestVolumeToSurfaceProjection:
             out_fpath=mock_paths.output,
         )
         mock_wb_project.assert_called_once()
+        assert str(result) == mock_paths.output
+        assert result.exists()
+
+    def test_label_surface_project(self, mock_paths: Vol2SurfOutput) -> None:
+        """Test label volume-to-surface projection."""
+
+        def create_output(
+            *args: Any,  # noqa: ANN401, ARG001
+            **kwargs: Any,  # noqa: ANN401, ARG001
+        ) -> MagicMock:
+            Path(mock_paths.output).touch()
+            return MagicMock(label_out=mock_paths.output)
+
+        with patch(
+            "neuromaps_prime.transforms.volume.workbench.volume_label_to_surface_mapping",
+            side_effect=create_output,
+        ) as mock_wb:
+            result = label_surface_project(
+                volume=mock_paths.volume,
+                surface=mock_paths.surface,
+                ribbon_surfs=mock_paths.ribbon_surfs,
+                out_fpath=mock_paths.output,
+            )
+        mock_wb.assert_called_once()
         assert str(result) == mock_paths.output
         assert result.exists()

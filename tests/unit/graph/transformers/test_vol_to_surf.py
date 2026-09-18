@@ -105,11 +105,19 @@ class TestVolumeToSurfaceTransformer:
             patch(
                 "neuromaps_prime.graph.transforms.volume.workbench.volume_to_surface_mapping_ribbon_constrained",
                 return_value=MagicMock(),
-            ) as mock_ribbon,
+            ) as mock_metric_ribbon,
+            patch(
+                "neuromaps_prime.graph.transforms.volume.workbench.volume_label_to_surface_mapping_ribbon_constrained",
+                return_value=MagicMock(),
+            ) as mock_label_ribbon,
             patch(
                 "neuromaps_prime.graph.transforms.volume.metric_surface_project",
                 return_value=projected_file,
             ) as mock_metric_surface_project,
+            patch(
+                "neuromaps_prime.graph.transforms.volume.label_surface_project",
+                return_value=projected_file,
+            ) as mock_label_surface_project,
         ):
             mock_transformer.volume_ops.surface_ops.transform_surface.return_value = (
                 TransformResult(output_path=expected_output)
@@ -122,8 +130,16 @@ class TestVolumeToSurfaceTransformer:
             basic_params.source_space, basic_params.target_space
         )
         assert mock_transformer.volume_ops.cache.require_surface_atlas.call_count == 3
-        mock_ribbon.assert_called_once()
-        mock_metric_surface_project.assert_called_once()
+        if transformer_type == "metric":
+            mock_metric_ribbon.assert_called_once()
+            mock_label_ribbon.assert_not_called()
+            mock_metric_surface_project.assert_called_once()
+            mock_label_surface_project.assert_not_called()
+        else:
+            mock_label_ribbon.assert_called_once()
+            mock_metric_ribbon.assert_not_called()
+            mock_label_surface_project.assert_called_once()
+            mock_metric_surface_project.assert_not_called()
         mock_transformer.volume_ops.surface_ops.transform_surface.assert_called_once()
         assert result == expected_output
 
@@ -155,13 +171,26 @@ class TestVolumeToSurfaceTransformer:
                 return_value=MagicMock(),
             ),
             patch(
+                "neuromaps_prime.graph.transforms.volume.workbench.volume_label_to_surface_mapping_ribbon_constrained",
+                return_value=MagicMock(),
+            ),
+            patch(
                 "neuromaps_prime.graph.transforms.volume.metric_surface_project",
                 return_value=projected_file,
             ) as mock_metric_surface_project,
+            patch(
+                "neuromaps_prime.graph.transforms.volume.label_surface_project",
+                return_value=projected_file,
+            ) as mock_label_surface_project,
         ):
             mock_transformer.volume_to_surface_transformer(**basic_params._asdict())
 
-        _, kwargs = mock_metric_surface_project.call_args
+        mock_project = (
+            mock_metric_surface_project
+            if transformer_type == "metric"
+            else mock_label_surface_project
+        )
+        _, kwargs = mock_project.call_args
         assert f".{expected_ext}.gii" in kwargs["out_fpath"]
 
     def test_surface_to_surface_called_with_correct_args(
