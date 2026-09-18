@@ -12,7 +12,7 @@ from niwrap import workbench
 from neuromaps_prime.transforms.volume import (
     INTERP_NOPARAMS,
     INTERP_PARAMS,
-    surface_project,
+    metric_surface_project,
     vol_to_vol,
 )
 
@@ -159,7 +159,7 @@ class Vol2SurfOutput(NamedTuple):
 
 
 class TestVolumeToSurfaceProjection:
-    """Unit tests for projecting volumes to surface (`surface_project`)."""
+    """Unit tests for projecting volumes to surface (`metric_surface_project`)."""
 
     @pytest.fixture
     def mock_paths(self, tmp_path: Path) -> Vol2SurfOutput:
@@ -198,11 +198,11 @@ class TestVolumeToSurfaceProjection:
             mock_wb.side_effect = create_output
             yield mock_wb
 
-    def test_surface_project(
+    def test_metric_surface_project(
         self, mock_wb_project: MagicMock, mock_paths: Vol2SurfOutput
     ) -> None:
         """Test volume-to-surface projection."""
-        result = surface_project(
+        result = metric_surface_project(
             volume=mock_paths.volume,
             surface=mock_paths.surface,
             ribbon_surfs=mock_paths.ribbon_surfs,

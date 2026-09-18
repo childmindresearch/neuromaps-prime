@@ -23,7 +23,7 @@ from neuromaps_prime.graph.transforms.surface import (
 )
 from neuromaps_prime.graph.utils import GraphUtils  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.transforms.utils import validate_volume_file
-from neuromaps_prime.transforms.volume import surface_project, vol_to_vol
+from neuromaps_prime.transforms.volume import metric_surface_project, vol_to_vol
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -287,7 +287,7 @@ class VolumeTransformOps(BaseModel):
             f"hemi-{hemisphere}_"
             f"desc-volume_annot.{ext}.gii"
         )
-        return surface_project(
+        return metric_surface_project(
             volume=input_file,
             surface=source_surface,
             ribbon_surfs=ribbon_surfs,

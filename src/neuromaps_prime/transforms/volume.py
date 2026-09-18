@@ -88,7 +88,7 @@ def vol_to_vol(
     return written
 
 
-def surface_project(
+def metric_surface_project(
     volume: Path,
     surface: Path,
     ribbon_surfs: workbench.VolumeToSurfaceMappingRibbonConstrainedParamsDict,  # type: ignore[valid-type]
