@@ -1,19 +1,23 @@
-"""Create an outline figure showing resources and annotations for each space."""
+"""Visualize the Yerkes19 PC_Yeo17Networks annotation on 10k midthickness."""
 
 from pathlib import Path
+import hashlib
+import tempfile
 
+import nibabel as nib
 import matplotlib.pyplot as plt
-import yaml
-from matplotlib.patches import FancyBboxPatch
+import numpy as np
+import requests
+from nilearn import plotting
 
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
-NODES_DIR = (
+NODE_DIR = (
     REPO_ROOT
     / "src"
     / "neuromaps_prime"
@@ -21,628 +25,394 @@ NODES_DIR = (
     / "nodes"
 )
 
-OUTPUT_FILE = REPO_ROOT / "annotation_outline.png"
+SPACE_NAME = "Yerkes19"
+DENSITY = "10k"
+ANNOTATION_NAME = "PC_Yeo17Networks"
 
-CARD_WIDTH = 1.8
-CARD_HEIGHT = 0.7
-CARD_GAP = 0.2
-SPACE_WIDTH = 4.4
-ROW_GAP = 0.2
+OUTPUT_FILE = (
+    REPO_ROOT
+    / f"visualize_{SPACE_NAME}_{ANNOTATION_NAME}_{DENSITY}.png"
+)
 
-IGNORE_SPECIES = {"marmoset"}
+SURFACE_PRIORITY = [
+    "midthickness",
+    "white",
+    "pial",
+    "inflated",
+    "sphere",
+]
+
+CACHE_DIR = Path(tempfile.gettempdir()) / "neuromaps_prime_visualize"
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def parse_nodes(nodes_dir: Path):
-    """Parse all node YAML files, organized by species folder."""
-    spaces = {}
+# ---------------------------------------------------------------------------
+# YAML loading
+# ---------------------------------------------------------------------------
 
-    for species_dir in sorted(nodes_dir.iterdir()):
-        if not species_dir.is_dir():
-            continue
+def find_yaml(space_name):
+    """Find the YAML file containing the requested space."""
+    matches = list(NODE_DIR.rglob(f"{space_name}.yaml"))
 
-        species = species_dir.name
-
-        if species.lower() in IGNORE_SPECIES:
-            continue
-
-        yaml_files = sorted(
-            list(species_dir.glob("*.yml"))
-            + list(species_dir.glob("*.yaml"))
+    if not matches:
+        raise FileNotFoundError(
+            f"Could not find YAML for {space_name} under {NODE_DIR}"
         )
 
-        for yaml_file in yaml_files:
-            data = yaml.safe_load(
-                yaml_file.read_text(
-                    encoding="utf-8"
-                )
-            )
+    return matches[0]
 
-            if not isinstance(data, dict):
-                continue
 
-            for space_name, space_data in data.items():
-                if not isinstance(space_data, dict):
-                    continue
+def load_yaml(path):
+    """Load YAML."""
+    import yaml
 
-                annotations = []
-
-                surfaces = space_data.get(
-                    "surfaces",
-                    {},
-                )
-
-                volumes = space_data.get(
-                    "volumes",
-                    {},
-                )
-
-                # ------------------------------------------------------
-                # Annotations
-                # ------------------------------------------------------
-
-                if isinstance(surfaces, dict):
-                    for density, density_data in surfaces.items():
-                        if not isinstance(
-                            density_data,
-                            dict,
-                        ):
-                            continue
-
-                        annotation_data = (
-                            density_data.get(
-                                "annotation",
-                                {},
-                            )
-                        )
-
-                        if not isinstance(
-                            annotation_data,
-                            dict,
-                        ):
-                            continue
-
-                        for (
-                            annotation_name,
-                            annotation,
-                        ) in annotation_data.items():
-
-                            if not isinstance(
-                                annotation,
-                                dict,
-                            ):
-                                continue
-
-                            hemispheres = []
-
-                            if "left" in annotation:
-                                hemispheres.append("L")
-
-                            if "right" in annotation:
-                                hemispheres.append("R")
-
-                            annotations.append(
-                                {
-                                    "name": str(
-                                        annotation_name
-                                    ),
-                                    "density": str(
-                                        density
-                                    ),
-                                    "hemispheres": (
-                                        hemispheres
-                                    ),
-                                }
-                            )
-
-                # ------------------------------------------------------
-                # Store space
-                # ------------------------------------------------------
-
-                spaces[str(space_name)] = {
-                    "species": species,
-                    "surfaces": surfaces,
-                    "volumes": volumes,
-                    "annotations": annotations,
-                }
-
-    return spaces
+    with path.open() as f:
+        return yaml.safe_load(f)
 
 
 # ---------------------------------------------------------------------------
-# Plot
+# Download/cache helpers
 # ---------------------------------------------------------------------------
 
+def detect_extension(data, content_type=""):
+    """Detect the file type from bytes, falling back to Content-Type."""
+    # GIFTI files are XML.
+    if data[:100].lstrip().startswith(b"<?xml"):
+        return ".gii"
 
-def draw_card(
-    ax,
-    x,
-    y,
-    width,
-    height,
-    text,
-):
-    """Draw a fixed-size card."""
-    card = FancyBboxPatch(
-        (x, y),
-        width,
-        height,
-        boxstyle=(
-            "round,pad=0.03,"
-            "rounding_size=0.05"
-        ),
-        fill=False,
-        linestyle="--",
-        linewidth=1,
-    )
+    if b"<GIFTI" in data[:1000]:
+        return ".gii"
 
-    ax.add_patch(card)
+    # NIfTI gzip.
+    if data[:2] == b"\x1f\x8b":
+        return ".nii.gz"
 
-    ax.text(
-        x + width / 2,
-        y + height / 2,
-        text,
-        ha="center",
-        va="center",
-        fontsize=9,
-    )
+    # NIfTI magic.
+    if len(data) >= 348:
+        if data[344:348] in (b"n+1\x00", b"ni1\x00"):
+            return ".nii"
+
+    content_type = content_type.lower()
+
+    if "gifti" in content_type:
+        return ".gii"
+
+    if "nifti" in content_type:
+        return ".nii"
+
+    return ""
 
 
-def draw_lr_cards(
-    ax,
-    x,
-    y,
-    name,
-    hemispheres,
-):
-    """Draw fixed L/R cards for a resource."""
-    left_x = x
-    right_x = (
-        x
-        + CARD_WIDTH
-        + CARD_GAP
-    )
+def download_file(url):
+    """Download a remote resource and cache it locally."""
+    key = hashlib.sha256(url.encode()).hexdigest()
 
-    # Always reserve both positions.
-    draw_card(
-        ax,
-        left_x,
-        y,
-        CARD_WIDTH,
-        CARD_HEIGHT,
-        "L" if "L" in hemispheres else "",
-    )
+    # Reuse an existing cached file.
+    for extension in (".gii", ".nii.gz", ".nii"):
+        cached = CACHE_DIR / f"{key}{extension}"
 
-    draw_card(
-        ax,
-        right_x,
-        y,
-        CARD_WIDTH,
-        CARD_HEIGHT,
-        "R" if "R" in hemispheres else "",
-    )
+        if cached.exists():
+            return cached
 
-    ax.text(
-        x - 0.15,
-        y + CARD_HEIGHT / 2,
-        name,
-        ha="right",
-        va="center",
-        fontsize=9,
-    )
+    print(f"Downloading: {url}")
 
+    response = requests.get(url, timeout=120)
+    response.raise_for_status()
 
-# ---------------------------------------------------------------------------
-# Figure
-# ---------------------------------------------------------------------------
+    content_type = response.headers.get("Content-Type", "")
+    data = response.content
 
+    extension = detect_extension(data, content_type)
 
-def make_plot(
-    spaces,
-    output_file,
-):
-    """Create the outline figure."""
-    species_groups = {}
-
-    for space_name, space in spaces.items():
-        species = space["species"]
-
-        species_groups.setdefault(
-            species,
-            [],
-        ).append(space_name)
-
-    for species in species_groups:
-        species_groups[species].sort()
-
-    # Estimate figure dimensions.
-    total_rows = 0
-
-    for species_spaces in species_groups.values():
-        for space_name in species_spaces:
-            space = spaces[space_name]
-
-            rows = 2  # Surface + Annotation + Volume headings
-
-            surfaces = space["surfaces"]
-
-            for density_data in surfaces.values():
-                if isinstance(
-                    density_data,
-                    dict,
-                ):
-                    rows += sum(
-                        1
-                        for key in density_data
-                        if key != "annotation"
-                    )
-
-            rows += len(
-                space["annotations"]
-            )
-
-            volumes = space["volumes"]
-
-            for density_data in volumes.values():
-                if isinstance(
-                    density_data,
-                    dict,
-                ):
-                    rows += len(
-                        density_data
-                    )
-
-            total_rows = max(
-                total_rows,
-                rows,
-            )
-
-    max_spaces = max(
-        (
-            len(species_spaces)
-            for species_spaces
-            in species_groups.values()
-        ),
-        default=1,
-    )
-
-    figure_width = max(
-        12,
-        3
-        + max_spaces
-        * SPACE_WIDTH,
-    )
-
-    figure_height = max(
-        8,
-        3
-        + total_rows
-        * (
-            CARD_HEIGHT
-            + ROW_GAP
-        ),
-    )
-
-    fig, ax = plt.subplots(
-        figsize=(
-            figure_width,
-            figure_height,
-        )
-    )
-
-    ax.set_axis_off()
-
-    y = (
-        figure_height
-        - 0.8
-    )
-
-    # ------------------------------------------------------------------
-    # Title
-    # ------------------------------------------------------------------
-
-    ax.text(
-        0,
-        y,
-        "Neuromaps-PRIME",
-        fontsize=18,
-        fontweight="bold",
-        ha="left",
-        va="top",
-    )
-
-    y -= 0.65
-
-    # ------------------------------------------------------------------
-    # Species
-    # ------------------------------------------------------------------
-
-    for species_index, (
-        species,
-        species_spaces,
-    ) in enumerate(
-        species_groups.items()
-    ):
-        if species_index:
-            y -= 0.7
-
-        ax.text(
-            0,
-            y,
-            species,
-            fontsize=14,
-            fontweight="bold",
-            ha="left",
-            va="top",
+    if not extension:
+        raise RuntimeError(
+            f"Could not determine file type for:\n"
+            f"{url}\n"
+            f"Content-Type: {content_type}"
         )
 
-        y -= 0.55
+    print(f"  Content-Type: {content_type}")
+    print(f"  Detected format: {extension}")
 
-        # --------------------------------------------------------------
-        # Space columns
-        # --------------------------------------------------------------
+    cached = CACHE_DIR / f"{key}{extension}"
+    cached.write_bytes(data)
 
-        for space_index, space_name in enumerate(
-            species_spaces
+    print(f"  Cached at: {cached}")
+
+    return cached
+
+
+# ---------------------------------------------------------------------------
+# GIFTI helpers
+# ---------------------------------------------------------------------------
+
+def load_gifti_data(path):
+    """Load the first data array from a GIFTI file."""
+    image = nib.load(str(path))
+
+    if not isinstance(image, nib.gifti.GiftiImage):
+        raise TypeError(
+            f"Expected GIFTI image, got {type(image)}"
+        )
+
+    if not image.darrays:
+        raise ValueError(
+            f"No data arrays found in {path}"
+        )
+
+    return np.asarray(image.darrays[0].data)
+
+
+def load_surface(url):
+    """Download and load a GIFTI surface."""
+    path = download_file(url)
+
+    image = nib.load(str(path))
+
+    if not isinstance(image, nib.gifti.GiftiImage):
+        raise TypeError(
+            f"Expected GIFTI surface, got {type(image)}"
+        )
+
+    coords = None
+    faces = None
+
+    for darray in image.darrays:
+        if (
+            darray.intent
+            == nib.nifti1.intent_codes["NIFTI_INTENT_POINTSET"]
         ):
-            space = spaces[space_name]
+            coords = np.asarray(darray.data)
 
-            x = (
-                3.0
-                + space_index
-                * SPACE_WIDTH
-            )
+        elif (
+            darray.intent
+            == nib.nifti1.intent_codes["NIFTI_INTENT_TRIANGLE"]
+        ):
+            faces = np.asarray(darray.data)
 
-            current_y = y
-
-            # Space title
-            ax.text(
-                x
-                + SPACE_WIDTH / 2,
-                current_y,
-                space_name,
-                fontsize=11,
-                fontweight="bold",
-                ha="center",
-                va="bottom",
-            )
-
-            current_y -= 0.5
-
-            # Hemisphere headings
-            left_x = x + 0.2
-
-            right_x = (
-                left_x
-                + CARD_WIDTH
-                + CARD_GAP
-            )
-
-            ax.text(
-                left_x
-                + CARD_WIDTH / 2,
-                current_y,
-                "L",
-                fontsize=8,
-                fontweight="bold",
-                ha="center",
-            )
-
-            ax.text(
-                right_x
-                + CARD_WIDTH / 2,
-                current_y,
-                "R",
-                fontsize=8,
-                fontweight="bold",
-                ha="center",
-            )
-
-            current_y -= 0.35
-
-            # ----------------------------------------------------------
-            # Surfaces
-            # ----------------------------------------------------------
-
-            ax.text(
-                x,
-                current_y,
-                "Surface",
-                fontsize=8,
-                fontweight="bold",
-                alpha=0.6,
-                ha="left",
-            )
-
-            current_y -= 0.35
-
-            for density, density_data in (
-                space["surfaces"].items()
-            ):
-                if not isinstance(
-                    density_data,
-                    dict,
-                ):
-                    continue
-
-                for surface_name, surface in (
-                    density_data.items()
-                ):
-                    if surface_name == "annotation":
-                        continue
-
-                    if not isinstance(
-                        surface,
-                        dict,
-                    ):
-                        continue
-
-                    hemispheres = []
-
-                    if "left" in surface:
-                        hemispheres.append("L")
-
-                    if "right" in surface:
-                        hemispheres.append("R")
-
-                    draw_lr_cards(
-                        ax,
-                        x + 0.2,
-                        current_y,
-                        f"{surface_name} ({density})",
-                        hemispheres,
-                    )
-
-                    current_y -= (
-                        CARD_HEIGHT
-                        + ROW_GAP
-                    )
-
-            # ----------------------------------------------------------
-            # Annotations
-            # ----------------------------------------------------------
-
-            ax.text(
-                x,
-                current_y,
-                "Annotation",
-                fontsize=8,
-                fontweight="bold",
-                alpha=0.6,
-                ha="left",
-            )
-
-            current_y -= 0.35
-
-            for annotation in space[
-                "annotations"
-            ]:
-                draw_lr_cards(
-                    ax,
-                    x + 0.2,
-                    current_y,
-                    annotation["name"],
-                    annotation["hemispheres"],
-                )
-
-                current_y -= (
-                    CARD_HEIGHT
-                    + ROW_GAP
-                )
-
-            # ----------------------------------------------------------
-            # Volumes
-            # ----------------------------------------------------------
-
-            ax.text(
-                x,
-                current_y,
-                "Volume",
-                fontsize=8,
-                fontweight="bold",
-                alpha=0.6,
-                ha="left",
-            )
-
-            current_y -= 0.35
-
-            for density, density_data in (
-                space["volumes"].items()
-            ):
-                if not isinstance(
-                    density_data,
-                    dict,
-                ):
-                    continue
-
-                for volume_name in density_data:
-                    draw_card(
-                        ax,
-                        x + 0.2,
-                        current_y,
-                        CARD_WIDTH * 2
-                        + CARD_GAP,
-                        CARD_HEIGHT,
-                        f"{volume_name} ({density})",
-                    )
-
-                    current_y -= (
-                        CARD_HEIGHT
-                        + ROW_GAP
-                    )
-
-        y -= (
-            total_rows
-            * (
-                CARD_HEIGHT
-                + ROW_GAP
-            )
-            + 0.4
+    if coords is None:
+        raise ValueError(
+            f"No pointset found in surface: {path}"
         )
 
-    ax.set_xlim(
-        -0.5,
-        3.0
-        + max_spaces
-        * SPACE_WIDTH,
+    if faces is None:
+        raise ValueError(
+            f"No triangle faces found in surface: {path}"
+        )
+
+    return coords, faces, path
+
+
+# ---------------------------------------------------------------------------
+# Surface selection
+# ---------------------------------------------------------------------------
+
+def select_surface(density_data, hemisphere):
+    """Select the highest-priority available surface."""
+    for surface_name in SURFACE_PRIORITY:
+        surface_data = density_data.get(surface_name)
+
+        if not surface_data:
+            continue
+
+        url = surface_data.get(hemisphere)
+
+        if not url:
+            continue
+
+        print(
+            f"  {hemisphere}: {surface_name} → {url}"
+        )
+
+        coords, faces, path = load_surface(url)
+
+        return surface_name, coords, faces, path
+
+    raise RuntimeError(
+        f"No usable surface found for {hemisphere}"
     )
 
-    ax.set_ylim(
-        0,
-        figure_height,
+
+# ---------------------------------------------------------------------------
+# Main visualization
+# ---------------------------------------------------------------------------
+
+def main():
+    yaml_path = find_yaml(SPACE_NAME)
+    node = load_yaml(yaml_path)
+
+    if SPACE_NAME not in node:
+        raise KeyError(
+            f"{SPACE_NAME} not found in {yaml_path}"
+        )
+
+    space = node[SPACE_NAME]
+
+    print(f"Reading nodes from: {NODE_DIR}")
+    print(f"Target space: {SPACE_NAME}")
+    print()
+    print(f"Space:      {SPACE_NAME}")
+    print(f"Species:    {space.get('species')}")
+    print(f"YAML:       {yaml_path}")
+    print(f"Density:    {DENSITY}")
+    print(f"Annotation: {ANNOTATION_NAME}")
+    print()
+
+    surfaces = space["surfaces"]
+
+    if DENSITY not in surfaces:
+        raise KeyError(
+            f"Density {DENSITY!r} not found in {SPACE_NAME}"
+        )
+
+    density_data = surfaces[DENSITY]
+
+    annotations = density_data.get("annotation", {})
+
+    if ANNOTATION_NAME not in annotations:
+        available = ", ".join(annotations.keys())
+
+        raise KeyError(
+            f"{ANNOTATION_NAME!r} not found at "
+            f"{SPACE_NAME} → surfaces → {DENSITY} → annotation.\n\n"
+            f"Available annotations:\n{available}"
+        )
+
+    annotation = annotations[ANNOTATION_NAME]
+
+    hemisphere_data = {}
+
+    # -----------------------------------------------------------------------
+    # Load left and right hemisphere surfaces + annotation
+    # -----------------------------------------------------------------------
+
+    for hemisphere in ("left", "right"):
+        if hemisphere not in annotation:
+            raise KeyError(
+                f"{ANNOTATION_NAME} has no {hemisphere} annotation."
+            )
+
+        (
+            surface_name,
+            coords,
+            faces,
+            surface_path,
+        ) = select_surface(
+            density_data,
+            hemisphere,
+        )
+
+        annotation_url = annotation[hemisphere]
+
+        print(
+            f"  {hemisphere}: loading {ANNOTATION_NAME}"
+        )
+
+        annotation_path = download_file(annotation_url)
+
+        annotation_data = load_gifti_data(
+            annotation_path
+        )
+
+        print(
+            f"    surface vertices:    {len(coords)}"
+        )
+        print(
+            f"    annotation vertices: {len(annotation_data)}"
+        )
+
+        if len(annotation_data) != len(coords):
+            raise ValueError(
+                f"Vertex-count mismatch for {hemisphere}:\n"
+                f"  surface:    {len(coords)} vertices\n"
+                f"  annotation: {len(annotation_data)} vertices"
+            )
+
+        hemisphere_data[hemisphere] = {
+            "coords": coords,
+            "faces": faces,
+            "annotation": annotation_data,
+            "surface_name": surface_name,
+            "surface_path": surface_path,
+        }
+
+    # -----------------------------------------------------------------------
+    # Plot
+    # -----------------------------------------------------------------------
+
+    fig = plt.figure(figsize=(14, 7))
+
+    for index, hemisphere in enumerate(
+        ("left", "right"),
+        start=1,
+    ):
+        data = hemisphere_data[hemisphere]
+
+        ax = fig.add_subplot(
+            1,
+            2,
+            index,
+            projection="3d",
+        )
+
+        roi = np.asarray(
+            data["annotation"]
+        )
+
+        # Handle floating-point annotations containing NaN/Inf.
+        if np.issubdtype(
+            roi.dtype,
+            np.floating,
+        ):
+            roi = np.nan_to_num(
+                roi,
+                nan=0,
+                posinf=0,
+                neginf=0,
+            )
+
+        roi = roi.astype(int)
+
+        plotting.plot_surf_roi(
+            surf_mesh=(
+                data["coords"],
+                data["faces"],
+            ),
+            roi_map=roi,
+            hemi=(
+                "left"
+                if hemisphere == "left"
+                else "right"
+            ),
+            view="lateral",
+            bg_map=None,
+            cmap="tab20",
+            axes=ax,
+            colorbar=True,
+            title=(
+                f"{hemisphere.capitalize()} hemisphere\n"
+                f"{ANNOTATION_NAME}"
+            ),
+        )
+
+    fig.suptitle(
+        f"{SPACE_NAME} — {ANNOTATION_NAME}\n"
+        f"{DENSITY} {hemisphere_data['left']['surface_name']} surface",
+        fontsize=16,
     )
+
+    fig.tight_layout()
 
     fig.savefig(
-        output_file,
-        dpi=200,
+        OUTPUT_FILE,
+        dpi=300,
         bbox_inches="tight",
     )
 
     plt.close(fig)
 
-    print(
-        f"Saved figure to {output_file}"
-    )
-
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
-
-def main():
-    """Parse node YAML files and create the figure."""
-    print(
-        f"Reading nodes from: {NODES_DIR}"
-    )
-
-    spaces = parse_nodes(
-        NODES_DIR
-    )
-
-    print(
-        f"Found {len(spaces)} spaces"
-    )
-
-    for space_name, space in spaces.items():
-        print(
-            f"\n{space['species']} / "
-            f"{space_name}"
-        )
-
-        print("  annotations:")
-
-        for annotation in space[
-            "annotations"
-        ]:
-            print(
-                f"    - {annotation['name']}: "
-                f"{', '.join(annotation['hemispheres'])}"
-            )
-
-    make_plot(
-        spaces,
-        OUTPUT_FILE,
-    )
+    print()
+    print(f"Saved: {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
