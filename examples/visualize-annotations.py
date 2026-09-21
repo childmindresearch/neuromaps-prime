@@ -1,16 +1,15 @@
-"""Visualize all Yerkes19 10k annotations on midthickness surfaces."""
+"""Visualize annotations on anatomical surfaces for a node space."""
 
 from pathlib import Path
-import math
+import sys
 import tempfile
-import urllib.request
 
 import matplotlib.pyplot as plt
-from matplotlib import cm
-from matplotlib.colors import Normalize
 import nibabel as nib
 import numpy as np
+import requests
 import yaml
+from matplotlib import colormaps
 from nilearn import plotting
 
 
@@ -20,8 +19,14 @@ from nilearn import plotting
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-SPACE_NAME = "Yerkes19"
-DENSITY = "10k"
+NODE_DIR = (
+    REPO_ROOT
+    / "src"
+    / "neuromaps_prime"
+    / "resources"
+    / "nodes"
+    / "macaque"
+)
 
 SURFACE_PRIORITY = [
     "midthickness",
@@ -31,549 +36,543 @@ SURFACE_PRIORITY = [
     "sphere",
 ]
 
-OUTPUT_FILE = REPO_ROOT / f"visualize_{SPACE_NAME}_{DENSITY}_annotations.png"
-
-# Four L/R annotation pairs across.
 N_PAIRS_PER_ROW = 4
+
+PAIR_WIDTH = 5.2
+PAIR_HEIGHT = 4.8
 
 CACHE_DIR = Path(tempfile.gettempdir()) / "neuromaps_prime_visualize"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ---------------------------------------------------------------------
-# YAML resource
+# Helpers
 # ---------------------------------------------------------------------
 
-NODE_FILE = (
-    REPO_ROOT
-    / "src"
-    / "neuromaps_prime"
-    / "resources"
-    / "nodes"
-    / "macaque"
-    / f"{SPACE_NAME}.yaml"
-)
+def get_space_yaml(space_name):
+    """Load the YAML definition for a space."""
+    yaml_path = NODE_DIR / f"{space_name}.yaml"
+
+    if not yaml_path.exists():
+        available = sorted(path.stem for path in NODE_DIR.glob("*.yaml"))
+        raise FileNotFoundError(
+            f"Could not find YAML for space '{space_name}'.\n"
+            f"Expected: {yaml_path}\n"
+            f"Available spaces: {', '.join(available)}"
+        )
+
+    with yaml_path.open() as f:
+        data = yaml.safe_load(f)
+
+    if space_name in data:
+        return data[space_name]
+
+    return data
 
 
-# ---------------------------------------------------------------------
-# Download helpers
-# ---------------------------------------------------------------------
+def download_file(url, name):
+    """Download and cache a file, preserving GIFTI extension when needed."""
+    response = requests.get(url, timeout=120)
+    response.raise_for_status()
 
-def download_file(url: str, name: str) -> Path:
-    """Download a remote file and cache it locally."""
-    path = CACHE_DIR / name
+    content = response.content
+    content_type = response.headers.get("Content-Type", "").lower()
 
-    if path.exists() and path.stat().st_size > 0:
-        return path
-
-    print(f"Downloading {url}")
-
-    request = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Mozilla/5.0"},
-    )
-
-    with urllib.request.urlopen(request) as response:
-        data = response.read()
-        content_type = response.headers.get("Content-Type", "")
-
-    # OSF frequently returns GIFTI files as application/octet-stream.
     is_gifti = (
-        "gifti" in content_type.lower()
-        or data.lstrip().startswith(b"<?xml")
-        or b"<GIFTI" in data[:5000]
+        "gifti" in content_type
+        or b"<GIFTI" in content[:1000]
+        or (
+            b"<?xml" in content[:1000]
+            and b"GIFTI" in content[:5000]
+        )
     )
 
-    if is_gifti and path.suffix.lower() != ".gii":
-        path = path.with_suffix(".gii")
+    extension = ".gii" if is_gifti else ""
 
-    tmp_path = path.with_suffix(path.suffix + ".tmp")
+    safe_name = name.replace("/", "_").replace(":", "_")
+    output_path = CACHE_DIR / f"{safe_name}{extension}"
 
-    with open(tmp_path, "wb") as f:
-        f.write(data)
+    if not output_path.exists():
+        output_path.write_bytes(content)
 
-    tmp_path.replace(path)
-
-    return path
+    return output_path
 
 
-# ---------------------------------------------------------------------
-# GIFTI loading
-# ---------------------------------------------------------------------
+def get_url(value):
+    """Extract a URL from a YAML value."""
+    if isinstance(value, str):
+        return value
 
-def load_surface(url: str, name: str):
-    """Load GIFTI surface coordinates and triangle indices."""
-    path = download_file(url, f"{name}.gii")
+    if isinstance(value, dict):
+        for key in ("url", "source", "path", "file"):
+            if key in value and isinstance(value[key], str):
+                return value[key]
+
+    return None
+
+
+def load_surface(url, name):
+    """Load a GIFTI surface and return coordinates and triangles."""
+    path = download_file(url, name)
 
     image = nib.load(str(path))
 
     coordinates = None
-    triangles = None
+    faces = None
 
     for darray in image.darrays:
         data = np.asarray(darray.data)
 
-        # Surface coordinates are N x 3.
-        if data.ndim == 2 and data.shape[1] == 3:
-            if coordinates is None:
-                coordinates = data
+        # Surface coordinates: N x 3 floating-point array.
+        if (
+            data.ndim == 2
+            and data.shape[1] == 3
+            and np.issubdtype(data.dtype, np.floating)
+        ):
+            coordinates = data
 
-        # Triangle indices are M x 3 and integer-valued.
-        elif data.ndim == 2 and data.shape[1] == 3:
-            if (
-                np.issubdtype(data.dtype, np.integer)
-                and triangles is None
-            ):
-                triangles = data.astype(np.int32)
+        # Surface triangles: M x 3 integer array.
+        elif (
+            data.ndim == 2
+            and data.shape[1] == 3
+            and np.issubdtype(data.dtype, np.integer)
+        ):
+            faces = data
 
-    # Some GIFTI readers expose both as N x 3, so use the intent
-    # as a secondary signal when available.
-    if coordinates is None or triangles is None:
-        for darray in image.darrays:
-            data = np.asarray(darray.data)
+    if coordinates is None:
+        raise ValueError(f"No surface coordinates found in {path}")
 
-            intent = str(darray.intent).lower()
+    if faces is None:
+        raise ValueError(f"No surface triangles found in {path}")
 
-            if (
-                coordinates is None
-                and data.ndim == 2
-                and data.shape[1] == 3
-                and (
-                    "point" in intent
-                    or "coord" in intent
-                    or darray.intent == 1008
-                )
-            ):
-                coordinates = data
-
-            if (
-                triangles is None
-                and data.ndim == 2
-                and data.shape[1] == 3
-                and (
-                    "triangle" in intent
-                    or "face" in intent
-                    or darray.intent == 1009
-                )
-            ):
-                triangles = data.astype(np.int32)
-
-    if coordinates is None or triangles is None:
-        print(f"\nCould not identify surface arrays in: {path}")
-
-        for i, darray in enumerate(image.darrays):
-            print(
-                f"  array {i}: "
-                f"intent={darray.intent!r}, "
-                f"shape={np.asarray(darray.data).shape}, "
-                f"dtype={np.asarray(darray.data).dtype}"
-            )
-
-        raise ValueError(
-            f"Could not identify pointset and triangle arrays in {path}"
-        )
-
-    return coordinates, triangles
+    return coordinates, faces
 
 
-def load_annotation(url: str, name: str):
-    """Load the first data array from a GIFTI annotation."""
-    path = download_file(url, f"{name}.gii")
+def load_annotation(url, name, n_vertices):
+    """Load a surface annotation as a one-dimensional vertex array."""
+    path = download_file(url, name)
 
     image = nib.load(str(path))
 
-    if not image.darrays:
-        raise ValueError(f"No data arrays found in {path}")
+    candidates = []
 
-    return np.asarray(image.darrays[0].data).squeeze()
+    for darray in image.darrays:
+        data = np.asarray(darray.data)
 
+        if data.ndim == 1 and data.shape[0] == n_vertices:
+            candidates.append(data)
 
-# ---------------------------------------------------------------------
-# YAML loading
-# ---------------------------------------------------------------------
+        elif data.ndim == 2:
+            if data.shape[0] == n_vertices:
+                print(
+                    f"  {name}: multi-map data "
+                    f"{data.shape}; using map 0"
+                )
+                candidates.append(data[:, 0])
 
-def load_space_data():
-    """Load the Yerkes19 YAML resource directly."""
-    if not NODE_FILE.exists():
-        raise FileNotFoundError(
-            f"Could not find YAML resource:\n{NODE_FILE}"
+            elif data.shape[1] == n_vertices:
+                print(
+                    f"  {name}: multi-map data "
+                    f"{data.shape}; using map 0"
+                )
+                candidates.append(data[0, :])
+
+    if not candidates:
+        raise ValueError(
+            f"No annotation array with {n_vertices} vertices found in {path}"
         )
 
-    with open(NODE_FILE, "r") as f:
-        data = yaml.safe_load(f)
-
-    if SPACE_NAME not in data:
-        raise KeyError(
-            f"{SPACE_NAME} not found in {NODE_FILE}"
-        )
-
-    return data[SPACE_NAME]
+    return np.asarray(candidates[0])
 
 
-# ---------------------------------------------------------------------
-# Surface selection
-# ---------------------------------------------------------------------
+def get_surface_resolutions(space):
+    """Return surface resolutions containing annotations."""
+    surfaces = space.get("surfaces", {})
 
-def choose_surface(density_data, hemisphere):
-    """Choose the highest-priority available anatomical surface."""
+    resolutions = []
+
+    for density, data in surfaces.items():
+        if isinstance(data, dict) and "annotation" in data:
+            resolutions.append(density)
+
+    return resolutions
+
+
+def get_annotations(space, density):
+    """Return annotation entries for a surface density."""
+    density_data = space["surfaces"][density]
+    annotations = density_data.get("annotation", {})
+
+    if isinstance(annotations, dict):
+        return list(annotations.items())
+
+    return []
+
+
+def get_anatomical_surface(space, density, hemisphere):
+    """Find the highest-priority anatomical surface for a hemisphere."""
+    density_data = space["surfaces"][density]
+
     for surface_name in SURFACE_PRIORITY:
-        surface = density_data.get(surface_name)
+        surface_data = density_data.get(surface_name)
 
-        if (
-            isinstance(surface, dict)
-            and hemisphere in surface
-            and surface[hemisphere]
-        ):
-            return surface_name, surface[hemisphere]
+        if not isinstance(surface_data, dict):
+            continue
+
+        value = surface_data.get(hemisphere)
+
+        if value is None:
+            continue
+
+        url = get_url(value)
+
+        if url is not None:
+            return surface_name, url
 
     raise ValueError(
-        f"No anatomical surface found for {hemisphere}. "
-        f"Tried: {SURFACE_PRIORITY}"
+        f"No anatomical surface found for {hemisphere} at {density}"
+    )
+
+
+def get_annotation_hemisphere(annotation_data, hemisphere):
+    """Get an annotation URL for a hemisphere."""
+    if not isinstance(annotation_data, dict):
+        return None
+
+    value = annotation_data.get(hemisphere)
+
+    if value is None:
+        return None
+
+    return get_url(value)
+
+
+def annotation_is_categorical(name, values):
+    """Determine whether an annotation is likely categorical."""
+    if name.startswith("PC_"):
+        return True
+
+    finite = values[np.isfinite(values)]
+
+    if len(finite) == 0:
+        return False
+
+    unique = np.unique(finite)
+
+    return len(unique) <= 20 and np.allclose(
+        unique,
+        np.round(unique),
     )
 
 
 # ---------------------------------------------------------------------
-# Load YAML
+# Plotting
 # ---------------------------------------------------------------------
 
-space = load_space_data()
+def plot_resolution(space_name, space, density):
+    """Plot all annotation pairs for one surface density."""
+    annotations = get_annotations(space, density)
 
-surfaces_data = space.get("surfaces", {})
+    if not annotations:
+        print(f"No annotations found for {density}")
+        return
 
-if DENSITY not in surfaces_data:
-    raise ValueError(
-        f"{SPACE_NAME} does not contain density {DENSITY}"
-    )
-
-density_data = surfaces_data[DENSITY]
-
-annotations = density_data.get("annotation", {})
-
-if not annotations:
-    raise ValueError(
-        f"No annotations found under "
-        f"{SPACE_NAME} -> surfaces -> {DENSITY} -> annotation"
-    )
-
-print(f"Found {len(annotations)} annotations:")
-
-for annotation_name in annotations:
-    print(f"  - {annotation_name}")
-
-
-# ---------------------------------------------------------------------
-# Load anatomical surfaces once
-# ---------------------------------------------------------------------
-
-surface_data = {}
-
-for hemisphere in ("left", "right"):
-    surface_name, surface_url = choose_surface(
-        density_data,
-        hemisphere,
-    )
-
-    print(
-        f"Using {surface_name} surface for "
-        f"{hemisphere} hemisphere"
-    )
-
-    surface_data[hemisphere] = load_surface(
-        surface_url,
-        f"{SPACE_NAME}_{DENSITY}_{surface_name}_{hemisphere}",
-    )
-
-
-# ---------------------------------------------------------------------
-# Figure layout
-#
-# Four complete annotation pairs per row:
-#
-#   [ L | R | CB ] [ L | R | CB ] [ L | R | CB ] [ L | R | CB ]
-#
-# ---------------------------------------------------------------------
-
-annotation_items = list(annotations.items())
-
-n_annotations = len(annotation_items)
-n_rows = math.ceil(n_annotations / N_PAIRS_PER_ROW)
-
-fig = plt.figure(
-    figsize=(22, n_rows * 5.0),
-    facecolor="white",
-)
-
-outer = fig.add_gridspec(
-    n_rows,
-    N_PAIRS_PER_ROW,
-    wspace=0.08,
-    hspace=0.28,
-)
-
-
-# ---------------------------------------------------------------------
-# Plot each annotation
-# ---------------------------------------------------------------------
-
-for index, (annotation_name, annotation_data) in enumerate(
-    annotation_items
-):
-
-    row = index // N_PAIRS_PER_ROW
-    col = index % N_PAIRS_PER_ROW
-
-    print(f"\nProcessing {annotation_name}")
-
-    left_url = annotation_data.get("left")
-    right_url = annotation_data.get("right")
-
-    left_values = None
-    right_values = None
+    print(f"\nProcessing {space_name} {density}")
+    print(f"Found {len(annotations)} annotations")
 
     # -------------------------------------------------------------
-    # Load left annotation
+    # Load anatomical surfaces once.
     # -------------------------------------------------------------
 
-    if left_url:
-        try:
-            left_values = load_annotation(
-                left_url,
-                f"{SPACE_NAME}_{DENSITY}_{annotation_name}_left",
-            )
-        except Exception as exc:
-            print(
-                f"WARNING: could not load left annotation "
-                f"{annotation_name}: {exc}"
-            )
+    surfaces = {}
 
-    # -------------------------------------------------------------
-    # Load right annotation
-    # -------------------------------------------------------------
-
-    if right_url:
-        try:
-            right_values = load_annotation(
-                right_url,
-                f"{SPACE_NAME}_{DENSITY}_{annotation_name}_right",
-            )
-        except Exception as exc:
-            print(
-                f"WARNING: could not load right annotation "
-                f"{annotation_name}: {exc}"
-            )
-
-    if left_values is None and right_values is None:
-        print(f"WARNING: no usable data for {annotation_name}")
-        continue
-
-    # -------------------------------------------------------------
-    # Validate vertex counts
-    # -------------------------------------------------------------
-
-    left_coordinates, left_faces = surface_data["left"]
-    right_coordinates, right_faces = surface_data["right"]
-
-    if (
-        left_values is not None
-        and len(left_values) != len(left_coordinates)
-    ):
-        print(
-            f"WARNING: skipping left hemisphere for "
-            f"{annotation_name}: "
-            f"{len(left_values)} values vs "
-            f"{len(left_coordinates)} vertices"
+    for hemisphere in ("left", "right"):
+        surface_name, surface_url = get_anatomical_surface(
+            space,
+            density,
+            hemisphere,
         )
+
+        print(
+            f"  {hemisphere}: using {surface_name} surface"
+        )
+
+        try:
+            coordinates, faces = load_surface(
+                surface_url,
+                f"{space_name}_{density}_{surface_name}_{hemisphere}",
+            )
+
+            surfaces[hemisphere] = {
+                "coordinates": coordinates,
+                "faces": faces,
+                "surface_name": surface_name,
+            }
+
+        except Exception as exc:
+            print(
+                f"  ERROR loading {hemisphere} surface: {exc}"
+            )
+
+    if "left" not in surfaces or "right" not in surfaces:
+        print(
+            f"Skipping {density}: both hemispheres are required."
+        )
+        return
+
+    # -------------------------------------------------------------
+    # Figure dimensions.
+    # -------------------------------------------------------------
+
+    n_pairs = len(annotations)
+    n_rows = int(np.ceil(n_pairs / N_PAIRS_PER_ROW))
+
+    fig_width = N_PAIRS_PER_ROW * PAIR_WIDTH
+    fig_height = n_rows * PAIR_HEIGHT
+
+    fig = plt.figure(
+        figsize=(fig_width, fig_height),
+        constrained_layout=False,
+    )
+
+    outer = fig.add_gridspec(
+        n_rows,
+        N_PAIRS_PER_ROW,
+        wspace=0.02,
+        hspace=0.12,
+    )
+
+    cmap_categorical = colormaps["tab20"]
+    cmap_continuous = colormaps["viridis"]
+
+    # -------------------------------------------------------------
+    # Plot each annotation pair.
+    # -------------------------------------------------------------
+
+    for index, (annotation_name, annotation_data) in enumerate(
+        annotations
+    ):
+        row = index // N_PAIRS_PER_ROW
+        col = index % N_PAIRS_PER_ROW
+
+        pair_grid = outer[row, col].subgridspec(
+            2,
+            2,
+            height_ratios=[0.15, 1],
+            wspace=0.01,
+            hspace=0.01,
+        )
+
+        title_ax = fig.add_subplot(pair_grid[0, :])
+
+        left_ax = fig.add_subplot(
+            pair_grid[1, 0],
+            projection="3d",
+        )
+
+        right_ax = fig.add_subplot(
+            pair_grid[1, 1],
+            projection="3d",
+        )
+
+        title_ax.axis("off")
+
+        title_ax.text(
+            0.5,
+            0.5,
+            annotation_name,
+            ha="center",
+            va="center",
+            fontsize=10,
+            fontweight="bold",
+        )
+
+        left_url = get_annotation_hemisphere(
+            annotation_data,
+            "left",
+        )
+
+        right_url = get_annotation_hemisphere(
+            annotation_data,
+            "right",
+        )
+
         left_values = None
-
-    if (
-        right_values is not None
-        and len(right_values) != len(right_coordinates)
-    ):
-        print(
-            f"WARNING: skipping right hemisphere for "
-            f"{annotation_name}: "
-            f"{len(right_values)} values vs "
-            f"{len(right_coordinates)} vertices"
-        )
         right_values = None
 
-    if left_values is None and right_values is None:
-        continue
+        # ---------------------------------------------------------
+        # Load annotation data.
+        # ---------------------------------------------------------
 
-    # -------------------------------------------------------------
-    # Shared color scale for the L/R pair
-    # -------------------------------------------------------------
+        if left_url is not None:
+            try:
+                left_values = load_annotation(
+                    left_url,
+                    f"{space_name}_{density}_{annotation_name}_left",
+                    len(surfaces["left"]["coordinates"]),
+                )
+            except Exception as exc:
+                print(
+                    f"  ERROR loading "
+                    f"{annotation_name} left: {exc}"
+                )
 
-    valid_values = []
+        if right_url is not None:
+            try:
+                right_values = load_annotation(
+                    right_url,
+                    f"{space_name}_{density}_{annotation_name}_right",
+                    len(surfaces["right"]["coordinates"]),
+                )
+            except Exception as exc:
+                print(
+                    f"  ERROR loading "
+                    f"{annotation_name} right: {exc}"
+                )
 
-    if left_values is not None:
-        valid_values.append(
-            left_values[np.isfinite(left_values)]
+        # ---------------------------------------------------------
+        # Select colormap.
+        # ---------------------------------------------------------
+
+        categorical = False
+
+        if left_values is not None:
+            categorical = annotation_is_categorical(
+                annotation_name,
+                left_values,
+            )
+
+        if right_values is not None:
+            categorical = categorical or annotation_is_categorical(
+                annotation_name,
+                right_values,
+            )
+
+        cmap = (
+            cmap_categorical
+            if categorical
+            else cmap_continuous
         )
 
-    if right_values is not None:
-        valid_values.append(
-            right_values[np.isfinite(right_values)]
-        )
+        # ---------------------------------------------------------
+        # Plot left hemisphere.
+        # ---------------------------------------------------------
 
-    if not valid_values:
-        continue
+        try:
+            if left_values is not None:
+                plotting.plot_surf_roi(
+                    (
+                        surfaces["left"]["coordinates"],
+                        surfaces["left"]["faces"],
+                    ),
+                    roi_map=left_values,
+                    hemi="left",
+                    view="lateral",
+                    bg_on_data=True,
+                    darkness=0.5,
+                    cmap=cmap,
+                    colorbar=False,
+                    axes=left_ax,
+                )
+            else:
+                left_ax.set_axis_off()
 
-    all_values = np.concatenate(valid_values)
+        except Exception as exc:
+            print(
+                f"  ERROR plotting "
+                f"{annotation_name} left: {exc}"
+            )
+            left_ax.set_axis_off()
 
-    vmin = float(np.min(all_values))
-    vmax = float(np.max(all_values))
+        # ---------------------------------------------------------
+        # Plot right hemisphere.
+        # ---------------------------------------------------------
 
-    if vmin == vmax:
-        vmax = vmin + 1
+        try:
+            if right_values is not None:
+                plotting.plot_surf_roi(
+                    (
+                        surfaces["right"]["coordinates"],
+                        surfaces["right"]["faces"],
+                    ),
+                    roi_map=right_values,
+                    hemi="right",
+                    view="lateral",
+                    bg_on_data=True,
+                    darkness=0.5,
+                    cmap=cmap,
+                    colorbar=False,
+                    axes=right_ax,
+                )
+            else:
+                right_ax.set_axis_off()
 
-    norm = Normalize(
-        vmin=vmin,
-        vmax=vmax,
+        except Exception as exc:
+            print(
+                f"  ERROR plotting "
+                f"{annotation_name} right: {exc}"
+            )
+            right_ax.set_axis_off()
+
+    # -------------------------------------------------------------
+    # Save figure.
+    # -------------------------------------------------------------
+
+    output_path = (
+        REPO_ROOT
+        / "examples"
+        / f"visualize_{space_name}_{density}_annotations.png"
     )
 
-    cmap = cm.get_cmap("tab20")
-
-    # -------------------------------------------------------------
-    # Create one annotation pair
-    # -------------------------------------------------------------
-
-    pair = outer[row, col].subgridspec(
-        2,
-        3,
-        height_ratios=[0.25, 1],
-        width_ratios=[1, 1, 0.12],
-        wspace=0.01,
-        hspace=0.01,
+    fig.savefig(
+        output_path,
+        dpi=200,
+        bbox_inches="tight",
     )
 
-    # -------------------------------------------------------------
-    # Annotation label
-    # -------------------------------------------------------------
+    plt.close(fig)
 
-    title_ax = fig.add_subplot(pair[0, :])
-    title_ax.axis("off")
-
-    title_ax.text(
-        0.5,
-        0.45,
-        annotation_name,
-        ha="center",
-        va="center",
-        fontsize=10,
-        fontweight="bold",
-    )
-
-    # -------------------------------------------------------------
-    # Left hemisphere
-    # -------------------------------------------------------------
-
-    left_ax = fig.add_subplot(
-        pair[1, 0],
-        projection="3d",
-    )
-
-    if left_values is not None:
-        plotting.plot_surf_roi(
-            (left_coordinates, left_faces),
-            roi_map=left_values,
-            hemi="left",
-            view="lateral",
-            cmap="tab20",
-            vmin=vmin,
-            vmax=vmax,
-            colorbar=False,
-            bg_map=None,
-            axes=left_ax,
-        )
-    else:
-        left_ax.axis("off")
-
-    # -------------------------------------------------------------
-    # Right hemisphere
-    # -------------------------------------------------------------
-
-    right_ax = fig.add_subplot(
-        pair[1, 1],
-        projection="3d",
-    )
-
-    if right_values is not None:
-        plotting.plot_surf_roi(
-            (right_coordinates, right_faces),
-            roi_map=right_values,
-            hemi="right",
-            view="lateral",
-            cmap="tab20",
-            vmin=vmin,
-            vmax=vmax,
-            colorbar=False,
-            bg_map=None,
-            axes=right_ax,
-        )
-    else:
-        right_ax.axis("off")
-
-    # -------------------------------------------------------------
-    # One shared color bar
-    # -------------------------------------------------------------
-
-    colorbar_ax = fig.add_subplot(pair[1, 2])
-
-    scalar_mappable = cm.ScalarMappable(
-        norm=norm,
-        cmap=cmap,
-    )
-
-    scalar_mappable.set_array(all_values)
-
-    colorbar = fig.colorbar(
-        scalar_mappable,
-        cax=colorbar_ax,
-    )
-
-    colorbar.ax.tick_params(
-        labelsize=6,
-        pad=1,
-    )
-
-    # Keep integer labels for categorical annotations where
-    # there are a manageable number of unique values.
-    if np.all(np.isclose(all_values, np.round(all_values))):
-        integer_values = np.unique(
-            np.round(all_values).astype(int)
-        )
-
-        if len(integer_values) <= 20:
-            colorbar.set_ticks(integer_values)
-
-    colorbar.outline.set_linewidth(0.5)
+    print(f"Saved: {output_path}")
 
 
 # ---------------------------------------------------------------------
-# Overall title
+# Main
 # ---------------------------------------------------------------------
 
-fig.suptitle(
-    f"{SPACE_NAME} — {DENSITY} annotations",
-    fontsize=16,
-    fontweight="bold",
-    y=0.995,
-)
+def main():
+    if len(sys.argv) != 2:
+        print(
+            "Usage:\n"
+            "  python3 examples/visualize-annotations.py SPACE\n\n"
+            "Example:\n"
+            "  python3 examples/visualize-annotations.py Yerkes19"
+        )
+        sys.exit(1)
+
+    space_name = sys.argv[1]
+
+    space = get_space_yaml(space_name)
+
+    resolutions = get_surface_resolutions(space)
+
+    if not resolutions:
+        raise ValueError(
+            f"No surface resolutions with annotations found "
+            f"for {space_name}."
+        )
+
+    print(f"Space: {space_name}")
+    print(
+        f"Surface resolutions: {', '.join(resolutions)}"
+    )
+
+    for density in resolutions:
+        plot_resolution(
+            space_name,
+            space,
+            density,
+        )
 
 
-# ---------------------------------------------------------------------
-# Save
-# ---------------------------------------------------------------------
-
-plt.savefig(
-    OUTPUT_FILE,
-    dpi=300,
-    bbox_inches="tight",
-    facecolor="white",
-)
-
-plt.close(fig)
-
-print("\nSaved visualization to:")
-print(OUTPUT_FILE)
+if __name__ == "__main__":
+    main()
