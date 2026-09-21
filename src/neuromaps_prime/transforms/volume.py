@@ -151,8 +151,15 @@ def label_surface_project(
     """
     final_path = Path(out_fpath)
 
+    # Label needs to be converted to Workbench format for mapping
+    wb_volume = workbench.volume_label_import(
+        input_=volume,
+        label_list_file="",  # Not provided (too prescriptive for use case)
+        output="wb_label.nii.gz",
+    )
+
     projected_vol = workbench.volume_label_to_surface_mapping(
-        volume=volume,
+        volume=wb_volume.output,
         surface=surface,
         ribbon_constrained=ribbon_surfs,
         label_out=final_path.name,

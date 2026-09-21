@@ -214,18 +214,27 @@ class TestVolumeToSurfaceProjection:
 
     def test_label_surface_project(self, mock_paths: Vol2SurfOutput) -> None:
         """Test label volume-to-surface projection."""
-        with patch(
-            "neuromaps_prime.transforms.volume.workbench.volume_label_to_surface_mapping",
-            side_effect=fake_workbench_result(
-                mock_paths.output, MagicMock(label_out=mock_paths.output)
-            ),
-        ) as mock_wb:
+        with (
+            patch(
+                "neuromaps_prime.transforms.volume.workbench.volume_label_import",
+                return_value=MagicMock(output=mock_paths.volume),
+            ) as mock_import,
+            patch(
+                "neuromaps_prime.transforms.volume.workbench.volume_label_to_surface_mapping",
+                side_effect=fake_workbench_result(
+                    mock_paths.output, MagicMock(label_out=mock_paths.output)
+                ),
+            ) as mock_wb,
+        ):
             result = label_surface_project(
                 volume=mock_paths.volume,
                 surface=mock_paths.surface,
                 ribbon_surfs=mock_paths.ribbon_surfs,
                 out_fpath=mock_paths.output,
             )
+        mock_import.assert_called_once_with(
+            input_=mock_paths.volume, label_list_file="", output="wb_label.nii.gz"
+        )
         mock_wb.assert_called_once_with(
             volume=mock_paths.volume,
             surface=mock_paths.surface,
