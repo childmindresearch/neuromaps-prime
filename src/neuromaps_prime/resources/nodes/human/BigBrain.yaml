@@ -4,6 +4,10 @@
 BigBrain:
   species: human
   description: BigBrain Human Template
+  references:
+  - citation: Fischl, B, et al. 1999. Human Brain Mapping, 8(4):272–284
+    doi: 10.1126/science.1235381
+    url: https://pubmed.ncbi.nlm.nih.gov/23788795/
   surfaces:
     164k:
       white:
