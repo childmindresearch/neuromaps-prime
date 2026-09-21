@@ -1,38 +1,27 @@
-"""Visualize the Yerkes19 PC_Yeo17Networks annotation on 10k midthickness."""
+"""Visualize all Yerkes19 10k annotations on midthickness surfaces."""
 
 from pathlib import Path
-import hashlib
+import math
 import tempfile
+import urllib.request
 
-import nibabel as nib
 import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.colors import Normalize
+import nibabel as nib
 import numpy as np
-import requests
+import yaml
 from nilearn import plotting
 
 
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # Configuration
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-NODE_DIR = (
-    REPO_ROOT
-    / "src"
-    / "neuromaps_prime"
-    / "resources"
-    / "nodes"
-)
-
 SPACE_NAME = "Yerkes19"
 DENSITY = "10k"
-ANNOTATION_NAME = "PC_Yeo17Networks"
-
-OUTPUT_FILE = (
-    REPO_ROOT
-    / f"visualize_{SPACE_NAME}_{ANNOTATION_NAME}_{DENSITY}.png"
-)
 
 SURFACE_PRIORITY = [
     "midthickness",
@@ -42,378 +31,549 @@ SURFACE_PRIORITY = [
     "sphere",
 ]
 
+OUTPUT_FILE = REPO_ROOT / f"visualize_{SPACE_NAME}_{DENSITY}_annotations.png"
+
+# Four L/R annotation pairs across.
+N_PAIRS_PER_ROW = 4
+
 CACHE_DIR = Path(tempfile.gettempdir()) / "neuromaps_prime_visualize"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# ---------------------------------------------------------------------------
-# YAML loading
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# YAML resource
+# ---------------------------------------------------------------------
 
-def find_yaml(space_name):
-    """Find the YAML file containing the requested space."""
-    matches = list(NODE_DIR.rglob(f"{space_name}.yaml"))
-
-    if not matches:
-        raise FileNotFoundError(
-            f"Could not find YAML for {space_name} under {NODE_DIR}"
-        )
-
-    return matches[0]
-
-
-def load_yaml(path):
-    """Load YAML."""
-    import yaml
-
-    with path.open() as f:
-        return yaml.safe_load(f)
+NODE_FILE = (
+    REPO_ROOT
+    / "src"
+    / "neuromaps_prime"
+    / "resources"
+    / "nodes"
+    / "macaque"
+    / f"{SPACE_NAME}.yaml"
+)
 
 
-# ---------------------------------------------------------------------------
-# Download/cache helpers
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# Download helpers
+# ---------------------------------------------------------------------
 
-def detect_extension(data, content_type=""):
-    """Detect the file type from bytes, falling back to Content-Type."""
-    # GIFTI files are XML.
-    if data[:100].lstrip().startswith(b"<?xml"):
-        return ".gii"
+def download_file(url: str, name: str) -> Path:
+    """Download a remote file and cache it locally."""
+    path = CACHE_DIR / name
 
-    if b"<GIFTI" in data[:1000]:
-        return ".gii"
+    if path.exists() and path.stat().st_size > 0:
+        return path
 
-    # NIfTI gzip.
-    if data[:2] == b"\x1f\x8b":
-        return ".nii.gz"
+    print(f"Downloading {url}")
 
-    # NIfTI magic.
-    if len(data) >= 348:
-        if data[344:348] in (b"n+1\x00", b"ni1\x00"):
-            return ".nii"
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Mozilla/5.0"},
+    )
 
-    content_type = content_type.lower()
+    with urllib.request.urlopen(request) as response:
+        data = response.read()
+        content_type = response.headers.get("Content-Type", "")
 
-    if "gifti" in content_type:
-        return ".gii"
+    # OSF frequently returns GIFTI files as application/octet-stream.
+    is_gifti = (
+        "gifti" in content_type.lower()
+        or data.lstrip().startswith(b"<?xml")
+        or b"<GIFTI" in data[:5000]
+    )
 
-    if "nifti" in content_type:
-        return ".nii"
+    if is_gifti and path.suffix.lower() != ".gii":
+        path = path.with_suffix(".gii")
 
-    return ""
+    tmp_path = path.with_suffix(path.suffix + ".tmp")
 
+    with open(tmp_path, "wb") as f:
+        f.write(data)
 
-def download_file(url):
-    """Download a remote resource and cache it locally."""
-    key = hashlib.sha256(url.encode()).hexdigest()
+    tmp_path.replace(path)
 
-    # Reuse an existing cached file.
-    for extension in (".gii", ".nii.gz", ".nii"):
-        cached = CACHE_DIR / f"{key}{extension}"
-
-        if cached.exists():
-            return cached
-
-    print(f"Downloading: {url}")
-
-    response = requests.get(url, timeout=120)
-    response.raise_for_status()
-
-    content_type = response.headers.get("Content-Type", "")
-    data = response.content
-
-    extension = detect_extension(data, content_type)
-
-    if not extension:
-        raise RuntimeError(
-            f"Could not determine file type for:\n"
-            f"{url}\n"
-            f"Content-Type: {content_type}"
-        )
-
-    print(f"  Content-Type: {content_type}")
-    print(f"  Detected format: {extension}")
-
-    cached = CACHE_DIR / f"{key}{extension}"
-    cached.write_bytes(data)
-
-    print(f"  Cached at: {cached}")
-
-    return cached
+    return path
 
 
-# ---------------------------------------------------------------------------
-# GIFTI helpers
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# GIFTI loading
+# ---------------------------------------------------------------------
 
-def load_gifti_data(path):
-    """Load the first data array from a GIFTI file."""
-    image = nib.load(str(path))
-
-    if not isinstance(image, nib.gifti.GiftiImage):
-        raise TypeError(
-            f"Expected GIFTI image, got {type(image)}"
-        )
-
-    if not image.darrays:
-        raise ValueError(
-            f"No data arrays found in {path}"
-        )
-
-    return np.asarray(image.darrays[0].data)
-
-
-def load_surface(url):
-    """Download and load a GIFTI surface."""
-    path = download_file(url)
+def load_surface(url: str, name: str):
+    """Load GIFTI surface coordinates and triangle indices."""
+    path = download_file(url, f"{name}.gii")
 
     image = nib.load(str(path))
 
-    if not isinstance(image, nib.gifti.GiftiImage):
-        raise TypeError(
-            f"Expected GIFTI surface, got {type(image)}"
-        )
-
-    coords = None
-    faces = None
+    coordinates = None
+    triangles = None
 
     for darray in image.darrays:
-        if (
-            darray.intent
-            == nib.nifti1.intent_codes["NIFTI_INTENT_POINTSET"]
-        ):
-            coords = np.asarray(darray.data)
+        data = np.asarray(darray.data)
 
-        elif (
-            darray.intent
-            == nib.nifti1.intent_codes["NIFTI_INTENT_TRIANGLE"]
-        ):
-            faces = np.asarray(darray.data)
+        # Surface coordinates are N x 3.
+        if data.ndim == 2 and data.shape[1] == 3:
+            if coordinates is None:
+                coordinates = data
 
-    if coords is None:
+        # Triangle indices are M x 3 and integer-valued.
+        elif data.ndim == 2 and data.shape[1] == 3:
+            if (
+                np.issubdtype(data.dtype, np.integer)
+                and triangles is None
+            ):
+                triangles = data.astype(np.int32)
+
+    # Some GIFTI readers expose both as N x 3, so use the intent
+    # as a secondary signal when available.
+    if coordinates is None or triangles is None:
+        for darray in image.darrays:
+            data = np.asarray(darray.data)
+
+            intent = str(darray.intent).lower()
+
+            if (
+                coordinates is None
+                and data.ndim == 2
+                and data.shape[1] == 3
+                and (
+                    "point" in intent
+                    or "coord" in intent
+                    or darray.intent == 1008
+                )
+            ):
+                coordinates = data
+
+            if (
+                triangles is None
+                and data.ndim == 2
+                and data.shape[1] == 3
+                and (
+                    "triangle" in intent
+                    or "face" in intent
+                    or darray.intent == 1009
+                )
+            ):
+                triangles = data.astype(np.int32)
+
+    if coordinates is None or triangles is None:
+        print(f"\nCould not identify surface arrays in: {path}")
+
+        for i, darray in enumerate(image.darrays):
+            print(
+                f"  array {i}: "
+                f"intent={darray.intent!r}, "
+                f"shape={np.asarray(darray.data).shape}, "
+                f"dtype={np.asarray(darray.data).dtype}"
+            )
+
         raise ValueError(
-            f"No pointset found in surface: {path}"
+            f"Could not identify pointset and triangle arrays in {path}"
         )
 
-    if faces is None:
-        raise ValueError(
-            f"No triangle faces found in surface: {path}"
+    return coordinates, triangles
+
+
+def load_annotation(url: str, name: str):
+    """Load the first data array from a GIFTI annotation."""
+    path = download_file(url, f"{name}.gii")
+
+    image = nib.load(str(path))
+
+    if not image.darrays:
+        raise ValueError(f"No data arrays found in {path}")
+
+    return np.asarray(image.darrays[0].data).squeeze()
+
+
+# ---------------------------------------------------------------------
+# YAML loading
+# ---------------------------------------------------------------------
+
+def load_space_data():
+    """Load the Yerkes19 YAML resource directly."""
+    if not NODE_FILE.exists():
+        raise FileNotFoundError(
+            f"Could not find YAML resource:\n{NODE_FILE}"
         )
 
-    return coords, faces, path
+    with open(NODE_FILE, "r") as f:
+        data = yaml.safe_load(f)
+
+    if SPACE_NAME not in data:
+        raise KeyError(
+            f"{SPACE_NAME} not found in {NODE_FILE}"
+        )
+
+    return data[SPACE_NAME]
 
 
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # Surface selection
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------
 
-def select_surface(density_data, hemisphere):
-    """Select the highest-priority available surface."""
+def choose_surface(density_data, hemisphere):
+    """Choose the highest-priority available anatomical surface."""
     for surface_name in SURFACE_PRIORITY:
-        surface_data = density_data.get(surface_name)
+        surface = density_data.get(surface_name)
 
-        if not surface_data:
-            continue
-
-        url = surface_data.get(hemisphere)
-
-        if not url:
-            continue
-
-        print(
-            f"  {hemisphere}: {surface_name} → {url}"
-        )
-
-        coords, faces, path = load_surface(url)
-
-        return surface_name, coords, faces, path
-
-    raise RuntimeError(
-        f"No usable surface found for {hemisphere}"
-    )
-
-
-# ---------------------------------------------------------------------------
-# Main visualization
-# ---------------------------------------------------------------------------
-
-def main():
-    yaml_path = find_yaml(SPACE_NAME)
-    node = load_yaml(yaml_path)
-
-    if SPACE_NAME not in node:
-        raise KeyError(
-            f"{SPACE_NAME} not found in {yaml_path}"
-        )
-
-    space = node[SPACE_NAME]
-
-    print(f"Reading nodes from: {NODE_DIR}")
-    print(f"Target space: {SPACE_NAME}")
-    print()
-    print(f"Space:      {SPACE_NAME}")
-    print(f"Species:    {space.get('species')}")
-    print(f"YAML:       {yaml_path}")
-    print(f"Density:    {DENSITY}")
-    print(f"Annotation: {ANNOTATION_NAME}")
-    print()
-
-    surfaces = space["surfaces"]
-
-    if DENSITY not in surfaces:
-        raise KeyError(
-            f"Density {DENSITY!r} not found in {SPACE_NAME}"
-        )
-
-    density_data = surfaces[DENSITY]
-
-    annotations = density_data.get("annotation", {})
-
-    if ANNOTATION_NAME not in annotations:
-        available = ", ".join(annotations.keys())
-
-        raise KeyError(
-            f"{ANNOTATION_NAME!r} not found at "
-            f"{SPACE_NAME} → surfaces → {DENSITY} → annotation.\n\n"
-            f"Available annotations:\n{available}"
-        )
-
-    annotation = annotations[ANNOTATION_NAME]
-
-    hemisphere_data = {}
-
-    # -----------------------------------------------------------------------
-    # Load left and right hemisphere surfaces + annotation
-    # -----------------------------------------------------------------------
-
-    for hemisphere in ("left", "right"):
-        if hemisphere not in annotation:
-            raise KeyError(
-                f"{ANNOTATION_NAME} has no {hemisphere} annotation."
-            )
-
-        (
-            surface_name,
-            coords,
-            faces,
-            surface_path,
-        ) = select_surface(
-            density_data,
-            hemisphere,
-        )
-
-        annotation_url = annotation[hemisphere]
-
-        print(
-            f"  {hemisphere}: loading {ANNOTATION_NAME}"
-        )
-
-        annotation_path = download_file(annotation_url)
-
-        annotation_data = load_gifti_data(
-            annotation_path
-        )
-
-        print(
-            f"    surface vertices:    {len(coords)}"
-        )
-        print(
-            f"    annotation vertices: {len(annotation_data)}"
-        )
-
-        if len(annotation_data) != len(coords):
-            raise ValueError(
-                f"Vertex-count mismatch for {hemisphere}:\n"
-                f"  surface:    {len(coords)} vertices\n"
-                f"  annotation: {len(annotation_data)} vertices"
-            )
-
-        hemisphere_data[hemisphere] = {
-            "coords": coords,
-            "faces": faces,
-            "annotation": annotation_data,
-            "surface_name": surface_name,
-            "surface_path": surface_path,
-        }
-
-    # -----------------------------------------------------------------------
-    # Plot
-    # -----------------------------------------------------------------------
-
-    fig = plt.figure(figsize=(14, 7))
-
-    for index, hemisphere in enumerate(
-        ("left", "right"),
-        start=1,
-    ):
-        data = hemisphere_data[hemisphere]
-
-        ax = fig.add_subplot(
-            1,
-            2,
-            index,
-            projection="3d",
-        )
-
-        roi = np.asarray(
-            data["annotation"]
-        )
-
-        # Handle floating-point annotations containing NaN/Inf.
-        if np.issubdtype(
-            roi.dtype,
-            np.floating,
+        if (
+            isinstance(surface, dict)
+            and hemisphere in surface
+            and surface[hemisphere]
         ):
-            roi = np.nan_to_num(
-                roi,
-                nan=0,
-                posinf=0,
-                neginf=0,
+            return surface_name, surface[hemisphere]
+
+    raise ValueError(
+        f"No anatomical surface found for {hemisphere}. "
+        f"Tried: {SURFACE_PRIORITY}"
+    )
+
+
+# ---------------------------------------------------------------------
+# Load YAML
+# ---------------------------------------------------------------------
+
+space = load_space_data()
+
+surfaces_data = space.get("surfaces", {})
+
+if DENSITY not in surfaces_data:
+    raise ValueError(
+        f"{SPACE_NAME} does not contain density {DENSITY}"
+    )
+
+density_data = surfaces_data[DENSITY]
+
+annotations = density_data.get("annotation", {})
+
+if not annotations:
+    raise ValueError(
+        f"No annotations found under "
+        f"{SPACE_NAME} -> surfaces -> {DENSITY} -> annotation"
+    )
+
+print(f"Found {len(annotations)} annotations:")
+
+for annotation_name in annotations:
+    print(f"  - {annotation_name}")
+
+
+# ---------------------------------------------------------------------
+# Load anatomical surfaces once
+# ---------------------------------------------------------------------
+
+surface_data = {}
+
+for hemisphere in ("left", "right"):
+    surface_name, surface_url = choose_surface(
+        density_data,
+        hemisphere,
+    )
+
+    print(
+        f"Using {surface_name} surface for "
+        f"{hemisphere} hemisphere"
+    )
+
+    surface_data[hemisphere] = load_surface(
+        surface_url,
+        f"{SPACE_NAME}_{DENSITY}_{surface_name}_{hemisphere}",
+    )
+
+
+# ---------------------------------------------------------------------
+# Figure layout
+#
+# Four complete annotation pairs per row:
+#
+#   [ L | R | CB ] [ L | R | CB ] [ L | R | CB ] [ L | R | CB ]
+#
+# ---------------------------------------------------------------------
+
+annotation_items = list(annotations.items())
+
+n_annotations = len(annotation_items)
+n_rows = math.ceil(n_annotations / N_PAIRS_PER_ROW)
+
+fig = plt.figure(
+    figsize=(22, n_rows * 5.0),
+    facecolor="white",
+)
+
+outer = fig.add_gridspec(
+    n_rows,
+    N_PAIRS_PER_ROW,
+    wspace=0.08,
+    hspace=0.28,
+)
+
+
+# ---------------------------------------------------------------------
+# Plot each annotation
+# ---------------------------------------------------------------------
+
+for index, (annotation_name, annotation_data) in enumerate(
+    annotation_items
+):
+
+    row = index // N_PAIRS_PER_ROW
+    col = index % N_PAIRS_PER_ROW
+
+    print(f"\nProcessing {annotation_name}")
+
+    left_url = annotation_data.get("left")
+    right_url = annotation_data.get("right")
+
+    left_values = None
+    right_values = None
+
+    # -------------------------------------------------------------
+    # Load left annotation
+    # -------------------------------------------------------------
+
+    if left_url:
+        try:
+            left_values = load_annotation(
+                left_url,
+                f"{SPACE_NAME}_{DENSITY}_{annotation_name}_left",
+            )
+        except Exception as exc:
+            print(
+                f"WARNING: could not load left annotation "
+                f"{annotation_name}: {exc}"
             )
 
-        roi = roi.astype(int)
+    # -------------------------------------------------------------
+    # Load right annotation
+    # -------------------------------------------------------------
 
-        plotting.plot_surf_roi(
-            surf_mesh=(
-                data["coords"],
-                data["faces"],
-            ),
-            roi_map=roi,
-            hemi=(
-                "left"
-                if hemisphere == "left"
-                else "right"
-            ),
-            view="lateral",
-            bg_map=None,
-            cmap="tab20",
-            axes=ax,
-            colorbar=True,
-            title=(
-                f"{hemisphere.capitalize()} hemisphere\n"
-                f"{ANNOTATION_NAME}"
-            ),
+    if right_url:
+        try:
+            right_values = load_annotation(
+                right_url,
+                f"{SPACE_NAME}_{DENSITY}_{annotation_name}_right",
+            )
+        except Exception as exc:
+            print(
+                f"WARNING: could not load right annotation "
+                f"{annotation_name}: {exc}"
+            )
+
+    if left_values is None and right_values is None:
+        print(f"WARNING: no usable data for {annotation_name}")
+        continue
+
+    # -------------------------------------------------------------
+    # Validate vertex counts
+    # -------------------------------------------------------------
+
+    left_coordinates, left_faces = surface_data["left"]
+    right_coordinates, right_faces = surface_data["right"]
+
+    if (
+        left_values is not None
+        and len(left_values) != len(left_coordinates)
+    ):
+        print(
+            f"WARNING: skipping left hemisphere for "
+            f"{annotation_name}: "
+            f"{len(left_values)} values vs "
+            f"{len(left_coordinates)} vertices"
+        )
+        left_values = None
+
+    if (
+        right_values is not None
+        and len(right_values) != len(right_coordinates)
+    ):
+        print(
+            f"WARNING: skipping right hemisphere for "
+            f"{annotation_name}: "
+            f"{len(right_values)} values vs "
+            f"{len(right_coordinates)} vertices"
+        )
+        right_values = None
+
+    if left_values is None and right_values is None:
+        continue
+
+    # -------------------------------------------------------------
+    # Shared color scale for the L/R pair
+    # -------------------------------------------------------------
+
+    valid_values = []
+
+    if left_values is not None:
+        valid_values.append(
+            left_values[np.isfinite(left_values)]
         )
 
-    fig.suptitle(
-        f"{SPACE_NAME} — {ANNOTATION_NAME}\n"
-        f"{DENSITY} {hemisphere_data['left']['surface_name']} surface",
-        fontsize=16,
+    if right_values is not None:
+        valid_values.append(
+            right_values[np.isfinite(right_values)]
+        )
+
+    if not valid_values:
+        continue
+
+    all_values = np.concatenate(valid_values)
+
+    vmin = float(np.min(all_values))
+    vmax = float(np.max(all_values))
+
+    if vmin == vmax:
+        vmax = vmin + 1
+
+    norm = Normalize(
+        vmin=vmin,
+        vmax=vmax,
     )
 
-    fig.tight_layout()
+    cmap = cm.get_cmap("tab20")
 
-    fig.savefig(
-        OUTPUT_FILE,
-        dpi=300,
-        bbox_inches="tight",
+    # -------------------------------------------------------------
+    # Create one annotation pair
+    # -------------------------------------------------------------
+
+    pair = outer[row, col].subgridspec(
+        2,
+        3,
+        height_ratios=[0.25, 1],
+        width_ratios=[1, 1, 0.12],
+        wspace=0.01,
+        hspace=0.01,
     )
 
-    plt.close(fig)
+    # -------------------------------------------------------------
+    # Annotation label
+    # -------------------------------------------------------------
 
-    print()
-    print(f"Saved: {OUTPUT_FILE}")
+    title_ax = fig.add_subplot(pair[0, :])
+    title_ax.axis("off")
+
+    title_ax.text(
+        0.5,
+        0.45,
+        annotation_name,
+        ha="center",
+        va="center",
+        fontsize=10,
+        fontweight="bold",
+    )
+
+    # -------------------------------------------------------------
+    # Left hemisphere
+    # -------------------------------------------------------------
+
+    left_ax = fig.add_subplot(
+        pair[1, 0],
+        projection="3d",
+    )
+
+    if left_values is not None:
+        plotting.plot_surf_roi(
+            (left_coordinates, left_faces),
+            roi_map=left_values,
+            hemi="left",
+            view="lateral",
+            cmap="tab20",
+            vmin=vmin,
+            vmax=vmax,
+            colorbar=False,
+            bg_map=None,
+            axes=left_ax,
+        )
+    else:
+        left_ax.axis("off")
+
+    # -------------------------------------------------------------
+    # Right hemisphere
+    # -------------------------------------------------------------
+
+    right_ax = fig.add_subplot(
+        pair[1, 1],
+        projection="3d",
+    )
+
+    if right_values is not None:
+        plotting.plot_surf_roi(
+            (right_coordinates, right_faces),
+            roi_map=right_values,
+            hemi="right",
+            view="lateral",
+            cmap="tab20",
+            vmin=vmin,
+            vmax=vmax,
+            colorbar=False,
+            bg_map=None,
+            axes=right_ax,
+        )
+    else:
+        right_ax.axis("off")
+
+    # -------------------------------------------------------------
+    # One shared color bar
+    # -------------------------------------------------------------
+
+    colorbar_ax = fig.add_subplot(pair[1, 2])
+
+    scalar_mappable = cm.ScalarMappable(
+        norm=norm,
+        cmap=cmap,
+    )
+
+    scalar_mappable.set_array(all_values)
+
+    colorbar = fig.colorbar(
+        scalar_mappable,
+        cax=colorbar_ax,
+    )
+
+    colorbar.ax.tick_params(
+        labelsize=6,
+        pad=1,
+    )
+
+    # Keep integer labels for categorical annotations where
+    # there are a manageable number of unique values.
+    if np.all(np.isclose(all_values, np.round(all_values))):
+        integer_values = np.unique(
+            np.round(all_values).astype(int)
+        )
+
+        if len(integer_values) <= 20:
+            colorbar.set_ticks(integer_values)
+
+    colorbar.outline.set_linewidth(0.5)
 
 
-if __name__ == "__main__":
-    main()
+# ---------------------------------------------------------------------
+# Overall title
+# ---------------------------------------------------------------------
+
+fig.suptitle(
+    f"{SPACE_NAME} — {DENSITY} annotations",
+    fontsize=16,
+    fontweight="bold",
+    y=0.995,
+)
+
+
+# ---------------------------------------------------------------------
+# Save
+# ---------------------------------------------------------------------
+
+plt.savefig(
+    OUTPUT_FILE,
+    dpi=300,
+    bbox_inches="tight",
+    facecolor="white",
+)
+
+plt.close(fig)
+
+print("\nSaved visualization to:")
+print(OUTPUT_FILE)
