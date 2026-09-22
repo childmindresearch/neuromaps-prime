@@ -15,7 +15,33 @@ from nilearn import plotting
 # Repository paths
 # ---------------------------------------------------------------------------
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+def get_repo_root():
+    """Return the repository root from the current command-line location."""
+    current = Path.cwd().resolve()
+
+    for path in (current, *current.parents):
+        if (
+            (path / "pyproject.toml").exists()
+            and (path / "src" / "neuromaps_prime").exists()
+        ):
+            return path
+
+    # Fall back to the repository containing this script. This allows the
+    # script to work when invoked with an absolute path from elsewhere.
+    script_root = Path(__file__).resolve().parents[1]
+
+    if (
+        (script_root / "pyproject.toml").exists()
+        and (script_root / "src" / "neuromaps_prime").exists()
+    ):
+        return script_root
+
+    raise FileNotFoundError(
+        "Could not determine the neuromaps-prime repository root."
+    )
+
+
+REPO_ROOT = get_repo_root()
 SRC_ROOT = REPO_ROOT / "src"
 
 if str(SRC_ROOT) not in sys.path:
@@ -46,21 +72,57 @@ PAIR_HEIGHT = 4.8
 # ---------------------------------------------------------------------------
 
 def get_space_yaml(space_name):
-    """Load the YAML metadata for a space."""
-    yaml_path = (
+    """Find and load the YAML metadata for a space.
+
+    Spaces are discovered recursively under:
+        src/neuromaps_prime/resources/nodes/
+
+    This allows spaces to live in species-specific subdirectories such as
+    macaque, human, chimpanzee, etc.
+    """
+    resources_root = (
         REPO_ROOT
         / "src"
         / "neuromaps_prime"
         / "resources"
         / "nodes"
-        / "macaque"
-        / f"{space_name}.yaml"
     )
 
-    if not yaml_path.exists():
-        raise FileNotFoundError(
-            f"Could not find YAML metadata for {space_name}: {yaml_path}"
+    matches = sorted(
+        resources_root.rglob(f"{space_name}.yaml")
+    )
+
+    if not matches:
+        available = sorted(
+            path.stem
+            for path in resources_root.rglob("*.yaml")
         )
+
+        raise FileNotFoundError(
+            f"Could not find YAML metadata for space "
+            f"'{space_name}' under {resources_root}.\n"
+            f"Available spaces: {', '.join(available)}"
+        )
+
+    if len(matches) > 1:
+        locations = "\n".join(
+            f"  - {path.relative_to(resources_root)}"
+            for path in matches
+        )
+
+        raise ValueError(
+            f"Found multiple YAML files for space "
+            f"'{space_name}':\n"
+            f"{locations}\n"
+            "The space name must uniquely identify one YAML file."
+        )
+
+    yaml_path = matches[0]
+
+    print(
+        f"  Space metadata: "
+        f"{yaml_path.relative_to(resources_root)}"
+    )
 
     with yaml_path.open() as f:
         data = yaml.safe_load(f)
@@ -158,9 +220,7 @@ def load_surface(resource):
     path = resource.fetch()
 
     if is_png_path(path):
-        raise ValueError(
-            f"Skipping PNG resource: {path}"
-        )
+        raise ValueError(f"Skipping PNG resource: {path}")
 
     image = nib.load(str(path))
 
@@ -207,9 +267,7 @@ def load_annotation(resource, n_vertices):
     path = resource.fetch()
 
     if is_png_path(path):
-        raise ValueError(
-            f"Skipping PNG annotation: {path}"
-        )
+        raise ValueError(f"Skipping PNG annotation: {path}")
 
     image = nib.load(str(path))
 
@@ -218,11 +276,9 @@ def load_annotation(resource, n_vertices):
     for darray in image.darrays:
         data = np.asarray(darray.data)
 
-        # Standard one-dimensional surface annotation.
         if data.ndim == 1 and data.shape[0] == n_vertices:
             candidates.append(data)
 
-        # Shape: vertices x maps.
         elif data.ndim == 2 and data.shape[0] == n_vertices:
             print(
                 f"    {resource.name}: "
@@ -230,7 +286,6 @@ def load_annotation(resource, n_vertices):
             )
             candidates.append(data[:, 0])
 
-        # Shape: maps x vertices.
         elif data.ndim == 2 and data.shape[1] == n_vertices:
             print(
                 f"    {resource.name}: "
@@ -291,7 +346,6 @@ def plot_surface_map(
     cmap,
 ):
     """Plot either a categorical ROI map or a continuous surface map."""
-
     surface = (coordinates, faces)
 
     if categorical:
@@ -385,6 +439,15 @@ def plot_resolution(graph, space_name, space, density):
         constrained_layout=False,
     )
 
+    fig.suptitle(
+        f"{space_name} — {density} Surface Annotations",
+        fontsize=16,
+        fontweight="bold",
+        y=0.995,
+    )
+
+    fig.subplots_adjust(top=0.96)
+
     outer = fig.add_gridspec(
         n_rows,
         N_PAIRS_PER_ROW,
@@ -446,9 +509,7 @@ def plot_resolution(graph, space_name, space, density):
                 "left",
             )
         except Exception as exc:
-            print(
-                f"  ERROR fetching {label} left: {exc}"
-            )
+            print(f"  ERROR fetching {label} left: {exc}")
             left_resource = None
 
         try:
@@ -460,9 +521,7 @@ def plot_resolution(graph, space_name, space, density):
                 "right",
             )
         except Exception as exc:
-            print(
-                f"  ERROR fetching {label} right: {exc}"
-            )
+            print(f"  ERROR fetching {label} right: {exc}")
             right_resource = None
 
         # --------------------------------------------------------------
@@ -479,9 +538,7 @@ def plot_resolution(graph, space_name, space, density):
                     len(surfaces["left"]["coordinates"]),
                 )
             except Exception as exc:
-                print(
-                    f"  ERROR loading {label} left: {exc}"
-                )
+                print(f"  ERROR loading {label} left: {exc}")
 
         if right_resource is not None:
             try:
@@ -490,12 +547,8 @@ def plot_resolution(graph, space_name, space, density):
                     len(surfaces["right"]["coordinates"]),
                 )
             except Exception as exc:
-                print(
-                    f"  ERROR loading {label} right: {exc}"
-                )
+                print(f"  ERROR loading {label} right: {exc}")
 
-        # If neither hemisphere has a usable annotation, don't attempt
-        # to plot anything.
         if left_values is None and right_values is None:
             left_ax.set_axis_off()
             right_ax.set_axis_off()
@@ -544,9 +597,7 @@ def plot_resolution(graph, space_name, space, density):
                     cmap,
                 )
             except Exception as exc:
-                print(
-                    f"  ERROR plotting {label} left: {exc}"
-                )
+                print(f"  ERROR plotting {label} left: {exc}")
                 left_ax.set_axis_off()
         else:
             left_ax.set_axis_off()
@@ -567,9 +618,7 @@ def plot_resolution(graph, space_name, space, density):
                     cmap,
                 )
             except Exception as exc:
-                print(
-                    f"  ERROR plotting {label} right: {exc}"
-                )
+                print(f"  ERROR plotting {label} right: {exc}")
                 right_ax.set_axis_off()
         else:
             right_ax.set_axis_off()
@@ -621,9 +670,7 @@ def main():
         )
 
     print(f"Space: {space_name}")
-    print(
-        f"Surface resolutions: {', '.join(resolutions)}"
-    )
+    print(f"Surface resolutions: {', '.join(resolutions)}")
 
     for density in resolutions:
         plot_resolution(
