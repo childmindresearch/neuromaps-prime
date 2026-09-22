@@ -1,14 +1,7 @@
 """Visualize surface annotations on anatomical surfaces."""
 
-from collections import OrderedDict
 from pathlib import Path
 import sys
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-SRC_ROOT = REPO_ROOT / "src"
-
-if str(SRC_ROOT) not in sys.path:
-    sys.path.insert(0, str(SRC_ROOT))
 
 import matplotlib.pyplot as plt
 import nibabel as nib
@@ -17,12 +10,23 @@ import yaml
 from matplotlib import colormaps
 from nilearn import plotting
 
+
+# ---------------------------------------------------------------------------
+# Repository paths
+# ---------------------------------------------------------------------------
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SRC_ROOT = REPO_ROOT / "src"
+
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+
 from neuromaps_prime.graph import NeuromapsGraph
 
 
-# ---------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Plot configuration
+# ---------------------------------------------------------------------------
 
 SURFACE_PRIORITY = [
     "midthickness",
@@ -33,34 +37,16 @@ SURFACE_PRIORITY = [
 ]
 
 N_PAIRS_PER_ROW = 4
-
 PAIR_WIDTH = 5.2
 PAIR_HEIGHT = 4.8
 
 
-# ---------------------------------------------------------------------
-# Graph/resource helpers
-# ---------------------------------------------------------------------
-
-def get_graph():
-    """Initialize the NeuromapsGraph."""
-    return NeuromapsGraph()
-
-
-def get_node(graph, space_name):
-    """Get a graph node for a space."""
-    if space_name not in graph.nodes:
-        available = sorted(graph.nodes)
-        raise ValueError(
-            f"Space '{space_name}' was not found in the graph.\n"
-            f"Available spaces: {', '.join(available)}"
-        )
-
-    return graph.nodes[space_name]["data"]
-
+# ---------------------------------------------------------------------------
+# Space / YAML discovery
+# ---------------------------------------------------------------------------
 
 def get_space_yaml(space_name):
-    """Load the YAML definition for a space."""
+    """Load the YAML metadata for a space."""
     yaml_path = (
         REPO_ROOT
         / "src"
@@ -73,7 +59,7 @@ def get_space_yaml(space_name):
 
     if not yaml_path.exists():
         raise FileNotFoundError(
-            f"Could not find YAML for space '{space_name}': {yaml_path}"
+            f"Could not find YAML metadata for {space_name}: {yaml_path}"
         )
 
     with yaml_path.open() as f:
@@ -83,9 +69,8 @@ def get_space_yaml(space_name):
 
 
 def get_surface_resolutions(space):
-    """Return surface densities containing annotations."""
+    """Return surface resolutions that contain annotations."""
     surfaces = space.get("surfaces", {})
-
     resolutions = []
 
     for density, density_data in surfaces.items():
@@ -111,7 +96,7 @@ def get_surface_resolutions(space):
 
 
 def get_annotations(space, density):
-    """Return annotation labels for a surface density."""
+    """Return annotation names for a surface density."""
     density_data = space["surfaces"][density]
     annotations = density_data.get("annotation", {})
 
@@ -121,8 +106,17 @@ def get_annotations(space, density):
     return []
 
 
+# ---------------------------------------------------------------------------
+# Graph resources
+# ---------------------------------------------------------------------------
+
+def get_graph():
+    """Create the neuromaps graph."""
+    return NeuromapsGraph()
+
+
 def get_anatomical_surface(graph, space_name, density, hemisphere):
-    """Fetch the highest-priority anatomical surface for a hemisphere."""
+    """Find the highest-priority available anatomical surface."""
     for resource_type in SURFACE_PRIORITY:
         surface = graph.fetch_surface_atlas(
             space=space_name,
@@ -136,13 +130,12 @@ def get_anatomical_surface(graph, space_name, density, hemisphere):
 
     raise ValueError(
         f"No anatomical surface found for "
-        f"{space_name} {density} {hemisphere}. "
-        f"Tried: {', '.join(SURFACE_PRIORITY)}"
+        f"{space_name} {density} {hemisphere}"
     )
 
 
 def get_annotation(graph, space_name, label, density, hemisphere):
-    """Fetch a surface annotation resource."""
+    """Fetch an annotation resource through the project API."""
     return graph.fetch_surface_annotation(
         space=space_name,
         label=label,
@@ -151,13 +144,23 @@ def get_annotation(graph, space_name, label, density, hemisphere):
     )
 
 
-# ---------------------------------------------------------------------
-# File loading
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# GIFTI loading
+# ---------------------------------------------------------------------------
+
+def is_png_path(path):
+    """Return True when a fetched resource is a PNG."""
+    return Path(path).suffix.lower() == ".png"
+
 
 def load_surface(resource):
-    """Fetch and load a surface resource."""
+    """Load coordinates and faces from a GIFTI surface resource."""
     path = resource.fetch()
+
+    if is_png_path(path):
+        raise ValueError(
+            f"Skipping PNG resource: {path}"
+        )
 
     image = nib.load(str(path))
 
@@ -167,7 +170,6 @@ def load_surface(resource):
     for darray in image.darrays:
         data = np.asarray(darray.data)
 
-        # Surface coordinates.
         if (
             data.ndim == 2
             and data.shape[1] == 3
@@ -175,7 +177,6 @@ def load_surface(resource):
         ):
             coordinates = data
 
-        # Surface triangles.
         elif (
             data.ndim == 2
             and data.shape[1] == 3
@@ -185,20 +186,30 @@ def load_surface(resource):
 
     if coordinates is None:
         raise ValueError(
-            f"No surface coordinates found in {path}"
+            f"Could not find surface coordinates in {path}"
         )
 
     if faces is None:
         raise ValueError(
-            f"No surface triangles found in {path}"
+            f"Could not find surface faces in {path}"
         )
 
     return coordinates, faces
 
 
 def load_annotation(resource, n_vertices):
-    """Fetch and load a surface annotation."""
+    """
+    Load an annotation from a GIFTI resource.
+
+    Multi-map GIFTIs are reduced to their first map.
+    PNG resources are explicitly rejected.
+    """
     path = resource.fetch()
+
+    if is_png_path(path):
+        raise ValueError(
+            f"Skipping PNG annotation: {path}"
+        )
 
     image = nib.load(str(path))
 
@@ -207,43 +218,48 @@ def load_annotation(resource, n_vertices):
     for darray in image.darrays:
         data = np.asarray(darray.data)
 
-        # Standard one-dimensional annotation.
+        # Standard one-dimensional surface annotation.
         if data.ndim == 1 and data.shape[0] == n_vertices:
             candidates.append(data)
 
-        # Multi-map annotation:
-        # (vertices, maps)
+        # Shape: vertices x maps.
         elif data.ndim == 2 and data.shape[0] == n_vertices:
             print(
-                f"    {resource.name}: multi-map data "
-                f"{data.shape}; using map 0"
+                f"    {resource.name}: "
+                f"multi-map data {data.shape}; using map 0"
             )
             candidates.append(data[:, 0])
 
-        # Multi-map annotation:
-        # (maps, vertices)
+        # Shape: maps x vertices.
         elif data.ndim == 2 and data.shape[1] == n_vertices:
             print(
-                f"    {resource.name}: multi-map data "
-                f"{data.shape}; using map 0"
+                f"    {resource.name}: "
+                f"multi-map data {data.shape}; using map 0"
             )
             candidates.append(data[0, :])
 
     if not candidates:
         raise ValueError(
-            f"No annotation array with {n_vertices} vertices "
-            f"found in {path}"
+            f"Could not find annotation data with "
+            f"{n_vertices} vertices in {path}"
         )
 
     return np.asarray(candidates[0])
 
 
-# ---------------------------------------------------------------------
-# Annotation helpers
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Annotation classification
+# ---------------------------------------------------------------------------
 
 def annotation_is_categorical(name, values):
-    """Determine whether an annotation should use a categorical colormap."""
+    """
+    Determine whether an annotation should be plotted as ROI labels.
+
+    PC_* resources are atlas/parcellation-style annotations and are therefore
+    categorical. Other resources are treated as continuous unless their
+    values are explicitly integer-valued, non-negative, and have a small
+    number of unique labels.
+    """
     if name.startswith("PC_"):
         return True
 
@@ -255,16 +271,55 @@ def annotation_is_categorical(name, values):
     unique = np.unique(finite)
 
     return (
-        len(unique) <= 20
-        and np.allclose(unique, np.round(unique))
+        np.issubdtype(values.dtype, np.integer)
+        and len(unique) <= 20
+        and np.all(unique >= 0)
     )
 
 
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Plotting
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+
+def plot_surface_map(
+    ax,
+    coordinates,
+    faces,
+    values,
+    hemisphere,
+    categorical,
+    cmap,
+):
+    """Plot either a categorical ROI map or a continuous surface map."""
+
+    surface = (coordinates, faces)
+
+    if categorical:
+        plotting.plot_surf_roi(
+            surface,
+            roi_map=values,
+            hemi=hemisphere,
+            view="lateral",
+            bg_on_data=True,
+            cmap=cmap,
+            colorbar=False,
+            axes=ax,
+        )
+    else:
+        plotting.plot_surf_stat_map(
+            surface,
+            stat_map=values,
+            hemi=hemisphere,
+            view="lateral",
+            bg_on_data=True,
+            cmap=cmap,
+            colorbar=False,
+            axes=ax,
+        )
+
 
 def plot_resolution(graph, space_name, space, density):
+    """Create one annotation figure for a surface density."""
     annotations = get_annotations(space, density)
 
     if not annotations:
@@ -274,26 +329,26 @@ def plot_resolution(graph, space_name, space, density):
     print(f"\nProcessing {space_name} {density}")
     print(f"Found {len(annotations)} annotations")
 
-    # -------------------------------------------------------------
-    # Fetch anatomical surfaces through NeuromapsGraph.
-    # -------------------------------------------------------------
+    # ------------------------------------------------------------------
+    # Load anatomical surfaces independently for each hemisphere.
+    # ------------------------------------------------------------------
 
     surfaces = {}
 
     for hemisphere in ("left", "right"):
-        surface_resource = get_anatomical_surface(
-            graph,
-            space_name,
-            density,
-            hemisphere,
-        )
-
-        print(
-            f"  {hemisphere}: using "
-            f"{surface_resource.resource_type} surface"
-        )
-
         try:
+            surface_resource = get_anatomical_surface(
+                graph,
+                space_name,
+                density,
+                hemisphere,
+            )
+
+            print(
+                f"  {hemisphere}: "
+                f"using {surface_resource.resource_type} surface"
+            )
+
             coordinates, faces = load_surface(surface_resource)
 
             surfaces[hemisphere] = {
@@ -304,18 +359,20 @@ def plot_resolution(graph, space_name, space, density):
 
         except Exception as exc:
             print(
-                f"  ERROR loading {hemisphere} surface: {exc}"
+                f"  ERROR loading {hemisphere} anatomical surface: "
+                f"{exc}"
             )
 
     if "left" not in surfaces or "right" not in surfaces:
         print(
-            f"Skipping {density}: both hemispheres are required."
+            f"Skipping {density}: "
+            "both hemispheres are required."
         )
         return
 
-    # -------------------------------------------------------------
-    # Figure dimensions.
-    # -------------------------------------------------------------
+    # ------------------------------------------------------------------
+    # Figure layout.
+    # ------------------------------------------------------------------
 
     n_pairs = len(annotations)
     n_rows = int(np.ceil(n_pairs / N_PAIRS_PER_ROW))
@@ -338,9 +395,9 @@ def plot_resolution(graph, space_name, space, density):
     cmap_categorical = colormaps["tab20"]
     cmap_continuous = colormaps["viridis"]
 
-    # -------------------------------------------------------------
-    # Plot each annotation pair.
-    # -------------------------------------------------------------
+    # ------------------------------------------------------------------
+    # Plot every annotation.
+    # ------------------------------------------------------------------
 
     for index, label in enumerate(annotations):
         row = index // N_PAIRS_PER_ROW
@@ -355,13 +412,10 @@ def plot_resolution(graph, space_name, space, density):
         )
 
         title_ax = fig.add_subplot(pair_grid[0, :])
-
-        # Nilearn surface plotting requires 3D axes.
         left_ax = fig.add_subplot(
             pair_grid[1, 0],
             projection="3d",
         )
-
         right_ax = fig.add_subplot(
             pair_grid[1, 1],
             projection="3d",
@@ -379,25 +433,41 @@ def plot_resolution(graph, space_name, space, density):
             fontweight="bold",
         )
 
-        # ---------------------------------------------------------
-        # Fetch annotations through NeuromapsGraph.
-        # ---------------------------------------------------------
+        # --------------------------------------------------------------
+        # Fetch annotation resources.
+        # --------------------------------------------------------------
 
-        left_resource = get_annotation(
-            graph,
-            space_name,
-            label,
-            density,
-            "left",
-        )
+        try:
+            left_resource = get_annotation(
+                graph,
+                space_name,
+                label,
+                density,
+                "left",
+            )
+        except Exception as exc:
+            print(
+                f"  ERROR fetching {label} left: {exc}"
+            )
+            left_resource = None
 
-        right_resource = get_annotation(
-            graph,
-            space_name,
-            label,
-            density,
-            "right",
-        )
+        try:
+            right_resource = get_annotation(
+                graph,
+                space_name,
+                label,
+                density,
+                "right",
+            )
+        except Exception as exc:
+            print(
+                f"  ERROR fetching {label} right: {exc}"
+            )
+            right_resource = None
+
+        # --------------------------------------------------------------
+        # Load annotation values.
+        # --------------------------------------------------------------
 
         left_values = None
         right_values = None
@@ -410,8 +480,7 @@ def plot_resolution(graph, space_name, space, density):
                 )
             except Exception as exc:
                 print(
-                    f"  ERROR loading "
-                    f"{label} left: {exc}"
+                    f"  ERROR loading {label} left: {exc}"
                 )
 
         if right_resource is not None:
@@ -422,13 +491,19 @@ def plot_resolution(graph, space_name, space, density):
                 )
             except Exception as exc:
                 print(
-                    f"  ERROR loading "
-                    f"{label} right: {exc}"
+                    f"  ERROR loading {label} right: {exc}"
                 )
 
-        # ---------------------------------------------------------
-        # Select colormap.
-        # ---------------------------------------------------------
+        # If neither hemisphere has a usable annotation, don't attempt
+        # to plot anything.
+        if left_values is None and right_values is None:
+            left_ax.set_axis_off()
+            right_ax.set_axis_off()
+            continue
+
+        # --------------------------------------------------------------
+        # Determine map type.
+        # --------------------------------------------------------------
 
         categorical = False
 
@@ -439,9 +514,12 @@ def plot_resolution(graph, space_name, space, density):
             )
 
         if right_values is not None:
-            categorical = categorical or annotation_is_categorical(
-                label,
-                right_values,
+            categorical = (
+                categorical
+                or annotation_is_categorical(
+                    label,
+                    right_values,
+                )
             )
 
         cmap = (
@@ -450,67 +528,55 @@ def plot_resolution(graph, space_name, space, density):
             else cmap_continuous
         )
 
-        # ---------------------------------------------------------
-        # Plot left hemisphere.
-        # ---------------------------------------------------------
+        # --------------------------------------------------------------
+        # Left hemisphere.
+        # --------------------------------------------------------------
 
-        try:
-            if left_values is not None:
-                plotting.plot_surf_roi(
-                    (
-                        surfaces["left"]["coordinates"],
-                        surfaces["left"]["faces"],
-                    ),
-                    roi_map=left_values,
-                    hemi="left",
-                    view="lateral",
-                    bg_on_data=True,
-                    cmap=cmap,
-                    colorbar=False,
-                    axes=left_ax,
+        if left_values is not None:
+            try:
+                plot_surface_map(
+                    left_ax,
+                    surfaces["left"]["coordinates"],
+                    surfaces["left"]["faces"],
+                    left_values,
+                    "left",
+                    categorical,
+                    cmap,
                 )
-            else:
+            except Exception as exc:
+                print(
+                    f"  ERROR plotting {label} left: {exc}"
+                )
                 left_ax.set_axis_off()
-
-        except Exception as exc:
-            print(
-                f"  ERROR plotting "
-                f"{label} left: {exc}"
-            )
+        else:
             left_ax.set_axis_off()
 
-        # ---------------------------------------------------------
-        # Plot right hemisphere.
-        # ---------------------------------------------------------
+        # --------------------------------------------------------------
+        # Right hemisphere.
+        # --------------------------------------------------------------
 
-        try:
-            if right_values is not None:
-                plotting.plot_surf_roi(
-                    (
-                        surfaces["right"]["coordinates"],
-                        surfaces["right"]["faces"],
-                    ),
-                    roi_map=right_values,
-                    hemi="right",
-                    view="lateral",
-                    bg_on_data=True,
-                    cmap=cmap,
-                    colorbar=False,
-                    axes=right_ax,
+        if right_values is not None:
+            try:
+                plot_surface_map(
+                    right_ax,
+                    surfaces["right"]["coordinates"],
+                    surfaces["right"]["faces"],
+                    right_values,
+                    "right",
+                    categorical,
+                    cmap,
                 )
-            else:
+            except Exception as exc:
+                print(
+                    f"  ERROR plotting {label} right: {exc}"
+                )
                 right_ax.set_axis_off()
-
-        except Exception as exc:
-            print(
-                f"  ERROR plotting "
-                f"{label} right: {exc}"
-            )
+        else:
             right_ax.set_axis_off()
 
-    # -------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Save figure.
-    # -------------------------------------------------------------
+    # ------------------------------------------------------------------
 
     output_path = (
         REPO_ROOT
@@ -529,39 +595,34 @@ def plot_resolution(graph, space_name, space, density):
     print(f"Saved: {output_path}")
 
 
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Main
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 
 def main():
     if len(sys.argv) != 2:
         print(
-            "Usage:\n"
-            "  python3 examples/visualize-annotations.py SPACE\n\n"
-            "Example:\n"
-            "  python3 examples/visualize-annotations.py Yerkes19"
+            f"Usage: python {Path(sys.argv[0]).name} SPACE"
         )
         sys.exit(1)
 
     space_name = sys.argv[1]
 
     print("Initializing NeuromapsGraph...")
-    graph = get_graph()
 
-    # YAML is only used to discover the annotations/densities.
+    graph = get_graph()
     space = get_space_yaml(space_name)
 
     resolutions = get_surface_resolutions(space)
 
     if not resolutions:
         raise ValueError(
-            f"No surface annotations found for {space_name}."
+            f"No annotated surface resolutions found for {space_name}"
         )
 
     print(f"Space: {space_name}")
     print(
-        f"Surface resolutions: "
-        f"{', '.join(resolutions)}"
+        f"Surface resolutions: {', '.join(resolutions)}"
     )
 
     for density in resolutions:
