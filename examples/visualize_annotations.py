@@ -96,6 +96,18 @@ def load_annotation(resource: SurfaceAnnotation, n_vertices: int) -> np.ndarray:
     fetched = resource.fetch()
     data = load_data(fetched).array
 
+    if isinstance(data, tuple):
+        if data and all(
+            isinstance(values, np.ndarray) and values.shape == (n_vertices,)
+            for values in data
+        ):
+            logger.info("    %s: %d maps; using map 0", resource.name, len(data))
+            return data[0]
+
+        raise ValueError(
+            f"Could not find annotation data with {n_vertices} vertices in {fetched}"
+        )
+
     if data.ndim == 1 and data.shape[0] == n_vertices:
         return data
 
