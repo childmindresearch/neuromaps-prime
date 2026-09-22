@@ -315,6 +315,61 @@ def plot_surface_map(
         )
 
 
+def load_annotation_for_hemisphere(
+    graph: NeuromapsGraph,
+    space_name: str,
+    density: str,
+    label: str,
+    hemisphere: str,
+    n_vertices: int,
+) -> np.ndarray | None:
+    """Fetch and load an annotation for one hemisphere."""
+    try:
+        resource = graph.fetch_surface_annotation(
+            space=space_name, label=label, density=density, hemisphere=hemisphere
+        )
+    except (ValueError, TypeError, RuntimeError) as exc:
+        logger.error("  ERROR fetching %s %s: %s", label, hemisphere, exc)
+        return None
+
+    try:
+        return load_annotation(resource, n_vertices)
+    except (FileNotFoundError, OSError, ValueError, TypeError) as exc:
+        logger.error("  ERROR loading %s %s: %s", label, hemisphere, exc)
+        return None
+
+
+def plot_annotation_hemisphere(
+    ax: Axes3D,
+    coordinates: np.ndarray,
+    faces: np.ndarray,
+    values: np.ndarray | None,
+    hemisphere: str,
+    label: str,
+    *,
+    categorical: bool,
+    cmap: Colormap,
+) -> None:
+    """Plot an annotation for one hemisphere."""
+    if values is None:
+        ax.set_axis_off()
+        return
+
+    try:
+        plot_surface_map(
+            ax,
+            coordinates,
+            faces,
+            values,
+            hemisphere,
+            categorical=categorical,
+            cmap=cmap,
+        )
+    except (ValueError, TypeError, RuntimeError) as exc:
+        logger.error("  ERROR plotting %s %s: %s", label, hemisphere, exc)
+        ax.set_axis_off()
+
+
 def plot_resolution(
     graph: NeuromapsGraph, space_name: str, space: dict, density: str
 ) -> None:
@@ -408,52 +463,26 @@ def plot_resolution(
         )
 
         # --------------------------------------------------------------
-        # Fetch annotation resources.
+        # Fetch and load annotation values.
         # --------------------------------------------------------------
 
-        try:
-            left_resource = graph.fetch_surface_annotation(
-                space=space_name, label=label, density=density, hemisphere="left"
-            )
-        except (ValueError, TypeError, RuntimeError) as exc:
-            logger.error("  ERROR fetching %s left: %s", label, exc)
-            left_resource = None
+        left_values = load_annotation_for_hemisphere(
+            graph,
+            space_name,
+            density,
+            label,
+            "left",
+            len(surfaces["left"]["coordinates"]),
+        )
 
-        try:
-            right_resource = graph.fetch_surface_annotation(
-                space=space_name, label=label, density=density, hemisphere="right"
-            )
-        except (ValueError, TypeError, RuntimeError) as exc:
-            logger.error("  ERROR fetching %s right: %s", label, exc)
-            right_resource = None
-
-        # --------------------------------------------------------------
-        # Load annotation values.
-        # --------------------------------------------------------------
-
-        left_values = None
-        right_values = None
-
-        if left_resource is not None:
-            try:
-                left_values = load_annotation(
-                    left_resource, len(surfaces["left"]["coordinates"])
-                )
-            except (FileNotFoundError, OSError, ValueError, TypeError) as exc:
-                logger.error("  ERROR loading %s left: %s", label, exc)
-
-        if right_resource is not None:
-            try:
-                right_values = load_annotation(
-                    right_resource, len(surfaces["right"]["coordinates"])
-                )
-            except (FileNotFoundError, OSError, ValueError, TypeError) as exc:
-                logger.error("  ERROR loading %s right: %s", label, exc)
-
-        if left_values is None and right_values is None:
-            left_ax.set_axis_off()
-            right_ax.set_axis_off()
-            continue
+        right_values = load_annotation_for_hemisphere(
+            graph,
+            space_name,
+            density,
+            label,
+            "right",
+            len(surfaces["right"]["coordinates"]),
+        )
 
         # --------------------------------------------------------------
         # Determine map type.
@@ -469,47 +498,27 @@ def plot_resolution(
 
         cmap = cmap_categorical if categorical else cmap_continuous
 
-        # --------------------------------------------------------------
-        # Left hemisphere.
-        # --------------------------------------------------------------
+        plot_annotation_hemisphere(
+            left_ax,
+            surfaces["left"]["coordinates"],
+            surfaces["left"]["faces"],
+            left_values,
+            "left",
+            label,
+            categorical,
+            cmap,
+        )
 
-        if left_values is not None:
-            try:
-                plot_surface_map(
-                    left_ax,
-                    surfaces["left"]["coordinates"],
-                    surfaces["left"]["faces"],
-                    left_values,
-                    "left",
-                    categorical=categorical,
-                    cmap=cmap,
-                )
-            except (ValueError, TypeError, RuntimeError) as exc:
-                logger.error("  ERROR plotting %s left: %s", label, exc)
-                left_ax.set_axis_off()
-        else:
-            left_ax.set_axis_off()
-
-        # --------------------------------------------------------------
-        # Right hemisphere.
-        # --------------------------------------------------------------
-
-        if right_values is not None:
-            try:
-                plot_surface_map(
-                    right_ax,
-                    surfaces["right"]["coordinates"],
-                    surfaces["right"]["faces"],
-                    right_values,
-                    "right",
-                    categorical=categorical,
-                    cmap=cmap,
-                )
-            except (ValueError, TypeError, RuntimeError) as exc:
-                logger.error("  ERROR plotting %s right: %s", label, exc)
-                right_ax.set_axis_off()
-        else:
-            right_ax.set_axis_off()
+        plot_annotation_hemisphere(
+            right_ax,
+            surfaces["right"]["coordinates"],
+            surfaces["right"]["faces"],
+            right_values,
+            "right",
+            label,
+            categorical,
+            cmap,
+        )
 
     # ------------------------------------------------------------------
     # Save figure.
