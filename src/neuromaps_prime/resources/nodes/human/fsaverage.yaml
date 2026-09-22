@@ -83,6 +83,6 @@ fsaverage:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638553fe228a5a18d67bcac8
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6385540d228a5a18d67bcadd
           references:
+          - Norgaard, M., Beliveau, V., Ganz, M., et al. 2021. NeuroImage. 232, 117878.
+          - 10.1016/j.neuroimage.2021.117878
           - https://doi.org/10.1016/j.neuroimage.2021.117878
-          notes:
-          - Norgaard 2021 flumazenil
