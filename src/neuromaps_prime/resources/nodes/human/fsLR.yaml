@@ -21,68 +21,43 @@ fsLR:
         meggamma1:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe86af610c0217dfe770
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe7a4e5ee50219291b6e
-          references:
-          - HCP S1200
-          - Van Essen, DC, et al. 2012. Cerebral Cortex. 22(10), 2241–2262.
-          - 10.1093/cercor/bhr291
-          - https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
+          notes:
+          - from HCP S1200
         megalpha:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe62af610c0212dfd100
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe6fab8bca0226edd089
-          references:
-          - HCP S1200
-          - Van Essen, DC, et al. 2012. Cerebral Cortex. 22(10), 2241–2262.
-          - 10.1093/cercor/bhr291
-          - https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
+          notes:
+          - from HCP S1200
         megtheta:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe57af610c020ddfebd0
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe49ab8bca0225edc476
-          references:
-          - HCP S1200
-          - Van Essen, DC, et al. 2012. Cerebral Cortex. 22(10), 2241–2262.
-          - 10.1093/cercor/bhr291
-          - https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
+          notes:
+          - from HCP S1200
         thickness:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe34af610c0217dfe61a
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe40ab8bca0225edc458
-          references:
-          - HCP S1200
-          - Van Essen, DC, et al. 2012. Cerebral Cortex. 22(10), 2241–2262.
-          - 10.1093/cercor/bhr291
-          - https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
+          notes:
+          - from HCP S1200
         megbeta:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe90af610c0216dfde19
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe9caf610c0216dfde35
-          references:
-          - HCP S1200
-          - Van Essen, DC, et al. 2012. Cerebral Cortex. 22(10), 2241–2262.
-          - 10.1093/cercor/bhr291
-          - https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
+          notes:
+          - from HCP S1200
         megdelta:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130febeab8bca0226edd198
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fecbab8bca0226edd1c6
-          references:
-          - HCP S1200
-          - Van Essen, DC, et al. 2012. Cerebral Cortex. 22(10), 2241–2262.
-          - 10.1093/cercor/bhr291
-          - https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
+          notes:
+          - from HCP S1200
         meggamma2:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fea54e5ee502182911a0
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130feb4af610c0216dfde66
-          references:
-          - HCP S1200
-          - Van Essen, DC, et al. 2012. Cerebral Cortex. 22(10), 2241–2262.
-          - 10.1093/cercor/bhr291
-          - https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
+          notes:
+          - from HCP S1200
         megtimescale:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61aa56660db65905cf836093
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61aa5657c7d9fb0543eb52b8
-          references:
-          - HCP S1200
-          - Van Essen, DC, et al. 2012. Cerebral Cortex. 22(10), 2241–2262.
-          - 10.1093/cercor/bhr291
-          - https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
-          - NeuroImage 80(2013):62-79. 
+          notes:
+          - from HCP S1200
     8k:
     # 8k surfaces all use neuromaps OSF (https://osf.io/4mw3a)
       sphere:
@@ -137,16 +112,16 @@ fsLR:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7053c53349e06925fa79c
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7054a95a0300698ed257c
           references:
-          - Xu 2020
-          - https://www.sciencedirect.com/science/article/pii/S1053811920308326?via%3Dihub
-          - 10.1016/j.neuroimage.2020.117346
+          - citation: Xu 2020
+            url: https://www.sciencedirect.com/science/article/pii/S1053811920308326?via%3Dihub
+            doi: 10.1016/j.neuroimage.2020.117346
         FChomology:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7055b53349e06925fa808
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e7056b95a0300698ed25bb
           references:
-          - Xu 2020
-          - https://www.sciencedirect.com/science/article/pii/S1053811920308326?via%3Dihub
-          - 10.1016/j.neuroimage.2020.117346
+          - citation: Xu 2020
+            url: https://www.sciencedirect.com/science/article/pii/S1053811920308326?via%3Dihub
+            doi: 10.1016/j.neuroimage.2020.117346
         SAaxis:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e06d4ac99ebd0254018176
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/61e06d3c466d150209d58122
@@ -213,10 +188,8 @@ fsLR:
         myelinmap:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe1c4e5ee50219291a2a
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe29af610c0216dfdd20
-          references:
-          - Van Essen, DC, et al. 2012. Cerebral Cortex. 22(10), 2241–2262.
-          - 10.1093/cercor/bhr291
-          - https://academic.oup.com/cercor/article-abstract/22/10/2241/286589
+          notes:
+          - from HCP S1200
     164k:
     # 164k surfaces all use neuromaps OSF (https://osf.io/4mw3a)
       sphere:
