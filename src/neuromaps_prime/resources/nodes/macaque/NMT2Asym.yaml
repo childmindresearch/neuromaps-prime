@@ -34,7 +34,7 @@ NMT2Asym:
           - Intrinsic timescale; sum of ACF values in the initial positive period, projected onto the cortical surface.
   volumes:
     750um:
-      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d1f0c8124b0910845265
+      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d8ea977c2187a7845046
       annotation:
         IT:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa04faefa47ed7a6e48642b
