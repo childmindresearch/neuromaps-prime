@@ -20,7 +20,17 @@ concurrency:
 
 env:
   TZ: UTC   # stable filename timestamps / timeline ordering
+  REPO: childmindresearch/neuromaps-prime
+  HISTORY_BRANCH: regression-history
+  LEGACY_HISTORY_BRANCH: cycle-history
 
+# Two regression suites are tracked, each a (prefix, source dir, plot script, svg)
+# tuple:
+#   cycle        cycle_        $NEUROMAPS_CYCLE_OUTPUT_DIR      scripts/plot_cycle_history.py      cycle_history.svg
+#   distance_map distance_map_ $NEUROMAPS_DISTANCE_OUTPUT_DIR   scripts/plot_distance_history.py   distance_map_history.svg
+# The canonical regression-history branch keeps one subdirectory per suite
+# (cycle/, distance_map/); the per-PR preview ref keeps the flat layout
+# (history/, <suite>_outputs/, svg at root) that the record job reads.
 jobs:
   test:
     if: (github.event_name == 'pull_request' && github.event.pull_request.draft == false) || github.event_name == 'workflow_dispatch'
@@ -33,6 +43,7 @@ jobs:
       with:
         enable-cache: true # not automatic on self-hosted runners
     - run: echo "NEUROMAPS_CYCLE_OUTPUT_DIR=$RUNNER_TEMP/cycle_outputs" >> "$GITHUB_ENV"
+    - run: echo "NEUROMAPS_DISTANCE_OUTPUT_DIR=$RUNNER_TEMP/distance_map_outputs" >> "$GITHUB_ENV"
     - run: uv sync --group tests --frozen
 
     - name: Run all tests
@@ -45,22 +56,34 @@ jobs:
           --log-level=DEBUG \
           --verbose
 
-    - name: Locate run summary CSV
+    - name: Locate cycle run summary CSV
       id: summary
       if: success()
       shell: bash
       run: |
         set -euo pipefail
         csv=$(ls -1 "$NEUROMAPS_CYCLE_OUTPUT_DIR"/cycle_[0-9]*.csv | sort | tail -n 1)
-        ts=${csv##*cycle_}
-        ts=${ts%.csv}
-        { echo "csv=$csv"; echo "ts=$ts"; } >> "$GITHUB_OUTPUT"
+        echo "csv=$csv" >> "$GITHUB_OUTPUT"
 
-    # Builds the combined state (canonical history + this run) for BOTH
-    # triggers. On pull_request it is published to a per-PR preview ref so the
-    # comment can render it inline; the canonical cycle-history branch is
-    # written only on merge (see the record job).
-    - name: Publish cycle history
+    - name: Locate distance run summary CSV
+      id: distance-summary
+      if: success()
+      shell: bash
+      run: |
+        # Soft: a missing distance summary must never fail the job or the cycle path.
+        set -uo pipefail
+        csv=$(ls -1 "$NEUROMAPS_DISTANCE_OUTPUT_DIR"/distance_map_[0-9]*.csv 2>/dev/null | sort | tail -n 1 || true)
+        if [ -z "$csv" ]; then
+          echo "::warning::distance-map run summary not found — that suite's history is skipped"
+        else
+          echo "csv=$csv" >> "$GITHUB_OUTPUT"
+        fi
+
+    # Builds the combined state (canonical history + this run) for BOTH triggers.
+    # On pull_request it is published to a per-PR preview ref so the comment can
+    # render it inline; the canonical regression-history branch is written only on
+    # merge (see the record job).
+    - name: Publish regression history
       id: publish
       if: success() && steps.summary.outputs.csv != ''
       shell: bash
@@ -69,38 +92,62 @@ jobs:
         EVENT: ${{ github.event_name }}
         HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
+        CYCLE_CSV: ${{ steps.summary.outputs.csv }}
+        DIST_CSV: ${{ steps.distance-summary.outputs.csv }}
       run: |
         set -euo pipefail
-        branch="cycle-history"
-        repo="childmindresearch/neuromaps-prime"
-        workdir="$RUNNER_TEMP/cycle_history_work"
+        workdir="$RUNNER_TEMP/regression_history_work"
         sha8="${HEAD_SHA:0:8}"
-        csv="${{ steps.summary.outputs.csv }}"
-        ts="${{ steps.summary.outputs.ts }}"
 
-        # Canonical history (bootstrap empty if absent) + this run's summary.
+        # Canonical history (bootstrap empty if absent). The branch was
+        # 'cycle-history' with a flat layout; fall back to it once and reshape.
         rm -rf "$workdir"
-        git init -q -b "$branch" "$workdir"
+        git init -q -b "$HISTORY_BRANCH" "$workdir"
         git -C "$workdir" config user.name  "github-actions[bot]"
         git -C "$workdir" config user.email "github-actions[bot]@users.noreply.github.com"
-        if git -C "$workdir" fetch -q --depth 1 "https://github.com/$repo" "$branch"; then
+        if git -C "$workdir" fetch -q --depth 1 "https://github.com/$REPO" "$HISTORY_BRANCH" 2>/dev/null; then
+          git -C "$workdir" reset -q --hard FETCH_HEAD
+        elif git -C "$workdir" fetch -q --depth 1 "https://github.com/$REPO" "$LEGACY_HISTORY_BRANCH"; then
           git -C "$workdir" reset -q --hard FETCH_HEAD
         fi
+
+        # The preview is flat: accumulate every suite's history CSVs (incl.
+        # releases/) into one history/ dir so a single timeline covers both,
+        # whether the canonical branch is the per-suite subdir or legacy flat.
         mkdir -p "$workdir/history"
-        cp "$csv" "$workdir/history/cycle_${ts}_${sha8}.csv"
+        for suite in cycle distance_map; do
+          if [ -d "$workdir/$suite/history" ]; then
+            cp -rn "$workdir/$suite/history/." "$workdir/history/"
+          fi
+        done
+        rm -rf "$workdir/cycle" "$workdir/distance_map"
 
-        # This run's per-path detail, replacing the previous run's: rebuild the
-        # folder from scratch so an origin skipped in this run keeps no stale
-        # file. (Excludes the timestamped summary — under history/ — and the
-        # work_*/ GIFTI intermediates.)
-        rm -rf "$workdir/cycle_outputs"
-        mkdir -p "$workdir/cycle_outputs"
-        find "$NEUROMAPS_CYCLE_OUTPUT_DIR" -maxdepth 1 -type f \
-          \( -name 'cycle_*.csv' -o -name 'cycle_*.txt' \) ! -name 'cycle_[0-9]*.csv' \
-          -exec cp -t "$workdir/cycle_outputs" {} +
+        # Add this run to each suite and stage its per-path detail, in the flat preview.
+        apply_preview_suite() { # $1=prefix $2=src-dir $3=summary-csv
+          local prefix="$1" src="$2" csv="$3" ts outdir
+          if [ -z "${csv:-}" ]; then
+            echo "::warning::no ${prefix} summary — skipping that suite in the preview"
+            return 0
+          fi
+          ts="${csv##*${prefix}}"; ts="${ts%.csv}"
+          cp "$csv" "$workdir/history/${prefix}${ts}_${sha8}.csv"
+          outdir="$workdir/${prefix%_*}_outputs"
+          rm -rf "$outdir"; mkdir -p "$outdir"
+          find "$src" -maxdepth 1 -type f \
+            \( -name "${prefix}*.csv" -o -name "${prefix}*.txt" -o -name "${prefix}*.png" \) \
+            ! -name "${prefix}[0-9]*.csv" -exec cp -t "$outdir" {} +
+        }
+        apply_preview_suite cycle_        "$NEUROMAPS_CYCLE_OUTPUT_DIR"     "$CYCLE_CSV"
+        apply_preview_suite distance_map_ "$NEUROMAPS_DISTANCE_OUTPUT_DIR"  "$DIST_CSV"
 
-        rm -f "$workdir"/cycle_history.svg # derived: regenerate from the full set
-        uv run scripts/plot_cycle_history.py --dir "$workdir/history" --output-dir "$workdir"
+        # One timeline per suite, from the shared flat history/, svg at the preview root.
+        rm -f "$workdir/cycle_history.svg" "$workdir/distance_map_history.svg"
+        if ls "$workdir/history"/cycle_[0-9]*.csv >/dev/null 2>&1; then
+          uv run scripts/plot_cycle_history.py --dir "$workdir/history" --output-dir "$workdir"
+        fi
+        if ls "$workdir/history"/distance_map_[0-9]*.csv >/dev/null 2>&1; then
+          uv run scripts/plot_distance_history.py --dir "$workdir/history" --output-dir "$workdir"
+        fi
 
         if [ "$EVENT" != "pull_request" ]; then
           echo "Manual run — combined state built (not published)."
@@ -115,11 +162,13 @@ jobs:
 
         # Push with the token in the URL — no credential-helper config source to
         # miss on this box. GHA redacts the secret value everywhere in log output.
-        auth="https://x-access-token:${HISTORY_PAT}@github.com/$repo"
+        auth="https://x-access-token:${HISTORY_PAT}@github.com/$REPO"
 
         # Dedicated per-PR ref: force push, no fast-forward or contention concerns.
-        git -C "$workdir" add -A cycle_outputs history cycle_history.svg
-        git -C "$workdir" commit -q -m "Preview cycle regression ${sha8} (PR #${PR_NUMBER})"
+        # The preview keeps the flat layout so the record job — new, or the
+        # base-branch one during the transition — reads it the way it always has.
+        git -C "$workdir" add -A
+        git -C "$workdir" commit -q -m "Preview regression history ${sha8} (PR #${PR_NUMBER})"
         git -C "$workdir" push -q -f "$auth" "HEAD:refs/heads/cycle-preview/pr-${PR_NUMBER}"
         echo "preview=true" >> "$GITHUB_OUTPUT"
 
@@ -129,13 +178,16 @@ jobs:
       if: always() && (github.event_name == 'workflow_dispatch' || steps.publish.outputs.preview != 'true')
       uses: actions/upload-artifact@v7.0.1
       with:
-        name: cycle-results
-        # The run's per-path CSV/TXT summaries (no work_*/ GIFTI intermediates)
-        # + the combined timeline.
+        name: regression-results
+        # Each suite's per-path detail (no work_*/ GIFTI intermediates) + both
+        # combined timelines.
         path: |
           ${{ runner.temp }}/cycle_outputs/cycle_*.csv
           ${{ runner.temp }}/cycle_outputs/cycle_*.txt
-          ${{ runner.temp }}/cycle_history_work/cycle_history.svg
+          ${{ runner.temp }}/distance_map_outputs/distance_map_*.csv
+          ${{ runner.temp }}/distance_map_outputs/distance_map_*.png
+          ${{ runner.temp }}/regression_history_work/cycle_history.svg
+          ${{ runner.temp }}/regression_history_work/distance_map_history.svg
         if-no-files-found: warn
 
     - name: Build report body
@@ -143,22 +195,26 @@ jobs:
       id: report
       shell: bash
       env:
-        RAW_BASE: https://raw.githubusercontent.com/childmindresearch/neuromaps-prime
-        ARTIFACTS_URL: https://github.com/childmindresearch/neuromaps-prime/actions/runs/${{ github.run_id }}/artifacts
+        RAW_BASE: https://raw.githubusercontent.com/${{ env.REPO }}
+        ARTIFACTS_URL: https://github.com/${{ env.REPO }}/actions/runs/${{ github.run_id }}/artifacts
         PREVIEW_OK: ${{ steps.publish.outputs.preview }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
       run: |
         set -euo pipefail
         {
           echo "<!-- cycle-regression-report -->"
-          echo "## Cycle regression report"
+          echo "## Regression report"
           echo
           if [ "$PREVIEW_OK" = "true" ]; then
-            echo "This run (live preview — recorded on the \`cycle-history\` branch when the PR merges)."
+            echo "This run (live preview — recorded on the \`${HISTORY_BRANCH}\` branch when the PR merges)."
             echo
             echo "![cycle_history timeline]($RAW_BASE/cycle-preview%2Fpr-$PR_NUMBER/cycle_history.svg)"
+            if [ -f "$RUNNER_TEMP/regression_history_work/distance_map_history.svg" ]; then
+              echo
+              echo "![distance_map_history timeline]($RAW_BASE/cycle-preview%2Fpr-$PR_NUMBER/distance_map_history.svg)"
+            fi
             echo
-            echo "Accumulated history: [cycle-history branch](https://github.com/childmindresearch/neuromaps-prime/tree/cycle-history/history)"
+            echo "Accumulated history: [${HISTORY_BRANCH} branch](https://github.com/$REPO/tree/$HISTORY_BRANCH)"
           else
             echo "Preview unavailable for this PR (fork PRs get no repo secrets)."
             echo
@@ -193,7 +249,7 @@ jobs:
     - uses: actions/checkout@v7
     - uses: astral-sh/setup-uv@v9.0.0
 
-    - name: Record cycle history
+    - name: Record regression history
       id: record
       shell: bash
       env:
@@ -202,9 +258,7 @@ jobs:
         PR_NUMBER: ${{ github.event.pull_request.number }}
       run: |
         set -euo pipefail
-        branch="cycle-history"
-        repo="childmindresearch/neuromaps-prime"
-        workdir="$RUNNER_TEMP/cycle_history_work"
+        workdir="$RUNNER_TEMP/regression_history_work"
         preview="refs/heads/cycle-preview/pr-${PR_NUMBER}"
         sha8="${MERGED_SHA:0:8}"
 
@@ -214,64 +268,125 @@ jobs:
         }
         # Push with the token in the URL — no credential-helper config source to
         # miss on this box. GHA redacts the secret value everywhere in log output.
-        auth="https://x-access-token:${HISTORY_PAT}@github.com/$repo"
+        auth="https://x-access-token:${HISTORY_PAT}@github.com/$REPO"
 
-        # Canonical history (bootstrap empty if absent).
-        rm -rf "$workdir"
-        git init -q -b "$branch" "$workdir"
-        git -C "$workdir" config user.name  "GitHub Actions"
-        git -C "$workdir" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        if git -C "$workdir" fetch -q --depth 1 "https://github.com/$repo" "$branch"; then
-          git -C "$workdir" reset -q --hard FETCH_HEAD
-        fi
+        # Restructure the legacy flat layout into the per-suite subdir (no-op once migrated).
+        ensure_subdir() {
+          if [ -d "$workdir/history" ] && [ ! -d "$workdir/cycle" ]; then
+            mkdir -p "$workdir/cycle"
+            mv "$workdir/history" "$workdir/cycle/history" 2>/dev/null || true
+            mv "$workdir/cycle_outputs" "$workdir/cycle/outputs" 2>/dev/null || true
+            mv "$workdir/cycle_history.svg" "$workdir/cycle/" 2>/dev/null || true
+          fi
+        }
+        # Load the canonical history (bootstrap empty if absent). The branch was
+        # 'cycle-history' with a flat layout; fall back to it once.
+        load_canonical() {
+          rm -rf "$workdir"
+          git init -q -b "$HISTORY_BRANCH" "$workdir"
+          git -C "$workdir" config user.name  "GitHub Actions"
+          git -C "$workdir" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git -C "$workdir" fetch -q --depth 1 "https://github.com/$REPO" "$HISTORY_BRANCH" 2>/dev/null; then
+            git -C "$workdir" reset -q --hard FETCH_HEAD
+          elif git -C "$workdir" fetch -q --depth 1 "https://github.com/$REPO" "$LEGACY_HISTORY_BRANCH"; then
+            git -C "$workdir" reset -q --hard FETCH_HEAD
+          fi
+          ensure_subdir
+        }
 
         # This PR's final sync state, from its preview ref.
         preview_dir="$RUNNER_TEMP/preview"
         rm -rf "$preview_dir"
         git init -q "$preview_dir"
-        git -C "$preview_dir" fetch -q --depth 1 "https://github.com/$repo" "$preview" \
+        git -C "$preview_dir" fetch -q --depth 1 "https://github.com/$REPO" "$preview" \
           || { echo "::error::Preview ref ${preview} not found — re-run the PR's last sync."; exit 1; }
         git -C "$preview_dir" reset -q --hard FETCH_HEAD
 
-        apply_run() {  # newest summary for the merged sha + the final per-path detail
-          summary=$(ls -1 "$preview_dir/history"/cycle_*_"${sha8}".csv | sort | tail -n 1)
-          mkdir -p "$workdir/history"
-          cp "$summary" "$workdir/history/"
-          # Retention: keep only the latest main run (releases/ is kept).
-          keep=$(ls -1 "$workdir/history"/cycle_*.csv 2>/dev/null | sort | tail -n 1)
-          for f in "$workdir/history"/cycle_*.csv; do
-            [ -n "$keep" ] && [ "$f" != "$keep" ] && rm -f "$f"
+        # Apply one suite from the preview into the canonical subdir, with
+        # per-suite retention. A missing suite warns and skips (in-flight PRs
+        # and the first distance point), so it can never break the cycle path.
+        apply_suite() { # $1=suite $2=prefix $3=plot-script
+          local suite="$1" prefix="$2" plot="$3" history_dir summary keep f dsrc
+          # The preview is flat (history/ shared, <suite>_outputs/); accept a
+          # per-suite subdir layout too.
+          history_dir="$preview_dir/history"
+          [ -d "$preview_dir/$suite/history" ] && history_dir="$preview_dir/$suite/history"
+          summary=$(ls -1 "$history_dir/${prefix}"*_"${sha8}.csv" 2>/dev/null | sort | tail -n 1 || true)
+          if [ -z "${summary:-}" ]; then
+            echo "::warning::no ${prefix} summary for ${sha8} in the preview — skipping ${suite}"
+            return 0
+          fi
+          mkdir -p "$workdir/$suite/history"
+          cp "$summary" "$workdir/$suite/history/"
+          # Retention: keep only the newest top-level run; releases/ is kept.
+          keep=$(ls -1 "$workdir/$suite/history/${prefix}"*.csv 2>/dev/null | sort | tail -n 1 || true)
+          for f in "$workdir/$suite/history/${prefix}"*.csv; do
+            [ -e "$f" ] && [ -n "$keep" ] && [ "$f" != "$keep" ] && rm -f "$f"
           done
-          rm -rf "$workdir/cycle_outputs"
-          cp -r "$preview_dir/cycle_outputs" "$workdir/cycle_outputs"
-          rm -f "$workdir"/cycle_history.svg
-          uv run scripts/plot_cycle_history.py --dir "$workdir/history" --output-dir "$workdir"
+          # Detail: this run's per-path outputs, replacing the previous run's.
+          dsrc="$preview_dir/${suite}_outputs"
+          [ -d "$preview_dir/$suite/outputs" ] && dsrc="$preview_dir/$suite/outputs"
+          if [ -d "$dsrc" ]; then
+            rm -rf "$workdir/$suite/outputs"
+            cp -r "$dsrc" "$workdir/$suite/outputs"
+          fi
+          # Re-plot this suite's timeline (runs + released).
+          if ls "$workdir/$suite/history/${prefix}"*.csv >/dev/null 2>&1 \
+             || ls "$workdir/$suite/history/releases/${prefix}"*.csv >/dev/null 2>&1; then
+            rm -f "$workdir/$suite/"*.svg
+            uv run "$plot" --dir "$workdir/$suite/history" --output-dir "$workdir/$suite"
+          fi
         }
-        apply_run
+
+        load_canonical
+        apply_suite cycle        cycle_        scripts/plot_cycle_history.py
+        apply_suite distance_map distance_map_ scripts/plot_distance_history.py
 
         ok=0
         for attempt in 1 2 3; do
-          # -A stages removals too (origins skipped in the final run).
-          git -C "$workdir" add -A cycle_outputs history cycle_history.svg
-          if ! git -C "$workdir" commit -q -m "Record cycle regression ${sha8} (PR #${PR_NUMBER})"; then
+          # -A stages removals too (a suite skipped in this run keeps no stale file).
+          git -C "$workdir" add -A
+          if ! git -C "$workdir" commit -q -m "Record regression history ${sha8} (PR #${PR_NUMBER})"; then
             echo "Nothing to commit — history already up to date."
             ok=1
             break
           fi
-          if git -C "$workdir" push -q "$auth" "HEAD:refs/heads/$branch"; then
+          if git -C "$workdir" push -q "$auth" "HEAD:refs/heads/$HISTORY_BRANCH"; then
             ok=1
             break
           fi
-          echo "::warning::Push to ${branch} rejected (concurrent update); retry ${attempt}/3"
-          git -C "$workdir" fetch -q --depth 1 "https://github.com/$repo" "$branch"
-          git -C "$workdir" reset -q --hard FETCH_HEAD
-          apply_run
+          echo "::warning::Push to ${HISTORY_BRANCH} rejected (concurrent update); retry ${attempt}/3"
+          load_canonical
+          apply_suite cycle        cycle_        scripts/plot_cycle_history.py
+          apply_suite distance_map distance_map_ scripts/plot_distance_history.py
         done
-        [ "$ok" -eq 1 ] || { echo "::error::Could not push to ${branch} after 3 attempts"; exit 1; }
+        [ "$ok" -eq 1 ] || { echo "::error::Could not push to ${HISTORY_BRANCH} after 3 attempts"; exit 1; }
 
         # The preview ref has served its purpose.
         git -C "$workdir" push -q "$auth" ":${preview}" \
           || echo "::warning::could not delete preview ref ${preview}"
+
+    - name: Build recorded report body
+      if: steps.record.outcome == 'success'
+      shell: bash
+      run: |
+        set -euo pipefail
+        workdir="$RUNNER_TEMP/regression_history_work"
+        RAW_BASE="https://raw.githubusercontent.com/$REPO"
+        {
+          echo "<!-- cycle-regression-report -->"
+          echo "## Regression report"
+          echo
+          echo "Recorded on the \`${HISTORY_BRANCH}\` branch."
+          echo
+          echo "![cycle_history timeline]($RAW_BASE/$HISTORY_BRANCH/cycle/cycle_history.svg)"
+          if [ -f "$workdir/distance_map/distance_map_history.svg" ]; then
+            echo
+            echo "![distance_map_history timeline]($RAW_BASE/$HISTORY_BRANCH/distance_map/distance_map_history.svg)"
+          fi
+          echo
+          echo "Full history: [${HISTORY_BRANCH} branch](https://github.com/$REPO/tree/$HISTORY_BRANCH)"
+        } > "$RUNNER_TEMP/report_body.md"
 
     - name: Find existing report comment
       if: steps.record.outcome == 'success'
@@ -288,15 +403,7 @@ jobs:
       with:
         issue-number: ${{ github.event.pull_request.number }}
         comment-id: ${{ steps.find-comment.outputs.comment-id }}
-        body: |
-          <!-- cycle-regression-report -->
-          ## Cycle regression report
-
-          Recorded on the `cycle-history` branch.
-
-          ![cycle_history timeline](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/cycle-history/cycle_history.svg)
-
-          Full history: [cycle-history branch](https://github.com/childmindresearch/neuromaps-prime/tree/cycle-history/history)
+        body-path: ${{ runner.temp }}/report_body.md
         edit-mode: replace
 
   release:
@@ -308,16 +415,14 @@ jobs:
     - uses: actions/checkout@v7
     - uses: astral-sh/setup-uv@v9.0.0
 
-    - name: Promote latest run to release
+    - name: Promote latest runs to release
       shell: bash
       env:
         HISTORY_PAT: ${{ secrets.HISTORY_PAT }}
         TAG: ${{ github.ref_name }}
       run: |
         set -euo pipefail
-        branch="cycle-history"
-        repo="childmindresearch/neuromaps-prime"
-        workdir="$RUNNER_TEMP/cycle_history_work"
+        workdir="$RUNNER_TEMP/regression_history_work"
         tag="${TAG}"
 
         [ -n "${HISTORY_PAT:-}" ] || {
@@ -325,50 +430,77 @@ jobs:
           exit 1
         }
         # Push with the token in the URL; GHA redacts it from the logs.
-        auth="https://x-access-token:${HISTORY_PAT}@github.com/$repo"
+        auth="https://x-access-token:${HISTORY_PAT}@github.com/$REPO"
 
-        # Canonical history (bootstrap empty if absent).
-        rm -rf "$workdir"
-        git init -q -b "$branch" "$workdir"
-        git -C "$workdir" config user.name  "GitHub Actions"
-        git -C "$workdir" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        if git -C "$workdir" fetch -q --depth 1 "https://github.com/$repo" "$branch"; then
-          git -C "$workdir" reset -q --hard FETCH_HEAD
-        fi
+        # Restructure the legacy flat layout into the per-suite subdir (no-op once migrated).
+        ensure_subdir() {
+          if [ -d "$workdir/history" ] && [ ! -d "$workdir/cycle" ]; then
+            mkdir -p "$workdir/cycle"
+            mv "$workdir/history" "$workdir/cycle/history" 2>/dev/null || true
+            mv "$workdir/cycle_outputs" "$workdir/cycle/outputs" 2>/dev/null || true
+            mv "$workdir/cycle_history.svg" "$workdir/cycle/" 2>/dev/null || true
+          fi
+        }
+        # Load the canonical history (bootstrap empty if absent); fall back to the
+        # legacy 'cycle-history' branch once.
+        load_canonical() {
+          rm -rf "$workdir"
+          git init -q -b "$HISTORY_BRANCH" "$workdir"
+          git -C "$workdir" config user.name  "GitHub Actions"
+          git -C "$workdir" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git -C "$workdir" fetch -q --depth 1 "https://github.com/$REPO" "$HISTORY_BRANCH" 2>/dev/null; then
+            git -C "$workdir" reset -q --hard FETCH_HEAD
+          elif git -C "$workdir" fetch -q --depth 1 "https://github.com/$REPO" "$LEGACY_HISTORY_BRANCH"; then
+            git -C "$workdir" reset -q --hard FETCH_HEAD
+          fi
+          ensure_subdir
+        }
 
-        # Reuse the recorded run: promote the latest main run into releases/.
-        latest=$(ls -1 "$workdir/history"/cycle_*.csv 2>/dev/null | sort | tail -n 1 || true)
-        if [ -z "${latest}" ]; then
-          echo "::warning::No recorded main run to reuse for ${tag} — nothing to record."
+        load_canonical
+
+        # Promote a suite's newest top-level run into releases/ and re-plot.
+        promote_suite() { # $1=suite $2=prefix $3=svg $4=plot-script
+          local suite="$1" prefix="$2" svg="$3" plot="$4" latest
+          latest=$(ls -1 "$workdir/$suite/history/${prefix}"*.csv 2>/dev/null | sort | tail -n 1 || true)
+          if [ -n "${latest:-}" ]; then
+            mkdir -p "$workdir/$suite/history/releases"
+            mv "$latest" "$workdir/$suite/history/releases/"
+          fi
+          if ls "$workdir/$suite/history/${prefix}"*.csv >/dev/null 2>&1 \
+             || ls "$workdir/$suite/history/releases/${prefix}"*.csv >/dev/null 2>&1; then
+            rm -f "$workdir/$suite/$svg"
+            uv run "$plot" --dir "$workdir/$suite/history" --output-dir "$workdir/$suite"
+          fi
+        }
+
+        latest_cycle=$(ls -1 "$workdir/cycle/history"/cycle_[0-9]*.csv 2>/dev/null | sort | tail -n 1 || true)
+        latest_dist=$(ls -1 "$workdir/distance_map/history"/distance_map_[0-9]*.csv 2>/dev/null | sort | tail -n 1 || true)
+        if [ -z "$latest_cycle" ] && [ -z "$latest_dist" ]; then
+          echo "::warning::No recorded main run to promote for ${tag} — nothing to record."
           exit 0
         fi
 
-        promote() {
-          mkdir -p "$workdir/history/releases"
-          mv "$latest" "$workdir/history/releases/"
-          rm -f "$workdir"/cycle_history.svg
-          uv run scripts/plot_cycle_history.py --dir "$workdir/history" --output-dir "$workdir"
-        }
-        promote
+        promote_suite cycle        cycle_         cycle_history.svg        scripts/plot_cycle_history.py
+        promote_suite distance_map distance_map_  distance_map_history.svg scripts/plot_distance_history.py
 
         ok=0
         for attempt in 1 2 3; do
-          git -C "$workdir" add -A cycle_outputs history cycle_history.svg
-          if ! git -C "$workdir" commit -q -m "Record release ${tag} (reused latest main run)"; then
+          git -C "$workdir" add -A
+          if ! git -C "$workdir" commit -q -m "Record release ${tag} (promoted latest run per suite)"; then
             echo "Nothing to commit — release already recorded."
             ok=1
             break
           fi
-          if git -C "$workdir" push -q "$auth" "HEAD:refs/heads/$branch"; then
+          if git -C "$workdir" push -q "$auth" "HEAD:refs/heads/$HISTORY_BRANCH"; then
             ok=1
             break
           fi
-          echo "::warning::Push to ${branch} rejected (concurrent update); retry ${attempt}/3"
-          git -C "$workdir" fetch -q --depth 1 "https://github.com/$repo" "$branch"
-          git -C "$workdir" reset -q --hard FETCH_HEAD
-          promote
+          echo "::warning::Push to ${HISTORY_BRANCH} rejected (concurrent update); retry ${attempt}/3"
+          load_canonical
+          promote_suite cycle        cycle_         cycle_history.svg        scripts/plot_cycle_history.py
+          promote_suite distance_map distance_map_  distance_map_history.svg scripts/plot_distance_history.py
         done
-        [ "$ok" -eq 1 ] || { echo "::error::Could not push to ${branch} after 3 attempts"; exit 1; }
+        [ "$ok" -eq 1 ] || { echo "::error::Could not push to ${HISTORY_BRANCH} after 3 attempts"; exit 1; }
 
   cleanup:
     name: Remove PR preview
@@ -392,11 +524,11 @@ jobs:
         comment-id: ${{ steps.find-comment.outputs.comment-id }}
         body: |
           <!-- cycle-regression-report -->
-          ## Cycle regression report
+          ## Regression report
 
           PR closed without merging — this run was not recorded.
 
-          Results: [Actions runs](https://github.com/childmindresearch/neuromaps-prime/actions/workflows/test_full.yaml)
+          Results: [Actions runs](https://github.com/${{ env.REPO }}/actions/workflows/test_full.yaml)
         edit-mode: replace
 
     - name: Delete preview ref
@@ -408,6 +540,6 @@ jobs:
         set -euo pipefail
         [ -n "${HISTORY_PAT:-}" ] || { echo "no HISTORY_PAT — leaving any preview ref in place"; exit 0; }
         # Push with the token in the URL — no credential-helper config source to miss.
-        auth="https://x-access-token:${HISTORY_PAT}@github.com/childmindresearch/neuromaps-prime"
+        auth="https://x-access-token:${HISTORY_PAT}@github.com/$REPO"
         git push "$auth" ":refs/heads/cycle-preview/pr-${PR_NUMBER}" \
           || echo "preview ref not present — nothing to clean up"
