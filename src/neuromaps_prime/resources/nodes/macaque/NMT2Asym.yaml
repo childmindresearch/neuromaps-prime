@@ -10,17 +10,20 @@ NMT2Asym:
   surfaces:
     41k:
       sphere:
-        left: 
-        right: 
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d1896106292b7d14de9c
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d18c1ded4f7cfc84520d
       midthickness:
-        left: 
-        right: 
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d19f0118792f7514db5b
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d19fdd981914b514df5b
       white:
-        left: 
-        right: 
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d19ea9c71d8ce714de01
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d19f0753248e0db2a833
+      pial:
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d19c0753248e0db2a831
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d19f7c058c0221b2a5a9
       inflated:
-        left: 
-        right: 
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d19f52671ca676b2a5fa
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d19fe3bee888a5845480
       annotation:
         IT:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa04a8af76da4eb19405682
@@ -31,7 +34,7 @@ NMT2Asym:
           - Intrinsic timescale; sum of ACF values in the initial positive period, projected onto the cortical surface.
   volumes:
     750um:
-      T1w: 
+      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ab1d1f0c8124b0910845265
       annotation:
         IT:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa04faefa47ed7a6e48642b
