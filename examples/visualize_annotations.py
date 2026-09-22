@@ -332,6 +332,10 @@ def load_annotation_for_hemisphere(
         logger.error("  ERROR fetching %s %s: %s", label, hemisphere, exc)
         return None
 
+    if resource is None:
+        logger.info("  No annotation resource for %s %s", label, hemisphere)
+        return None
+
     try:
         return load_annotation(resource, n_vertices)
     except (FileNotFoundError, OSError, ValueError, TypeError) as exc:
