@@ -505,8 +505,8 @@ def plot_resolution(
             left_values,
             "left",
             label,
-            categorical,
-            cmap,
+            categorical=categorical,
+            cmap=cmap,
         )
 
         plot_annotation_hemisphere(
@@ -516,8 +516,8 @@ def plot_resolution(
             right_values,
             "right",
             label,
-            categorical,
-            cmap,
+            categorical=categorical,
+            cmap=cmap,
         )
 
     # ------------------------------------------------------------------
