@@ -93,7 +93,8 @@ def get_anatomical_surfaces(
 
 def load_annotation(resource: SurfaceAnnotation, n_vertices: int) -> np.ndarray:
     """Load an annotation from a GIFTI resource."""
-    data = load_data(resource.fetch()).array
+    fetched = resource.fetch()
+    data = load_data(fetched).array
 
     if data.ndim == 1 and data.shape[0] == n_vertices:
         return data
@@ -112,8 +113,7 @@ def load_annotation(resource: SurfaceAnnotation, n_vertices: int) -> np.ndarray:
             return data[0, :]
 
     raise ValueError(
-        f"Could not find annotation data with {n_vertices} vertices "
-        f"in {resource.fetch()}"
+        f"Could not find annotation data with {n_vertices} vertices in {fetched}"
     )
 
 
