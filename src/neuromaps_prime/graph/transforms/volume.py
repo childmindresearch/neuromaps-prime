@@ -23,7 +23,11 @@ from neuromaps_prime.graph.transforms.surface import (
 )
 from neuromaps_prime.graph.utils import GraphUtils  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.transforms.utils import validate_volume_file
-from neuromaps_prime.transforms.volume import surface_project, vol_to_vol
+from neuromaps_prime.transforms.volume import (
+    label_surface_project,
+    metric_surface_project,
+    vol_to_vol,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -246,8 +250,9 @@ class VolumeTransformOps(BaseModel):
         """Ribbon-constrained projection of input_file onto the surface.
 
         Args:
-            transformer_type: ``'metric'`` or ``'label'`` — determines the
-                output file extension.
+            transformer_type: ``'metric'`` or ``'label'`` — selects the
+                projection pipeline (niwrap mapping, ribbon builder, wrapper)
+                and the output file extension.
             input_file: NIfTI volume to project.
             source_space: Brain template space of the volume.
             source_density: Surface mesh density to use for projection.
@@ -277,19 +282,38 @@ class VolumeTransformOps(BaseModel):
             for surf_type in ("white", "pial")
         }
 
-        ribbon_surfs = workbench.volume_to_surface_mapping_ribbon_constrained(
-            inner_surf=ribbon["white"], outer_surf=ribbon["pial"]
+        if transformer_type == "metric":
+            metric_ribbon_surfs = (
+                workbench.volume_to_surface_mapping_ribbon_constrained(
+                    inner_surf=ribbon["white"], outer_surf=ribbon["pial"]
+                )
+            )
+            out_fpath = (
+                f"src-{source_space}_"
+                f"den-{source_density}_"
+                f"hemi-{hemisphere}_"
+                f"desc-volume_annot.func.gii"
+            )
+            return metric_surface_project(
+                volume=input_file,
+                surface=source_surface,
+                ribbon_surfs=metric_ribbon_surfs,
+                out_fpath=out_fpath,
+            )
+        label_ribbon_surfs = (
+            workbench.volume_label_to_surface_mapping_ribbon_constrained(
+                inner_surf=ribbon["white"], outer_surf=ribbon["pial"]
+            )
         )
-        ext = "func" if transformer_type == "metric" else "label"
         out_fpath = (
             f"src-{source_space}_"
             f"den-{source_density}_"
             f"hemi-{hemisphere}_"
-            f"desc-volume_annot.{ext}.gii"
+            f"desc-volume_annot.label.gii"
         )
-        return surface_project(
+        return label_surface_project(
             volume=input_file,
             surface=source_surface,
-            ribbon_surfs=ribbon_surfs,
+            ribbon_surfs=label_ribbon_surfs,
             out_fpath=out_fpath,
         )

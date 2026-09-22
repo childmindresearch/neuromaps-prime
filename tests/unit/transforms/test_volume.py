@@ -12,16 +12,32 @@ from niwrap import workbench
 from neuromaps_prime.transforms.volume import (
     INTERP_NOPARAMS,
     INTERP_PARAMS,
-    surface_project,
+    label_surface_project,
+    metric_surface_project,
     vol_to_vol,
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Callable, Generator
     from typing import Any
 
 # Interpolators that are currently implemented and should work
 DEVELOPED_INTERPS = [*INTERP_PARAMS, *INTERP_NOPARAMS]
+
+
+def fake_workbench_result(
+    path: str | Path, output: MagicMock
+) -> Callable[..., MagicMock]:
+    """Build a side effect that touches ``path`` and returns an ``output`` mock."""
+
+    def create_output(
+        *args: Any,  # noqa: ANN401, ARG001
+        **kwargs: Any,  # noqa: ANN401, ARG001
+    ) -> MagicMock:
+        Path(path).touch()
+        return output
+
+    return create_output
 
 
 class TestVolumetricTransform:
@@ -47,18 +63,12 @@ class TestVolumetricTransform:
         with patch(
             "neuromaps_prime.transforms.volume.ants.ants_apply_transforms"
         ) as mock_ants:
-            mock_result = MagicMock(
-                output=MagicMock(output_image_outfile=str(mock_paths["output"]))
+            mock_ants.side_effect = fake_workbench_result(
+                mock_paths["output"],
+                MagicMock(
+                    output=MagicMock(output_image_outfile=str(mock_paths["output"]))
+                ),
             )
-
-            def create_output(
-                *args: Any,  # noqa: ANN401, ARG001
-                **kwargs: Any,  # noqa: ANN401, ARG001
-            ) -> MagicMock:
-                mock_paths["output"].touch()
-                return mock_result
-
-            mock_ants.side_effect = create_output
             yield mock_ants
 
     @pytest.mark.parametrize("interp", DEVELOPED_INTERPS)
@@ -121,18 +131,10 @@ class TestVolumetricTransform:
         """Test interpolation param is correctly called with args."""
         mock_get_params.return_value = {"mocked": "params"}
 
-        mock_result = MagicMock(
-            output=MagicMock(output_image_outfile=str(mock_paths["output"]))
+        mock_ants.side_effect = fake_workbench_result(
+            mock_paths["output"],
+            MagicMock(output=MagicMock(output_image_outfile=str(mock_paths["output"]))),
         )
-
-        def create_output(
-            *args: Any,  # noqa: ANN401, ARG001
-            **kwargs: Any,  # noqa: ANN401, ARG001
-        ) -> MagicMock:
-            mock_paths["output"].touch()
-            return mock_result
-
-        mock_ants.side_effect = create_output
 
         interp_params = {"sigma": 1.5, "alpha": 0.7}
         vol_to_vol(
@@ -159,7 +161,7 @@ class Vol2SurfOutput(NamedTuple):
 
 
 class TestVolumeToSurfaceProjection:
-    """Unit tests for projecting volumes to surface (`surface_project`)."""
+    """Unit tests for projecting volumes to surface (`metric_surface_project`)."""
 
     @pytest.fixture
     def mock_paths(self, tmp_path: Path) -> Vol2SurfOutput:
@@ -186,28 +188,68 @@ class TestVolumeToSurfaceProjection:
         with patch(
             "neuromaps_prime.transforms.volume.workbench.volume_to_surface_mapping"
         ) as mock_wb:
-            mock_result = MagicMock(metric_out=mock_paths.output)
-
-            def create_output(
-                *args: Any,  # noqa: ANN401, ARG001
-                **kwargs: Any,  # noqa: ANN401, ARG001
-            ) -> MagicMock:
-                Path(mock_paths.output).touch()
-                return mock_result
-
-            mock_wb.side_effect = create_output
+            mock_wb.side_effect = fake_workbench_result(
+                mock_paths.output, MagicMock(metric_out=mock_paths.output)
+            )
             yield mock_wb
 
-    def test_surface_project(
+    def test_metric_surface_project(
         self, mock_wb_project: MagicMock, mock_paths: Vol2SurfOutput
     ) -> None:
         """Test volume-to-surface projection."""
-        result = surface_project(
+        result = metric_surface_project(
             volume=mock_paths.volume,
             surface=mock_paths.surface,
             ribbon_surfs=mock_paths.ribbon_surfs,
             out_fpath=mock_paths.output,
         )
-        mock_wb_project.assert_called_once()
+        mock_wb_project.assert_called_once_with(
+            volume=mock_paths.volume,
+            surface=mock_paths.surface,
+            ribbon_constrained=mock_paths.ribbon_surfs,
+            metric_out=Path(mock_paths.output).name,
+        )
         assert str(result) == mock_paths.output
         assert result.exists()
+
+    def test_label_surface_project(self, mock_paths: Vol2SurfOutput) -> None:
+        """Test label volume-to-surface projection."""
+        with (
+            patch(
+                "neuromaps_prime.transforms.volume.workbench.volume_label_import",
+                return_value=MagicMock(output=mock_paths.volume),
+            ) as mock_import,
+            patch(
+                "neuromaps_prime.transforms.volume.workbench.volume_label_to_surface_mapping",
+                side_effect=fake_workbench_result(
+                    mock_paths.output, MagicMock(label_out=mock_paths.output)
+                ),
+            ) as mock_wb,
+        ):
+            result = label_surface_project(
+                volume=mock_paths.volume,
+                surface=mock_paths.surface,
+                ribbon_surfs=mock_paths.ribbon_surfs,
+                out_fpath=mock_paths.output,
+            )
+        mock_import.assert_called_once_with(
+            input_=mock_paths.volume, label_list_file="", output="wb_label.nii.gz"
+        )
+        mock_wb.assert_called_once_with(
+            volume=mock_paths.volume,
+            surface=mock_paths.surface,
+            ribbon_constrained=mock_paths.ribbon_surfs,
+            label_out=Path(mock_paths.output).name,
+        )
+        assert str(result) == mock_paths.output
+        assert result.exists()
+
+    def test_label_ribbon_constrained_params(self, tmp_path: Path) -> None:
+        """Test the real label ribbon-constrained params dict keys and paths."""
+        inner = tmp_path / "inner.surf.gii"
+        outer = tmp_path / "outer.surf.gii"
+        ribbon = workbench.volume_label_to_surface_mapping_ribbon_constrained(
+            inner_surf=inner, outer_surf=outer
+        )
+        assert ribbon["inner-surf"] == inner
+        assert ribbon["outer-surf"] == outer
