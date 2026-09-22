@@ -1,13 +1,19 @@
-"""Visualize surface annotations on anatomical surfaces."""
+"""Visualize surface annotations on anatomical surfaces.
+
+Usage:
+    uv run python examples/visualize_annotations.py Yerkes19
+
+    or
+
+    uv run python examples/visualize_annotations.py Yerkes19 --output-dir /figures
+"""
 
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
 #     "matplotlib",
-#     "nibabel",
 #     "nilearn",
 #     "numpy",
-#     "pyyaml",
 # ]
 # ///
 
@@ -16,16 +22,15 @@ import logging
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import nibabel as nib
 import numpy as np
-import yaml
 from matplotlib import colormaps
 from matplotlib.colors import Colormap
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from nilearn import plotting
 
+from neuromaps_prime.analysis.images import load_data
 from neuromaps_prime.graph import NeuromapsGraph
-from neuromaps_prime.graph.models import SurfaceAtlas
+from neuromaps_prime.graph.models import SurfaceAnnotation, SurfaceAtlas
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -43,119 +48,41 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 # Plot configuration
 # ---------------------------------------------------------------------------
 
-SURFACE_PRIORITY = ["midthickness", "white", "pial", "inflated", "sphere"]
+SURFACE_PRIORITY = ("midthickness", "white", "pial", "inflated", "sphere")
 
 N_PAIRS_PER_ROW = 4
 PAIR_WIDTH = 5.2
 PAIR_HEIGHT = 4.8
-
-
-# ---------------------------------------------------------------------------
-# Space / YAML discovery
-# ---------------------------------------------------------------------------
-
-
-def get_space_yaml(space_name: str) -> dict:
-    """Find and load the YAML metadata for a space.
-
-    Spaces are discovered recursively under:
-        src/neuromaps_prime/resources/nodes/
-
-    This allows spaces to live in species-specific subdirectories such as
-    macaque, human, chimpanzee, etc.
-    """
-    resources_root = REPO_ROOT / "src" / "neuromaps_prime" / "resources" / "nodes"
-
-    matches = sorted(resources_root.rglob(f"{space_name}.yaml"))
-
-    if not matches:
-        available = sorted(path.stem for path in resources_root.rglob("*.yaml"))
-
-        raise FileNotFoundError(
-            f"Could not find YAML metadata for space "
-            f"'{space_name}' under {resources_root}.\n"
-            f"Available spaces: {', '.join(available)}"
-        )
-
-    if len(matches) > 1:
-        locations = "\n".join(
-            f"  - {path.relative_to(resources_root)}" for path in matches
-        )
-
-        raise ValueError(
-            f"Found multiple YAML files for space "
-            f"'{space_name}':\n"
-            f"{locations}\n"
-            "The space name must uniquely identify one YAML file."
-        )
-
-    yaml_path = matches[0]
-
-    logger.info("Space metadata: %s", yaml_path.relative_to(resources_root))
-
-    with yaml_path.open() as f:
-        data = yaml.safe_load(f)
-
-    return data.get(space_name, data)
-
-
-def get_surface_resolutions(space: dict) -> list[str]:
-    """Return surface resolutions that contain annotations."""
-    surfaces = space.get("surfaces", {})
-    resolutions = []
-
-    for density, density_data in surfaces.items():
-        if isinstance(density_data, dict) and "annotation" in density_data:
-            resolutions.append(density)
-
-    def sort_key(density: str) -> tuple[int, int | str]:
-        if density == "10k":
-            return (0, 0)
-
-        if density == "32k":
-            return (1, 0)
-
-        try:
-            return (2, int(density.rstrip("k")))
-        except ValueError:
-            return (3, density)
-
-    return sorted(resolutions, key=sort_key)
-
-
-def get_annotations(space: dict, density: str) -> list[str]:
-    """Return annotation names for a surface density."""
-    density_data = space["surfaces"][density]
-    annotations = density_data.get("annotation", {})
-
-    if isinstance(annotations, dict):
-        return list(annotations)
-
-    return []
-
 
 # ---------------------------------------------------------------------------
 # Graph resources
 # ---------------------------------------------------------------------------
 
 
-def get_anatomical_surface(
-    graph: NeuromapsGraph, space_name: str, density: str, hemisphere: str
-) -> SurfaceAtlas:
-    """Find the highest-priority available anatomical surface."""
+def get_anatomical_surfaces(
+    graph: NeuromapsGraph, space_name: str, density: str
+) -> tuple[SurfaceAtlas, SurfaceAtlas]:
+    """Find the highest-priority anatomical surface available for both hemispheres."""
     for resource_type in SURFACE_PRIORITY:
-        surface = graph.fetch_surface_atlas(
+        left = graph.fetch_surface_atlas(
             space=space_name,
             density=density,
-            hemisphere=hemisphere,
+            hemisphere="left",
             resource_type=resource_type,
         )
 
-        if surface is not None:
-            return surface
+        right = graph.fetch_surface_atlas(
+            space=space_name,
+            density=density,
+            hemisphere="right",
+            resource_type=resource_type,
+        )
+
+        if left is not None and right is not None:
+            return left, right
 
     raise ValueError(
-        f"No anatomical surface found for {space_name} {density} {hemisphere}"
+        f"No matching anatomical surfaces found for {space_name} {density}"
     )
 
 
@@ -164,83 +91,30 @@ def get_anatomical_surface(
 # ---------------------------------------------------------------------------
 
 
-def load_surface(resource: SurfaceAtlas) -> tuple[np.ndarray, np.ndarray]:
-    """Load coordinates and faces from a GIFTI surface resource."""
-    path = resource.fetch()
+def load_annotation(resource: SurfaceAnnotation, n_vertices: int) -> np.ndarray:
+    """Load an annotation from a GIFTI resource."""
+    data = load_data(resource.fetch()).array
 
-    if path.suffix.lower() == ".png":
-        raise ValueError(f"Skipping PNG resource: {path}")
+    if data.ndim == 1 and data.shape[0] == n_vertices:
+        return data
 
-    image = nib.load(path)
-
-    coordinates = None
-    faces = None
-
-    for darray in image.darrays:
-        data = np.asarray(darray.data)
-
-        if (
-            data.ndim == 2
-            and data.shape[1] == 3
-            and np.issubdtype(data.dtype, np.floating)
-        ):
-            coordinates = data
-
-        elif (
-            data.ndim == 2
-            and data.shape[1] == 3
-            and np.issubdtype(data.dtype, np.integer)
-        ):
-            faces = data
-
-    if coordinates is None:
-        raise ValueError(f"Could not find surface coordinates in {path}")
-
-    if faces is None:
-        raise ValueError(f"Could not find surface faces in {path}")
-
-    return coordinates, faces
-
-
-def load_annotation(resource: SurfaceAtlas, n_vertices: int) -> np.ndarray:
-    """Load an annotation from a GIFTI resource.
-
-    Multi-map GIFTIs are reduced to their first map.
-    PNG resources are explicitly rejected.
-    """
-    path = resource.fetch()
-
-    if path.suffix.lower() == ".png":
-        raise ValueError(f"Skipping PNG annotation: {path}")
-
-    image = nib.load(path)
-
-    candidates = []
-
-    for darray in image.darrays:
-        data = np.asarray(darray.data)
-
-        if data.ndim == 1 and data.shape[0] == n_vertices:
-            candidates.append(data)
-
-        elif data.ndim == 2 and data.shape[0] == n_vertices:
+    if data.ndim == 2:
+        if data.shape[0] == n_vertices:
             logger.info(
                 "    %s: multi-map data %s; using map 0", resource.name, data.shape
             )
-            candidates.append(data[:, 0])
+            return data[:, 0]
 
-        elif data.ndim == 2 and data.shape[1] == n_vertices:
+        if data.shape[1] == n_vertices:
             logger.info(
                 "    %s: multi-map data %s; using map 0", resource.name, data.shape
             )
-            candidates.append(data[0, :])
+            return data[0, :]
 
-    if not candidates:
-        raise ValueError(
-            f"Could not find annotation data with {n_vertices} vertices in {path}"
-        )
-
-    return np.asarray(candidates[0])
+    raise ValueError(
+        f"Could not find annotation data with {n_vertices} vertices "
+        f"in {resource.fetch()}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -375,10 +249,16 @@ def plot_annotation_hemisphere(
 
 
 def plot_resolution(
-    graph: NeuromapsGraph, space_name: str, space: dict, density: str
+    graph: NeuromapsGraph, space_name: str, density: str, output_dir: Path
 ) -> None:
     """Create one annotation figure for a surface density."""
-    annotations = get_annotations(space, density)
+    annotations = sorted(
+        {
+            annotation.label
+            for annotation in graph.get_node_data(space_name).surface_annotations
+            if annotation.density == density
+        }
+    )
 
     if not annotations:
         logger.info("No annotations found for %s", density)
@@ -393,29 +273,33 @@ def plot_resolution(
 
     surfaces = {}
 
-    for hemisphere in ("left", "right"):
-        try:
-            surface_resource = get_anatomical_surface(
-                graph, space_name, density, hemisphere
-            )
+    try:
+        left_resource, right_resource = get_anatomical_surfaces(
+            graph, space_name, density
+        )
 
-            logger.info(
-                "  %s: using %s surface", hemisphere, surface_resource.resource_type
-            )
+        logger.info(
+            "  using %s surface for both hemispheres", left_resource.resource_type
+        )
 
-            coordinates, faces = load_surface(surface_resource)
+        left_coordinates, left_faces = load_data(left_resource.fetch()).array
+        right_coordinates, right_faces = load_data(right_resource.fetch()).array
 
-            surfaces[hemisphere] = {
-                "coordinates": coordinates,
-                "faces": faces,
-                "resource": surface_resource,
-            }
+        surfaces = {
+            "left": {
+                "coordinates": left_coordinates,
+                "faces": left_faces,
+                "resource": left_resource,
+            },
+            "right": {
+                "coordinates": right_coordinates,
+                "faces": right_faces,
+                "resource": right_resource,
+            },
+        }
 
-        except (FileNotFoundError, OSError, ValueError) as exc:
-            logger.error("  ERROR loading %s anatomical surface: %s", hemisphere, exc)
-
-    if "left" not in surfaces or "right" not in surfaces:
-        logger.error("Skipping %s: both hemispheres are required.", density)
+    except (FileNotFoundError, OSError, ValueError) as exc:
+        logger.error("ERROR loading anatomical surfaces: %s", exc)
         return
 
     # ------------------------------------------------------------------
@@ -528,9 +412,9 @@ def plot_resolution(
     # Save figure.
     # ------------------------------------------------------------------
 
-    output_path = (
-        REPO_ROOT / "examples" / f"visualize_{space_name}_{density}_annotations.png"
-    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    output_path = output_dir / f"visualize_{space_name}_{density}_annotations.png"
 
     fig.savefig(output_path, dpi=200, bbox_inches="tight")
 
@@ -551,7 +435,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Visualize surface annotations for a neuromaps space."
     )
-    parser.add_argument("space", help="Space to visualize, e.g. Yerkes19")
+    parser.add_argument("space", type=str, help="Space to visualize, e.g. Yerkes19")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=REPO_ROOT / "examples",
+        help="Directory for output figures (default: examples/)",
+    )
 
     args = parser.parse_args()
     space_name = args.space
@@ -559,9 +449,11 @@ def main() -> None:
     logger.info("Initializing NeuromapsGraph...")
 
     graph = NeuromapsGraph()
-    space = get_space_yaml(space_name)
+    node = graph.get_node_data(space_name)
 
-    resolutions = get_surface_resolutions(space)
+    resolutions = sorted(
+        {annotation.density for annotation in node.surface_annotations}
+    )
 
     if not resolutions:
         raise ValueError(f"No annotated surface resolutions found for {space_name}")
@@ -570,7 +462,7 @@ def main() -> None:
     logger.info("Surface resolutions: %s", ", ".join(resolutions))
 
     for density in resolutions:
-        plot_resolution(graph, space_name, space, density)
+        plot_resolution(graph, space_name, density, args.output_dir)
 
 
 if __name__ == "__main__":
