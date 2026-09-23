@@ -12,6 +12,7 @@ Usage:
 # requires-python = ">=3.11"
 # dependencies = [
 #     "matplotlib",
+#     "nibabel",
 #     "nilearn",
 #     "numpy",
 # ]
@@ -26,6 +27,7 @@ import numpy as np
 from matplotlib import colormaps
 from matplotlib.colors import Colormap
 from mpl_toolkits.mplot3d.axes3d import Axes3D
+from nibabel.filebasedimages import ImageFileError
 from nilearn import plotting
 
 from neuromaps_prime.analysis.images import load_data
@@ -224,7 +226,7 @@ def load_annotation_for_hemisphere(
 
     try:
         return load_annotation(resource, n_vertices)
-    except (FileNotFoundError, OSError, ValueError, TypeError) as exc:
+    except (FileNotFoundError, OSError, ValueError, TypeError, ImageFileError) as exc:
         logger.error("  ERROR loading %s %s: %s", label, hemisphere, exc)
         return None
 
