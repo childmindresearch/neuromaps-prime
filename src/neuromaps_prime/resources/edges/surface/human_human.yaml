@@ -13,7 +13,6 @@
       references:
       - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
         doi: 10.1038/s41592-022-01625-w
-        url: https://www.nature.com/articles/s41592-022-01625-w
 
 - from: CIVET
   to: fsaverage
@@ -30,7 +29,6 @@
       references:
       - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
         doi: 10.1038/s41592-022-01625-w
-        url: https://www.nature.com/articles/s41592-022-01625-w
 
 - from: fsLR
   to: fsaverage
@@ -43,7 +41,6 @@
       references:
       - citation: Markello, R. D., et al. 2022. Nature Methods. 19:1472–1479.
         doi: 10.1038/s41592-022-01625-w
-        url: https://www.nature.com/articles/s41592-022-01625-w
 
 - from: BigBrain
   to: fsLR
@@ -56,7 +53,6 @@
       references:
       - citation: Fischl, B, et al. 1999. Human Brain Mapping, 8(4):272–284
         doi: 10.1126/science.1235381
-        url: https://pubmed.ncbi.nlm.nih.gov/23788795/
 
 - from: BigBrain
   to: fsaverage
@@ -69,4 +65,3 @@
       references:
       - citation: Fischl, B, et al. 1999. Human Brain Mapping, 8(4):272–284
         doi: 10.1126/science.1235381
-        url: https://pubmed.ncbi.nlm.nih.gov/23788795/
