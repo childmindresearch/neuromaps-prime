@@ -2,9 +2,8 @@ NCBR:
   species: chimpanzee
   description: NCBR Chimpanzee Atlas
   references:
-  - citation: Lepage C, et al. 2026. NeuroImage Reports. 6:100360.
+  - citation: Lepage, C, et al. 2026. NeuroImage Reports, 6(3):100360
     doi: 10.1016/j.ynirp.2026.100360
-    url: https://www.sciencedirect.com/science/article/pii/S2666956026000437
   surfaces:
     41k:
       sphere:
@@ -27,11 +26,17 @@ NCBR:
         PC_ChimpBNA:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88270d76354cd6b89b76
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88253d751cc6ffb66ddb
+          references:
+          - citation: Chen, X, et al. 2025. The Innovation, 6(2):100755
+            doi: 10.1016/j.xinn.2024.100755
           notes:
           - ChimpBNA parcellation atlas. 164k surface density.
         PC_DK:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c882778afc916b3b02b37
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c882b9a2ada619db66e19
+          references:
+          - citation: Desikan, RS, et al. 2006. NeuroImage, 31(3):968–980
+            doi: 10.1016/j.neuroimage.2006.01.021
           notes:
           - Desikan-Killiany parcellation atlas. 164k surface density.
 
@@ -41,5 +46,8 @@ NCBR:
       annotation:
         BM:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c88272919a6956918f9f8
-          notes: 
-          - Brain mask
+          references:
+          - citation: Lepage, C, et al. 2026. NeuroImage Reports, 6(3):100360
+            doi: 10.1016/j.ynirp.2026.100360
+          notes:
+          - Brain mask.

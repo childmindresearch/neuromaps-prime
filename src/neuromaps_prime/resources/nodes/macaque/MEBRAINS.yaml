@@ -2,9 +2,10 @@ MEBRAINS:
   species: macaque
   description: MEBRAINS 1.0 Macaque Atlas
   references:
+  - citation: Balan, PF, et al. 2024. Imaging Neuroscience, 2:1–26
+    doi: 10.1162/imag_a_00077
   - citation: Balan, P. 2024. Imaging Neuroscience
     doi: 10.1162/imag_a_00077
-    url: https://pubmed.ncbi.nlm.nih.gov/40800436/
   surfaces:
     101k:
       sphere:
@@ -26,6 +27,9 @@ MEBRAINS:
         BM:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51ac406d0c8a912c30ff
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51ab4572881301679a5b
+          references:
+          - citation: Balan, PF, et al. 2024. Imaging Neuroscience, 2:1–26
+            doi: 10.1162/imag_a_00077
   volumes:
     400um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523814d366de13d713ff6
