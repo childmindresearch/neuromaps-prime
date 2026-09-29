@@ -26,10 +26,13 @@ fsaverage:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c2290118f70b01fca797eb
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/60c228f5f3ce9401fa24e521
           references:
-          - https://doi.org/10.1038/nature11405
-          - https://doi.org/10.7554/eLife.72129
+          - citation: Hawrylycz, MJ, et al. 2012. Nature, 489:391–399
+            doi: 10.1038/nature11405
+          - citation: Markello, RD, et al. 2021. eLife, 10:e72129
+            doi: 10.7554/eLife.72129
           notes:
           - Abagen Gene PC1
+
     164k:
       sphere:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3784a4fb9e964cc78b5
@@ -48,41 +51,46 @@ fsaverage:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543b0723a11190518c8a6
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543a2c86e2818da88f993
           references:
-          - https://doi.org/10.1523/JNEUROSCI.2830-16.2016
+          - citation: Beliveau, V, et al. 2017. Journal of Neuroscience, 37(1):120–128
+            doi: 10.1523/JNEUROSCI.2830-16.2016
           notes:
           - Beliveau 2017 AZ10419369
         RM_cimbi36:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543bf228a5a18987bc2c1
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543cdc86e2818da88f9e7
           references:
-          - https://doi.org/10.1523/JNEUROSCI.2830-16.2016
+          - citation: Beliveau, V, et al. 2017. Journal of Neuroscience, 37(1):120–128
+            doi: 10.1523/JNEUROSCI.2830-16.2016
           notes:
           - Beliveau 2017 cimbi36
         RM_cumi101:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543ea1daa6b183975935a
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543dbc86e2818d988f7ea
           references:
-          - https://doi.org/10.1523/JNEUROSCI.2830-16.2016
+          - citation: Beliveau, V, et al. 2017. Journal of Neuroscience, 37(1):120–128
+            doi: 10.1523/JNEUROSCI.2830-16.2016
           notes:
           - Beliveau 2017 cumi101
+
         RM_dasb:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/63854394228a5a18987bc26e
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/63854385c86e2818da88f94b
           references:
-          - https://doi.org/10.1523/JNEUROSCI.2830-16.2016
+          - citation: Beliveau, V, et al. 2017. Journal of Neuroscience, 37(1):120–128
+            doi: 10.1523/JNEUROSCI.2830-16.2016
           notes:
           - Beliveau 2017 dasb
         RM_sb207145:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638542c2c86e2818d588f461
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638542b2a98e5f1ac2103866
           references:
-          - https://doi.org/10.1523/JNEUROSCI.2830-16.2016
+          - citation: Beliveau, V, et al. 2017. Journal of Neuroscience, 37(1):120–128
+            doi: 10.1523/JNEUROSCI.2830-16.2016
           notes:
           - Beliveau 2017 sb207145
         RM_norgaard_flumazenil:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638553fe228a5a18d67bcac8
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6385540d228a5a18d67bcadd
           references:
-          - https://doi.org/10.1016/j.neuroimage.2021.117878
-          notes:
-          - Norgaard 2021 flumazenil
+          - citation: Nørgaard, M, et al. 2021. NeuroImage, 232:117878
+            doi: 10.1016/j.neuroimage.2021.117878

@@ -2,9 +2,8 @@ Yerkes29:
   species: chimpanzee
   description: Yerkes29 Chimpanzee Atlas
   references:
-    - citation: Donahue, C. J., et al. 2018. Proceedings of the National Academy of Sciences. 115(22).
+    - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
       doi: 10.1073/pnas.1721653115
-      url: https://pubmed.ncbi.nlm.nih.gov/29739891/
   surfaces:
     32k:
       midthickness:
@@ -20,10 +19,12 @@ Yerkes29:
         AT_ChimpBNA:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d152d9ebacaefa84bf3b2
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d15f003f3684defd3d4e3
+          references:
+          - citation: Wang, Y, et al. 2025. The Innovation, 6(2):100755
+            doi: 10.1016/j.xinn.2024.100755
   volumes:
     800um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bcbb3d09fa484fe30a464
       annotation:
-        AT: 
+        AT:
           uri: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d153b9d0eeb31dc8b87ff
-        
