@@ -10,10 +10,9 @@ unmutated. Correlation is signed -- a low or negative r on a transform is the
 red flag this suite is meant to surface.
 
 Pairs run at the densities the transformation network actually supports: a
-source's map is transformed from the highest density it shares with the
-target (``NeuromapsGraph.find_common_density``) and scored against the
-target's native map at its own highest density. By default, only pairs within
-a single species are scored; pass ``same_species_only=False`` to include
+source's map is transformed from the highest density it shares with its first
+hop (the target when a direct edge exists) and scored against the target's
+native map at its own highest density. ``SAME_SPECIES_ONLY`` toggles
 cross-species bridge pairs.
 
 This is a pure producer: it records per-seed matrices, heatmaps, and a
@@ -171,6 +170,11 @@ def compute_node_maps(
     sphere = graph.fetch_surface_atlas(
         space=space, density=density, hemisphere=hemisphere, resource_type="sphere"
     )
+    if surface is None or sphere is None:
+        raise ValueError(
+            f"No {SURFACE_TYPE}/sphere atlas for '{space}' at density "
+            f"'{density}' ({hemisphere})."
+        )
     seeds = find_seed_vertices(load_surface_coords(surface.fetch()))
     return distance_maps(load_surface_coords(sphere.fetch()), seeds)
 
@@ -184,34 +188,59 @@ def pearson(a: np.ndarray, b: np.ndarray) -> float:
     return float(corr)
 
 
-def _required_source_densities(
-    graph: NeuromapsGraph, space: str, spaces: list[str]
-) -> list[str]:
-    """Densities at which ``space``'s seed maps must be staged as a source.
+def _pair_source_density(graph: NeuromapsGraph, src: str, dst: str) -> str | None:
+    """Density at which ``src``'s map must be staged to reach ``dst``, or ``None``.
 
-    Each target pair needs the highest density the space's atlases share with
-    its transforms to that target; pairs sharing no density are unreachable
-    and need no staging.
+    Direct pairs use the highest density shared with the target; pairs that
+    only compose use the first hop of the engine's path, since the engine
+    resolves all subsequent hops itself.
     """
+    try:
+        return graph.find_common_density(src, dst)
+    except ValueError:
+        pass
+    path = graph.utils.find_path(source=src, target=dst, edge_type=SURFACE_EDGE)
+    if len(path) < 2:
+        return None
+    try:
+        return graph.find_common_density(src, path[1])
+    except ValueError:
+        return None
+
+
+def _required_source_densities(
+    graph: NeuromapsGraph,
+    space: str,
+    spaces: list[str],
+    *,
+    same_species_only: bool = True,
+) -> list[str]:
+    """Densities at which ``space``'s seed maps must be staged as a source."""
     densities: set[str] = set()
     for dst in spaces:
         if dst == space:
             continue
-        try:
-            densities.add(graph.find_common_density(space, dst))
-        except ValueError:
+        if same_species_only and _is_cross_species(graph, space, dst):
             continue
-    return sorted(densities, key=lambda d: int(d.removesuffix("k")))
+        density = _pair_source_density(graph, space, dst)
+        if density is not None:
+            densities.add(density)
+    return sorted(densities)
 
 
 def _stage_native_maps(
-    graph: NeuromapsGraph, spaces: list[str], hemisphere: str, workdir: Path
+    graph: NeuromapsGraph,
+    spaces: list[str],
+    hemisphere: str,
+    workdir: Path,
+    *,
+    same_species_only: bool = True,
 ) -> StagedMaps:
     """Compute native maps per space and stage seed maps at each source density.
 
     The transformer expects its input on the source mesh it transforms from,
-    so a space's seed maps are staged at every outgoing density in addition to
-    its native (highest-density) maps, which are the correlation targets.
+    so seed maps are staged at every outgoing density in addition to the
+    native (highest-density) maps, which are the correlation targets.
     """
     native: dict[str, dict[str, np.ndarray]] = {}
     files: dict[tuple[str, str], dict[str, Path]] = {}
@@ -219,7 +248,9 @@ def _stage_native_maps(
     for space in spaces:
         density[space] = graph.find_highest_density(space)
         native[space] = compute_node_maps(graph, space, density[space], hemisphere)
-        for src_density in _required_source_densities(graph, space, spaces):
+        for src_density in _required_source_densities(
+            graph, space, spaces, same_species_only=same_species_only
+        ):
             if src_density == density[space]:
                 maps = native[space]
             else:
@@ -247,9 +278,7 @@ def _transform_similarity(
 ) -> float:
     """Transform one map ``src -> dst`` and correlate it against dst's native map.
 
-    The map is transformed from ``src`` at ``src_density`` onto ``dst``'s
-    ``dst_density`` sphere. Returns NaN when the pair is unreachable or the
-    transform fails.
+    Returns NaN when the pair is unreachable or the transform fails.
     """
     try:
         result = graph.surface_to_surface_transformer(
@@ -281,12 +310,7 @@ def _build_seed_matrix(
     *,
     same_species_only: bool = True,
 ) -> pd.DataFrame:
-    """Assemble the source-by-target correlation matrix for one seed map.
-
-    Each pair transforms from the highest density the source shares with the
-    target; pairs sharing no density stay NaN. By default, pairs crossing a
-    species boundary are skipped.
-    """
+    """Assemble the source-by-target correlation matrix for one seed map."""
     matrix = pd.DataFrame(index=spaces, columns=spaces, dtype=float)
     for src in spaces:
         for dst in spaces:
@@ -295,11 +319,10 @@ def _build_seed_matrix(
                 continue
             if same_species_only and _is_cross_species(graph, src, dst):
                 continue
-            try:
-                src_density = graph.find_common_density(src, dst)
-                src_file = staged.files[(src, src_density)][seed]
-            except ValueError:
+            src_density = _pair_source_density(graph, src, dst)
+            if src_density is None:
                 continue
+            src_file = staged.files[(src, src_density)][seed]
             out = workdir / f"{src}_to_{dst}_{seed}_{hemisphere}.func.gii"
             matrix.loc[src, dst] = _transform_similarity(
                 graph,
@@ -432,8 +455,7 @@ def run_distance_map_test(
 ) -> DistanceMapResults:
     """Compute the connected and direct matrices per seed and record artifacts.
 
-    By default, only pairs within a single species are scored; pass
-    ``same_species_only=False`` to include cross-species bridge pairs.
+    ``same_species_only=False`` includes cross-species bridge pairs.
     """
     spaces = get_valid_spaces(graph, hemisphere, surface_type=SURFACE_TYPE)
     logger.info("Distance-map test over %d spaces: %s", len(spaces), spaces)
@@ -442,7 +464,9 @@ def run_distance_map_test(
 
     direct_pairs = find_direct_pairs(graph, spaces, same_species_only=same_species_only)
     logger.info("%d directly connected (single-edge) pairs", len(direct_pairs))
-    staged = _stage_native_maps(graph, spaces, hemisphere, workdir)
+    staged = _stage_native_maps(
+        graph, spaces, hemisphere, workdir, same_species_only=same_species_only
+    )
 
     connected: dict[str, pd.DataFrame] = {}
     direct: dict[str, pd.DataFrame] = {}
@@ -489,10 +513,9 @@ class TestDistanceMaps:
 
     A class-scoped run scores both the connected and direct scopes across all
     spaces, then records per-seed matrices, heatmaps, and a timestamped
-    run-summary CSV. Cross-species bridge pairs are included per
-    ``SAME_SPECIES_ONLY``. The tests only confirm the correlations are
-    well-formed; version-to-version comparison is left to the accumulated
-    summaries and ``scripts/plot_distance_history.py``.
+    run-summary CSV. The tests only confirm the correlations are well-formed;
+    version-to-version comparison is left to the accumulated summaries and
+    ``scripts/plot_distance_history.py``.
 
     Outputs land under ``<tmp>/distance_map_outputs`` unless
     ``NEUROMAPS_DISTANCE_OUTPUT_DIR`` points at a persistent folder.
