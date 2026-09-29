@@ -4,6 +4,7 @@ Transformation path                                       Hops   Pearson r     M
 ------------------------------------------------------------------------------------------
 Yerkes19 -> fsLR -> Yerkes19                                 2    0.999949       1.165e+04
 Yerkes19 -> D99 -> Yerkes19                                  2    0.992402       6.512e+04
+Yerkes19 -> D99 -> CIVETNMT -> D99 -> Yerkes19               4    0.990475       6.549e+04
 Yerkes19 -> CIVETNMT -> NMT2Sym -> Yerkes19                  3    0.970034       1.076e+05
 Yerkes19 -> CIVETNMT -> NMT2Sym -> D99 -> Yerkes19           4    0.954900       1.474e+05
 Yerkes19 -> CIVETNMT -> MEBRAINS -> Yerkes19                 3    0.910425       1.648e+05
@@ -17,6 +18,8 @@ Yerkes19 -> CIVETNMT -> NMT2Sym -> MEBRAINS -> Yerkes19      4    0.862309      
 Yerkes19 -> NMT2Sym -> CIVETNMT -> NMT2Sym -> Yerkes19       4    0.832747       1.643e+05
 Yerkes19 -> NMT2Sym -> Yerkes19                              2    0.832453       1.590e+05
 Yerkes19 -> CIVETNMT -> D99 -> Yerkes19                      3    0.830223       1.736e+05
+Yerkes19 -> D99 -> CIVETNMT -> MEBRAINS -> Yerkes19          4    0.826726       1.648e+05
+Yerkes19 -> D99 -> CIVETNMT -> NMT2Sym -> Yerkes19           4    0.819491       1.947e+05
 Yerkes19 -> NMT2Sym -> D99 -> Yerkes19                       3    0.817183       1.632e+05
 Yerkes19 -> D99 -> NMT2Sym -> Yerkes19                       3    0.812007       1.701e+05
 Yerkes19 -> D99 -> NMT2Sym -> D99 -> Yerkes19                4    0.796014       1.807e+05
@@ -39,15 +42,19 @@ Yerkes19 -> NMT2Sym -> CIVETNMT -> D99 -> Yerkes19           4    0.535686      
 Yerkes19 -> NMT2Sym -> D99 -> NMT2Sym -> Yerkes19            4    0.425373       2.882e+05
 Yerkes19 -> MEBRAINS -> NMT2Sym -> MEBRAINS -> Yerkes19      4    0.409290       3.363e+05
 Yerkes19 -> NMT2Sym -> MEBRAINS -> NMT2Sym -> Yerkes19       4    0.298618       2.943e+05
+Yerkes19 -> D99 -> CIVETNMT -> Yerkes19                      3    0.098510       3.824e+05
+Yerkes19 -> CIVETNMT -> D99 -> CIVETNMT -> Yerkes19          4    0.090063       3.122e+05
 Yerkes19 -> CIVETNMT -> Yerkes19                             2    0.087497       3.173e+05
 Yerkes19 -> CIVETNMT -> NMT2Sym -> CIVETNMT -> Yerkes19      4    0.059216       3.364e+05
 Yerkes19 -> CIVETNMT -> MEBRAINS -> CIVETNMT -> Yerkes19     4    0.027125       3.355e+05
+Yerkes19 -> MEBRAINS -> D99 -> CIVETNMT -> Yerkes19          4   -0.029357       3.642e+05
 Yerkes19 -> D99 -> MEBRAINS -> CIVETNMT -> Yerkes19          4   -0.061043       3.409e+05
 Yerkes19 -> MEBRAINS -> CIVETNMT -> Yerkes19                 3   -0.076142       3.313e+05
+Yerkes19 -> NMT2Sym -> D99 -> CIVETNMT -> Yerkes19           4   -0.097256       3.620e+05
 Yerkes19 -> NMT2Sym -> CIVETNMT -> Yerkes19                  3   -0.106724       3.784e+05
 Yerkes19 -> D99 -> NMT2Sym -> CIVETNMT -> Yerkes19           4   -0.124587       3.796e+05
 Yerkes19 -> NMT2Sym -> MEBRAINS -> CIVETNMT -> Yerkes19      4   -0.201363       3.632e+05
 Yerkes19 -> MEBRAINS -> NMT2Sym -> CIVETNMT -> Yerkes19      4   -0.208493       3.824e+05
 ------------------------------------------------------------------------------------------
-Total cycles: 46
-Mean Pearson r: 0.583381
+Total cycles: 53
+Mean Pearson r: 0.557248
