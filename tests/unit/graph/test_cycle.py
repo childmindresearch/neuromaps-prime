@@ -351,10 +351,9 @@ class TestGraphCycle:
         results = run_cycle_test(
             rotation_graph,
             "A",
-            rotation_metric,
+            lambda _density: rotation_metric,
             self.HEMISPHERE,
             workdir=tmp_path,
-            density=self.DENSITY,
         )
 
         paths = {result.path for result in results}
@@ -386,7 +385,6 @@ class TestGraphCycle:
             ("A", "C"),
             self.HEMISPHERE,
             workdir=tmp_path,
-            density=self.DENSITY,
         )
 
         # Transform metric through the intermediate space B.
@@ -396,7 +394,6 @@ class TestGraphCycle:
             ("A", "B", "C"),
             self.HEMISPHERE,
             workdir=tmp_path,
-            density=self.DENSITY,
         )
 
         pearson_r, max_abs_diff = score_roundtrip(
