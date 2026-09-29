@@ -4,6 +4,7 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/childmindresearch/neuromaps-prime/blob/main/LICENSE)
 [![pages](https://img.shields.io/badge/api-docs-blue)](https://childmindresearch.github.io/neuromaps-prime)
+[![DOI](https://zenodo.org/badge/1062622567.svg)](https://doi.org/10.5281/zenodo.23019745)
 
 The `neuromaps-prime` toolbox integrates multiscale, multimodal annotations across NHP
 brains, enabling comprehensive comparative analyses of brain organization. This package

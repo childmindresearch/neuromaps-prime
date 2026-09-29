@@ -57,6 +57,8 @@ logger = logging.getLogger(__name__)
 
 HEMISPHERES = ("left", "right")
 MAX_CYCLE_LENGTH: Final = 4
+# Include cross-species bridge cycles in the sweep.
+SAME_SPECIES_ONLY: Final = False
 
 
 def _resolve_output_dir(base_dir: Path) -> Path:
@@ -281,43 +283,35 @@ def _save_cycle_results(
 def _run_origin_hemisphere(
     graph: NeuromapsGraph, origin: str, hemisphere: Hemisphere, output_dir: Path
 ) -> int:
-    """Run all cycles for one origin and hemisphere via the shared engine."""
+    """Run all cycles for one origin and hemisphere via the shared engine.
+
+    Seeds are cached per density so paths that share a seed density reuse
+    one metric file.
+    """
     work_dir = resolve_artifact_dir(output_dir / f"work_{origin}_{hemisphere}")
 
-    try:
-        density = graph.find_highest_density(origin)
+    seeds: dict[str, Path] = {}
 
-        metric_file = make_sphere(
-            graph=graph,
-            origin=origin,
-            density=density,
-            hemisphere=hemisphere,
-            output_dir=work_dir,
-        )
-
-    except (
-        AssertionError,
-        FileNotFoundError,
-        OSError,
-        ValueError,
-        RuntimeError,
-    ) as exc:
-        logger.warning(
-            "Skipping %s (%s): could not seed origin metric: %s",
-            origin,
-            hemisphere,
-            exc,
-        )
-        return 0
+    def seed_factory(density: str) -> Path:
+        if density not in seeds:
+            seeds[density] = make_sphere(
+                graph=graph,
+                origin=origin,
+                density=density,
+                hemisphere=hemisphere,
+                output_dir=work_dir,
+            )
+        return seeds[density]
 
     results = run_cycle_test(
         graph,
         origin,
-        metric_file,
+        seed_factory,
         hemisphere,
         workdir=work_dir,
         max_length=MAX_CYCLE_LENGTH,
         allow_revisits=True,
+        same_species_only=SAME_SPECIES_ONLY,
     )
 
     logger.info("Executed %d cycles for %s (%s)", len(results), origin, hemisphere)

@@ -6,7 +6,7 @@ permissions:
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened] # test + serve plot; no canonical write
+    types: [opened, synchronize, reopened, ready_for_review] # test + serve plot; no canonical write
   pull_request_target:
     types: [closed] # merged -> record; closed unmerged -> clean up the preview
   push:
@@ -23,7 +23,7 @@ env:
 
 jobs:
   test:
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'pull_request' && github.event.pull_request.draft == false) || github.event_name == 'workflow_dispatch'
     runs-on: arcana
     environment: self-hosted-actions
     timeout-minutes: 180
