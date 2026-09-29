@@ -43,6 +43,19 @@
         url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: CIVETNMT
+  to: NMT2Asym
+  surfaces:
+    CIVET:
+      41k:
+        midthickness:
+          left: 
+          right: 
+        sphere:
+          left: 
+          right: 
+      references:
+
+- from: CIVETNMT
   to: Yerkes19
   surfaces:
     CIVET:
@@ -130,6 +143,37 @@
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f491a97f5a8d6e96b9aca
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f491ac63a718cdfb8d2ea
+
+- from: D99
+  to: NMT2Asym
+  surfaces:
+    RheMAPSurf_standard:
+      168k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.D99-to-NMTv2.0-asym.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.D99-to-NMTv2.0-asym.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+    RheMAPSurf_approx_volume:
+      168k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.D99-to-NMTv2.0-asym.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.D99-to-NMTv2.0-asym.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+
+    CIVET:
+      41k:
+        midthickness:
+          left: 
+          right: 
+        sphere:
+          left: 
+          right: 
 
 - from: D99
   to: Yerkes19
@@ -232,6 +276,36 @@
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49fa3a67df4a7bb8cdda
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49f92b160b523a6ba0cc
+
+- from: MEBRAINS
+  to: NMT2Asym
+  surfaces:
+    RheMAPSurf_standard:
+      101k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.MEBRAINS-to-NMTv2.0-asym.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.MEBRAINS-to-NMTv2.0-asym.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+    RheMAPSurf_approx_volume:
+      101k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.MEBRAINS-to-NMTv2.0-asym.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.MEBRAINS-to-NMTv2.0-asym.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+    CIVET:
+      101k:
+        midthickness:
+          left: 
+          right:
+        sphere:
+          left: 
+          right: 
 
 - from: MEBRAINS
   to: Yerkes19
@@ -373,6 +447,116 @@
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d353e6dfd1a99b8c771
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d359bf888fc296b991e
 
+- from: NMT2Asym
+  to: CIVETNMT
+  surfaces:
+    CIVET:
+      41k:
+        midthickness:
+          left: 
+          right: 
+        sphere:
+          left: 
+          right: 
+      references:
+      - citation: Lepage, C., et al. 2021. NeuroImage. 227:117622.
+        doi: 10.1016/j.neuroimage.2020.
+        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
+
+- from: NMT2Asym
+  to: D99
+  surfaces:
+    RheMAPSurf_standard:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.NMTv2.0-asym-to-D99.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.NMTv2.0-asym-to-D99.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+    RheMAPSurf_approx_volume:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.NMTv2.0-asym-to-D99.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.NMTv2.0-asym-to-D99.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+    CIVET:
+      41k:
+        midthickness:
+          left: 
+          right:
+        sphere:
+          left: 
+          right:
+      references:
+      - citation: Lepage, C., et al. 2021. NeuroImage. 227:117622.
+        doi: 10.1016/j.neuroimage.2020.117622
+        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
+
+- from: NMT2Asym
+  to: MEBRAINS
+  surfaces:
+    RheMAPSurf_standard:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.NMTv2.0-asym-to-MEBRAINS.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.NMTv2.0-asym-to-MEBRAINS.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+    RheMAPSurf_approx_volume:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.NMTv2.0-asym-to-MEBRAINS.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.NMTv2.0-asym-to-MEBRAINS.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+    CIVET:
+      41k:
+        midthickness:
+          left: 
+          right: 
+        sphere:
+          left: 
+          right: 
+
+- from: NMT2Asym
+  to: Yerkes19
+  surfaces:
+    RheMAPSurf_standard:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.NMTv2.0-asym-to-YRK.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.NMTv2.0-asym-to-YRK.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+    RheMAPSurf_approx_volume:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.NMTv2.0-asym-to-YRK.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.NMTv2.0-asym-to-YRK.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+    CIVET:
+      41k:
+        midthickness:
+          left: 
+          right: 
+        sphere:
+          left: 
+          right: 
+
 - from: Yerkes19
   to: CIVETNMT
   surfaces:
@@ -478,3 +662,33 @@
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4abcedf908b2217df52f
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4abc1e78bf36907df879
+
+- from: Yerkes19
+  to: NMT2Asym
+  surfaces:
+    RheMAPSurf_standard:
+      32k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.YRK-to-NMTv2.0-asym.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.YRK-to-NMTv2.0-asym.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+    RheMAPSurf_approx_volume:
+      32k:
+        sphere:
+          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.YRK-to-NMTv2.0-asym.sphere.reg.surf.gii
+          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.YRK-to-NMTv2.0-asym.sphere.reg.surf.gii
+      references:
+      - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
+        doi: 10.5281/zenodo.15642801
+        url: https://zenodo.org/records/15642801
+    CIVET:
+      32k:
+        midthickness:
+          left: 
+          right: 
+        sphere:
+          left: 
+          right: 
