@@ -337,6 +337,22 @@ class TestGraphCycle:
         with pytest.raises(ValueError, match="not in the 'surface_to_surface' layer"):
             find_return_paths(rotation_graph, "unknown")
 
+    def test_find_return_paths_respects_species_filter(
+        self, rotation_graph: NeuromapsGraph
+    ) -> None:
+        """Cycles crossing a species boundary are excluded by default.
+
+        Assigning node ``C`` a different species drops its cycles from the
+        default enumeration; ``same_species_only=False`` restores them.
+        """
+        rotation_graph.nodes["C"]["data"].species = "other"
+
+        same_species = find_return_paths(rotation_graph, "A")
+        all_species = find_return_paths(rotation_graph, "A", same_species_only=False)
+
+        assert all(set(path) <= {"A", "B"} for path in same_species)
+        assert set(all_species) == self.EXPECTED_CYCLES
+
     @pytest.mark.usefixtures("patch_metric_resample")
     def test_closed_cycles_preserve_metric(
         self, rotation_graph: NeuromapsGraph, rotation_metric: Path, tmp_path: Path
@@ -351,10 +367,9 @@ class TestGraphCycle:
         results = run_cycle_test(
             rotation_graph,
             "A",
-            rotation_metric,
+            lambda _density: rotation_metric,
             self.HEMISPHERE,
             workdir=tmp_path,
-            density=self.DENSITY,
         )
 
         paths = {result.path for result in results}
@@ -386,7 +401,6 @@ class TestGraphCycle:
             ("A", "C"),
             self.HEMISPHERE,
             workdir=tmp_path,
-            density=self.DENSITY,
         )
 
         # Transform metric through the intermediate space B.
@@ -396,7 +410,6 @@ class TestGraphCycle:
             ("A", "B", "C"),
             self.HEMISPHERE,
             workdir=tmp_path,
-            density=self.DENSITY,
         )
 
         pearson_r, max_abs_diff = score_roundtrip(
