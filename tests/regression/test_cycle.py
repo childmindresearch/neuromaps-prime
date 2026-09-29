@@ -57,6 +57,8 @@ logger = logging.getLogger(__name__)
 
 HEMISPHERES = ("left", "right")
 MAX_CYCLE_LENGTH: Final = 4
+# Exclude cross-species cycles (e.g. macaque <-> human bridge spaces).
+SAME_SPECIES_ONLY: Final = False
 
 
 def _resolve_output_dir(base_dir: Path) -> Path:
@@ -310,6 +312,7 @@ def _run_origin_hemisphere(
         workdir=work_dir,
         max_length=MAX_CYCLE_LENGTH,
         allow_revisits=True,
+        same_species_only=SAME_SPECIES_ONLY,
     )
 
     logger.info("Executed %d cycles for %s (%s)", len(results), origin, hemisphere)

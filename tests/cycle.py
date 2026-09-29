@@ -25,6 +25,12 @@ seeded at the highest density shared by the origin and the first hop's
 target, and every hop resamples onto the density shared by its target and
 the next hop's target, so a closed path returns to the seed mesh.
 
+By default, cycles are restricted to a single species: return paths that
+cross a species boundary (for example, macaque <-> human bridge spaces) are
+not enumerated, so each species' round-trip fidelity is measured against its
+own template network. Pass ``same_species_only=False`` to evaluate
+cross-species cycles as well.
+
 The cycle evaluation operates on complete transformation paths rather than
 individual edges, allowing errors introduced across multiple transforms and
 resampling operations to be assessed together.
@@ -155,12 +161,15 @@ def find_return_paths(
     edge_type: str = NeuromapsGraph.surface_to_surface_key,
     max_length: int | None = None,
     allow_revisits: bool = False,
+    same_species_only: bool = True,
 ) -> list[tuple[str, ...]]:
     """Enumerate directed return paths from an origin space.
 
     By default, paths are directed simple cycles. When ``allow_revisits`` is
     enabled, paths consist of an outbound simple leg and an inbound simple leg,
-    permitting bridge spaces to be visited once in each direction.
+    permitting bridge spaces to be visited once in each direction. By default,
+    only spaces sharing the origin's species are traversed; pass
+    ``same_species_only=False`` to include cross-species bridge spaces.
 
     Args:
         graph: Populated :class:`NeuromapsGraph`.
@@ -168,6 +177,7 @@ def find_return_paths(
         edge_type: Graph edge layer to traverse.
         max_length: Maximum number of transformation hops.
         allow_revisits: Allow nodes to occur once on each leg.
+        same_species_only: Restrict traversal to the origin's species.
 
     Returns:
         Paths sorted by hop count (length) and then lexicographically.
@@ -178,6 +188,15 @@ def find_return_paths(
         raise ValueError(
             f"Origin space '{origin}' is not in the '{edge_type}' layer. "
             f"Available: {sorted(subgraph.nodes)}"
+        )
+
+    if same_species_only:
+        origin_species = graph.get_node_data(origin).species
+
+        subgraph = subgraph.subgraph(
+            node
+            for node in subgraph.nodes
+            if graph.get_node_data(node).species == origin_species
         )
 
     if allow_revisits:
@@ -543,6 +562,7 @@ def run_cycle_test(
     workdir: str | Path | None = None,
     max_length: int | None = None,
     allow_revisits: bool = False,
+    same_species_only: bool = True,
     add_edge: bool = False,
 ) -> list[CycleResult]:
     """Execute and score all return paths from an origin.
@@ -550,7 +570,9 @@ def run_cycle_test(
     Each return path is seeded at the highest density shared by the origin
     and the first hop's target (``NeuromapsGraph.find_common_density``), so
     cycles run at the highest resolution the transformation network actually
-    supports rather than the origin's highest registered density.
+    supports rather than the origin's highest registered density. By default,
+    only return paths within the origin's species are evaluated; pass
+    ``same_species_only=False`` to include cross-species bridge cycles.
 
     Shared execution engine for cycle testing: unit tests drive it against a
     synthetic graph, while regression tests drive it against the real
@@ -568,6 +590,7 @@ def run_cycle_test(
             the test's pytest ``tmp_path`` in tests.
         max_length: Maximum number of transformation hops.
         allow_revisits: Allow bridge nodes to occur once on each leg.
+        same_species_only: Restrict return paths to the origin's species.
         add_edge: Whether transformations may mutate the graph.
 
     Returns:
@@ -577,7 +600,11 @@ def run_cycle_test(
     workdir = resolve_artifact_dir(DEFAULT_WORKDIR, explicit=workdir)
 
     paths = find_return_paths(
-        graph, origin, max_length=max_length, allow_revisits=allow_revisits
+        graph,
+        origin,
+        max_length=max_length,
+        allow_revisits=allow_revisits,
+        same_species_only=same_species_only,
     )
 
     results: list[CycleResult] = []
