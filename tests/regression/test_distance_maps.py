@@ -9,6 +9,11 @@ pairs only). Transforms run with ``add_edge=False`` so the graph is left
 unmutated. Correlation is signed -- a low or negative r on a transform is the
 red flag this suite is meant to surface.
 
+Pairs run at the densities the transformation network actually supports: a
+source's map is transformed from the highest density it shares with the
+target (``NeuromapsGraph.find_common_density``) and scored against the
+target's native map at its own highest density.
+
 This is a pure producer: it records per-seed matrices, heatmaps, and a
 timestamped run-summary CSV, and the pytest checks only confirm the
 correlations are well-formed; version-to-version comparison is left to the
@@ -70,10 +75,15 @@ _SEED_AXES: dict[str, tuple[int, Callable[[np.ndarray], int]]] = {
 
 
 class StagedMaps(NamedTuple):
-    """Native seed maps, staged metric files, and densities, keyed by space."""
+    """Native seed maps, staged metric files, and densities, keyed by space.
+
+    ``files`` is keyed by ``(space, density)``: a space's seed maps are staged
+    at every density it transforms from, while ``native`` holds its
+    highest-density maps, the correlation targets.
+    """
 
     native: dict[str, dict[str, np.ndarray]]
-    files: dict[str, dict[str, Path]]
+    files: dict[tuple[str, str], dict[str, Path]]
     density: dict[str, str]
 
 
@@ -157,20 +167,53 @@ def pearson(a: np.ndarray, b: np.ndarray) -> float:
     return float(corr)
 
 
+def _required_source_densities(
+    graph: NeuromapsGraph, space: str, spaces: list[str]
+) -> list[str]:
+    """Densities at which ``space``'s seed maps must be staged as a source.
+
+    Each target pair needs the highest density the space's atlases share with
+    its transforms to that target; pairs sharing no density are unreachable
+    and need no staging.
+    """
+    densities: set[str] = set()
+    for dst in spaces:
+        if dst == space:
+            continue
+        try:
+            densities.add(graph.find_common_density(space, dst))
+        except ValueError:
+            continue
+    return sorted(densities, key=lambda d: int(d.removesuffix("k")))
+
+
 def _stage_native_maps(
     graph: NeuromapsGraph, spaces: list[str], hemisphere: str, workdir: Path
 ) -> StagedMaps:
-    """Compute native maps per space and stage each as a metric file."""
+    """Compute native maps per space and stage seed maps at each source density.
+
+    The transformer expects its input on the source mesh it transforms from,
+    so a space's seed maps are staged at every outgoing density in addition to
+    its native (highest-density) maps, which are the correlation targets.
+    """
     native: dict[str, dict[str, np.ndarray]] = {}
-    files: dict[str, dict[str, Path]] = {}
+    files: dict[tuple[str, str], dict[str, Path]] = {}
     density: dict[str, str] = {}
     for space in spaces:
         density[space] = graph.find_highest_density(space)
         native[space] = compute_node_maps(graph, space, density[space], hemisphere)
-        files[space] = {
-            seed: write_metric(workdir / f"{space}_{seed}_{hemisphere}.func.gii", data)
-            for seed, data in native[space].items()
-        }
+        for src_density in _required_source_densities(graph, space, spaces):
+            if src_density == density[space]:
+                maps = native[space]
+            else:
+                maps = compute_node_maps(graph, space, src_density, hemisphere)
+            files[(space, src_density)] = {
+                seed: write_metric(
+                    workdir / f"{space}_{src_density}_{seed}_{hemisphere}.func.gii",
+                    data,
+                )
+                for seed, data in maps.items()
+            }
     return StagedMaps(native, files, density)
 
 
@@ -180,13 +223,16 @@ def _transform_similarity(
     dst: str,
     src_file: Path,
     dst_native: np.ndarray,
-    density: dict[str, str],
+    src_density: str,
+    dst_density: str,
     hemisphere: str,
     out: Path,
 ) -> float:
     """Transform one map ``src -> dst`` and correlate it against dst's native map.
 
-    Returns NaN when the pair is unreachable or the transform fails.
+    The map is transformed from ``src`` at ``src_density`` onto ``dst``'s
+    ``dst_density`` sphere. Returns NaN when the pair is unreachable or the
+    transform fails.
     """
     try:
         result = graph.surface_to_surface_transformer(
@@ -196,8 +242,8 @@ def _transform_similarity(
             target_space=dst,
             hemisphere=hemisphere,
             output_file_path=str(out),
-            source_density=density[src],
-            target_density=density[dst],
+            source_density=src_density,
+            target_density=dst_density,
             add_edge=False,
         )
     except Exception as exc:
@@ -216,21 +262,31 @@ def _build_seed_matrix(
     hemisphere: str,
     workdir: Path,
 ) -> pd.DataFrame:
-    """Assemble the source-by-target correlation matrix for one seed map."""
+    """Assemble the source-by-target correlation matrix for one seed map.
+
+    Each pair transforms from the highest density the source shares with the
+    target; pairs sharing no density stay NaN.
+    """
     matrix = pd.DataFrame(index=spaces, columns=spaces, dtype=float)
     for src in spaces:
         for dst in spaces:
             if src == dst:
                 matrix.loc[src, dst] = 1.0
                 continue
+            try:
+                src_density = graph.find_common_density(src, dst)
+                src_file = staged.files[(src, src_density)][seed]
+            except ValueError:
+                continue
             out = workdir / f"{src}_to_{dst}_{seed}_{hemisphere}.func.gii"
             matrix.loc[src, dst] = _transform_similarity(
                 graph,
                 src,
                 dst,
-                staged.files[src][seed],
+                src_file,
                 staged.native[dst][seed],
-                staged.density,
+                src_density,
+                staged.density[dst],
                 hemisphere,
                 out,
             )
