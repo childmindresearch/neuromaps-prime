@@ -12,7 +12,9 @@ red flag this suite is meant to surface.
 Pairs run at the densities the transformation network actually supports: a
 source's map is transformed from the highest density it shares with the
 target (``NeuromapsGraph.find_common_density``) and scored against the
-target's native map at its own highest density.
+target's native map at its own highest density. By default, only pairs within
+a single species are scored; pass ``same_species_only=False`` to include
+cross-species bridge pairs.
 
 This is a pure producer: it records per-seed matrices, heatmaps, and a
 timestamped run-summary CSV, and the pytest checks only confirm the
@@ -28,7 +30,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, Final, NamedTuple
 
 import matplotlib.pyplot as plt
 import nibabel as nib
@@ -54,6 +56,8 @@ SEEDS = ("caudal", "lateral", "dorsal")
 SURFACE_TYPE = "midthickness"
 HEMISPHERE = "left"
 SURFACE_EDGE = "surface_to_surface"
+# Include cross-species bridge pairs in the scored matrices.
+SAME_SPECIES_ONLY: Final = False
 
 # Where run artifacts (per-seed CSVs, heatmaps, timestamped summaries) go.
 OUTPUT_ENV_VAR = "NEUROMAPS_DISTANCE_OUTPUT_DIR"
@@ -103,15 +107,28 @@ class DistanceMapResults(NamedTuple):
     spaces: list[str]
 
 
-def find_direct_pairs(graph: NeuromapsGraph, spaces: list[str]) -> set[tuple[str, str]]:
-    """Return ordered space pairs joined by a single surface edge (no concatenation)."""
+def _is_cross_species(graph: NeuromapsGraph, a: str, b: str) -> bool:
+    """Whether two spaces belong to different species."""
+    return graph.get_node_data(a).species != graph.get_node_data(b).species
+
+
+def find_direct_pairs(
+    graph: NeuromapsGraph, spaces: list[str], *, same_species_only: bool = True
+) -> set[tuple[str, str]]:
+    """Return ordered space pairs joined by a single surface edge (no concatenation).
+
+    By default, pairs crossing a species boundary are excluded.
+    """
     space_set = set(spaces)
     subgraph = graph.utils.get_subgraph(SURFACE_EDGE)
-    return {
+    pairs = {
         (u, v)
         for u, v, _key in subgraph.edges
         if u != v and u in space_set and v in space_set
     }
+    if same_species_only:
+        pairs = {(u, v) for u, v in pairs if not _is_cross_species(graph, u, v)}
+    return pairs
 
 
 def load_surface_coords(path: str | Path) -> np.ndarray:
@@ -261,17 +278,22 @@ def _build_seed_matrix(
     staged: StagedMaps,
     hemisphere: str,
     workdir: Path,
+    *,
+    same_species_only: bool = True,
 ) -> pd.DataFrame:
     """Assemble the source-by-target correlation matrix for one seed map.
 
     Each pair transforms from the highest density the source shares with the
-    target; pairs sharing no density stay NaN.
+    target; pairs sharing no density stay NaN. By default, pairs crossing a
+    species boundary are skipped.
     """
     matrix = pd.DataFrame(index=spaces, columns=spaces, dtype=float)
     for src in spaces:
         for dst in spaces:
             if src == dst:
                 matrix.loc[src, dst] = 1.0
+                continue
+            if same_species_only and _is_cross_species(graph, src, dst):
                 continue
             try:
                 src_density = graph.find_common_density(src, dst)
@@ -401,22 +423,39 @@ def write_run_summary(output_dir: Path, summary: pd.DataFrame) -> Path:
 
 
 def run_distance_map_test(
-    graph: NeuromapsGraph, hemisphere: str, workdir: Path, output_dir: Path
+    graph: NeuromapsGraph,
+    hemisphere: str,
+    workdir: Path,
+    output_dir: Path,
+    *,
+    same_species_only: bool = True,
 ) -> DistanceMapResults:
-    """Compute the connected and direct matrices per seed and record artifacts."""
+    """Compute the connected and direct matrices per seed and record artifacts.
+
+    By default, only pairs within a single species are scored; pass
+    ``same_species_only=False`` to include cross-species bridge pairs.
+    """
     spaces = get_valid_spaces(graph, hemisphere, surface_type=SURFACE_TYPE)
     logger.info("Distance-map test over %d spaces: %s", len(spaces), spaces)
     if len(spaces) < 2:
         raise RuntimeError("Need at least two spaces with the seed surface.")
 
-    direct_pairs = find_direct_pairs(graph, spaces)
+    direct_pairs = find_direct_pairs(graph, spaces, same_species_only=same_species_only)
     logger.info("%d directly connected (single-edge) pairs", len(direct_pairs))
     staged = _stage_native_maps(graph, spaces, hemisphere, workdir)
 
     connected: dict[str, pd.DataFrame] = {}
     direct: dict[str, pd.DataFrame] = {}
     for seed in SEEDS:
-        cmat = _build_seed_matrix(graph, spaces, seed, staged, hemisphere, workdir)
+        cmat = _build_seed_matrix(
+            graph,
+            spaces,
+            seed,
+            staged,
+            hemisphere,
+            workdir,
+            same_species_only=same_species_only,
+        )
         dmat = _direct_only(cmat, direct_pairs)
         connected[seed] = cmat
         direct[seed] = dmat
@@ -450,9 +489,10 @@ class TestDistanceMaps:
 
     A class-scoped run scores both the connected and direct scopes across all
     spaces, then records per-seed matrices, heatmaps, and a timestamped
-    run-summary CSV. The tests only confirm the correlations are well-formed;
-    version-to-version comparison is left to the accumulated summaries and
-    ``scripts/plot_distance_history.py``.
+    run-summary CSV. Cross-species bridge pairs are included per
+    ``SAME_SPECIES_ONLY``. The tests only confirm the correlations are
+    well-formed; version-to-version comparison is left to the accumulated
+    summaries and ``scripts/plot_distance_history.py``.
 
     Outputs land under ``<tmp>/distance_map_outputs`` unless
     ``NEUROMAPS_DISTANCE_OUTPUT_DIR`` points at a persistent folder.
@@ -469,7 +509,9 @@ class TestDistanceMaps:
         )
         logger.info("Distance-map artifacts -> %s", output_dir)
         workdir = tmp_path_factory.mktemp("distance_work")
-        return run_distance_map_test(graph, HEMISPHERE, workdir, output_dir)
+        return run_distance_map_test(
+            graph, HEMISPHERE, workdir, output_dir, same_species_only=SAME_SPECIES_ONLY
+        )
 
     def test_distance_maps_all_connected(
         self, distance_map_run: DistanceMapResults
