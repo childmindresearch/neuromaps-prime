@@ -4,8 +4,6 @@ MEBRAINS:
   references:
   - citation: Balan, PF, et al. 2024. Imaging Neuroscience, 2:1–26
     doi: 10.1162/imag_a_00077
-  - citation: Balan, P. 2024. Imaging Neuroscience
-    doi: 10.1162/imag_a_00077
   surfaces:
     101k:
       sphere:
