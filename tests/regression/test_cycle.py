@@ -57,7 +57,7 @@ logger = logging.getLogger(__name__)
 
 HEMISPHERES = ("left", "right")
 MAX_CYCLE_LENGTH: Final = 4
-# Exclude cross-species cycles (e.g. macaque <-> human bridge spaces).
+# Include cross-species bridge cycles in the sweep.
 SAME_SPECIES_ONLY: Final = False
 
 
@@ -285,9 +285,8 @@ def _run_origin_hemisphere(
 ) -> int:
     """Run all cycles for one origin and hemisphere via the shared engine.
 
-    The engine seeds each cycle at the highest density shared with the
-    cycle's first target; seeds are cached per density so paths that share a
-    seed density reuse one metric file.
+    Seeds are cached per density so paths that share a seed density reuse
+    one metric file.
     """
     work_dir = resolve_artifact_dir(output_dir / f"work_{origin}_{hemisphere}")
 

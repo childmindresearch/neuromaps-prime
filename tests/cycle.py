@@ -19,21 +19,11 @@ This module provides reusable machinery to:
 3. compare the returned metric against the original using Pearson correlation
    and maximum vertex-wise absolute difference.
 
-Cycles run at the densities the transformation network actually supports
-rather than the highest density registered on each space: each return path is
-seeded at the highest density shared by the origin and the first hop's
-target, and every hop resamples onto the density shared by its target and
-the next hop's target, so a closed path returns to the seed mesh.
-
-By default, cycles are restricted to a single species: return paths that
-cross a species boundary (for example, macaque <-> human bridge spaces) are
-not enumerated, so each species' round-trip fidelity is measured against its
-own template network. Pass ``same_species_only=False`` to evaluate
-cross-species cycles as well.
-
-The cycle evaluation operates on complete transformation paths rather than
-individual edges, allowing errors introduced across multiple transforms and
-resampling operations to be assessed together.
+Cycles run at the densities the transformation network actually supports:
+each path is seeded at the density the origin shares with the first hop's
+target, and each hop resamples onto the density shared with the next hop's
+target. By default, only same-species paths are enumerated; pass
+``same_species_only=False`` to include cross-species bridge cycles.
 
 The unit tests exercise this machinery using a synthetic three-space graph with
 known rotational transforms. Because the synthetic transformations compose to
@@ -68,6 +58,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 Hemisphere = Literal["left", "right"]
+
+# Failures that skip a transformation attempt (next area surface) or a whole
+# cycle (next path); OSError covers FileNotFoundError.
+_SKIP_EXCEPTIONS = (StyxRuntimeError, RuntimeError, OSError, ValueError, TypeError)
 
 
 # -------------------------------------------------------------------------
@@ -278,12 +272,13 @@ def _execute_hop(
 ) -> HopResult:
     """Execute one surface transformation with area-surface fallback.
 
-    The production transformer is attempted with midthickness first, followed
-    by pial and white if the requested area resource cannot produce a usable
-    output. The source density is estimated from the input file by the
-    production engine; ``target_density`` fixes the output mesh or defers to
-    the engine default when ``None``.
+    The transformer is attempted with midthickness first, followed by pial
+    and white. The source density is estimated from the input file;
+    ``target_density`` fixes the output mesh, or ``None`` defers to the
+    engine default.
     """
+    last_failure: Exception | None = None
+
     for area_resource in ("midthickness", "pial", "white"):
         try:
             result = graph.surface_to_surface_transformer(
@@ -330,14 +325,8 @@ def _execute_hop(
                 metric_values=metric_values,
             )
 
-        except (
-            StyxRuntimeError,
-            RuntimeError,
-            FileNotFoundError,
-            OSError,
-            ValueError,
-            TypeError,
-        ) as exc:
+        except _SKIP_EXCEPTIONS as exc:
+            last_failure = exc
             logger.debug(
                 "Area surface '%s' failed for %s -> %s (%s): %s",
                 area_resource,
@@ -350,7 +339,7 @@ def _execute_hop(
     raise RuntimeError(
         f"Could not execute surface transform "
         f"'{source}' -> '{target}' ({hemisphere}). "
-        f"Tried midthickness, pial, and white."
+        f"Tried midthickness, pial, and white: {last_failure}"
     )
 
 
@@ -395,12 +384,11 @@ def _hop_target_density(
 ) -> str | None:
     """Return the output density for one hop of a transformation path.
 
-    Each hop's output must be a mesh the following hop can transform from, so
-    the hop resamples onto the highest density shared by its target and the
-    next hop's target (``NeuromapsGraph.find_common_density``). For the
-    final hop of a closed path the next hop is the first one, which pins the
-    round trip back onto the seed density. The final hop of an open path
-    defers its target density to the production engine.
+    The hop must land on a mesh the following hop can transform from, so the
+    output is the highest density shared by its target and the next hop's
+    target (``NeuromapsGraph.find_common_density``); a closed path wraps
+    back to its first target on the final hop. The final hop of an open path
+    defers to the production engine (``None``).
     """
     n_hops = len(path) - 1
     closed = n_hops >= 2 and path[-1] == path[0]
@@ -425,12 +413,9 @@ def roundtrip_metric(
 ) -> RoundtripResult:
     """Propagate a metric through every hop in a transformation path.
 
-    The source density of each hop is estimated from the input file by the
-    production engine, and the target density is the highest density shared
-    by the hop's target and the next hop's target, so the metric stays on a
-    mesh the rest of the path can consume. A closed path therefore returns
-    to the seed mesh; the final hop of an open path leaves its target
-    density to the production engine.
+    The source density of each hop is estimated from the input file, and the
+    target density follows ``_hop_target_density``, so a closed path returns
+    to the seed mesh.
 
     Area surfaces are attempted in order:
 
@@ -454,9 +439,9 @@ def roundtrip_metric(
         intermediate hop.
 
     Raises:
-        RuntimeError: If any hop cannot be executed.
-        ValueError: If a hop's target shares no density with the next hop,
-            or if a transformation output cannot be recovered.
+        RuntimeError: If a hop cannot be executed.
+        FileNotFoundError: If a transformation output cannot be recovered.
+        ValueError: If a hop's target shares no density with the next hop.
     """
     workdir = resolve_artifact_dir(DEFAULT_WORKDIR, explicit=workdir)
 
@@ -567,17 +552,14 @@ def run_cycle_test(
 ) -> list[CycleResult]:
     """Execute and score all return paths from an origin.
 
-    Each return path is seeded at the highest density shared by the origin
-    and the first hop's target (``NeuromapsGraph.find_common_density``), so
-    cycles run at the highest resolution the transformation network actually
-    supports rather than the origin's highest registered density. By default,
-    only return paths within the origin's species are evaluated; pass
-    ``same_species_only=False`` to include cross-species bridge cycles.
+    Each path is seeded at the density the origin shares with the first
+    hop's target (``NeuromapsGraph.find_common_density``). Paths that cannot
+    be executed are skipped; by default, only same-species paths are
+    enumerated.
 
     Shared execution engine for cycle testing: unit tests drive it against a
     synthetic graph, while regression tests drive it against the real
-    transformation graph. Individual paths that cannot be executed are
-    skipped, allowing the caller to inspect all successfully executed cycles.
+    transformation graph.
 
     Args:
         graph: Populated :class:`NeuromapsGraph`.
@@ -632,13 +614,7 @@ def run_cycle_test(
                 metric_file, roundtrip.final_metric
             )
 
-        except (
-            StyxRuntimeError,
-            RuntimeError,
-            FileNotFoundError,
-            OSError,
-            ValueError,
-        ) as exc:
+        except _SKIP_EXCEPTIONS as exc:
             logger.warning(
                 "Skipping non-executable cycle %s (%s): %s",
                 " -> ".join(path),

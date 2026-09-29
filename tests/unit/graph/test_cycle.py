@@ -342,9 +342,8 @@ class TestGraphCycle:
     ) -> None:
         """Cycles crossing a species boundary are excluded by default.
 
-        With node ``C`` assigned to a different species, the default
-        enumeration only returns cycles within the origin's species, while
-        ``same_species_only=False`` restores the full cycle set.
+        Assigning node ``C`` a different species drops its cycles from the
+        default enumeration; ``same_species_only=False`` restores them.
         """
         rotation_graph.nodes["C"]["data"].species = "other"
 
