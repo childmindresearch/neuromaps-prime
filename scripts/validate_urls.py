@@ -7,7 +7,7 @@ Usage::
     uv run scripts/validate_urls.py \\
         input_files ... \\
         [--workers 4] [--fail-fast] \\
-        [--verbose]
+        [--skip PATTERN ...] [--verbose]
 
 Or standalone:
     uv run --script validate_urls.py input_files ...
@@ -492,33 +492,52 @@ async def _report_result(result: CheckResult, failed: list[CheckResult]) -> None
         failed.append(result)
 
 
-async def run(index: UrlIndex, *, workers: int, fail_fast: bool) -> list[CheckResult]:
-    """Probe all URLs in *index* concurrently and return failed results.
+async def run(
+    index: UrlIndex,
+    *,
+    workers: int,
+    fail_fast: bool,
+    skip_patterns: tuple[str, ...] = (),
+) -> tuple[list[CheckResult], list[CheckResult]]:
+    """Probe all URLs in *index* concurrently, skipping *skip_patterns*.
 
     Uses ``asyncio`` with a bounded semaphore for concurrency. HTTP 429
     responses are retried with exponential backoff (honouring ``Retry-After``
     when provided). Pending work is cancelled on ``fail_fast`` or
-    ``KeyboardInterrupt``.
+    ``KeyboardInterrupt``. URLs containing any of *skip_patterns* are not
+    probed at all and are reported separately.
 
     Args:
         index: URL index produced by :func:`build_index`.
         workers: Maximum number of in-flight requests.
         fail_fast: If True, stop after the first failure.
+        skip_patterns: Substrings; a URL is skipped (not probed) if it
+            contains any of them.
 
     Returns:
-        List of :class:`CheckResult` where ``ok`` is False.
+        Tuple of ``(failed, skipped)`` :class:`CheckResult` lists — failed
+        where ``ok`` is False, and skipped (not probed) respectively.
     """
     failed: list[CheckResult] = []
+    skipped: list[CheckResult] = []
     semaphore = asyncio.Semaphore(workers)
     connector = aiohttp.TCPConnector(limit=workers)
 
     async with aiohttp.ClientSession(connector=connector, headers=_HEADERS) as session:
-        pending: set[asyncio.Task[CheckResult]] = {
-            asyncio.create_task(
-                _bounded_check(session, semaphore, url, index.sources(url)), name=url
+        pending: set[asyncio.Task[CheckResult]] = set()
+        for url in index.urls():
+            sources = index.sources(url)
+            if any(p in url for p in skip_patterns):
+                log.info("SKIP  %s  (%s)", url, _format_sources(sources))
+                skipped.append(
+                    CheckResult(url, ok=True, detail="skipped", sources=sources)
+                )
+                continue
+            pending.add(
+                asyncio.create_task(
+                    _bounded_check(session, semaphore, url, sources), name=url
+                )
             )
-            for url in index.urls()
-        }
 
         try:
             while pending:
@@ -529,12 +548,12 @@ async def run(index: UrlIndex, *, workers: int, fail_fast: bool) -> list[CheckRe
                     await _report_result(task.result(), failed)
                     if fail_fast and failed:
                         await _cancel_pending(pending)
-                        return failed
+                        return failed, skipped
         except KeyboardInterrupt:
             await _cancel_pending(pending)
             sys.exit(130)
 
-    return failed
+    return failed, skipped
 
 
 def _configure_logging(*, verbose: bool) -> None:
@@ -564,11 +583,21 @@ def main() -> None:
         "--fail-fast", action="store_true", help="Exit 1 on first failure"
     )
     parser.add_argument(
+        "--skip",
+        action="append",
+        default=[],
+        metavar="PATTERN",
+        help="Skip URLs containing PATTERN without probing (repeatable)",
+    )
+    parser.add_argument(
         "--verbose", "-v", action="store_true", help="Enable DEBUG logging"
     )
     args = parser.parse_args()
 
     _configure_logging(verbose=args.verbose)
+
+    # Drop empty patterns (an empty substring would match every URL).
+    skip_patterns = tuple(p for p in args.skip if p)
 
     yaml_files = discover_yamls(args.files)
     index = build_index(yaml_files)
@@ -583,10 +612,23 @@ def main() -> None:
 
     log.info("Checking %d unique URLs with %d workers...\n", len(index), args.workers)
 
-    failed = asyncio.run(run(index, workers=args.workers, fail_fast=args.fail_fast))
+    failed, skipped = asyncio.run(
+        run(
+            index,
+            workers=args.workers,
+            fail_fast=args.fail_fast,
+            skip_patterns=skip_patterns,
+        )
+    )
 
     log.info("=" * 60)
-    log.info("Results: %d/%d OK", len(index) - len(failed), len(index))
+    log.info(
+        "Results: %d/%d OK",
+        len(index) - len(failed) - len(skipped),
+        len(index) - len(skipped),
+    )
+    if skipped:
+        log.info("Skipped: %d (matched a --skip pattern)", len(skipped))
 
     if failed:
         log.error("Failed URLs:")
