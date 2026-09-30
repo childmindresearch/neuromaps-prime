@@ -2,9 +2,8 @@ Yerkes19:
   species: macaque
   description: Yerkes19 Macaque Atlas
   references:
-    - citation: Van Essen, et al. 2012. Cerebral Cortex. 22.
+    - citation: Van Essen, DC, et al. 2012. Cerebral Cortex, 22(10):2227–2240
       doi: 10.1093/cercor/bhr290
-      url: https://pubmed.ncbi.nlm.nih.gov/22052704/
   surfaces:
     10k:
       sphere:
@@ -27,7 +26,8 @@ Yerkes19:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a64572881301679aba
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37a752a710f2c2b40
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 
           - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a680941e7c8fa7ad49'
@@ -36,149 +36,176 @@ Yerkes19:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9053d12ddf650bf928bf75
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9053d00d2105481c92fe6c
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Yeo2011 17 Network parcellation (N=1000). Human-to-monkey.
         PC_Markov:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37da771710ca7abbd
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a580941e7c8fa7ad47
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Markov monkey cortical parcellation.
         PC_B05:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb79d9a36f6de28bf7c
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba879a4dae5d374bd5
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - B05 monkey cortical parcellation.
         PC_Glasser2016:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb98dac1b881128c0d4
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbbdef9a8f7755a79ab
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Glasser 2016 multi-modal parcellation. Human-to-monkey.
         PC_Broddman09:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905309bf55aeca1f9300ef
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a90530a441f17df1392feeb
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Brodmann 1909 areal parcellation. Human-to-monkey. 
         PC_Schaefer7Networks_100:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb71614316345a7577
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba79a37b24f6374aa8
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer7Networks_200:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbadef9a8f7755a79a6
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb18a30f74a028bd46
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer7Networks_300:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb8dac1b881128c0d8
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbc79a37b24f6374ab0
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer7Networks_400:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb18a30f74a028bd44
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba17fc47ad57374c15
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer7Networks_500:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb9fd26577264374c10
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbbdef9a8f7755a79a9
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer7Networks_600:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb71614316345a7575
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba9c41aeb6ea5a770a
-          references: 
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          references:
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer7Networks_700:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb9879a4dae5d374bd0
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbaa36044701d28bc99
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer7Networks_800:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba9d9a36f6de28bf86
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb9def9a8f7755a79a4
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer7Networks_900:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbc879a4dae5d374bdc
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba9d9a36f6de28bf8a
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer7Networks_1000:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba9d9a36f6de28bf88
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb0569bfb8965a77ae
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer17Networks_100:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba18a30f74a028bd42
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb818a30f74a028bd3f
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer17Networks_200:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbafd26577264374c15
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb79a37b24f6374aae
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer17Networks_300:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb879a4dae5d374bda
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb17fc47ad57374c19
-          references: 
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          references:
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer17Networks_400:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbcfd26577264374c1f
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb79a37b24f6374aab
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer17Networks_500:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb99c41aeb6ea5a7707
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbafd26577264374c13
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer17Networks_600:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb917fc47ad57374c0e
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbc79a37b24f6374ab2
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer17Networks_700:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba17fc47ad57374c13
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba17fc47ad57374c11
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer17Networks_800:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb9d9a36f6de28bf8d
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba8dac1b881128c0d6
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer17Networks_900:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbc0569bfb8965a77b0
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bb9879a4dae5d374bd2
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         PC_Schaefer17Networks_1000:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb9c41aeb6ea5a770f
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba71614316345a7571
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
         AE:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9076bd108c949d505a774f
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9076bc1564d9fbd31364d9
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Relative surface area expansion.
         FHI:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9076acf17fd92acb1366e8
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a9076ac975e8fa7985a75f8
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Functional connectivity homology index. Cross-species similarity of FC gradient profiles; high in sensory, low in association cortex.
         
@@ -203,156 +230,216 @@ Yerkes19:
         RM_auto_ampa:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ff5369bb2ad30a2d0?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - AMPA receptor density, radioligand [³H]AMPA. Ionotropic glutamate receptor.
         RM_auto_cgp5:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9f80b41cc57830a318?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - GABA_B receptor density, radioligand [³H]CGP54626. Metabotropic inhibitory GABA receptor.
         RM_auto_damp:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa0c46daba5ba12608a?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - M3 muscarinic receptor density, radioligand [³H]4-DAMP. Cholinergic receptor.
         RM_auto_dpat:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa0f5369bb2ad30a2d4?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - 5-HT1A receptor density, radioligand [³H]8-OH-DPAT (dpat). Serotonin receptor.
         RM_auto_dpmg:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ef5369bb2ad30a2c9?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - D1 dopamine receptor density, radioligand [³H]SCH23390. Dopamine receptor.
         RM_auto_flum:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa070b8eb4dc718bbce?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - GABA_A/BZ receptor density, radioligand [³H]flumazenil. Benzodiazepine site of GABA_A receptor.
         RM_auto_kain:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ef5369bb2ad30a2cc?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - Kainate receptor density, radioligand [³H]kainate. Ionotropic glutamate receptor.
         RM_auto_keta:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9f19aff410e118bc73?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - 5-HT2A receptor density, radioligand [³H]ketanserin. Serotonin receptor.
         RM_auto_mk80:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa080b41cc57830a31d?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - NMDA receptor density, radioligand [³H]MK-801. Ionotropic glutamate receptor.
         RM_auto_musc:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1aa087cfdedaeb18bbf8?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - GABA_A receptor density, radioligand [³H]muscimol. Ionotropic inhibitory GABA receptor.
         RM_auto_oxot:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9d246d2a81ad1260bf?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - M2 muscarinic receptor density, radioligand [³H]oxotremorine-M. Cholinergic receptor.
         RM_auto_pire:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9ef5369bb2ad30a2cb?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - M1 muscarinic receptor density, radioligand [³H]pirenzepine. Cholinergic receptor.
         RM_auto_praz:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9d87cfdedaeb18bbf5?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - α1-adrenergic receptor density, radioligand [³H]prazosin. Noradrenergic receptor.
         RM_auto_uk14:
           left: https://files.osf.io/v1/resources/c9zab/providers/osfstorage/6a2c1a9d70b8eb4dc718bbcb?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1007/s00429-021-02437-y
-          - https://doi.org/10.1038/s41593-023-01351-2
+          - citation: Rapan, L, et al. 2022. Brain Structure and Function, 227(4):1247–1263
+            doi: 10.1007/s00429-021-02437-y
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
+          - early-visual receptor architecture from Rapan et al. 2022
+          - broader 14-receptor dataset/gradients mapped to Yerkes19 fromFroudist-Walsh et al. 2023
           - α2-adrenergic receptor density, radioligand [³H]UK-14304. Noradrenergic receptor.
         RM_perNeuron:
           left: https://files.us.osf.io/v1/resources/c9zab/providers/osfstorage/6a8f4a8502afd164fce39fd2?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1038/s41593-023-01351-2
-          - https://balsa.wustl.edu/study/P2Nql
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
           - Receptor density per neuron, summed across all receptor types (companion to the individual per-tracer receptor maps).
         RM_raw:
           left: https://files.us.osf.io/v1/resources/c9zab/providers/osfstorage/6a8f4a80c09f7e48516b124d?view_only=d3c6b547365d4e1f8095e928101ee4a5
           references:
-          - https://doi.org/10.1038/s41593-023-01351-2
-          - https://balsa.wustl.edu/study/P2Nql
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
           - Raw (non-normalized) receptor density, summed across all receptor types. 
         RG_perNeuron:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f4b0e02afd164fce3a045
           references:
-          - https://doi.org/10.1038/s41593-023-01351-2
-          - https://balsa.wustl.edu/study/P2Nql
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
           - Receptor density gradients (per-neuron normalized). 
           - Multi-map - PC1 is the principal receptor gradient, PC2 is 5-HT1A-driven.
         RG_raw:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f4b0879d2d292ee6b1255
           references:
-          - https://doi.org/10.1038/s41593-023-01351-2
-          - https://balsa.wustl.edu/study/P2Nql
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
           - Receptor density gradients (raw, non-normalized). 
           - Multi-map - PC1 is the principal receptor gradient, PC2 is 5-HT1A-driven.
         MM:
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52947a752a710f2c2b26
           references:
-          - https://doi.org/10.1073/pnas.1721653115
+          - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
+            doi: 10.1073/pnas.1721653115
           notes:
           - Myelin map (bias corrected). MacaqueYerkes19 v1.2.
         SMM:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527acd87cca253679b05
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527b80941e7c8fa7ad2d
           references:
-          - https://doi.org/10.1073/pnas.1721653115
+          - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
+            doi: 10.1073/pnas.1721653115
           notes:
           - Smoothed myelin map (bias corrected). MacaqueYerkes19 v1.2.
         CT:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d0d8bf292baf2c2d69
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d07a752a710f2c2b5d
           references:
-          - https://doi.org/10.1073/pnas.1721653115
+          - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
+            doi: 10.1073/pnas.1721653115
           notes:
           - Cortical thickness. MacaqueYerkes19 v1.2.
         CV:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52877a752a710f2c2b1c
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52881541aee377a7af33
           references:
-          - https://doi.org/10.1073/pnas.1721653115
+          - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
+            doi: 10.1073/pnas.1721653115
           notes:
           - Curvature. MacaqueYerkes19 v1.2.
         PC_Yeo7Networks:
@@ -363,51 +450,51 @@ Yerkes19:
         PC_Julich:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f50174012993bc0e3a12f
           references:
-          - https://doi.org/10.1038/s41593-023-01351-2
-          - https://balsa.wustl.edu/study/P2Nql
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
           - Julich cytoarchitectonic parcellation, 109 areas.
           - 'border file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f5012977fe396586b11ef'
         ND:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f448611ea4340aae3a481
           references:
-          - https://doi.org/10.1073/pnas.1010356107
-          - https://balsa.wustl.edu/study/P2Nql
+          - citation: Collins, CE, et al. 2010. Proceedings of the National Academy of Sciences, 107(36):15927–15932
+            doi: 10.1073/pnas.1010356107
           notes:
           - Neuron density.
         CH:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f47bcc14e371e50e3a122
           references:
-          - https://doi.org/10.1016/j.neuron.2021.08.024
-          - https://balsa.wustl.edu/study/P2Nql
+          - citation: Froudist-Walsh, S, et al. 2021. Neuron, 109(21):3500–3520.e13
+            doi: 10.1016/j.neuron.2021.08.024
           notes:
           - Anatomical cortical hierarchy. Complements the intrinsic timescale (Manea et al.) map. 
         DM_treeSize:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f48eac14e371e50e3a1c5
           references:
-          - https://doi.org/10.1016/B0-12-370878-8/00164-6
-          - https://balsa.wustl.edu/study/P2Nql
+          - citation: Elston, GN. 2007. Evolution of Nervous Systems, 1:191–242
+            doi: 10.1016/B0-12-370878-8/00164-6
           notes:
           - Dendritic tree size, layer III pyramidal cells.
         DM_spineCount:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f48eec14e371e50e3a1c7
           references:
-          - https://doi.org/10.1016/B0-12-370878-8/00164-6
-          - https://balsa.wustl.edu/study/P2Nql
+          - citation: Elston, GN. 2007. Evolution of Nervous Systems, 1:191–242
+            doi: 10.1016/B0-12-370878-8/00164-6
           notes:
           - Dendritic spine count, layer III pyramidal cells.
         FG:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f4c0621d2d3ad7e6b14c7
           references:
-          - https://doi.org/10.1016/j.neuroimage.2020.117346
-          - https://balsa.wustl.edu/study/P2Nql
+          - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
+            doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Functional connectivity gradients 1-15 (multi-map, 15 gradients in one file).
         HTR1A:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f526e5e77f8cea96b11cf
           references:
-          - https://doi.org/10.1038/s41593-023-01351-2
-          - https://balsa.wustl.edu/study/P2Nql
+          - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
+            doi: 10.1038/s41593-023-01351-2
           notes:
           - HTR1A (serotonin 1A receptor) gene expression map. Derived from the Allen Human Brain Atlas (AHBA), mapped from human to macaque. 
           - Represents a single gene only, included as a worked example of a cross-species expression annotation.

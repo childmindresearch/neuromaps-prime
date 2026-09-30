@@ -19,9 +19,11 @@ This module provides reusable machinery to:
 3. compare the returned metric against the original using Pearson correlation
    and maximum vertex-wise absolute difference.
 
-The cycle evaluation operates on complete transformation paths rather than
-individual edges, allowing errors introduced across multiple transforms and
-resampling operations to be assessed together.
+Cycles run at the densities the transformation network actually supports:
+each path is seeded at the density the origin shares with the first hop's
+target, and each hop resamples onto the density shared with the next hop's
+target. By default, only same-species paths are enumerated; pass
+``same_species_only=False`` to include cross-species bridge cycles.
 
 The unit tests exercise this machinery using a synthetic three-space graph with
 known rotational transforms. Because the synthetic transformations compose to
@@ -51,11 +53,15 @@ from neuromaps_prime.analysis.images import load_data
 from neuromaps_prime.graph import NeuromapsGraph
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
 
 logger = logging.getLogger(__name__)
 
 Hemisphere = Literal["left", "right"]
+
+# Failures that skip a transformation attempt (next area surface) or a whole
+# cycle (next path); OSError covers FileNotFoundError.
+_SKIP_EXCEPTIONS = (StyxRuntimeError, RuntimeError, OSError, ValueError, TypeError)
 
 
 # -------------------------------------------------------------------------
@@ -149,12 +155,15 @@ def find_return_paths(
     edge_type: str = NeuromapsGraph.surface_to_surface_key,
     max_length: int | None = None,
     allow_revisits: bool = False,
+    same_species_only: bool = True,
 ) -> list[tuple[str, ...]]:
     """Enumerate directed return paths from an origin space.
 
     By default, paths are directed simple cycles. When ``allow_revisits`` is
     enabled, paths consist of an outbound simple leg and an inbound simple leg,
-    permitting bridge spaces to be visited once in each direction.
+    permitting bridge spaces to be visited once in each direction. By default,
+    only spaces sharing the origin's species are traversed; pass
+    ``same_species_only=False`` to include cross-species bridge spaces.
 
     Args:
         graph: Populated :class:`NeuromapsGraph`.
@@ -162,6 +171,7 @@ def find_return_paths(
         edge_type: Graph edge layer to traverse.
         max_length: Maximum number of transformation hops.
         allow_revisits: Allow nodes to occur once on each leg.
+        same_species_only: Restrict traversal to the origin's species.
 
     Returns:
         Paths sorted by hop count (length) and then lexicographically.
@@ -172,6 +182,15 @@ def find_return_paths(
         raise ValueError(
             f"Origin space '{origin}' is not in the '{edge_type}' layer. "
             f"Available: {sorted(subgraph.nodes)}"
+        )
+
+    if same_species_only:
+        origin_species = graph.get_node_data(origin).species
+
+        subgraph = subgraph.subgraph(
+            node
+            for node in subgraph.nodes
+            if graph.get_node_data(node).species == origin_species
         )
 
     if allow_revisits:
@@ -248,15 +267,18 @@ def _execute_hop(
     hemisphere: Hemisphere,
     output_file: Path,
     *,
-    density: str | None,
+    target_density: str | None,
     add_edge: bool,
 ) -> HopResult:
     """Execute one surface transformation with area-surface fallback.
 
-    The production transformer is attempted with midthickness first, followed
-    by pial and white if the requested area resource cannot produce a usable
-    output.
+    The transformer is attempted with midthickness first, followed by pial
+    and white. The source density is estimated from the input file;
+    ``target_density`` fixes the output mesh, or ``None`` defers to the
+    engine default.
     """
+    last_failure: Exception | None = None
+
     for area_resource in ("midthickness", "pial", "white"):
         try:
             result = graph.surface_to_surface_transformer(
@@ -266,8 +288,7 @@ def _execute_hop(
                 target_space=target,
                 hemisphere=hemisphere,
                 output_file_path=output_file,
-                source_density=density,
-                target_density=density,
+                target_density=target_density,
                 area_resource=area_resource,
                 add_edge=add_edge,
             )
@@ -304,14 +325,8 @@ def _execute_hop(
                 metric_values=metric_values,
             )
 
-        except (
-            StyxRuntimeError,
-            RuntimeError,
-            FileNotFoundError,
-            OSError,
-            ValueError,
-            TypeError,
-        ) as exc:
+        except _SKIP_EXCEPTIONS as exc:
+            last_failure = exc
             logger.debug(
                 "Area surface '%s' failed for %s -> %s (%s): %s",
                 area_resource,
@@ -324,7 +339,7 @@ def _execute_hop(
     raise RuntimeError(
         f"Could not execute surface transform "
         f"'{source}' -> '{target}' ({hemisphere}). "
-        f"Tried midthickness, pial, and white."
+        f"Tried midthickness, pial, and white: {last_failure}"
     )
 
 
@@ -364,6 +379,29 @@ def resolve_artifact_dir(
     return resolved
 
 
+def _hop_target_density(
+    graph: NeuromapsGraph, path: tuple[str, ...], hop_number: int
+) -> str | None:
+    """Return the output density for one hop of a transformation path.
+
+    The hop must land on a mesh the following hop can transform from, so the
+    output is the highest density shared by its target and the next hop's
+    target (``NeuromapsGraph.find_common_density``); a closed path wraps
+    back to its first target on the final hop. The final hop of an open path
+    defers to the production engine (``None``).
+    """
+    n_hops = len(path) - 1
+    closed = n_hops >= 2 and path[-1] == path[0]
+
+    if not closed and hop_number == n_hops - 1:
+        return None
+
+    target = path[hop_number + 1]
+    next_target = path[((hop_number + 1) % n_hops) + 1]
+
+    return graph.find_common_density(target, next_target)
+
+
 def roundtrip_metric(
     graph: NeuromapsGraph,
     metric_file: str | Path,
@@ -371,18 +409,13 @@ def roundtrip_metric(
     hemisphere: Hemisphere,
     *,
     workdir: str | Path | None = None,
-    density: str | None = None,
     add_edge: bool = False,
 ) -> RoundtripResult:
-    """Propagate a metric through every hop in a return path.
+    """Propagate a metric through every hop in a transformation path.
 
-    When ``density`` is ``None``, the production transformation engine is
-    allowed to determine source and target densities independently for each
-    hop. This permits cross-density cycles such as:
-
-    ``CIVETNMT -> D99 -> CIVETNMT``
-
-    to use the native mesh available in each space.
+    The source density of each hop is estimated from the input file, and the
+    target density follows ``_hop_target_density``, so a closed path returns
+    to the seed mesh.
 
     Area surfaces are attempted in order:
 
@@ -393,13 +426,12 @@ def roundtrip_metric(
     Args:
         graph: Populated :class:`NeuromapsGraph`.
         metric_file: Seed metric.
-        path: Closed transformation path.
+        path: Transformation path. Closed paths (``path[-1] == path[0]``)
+            are return paths; open paths are single-route propagations.
         hemisphere: Hemisphere being tested.
         workdir: Directory for intermediate artifacts. When ``None``, a
             shared directory under the system temporary area is used; pass
             the test's pytest ``tmp_path`` in tests.
-        density: Optional fixed density. ``None`` delegates density handling
-            to the production transformer.
         add_edge: Whether transformations may mutate the graph.
 
     Returns:
@@ -407,8 +439,9 @@ def roundtrip_metric(
         intermediate hop.
 
     Raises:
-        RuntimeError: If any hop cannot be executed.
+        RuntimeError: If a hop cannot be executed.
         FileNotFoundError: If a transformation output cannot be recovered.
+        ValueError: If a hop's target shares no density with the next hop.
     """
     workdir = resolve_artifact_dir(DEFAULT_WORKDIR, explicit=workdir)
 
@@ -432,7 +465,7 @@ def roundtrip_metric(
             target=target,
             hemisphere=hemisphere,
             output_file=output_file,
-            density=density,
+            target_density=_hop_target_density(graph, path, hop_number),
             add_edge=add_edge,
         )
 
@@ -508,33 +541,38 @@ def score_roundtrip(
 def run_cycle_test(
     graph: NeuromapsGraph,
     origin: str,
-    metric_file: str | Path,
+    seed_factory: Callable[[str], Path],
     hemisphere: Hemisphere,
     *,
     workdir: str | Path | None = None,
-    density: str | None = None,
     max_length: int | None = None,
     allow_revisits: bool = False,
+    same_species_only: bool = True,
     add_edge: bool = False,
 ) -> list[CycleResult]:
     """Execute and score all return paths from an origin.
 
+    Each path is seeded at the density the origin shares with the first
+    hop's target (``NeuromapsGraph.find_common_density``). Paths that cannot
+    be executed are skipped; by default, only same-species paths are
+    enumerated.
+
     Shared execution engine for cycle testing: unit tests drive it against a
     synthetic graph, while regression tests drive it against the real
-    transformation graph. Individual paths that cannot be executed are
-    skipped, allowing the caller to inspect all successfully executed cycles.
+    transformation graph.
 
     Args:
         graph: Populated :class:`NeuromapsGraph`.
         origin: Starting and ending space.
-        metric_file: Seed metric.
+        seed_factory: Returns a seed metric file on the origin's mesh at the
+            requested density.
         hemisphere: Hemisphere being tested.
         workdir: Directory for transformation artifacts. When ``None``, a
             shared directory under the system temporary area is used; pass
             the test's pytest ``tmp_path`` in tests.
-        density: Optional fixed surface density.
         max_length: Maximum number of transformation hops.
         allow_revisits: Allow bridge nodes to occur once on each leg.
+        same_species_only: Restrict return paths to the origin's species.
         add_edge: Whether transformations may mutate the graph.
 
     Returns:
@@ -544,7 +582,11 @@ def run_cycle_test(
     workdir = resolve_artifact_dir(DEFAULT_WORKDIR, explicit=workdir)
 
     paths = find_return_paths(
-        graph, origin, max_length=max_length, allow_revisits=allow_revisits
+        graph,
+        origin,
+        max_length=max_length,
+        allow_revisits=allow_revisits,
+        same_species_only=same_species_only,
     )
 
     results: list[CycleResult] = []
@@ -556,13 +598,15 @@ def run_cycle_test(
         logger.info("Executing cycle %s (%s)", " -> ".join(path), hemisphere)
 
         try:
+            seed_density = graph.find_common_density(origin, path[1])
+            metric_file = seed_factory(seed_density)
+
             roundtrip = roundtrip_metric(
                 graph=graph,
                 metric_file=metric_file,
                 path=path,
                 hemisphere=hemisphere,
                 workdir=path_workdir,
-                density=density,
                 add_edge=add_edge,
             )
 
@@ -570,13 +614,7 @@ def run_cycle_test(
                 metric_file, roundtrip.final_metric
             )
 
-        except (
-            StyxRuntimeError,
-            RuntimeError,
-            FileNotFoundError,
-            OSError,
-            ValueError,
-        ) as exc:
+        except _SKIP_EXCEPTIONS as exc:
             logger.warning(
                 "Skipping non-executable cycle %s (%s): %s",
                 " -> ".join(path),
