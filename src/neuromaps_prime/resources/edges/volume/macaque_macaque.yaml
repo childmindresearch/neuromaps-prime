@@ -98,7 +98,7 @@
   to: D99
   volumes:
     RheMap:
-    250um:
+      250um:
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_D99_CompositeWarp.nii.gz
 - from: NMT2Asym
   to: NMT2Sym
