@@ -441,7 +441,9 @@ jobs:
         body-includes: <!-- cycle-regression-report -->
 
     - name: Re-point PR comment
-      if: steps.find-comment.outcome == 'success'
+      # Only re-point a comment that exists; find-comment succeeds (empty
+      # comment-id) when it finds none, which would otherwise create one.
+      if: steps.find-comment.outputs.comment-id != ''
       uses: peter-evans/create-or-update-comment@v5.0.0
       with:
         issue-number: ${{ github.event.pull_request.number }}
