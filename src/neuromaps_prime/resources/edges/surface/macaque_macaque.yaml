@@ -43,19 +43,6 @@
         url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: CIVETNMT
-  to: NMT2Asym
-  surfaces:
-    CIVET:
-      41k:
-        midthickness:
-          left: 
-          right: 
-        sphere:
-          left: 
-          right: 
-      references:
-
-- from: CIVETNMT
   to: Yerkes19
   surfaces:
     CIVET:
@@ -165,15 +152,6 @@
       - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
         doi: 10.5281/zenodo.15642801
         url: https://zenodo.org/records/15642801
-
-    CIVET:
-      41k:
-        midthickness:
-          left: 
-          right: 
-        sphere:
-          left: 
-          right: 
 
 - from: D99
   to: Yerkes19
@@ -298,14 +276,6 @@
       - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
         doi: 10.5281/zenodo.15642801
         url: https://zenodo.org/records/15642801
-    CIVET:
-      101k:
-        midthickness:
-          left: 
-          right:
-        sphere:
-          left: 
-          right: 
 
 - from: MEBRAINS
   to: Yerkes19
@@ -448,22 +418,6 @@
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d359bf888fc296b991e
 
 - from: NMT2Asym
-  to: CIVETNMT
-  surfaces:
-    CIVET:
-      41k:
-        midthickness:
-          left: 
-          right: 
-        sphere:
-          left: 
-          right: 
-      references:
-      - citation: Lepage, C., et al. 2021. NeuroImage. 227:117622.
-        doi: 10.1016/j.neuroimage.2020.
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
-
-- from: NMT2Asym
   to: D99
   surfaces:
     RheMAPSurf_standard:
@@ -484,18 +438,6 @@
       - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
         doi: 10.5281/zenodo.15642801
         url: https://zenodo.org/records/15642801
-    CIVET:
-      41k:
-        midthickness:
-          left: 
-          right:
-        sphere:
-          left: 
-          right:
-      references:
-      - citation: Lepage, C., et al. 2021. NeuroImage. 227:117622.
-        doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: NMT2Asym
   to: MEBRAINS
@@ -518,14 +460,6 @@
       - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
         doi: 10.5281/zenodo.15642801
         url: https://zenodo.org/records/15642801
-    CIVET:
-      41k:
-        midthickness:
-          left: 
-          right: 
-        sphere:
-          left: 
-          right: 
 
 - from: NMT2Asym
   to: Yerkes19
@@ -548,14 +482,6 @@
       - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
         doi: 10.5281/zenodo.15642801
         url: https://zenodo.org/records/15642801
-    CIVET:
-      41k:
-        midthickness:
-          left: 
-          right: 
-        sphere:
-          left: 
-          right: 
 
 - from: Yerkes19
   to: CIVETNMT
@@ -684,11 +610,3 @@
       - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
         doi: 10.5281/zenodo.15642801
         url: https://zenodo.org/records/15642801
-    CIVET:
-      32k:
-        midthickness:
-          left: 
-          right: 
-        sphere:
-          left: 
-          right: 
