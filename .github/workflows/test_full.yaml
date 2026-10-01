@@ -29,7 +29,7 @@ jobs:
     timeout-minutes: 180
     steps:
     - uses: actions/checkout@v7
-    - uses: astral-sh/setup-uv@v9.0.0
+    - uses: astral-sh/setup-uv@v10.2.0
       with:
         enable-cache: true # not automatic on self-hosted runners
     - run: echo "NEUROMAPS_CYCLE_OUTPUT_DIR=$RUNNER_TEMP/cycle_outputs" >> "$GITHUB_ENV"
@@ -191,7 +191,7 @@ jobs:
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v7
-    - uses: astral-sh/setup-uv@v9.0.0
+    - uses: astral-sh/setup-uv@v10.2.0
 
     - name: Record cycle history
       id: record
@@ -306,7 +306,7 @@ jobs:
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v7
-    - uses: astral-sh/setup-uv@v9.0.0
+    - uses: astral-sh/setup-uv@v10.2.0
 
     - name: Promote latest run to release
       shell: bash
