@@ -22,11 +22,12 @@
     RheMap:
       500um:
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/MEBRAINS_to_F99_CompositeWarp.nii.gz
+- from: MEBRAINS
   to: NMT2Asym
   volumes:
     RheMap:
-      {}um:
-        composite: 
+      250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/MEBRAINS_to_NMTv2.0-asym_CompositeWarp.nii.gz
 - from: D99
   to: MEBRAINS
   volumes:
@@ -43,8 +44,8 @@
   to: NMT2Asym
   volumes:
     RheMap:
-      {}um:
-        composite: 
+      250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/D99_to_NMTv2.0-asym_CompositeWarp.nii.gz
 - from: D99
   to: Yerkes19
   volumes:
@@ -73,8 +74,8 @@
   to: NMT2Asym
   volumes:
     RheMap:
-      {}um:
-        composite: 
+      250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-sym_to_NMTv2.0-asym_CompositeWarp.nii.gz
 - from: NMT2Sym
   to: Yerkes19
   volumes:
@@ -91,26 +92,32 @@
   to: MEBRAINS
   volumes:
     RheMap:
-      {}um:
-        composite: 
+      400um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_MEBRAINS_CompositeWarp.nii.gz
 - from: NMT2Asym
   to: D99
   volumes:
     RheMap:
-      {}um:
-        composite: 
+    250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_D99_CompositeWarp.nii.gz
 - from: NMT2Asym
   to: NMT2Sym
   volumes:
     RheMap:
-      {}um:
-        composite: 
+      250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_NMTv2.0-sym_CompositeWarp.nii.gz
 - from: NMT2Asym
   to: Yerkes19
   volumes:
     RheMap:
-      {}um:
-        composite: 
+      500um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_YRK_CompositeWarp.nii.gz
+- from: NMT2Asym
+  to: F99
+  volumes:
+    RheMap:
+      500um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_F99_CompositeWarp.nii.gz
 - from: Yerkes19
   to: MEBRAINS
   volumes:
@@ -159,8 +166,9 @@
     RheMap:
       250um:
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_D99_CompositeWarp.nii.gz
+- from: F99
   to: NMT2Asym
   volumes:
     RheMap:
-      {}um:
-        composite: 
+      250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_NMTv2.0-asym_CompositeWarp.nii.gz
