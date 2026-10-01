@@ -34,8 +34,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/MEBRAINS_to_NMTv2.0-asym_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: D99
   to: MEBRAINS
   volumes:
@@ -56,8 +56,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/D99_to_NMTv2.0-asym_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: D99
   to: Yerkes19
   volumes:
@@ -72,8 +72,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/D99_to_F99_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: NMT2Sym
   to: MEBRAINS
   volumes:
@@ -94,8 +94,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-sym_to_NMTv2.0-asym_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: NMT2Sym
   to: Yerkes19
   volumes:
@@ -110,8 +110,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-0.5mm-sym_to_F99_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: NMT2Asym
   to: MEBRAINS
   volumes:
@@ -120,8 +120,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_MEBRAINS_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: NMT2Asym
   to: D99
   volumes:
@@ -130,8 +130,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_D99_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: NMT2Asym
   to: NMT2Sym
   volumes:
@@ -140,8 +140,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_NMTv2.0-sym_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: NMT2Asym
   to: Yerkes19
   volumes:
@@ -150,8 +150,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_YRK_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: NMT2Asym
   to: F99
   volumes:
@@ -160,8 +160,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_F99_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: Yerkes19
   to: MEBRAINS
   volumes:
@@ -188,8 +188,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/YRK_to_F99_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: F99
   to: MEBRAINS
   volumes:
@@ -198,8 +198,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_MEBRAINS_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: F99
   to: NMT2Sym
   volumes:
@@ -208,8 +208,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_NMTv2.0-sym_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: F99
   to: Yerkes19
   volumes:
@@ -218,8 +218,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_YRK_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: F99
   to: D99
   volumes:
@@ -228,8 +228,8 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_D99_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: F99
   to: NMT2Asym
   volumes:
@@ -238,5 +238,5 @@
         composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_NMTv2.0-asym_CompositeWarp.nii.gz
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020. Zenodo dataset.
-      doi: 10.5281/zenodo.3780711
-      url: https://zenodo.org/records/4748589
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
