@@ -3,6 +3,7 @@ name: Full testing suite
 permissions:
   contents: read
   pull-requests: write
+  actions: read   # record job: list a fork PR's runs and download its regression-results artifact
 
 on:
   pull_request:
@@ -39,7 +40,7 @@ jobs:
     timeout-minutes: 180
     steps:
     - uses: actions/checkout@v7
-    - uses: astral-sh/setup-uv@v9.0.0
+    - uses: astral-sh/setup-uv@v10.2.0
       with:
         enable-cache: true # not automatic on self-hosted runners
     - run: echo "NEUROMAPS_CYCLE_OUTPUT_DIR=$RUNNER_TEMP/cycle_outputs" >> "$GITHUB_ENV"
@@ -197,7 +198,9 @@ jobs:
       env:
         RAW_BASE: https://raw.githubusercontent.com/${{ env.REPO }}
         ARTIFACTS_URL: https://github.com/${{ env.REPO }}/actions/runs/${{ github.run_id }}/artifacts
+        RUN_URL: https://github.com/${{ env.REPO }}/actions/runs/${{ github.run_id }}
         PREVIEW_OK: ${{ steps.publish.outputs.preview }}
+        SUMMARY_OK: ${{ steps.summary.outcome == 'success' }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
       run: |
         set -euo pipefail
@@ -205,7 +208,12 @@ jobs:
           echo "<!-- cycle-regression-report -->"
           echo "## Regression report"
           echo
-          if [ "$PREVIEW_OK" = "true" ]; then
+          if [ "$SUMMARY_OK" != "true" ]; then
+            # No summary (e.g. a failed run) — don't blame forks or link an empty artifact.
+            echo "No results for this run — the test job did not produce a summary."
+            echo
+            echo "See the [full run]($RUN_URL)."
+          elif [ "$PREVIEW_OK" = "true" ]; then
             echo "This run (live preview — recorded on the \`${HISTORY_BRANCH}\` branch when the PR merges)."
             echo
             echo "![cycle_history timeline]($RAW_BASE/cycle-preview%2Fpr-$PR_NUMBER/cycle_history.svg)"
@@ -247,7 +255,7 @@ jobs:
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v7
-    - uses: astral-sh/setup-uv@v9.0.0
+    - uses: astral-sh/setup-uv@v10.2.0
 
     - name: Record regression history
       id: record
@@ -294,13 +302,72 @@ jobs:
           ensure_subdir
         }
 
-        # This PR's final sync state, from its preview ref.
+        # Fork PRs get no secrets, so no preview ref was pushed — fall back to
+        # the PR's regression-results artifact, normalized to the flat layout
+        # (history/ + <suite>_outputs/) that apply_suite reads.
+        source_from_artifact() {
+          target="$1"
+          api="https://api.github.com"
+          art_dir="$RUNNER_TEMP/pr_artifact"
+
+          run_id=$(curl -sS -f \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${api}/repos/${REPO}/actions/runs?event=pull_request&per_page=100" \
+            | jq -r --arg sha "$MERGED_SHA" '[.workflow_runs[] | select(.head_sha == $sha)] | sort_by(.run_id) | last | .id // empty') \
+            || { echo "::error::Failed to list pull_request runs."; exit 1; }
+          [ -n "$run_id" ] || { echo "::error::No pull_request run for head sha ${sha8}."; exit 1; }
+          echo "Sourcing record from run ${run_id}'s artifact."
+
+          art_id=$(curl -sS -f \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${api}/repos/${REPO}/actions/runs/${run_id}/artifacts" \
+            | jq -r '.artifacts[] | select(.name == "regression-results") | .id // empty') \
+            || { echo "::error::Failed to list artifacts for run ${run_id}."; exit 1; }
+          [ -n "$art_id" ] || { echo "::error::No regression-results artifact in run ${run_id}."; exit 1; }
+
+          # The zip endpoint 302s to a pre-signed URL; fetch it directly so the
+          # auth header is never forwarded to the storage host.
+          loc=$(curl -sS -o /dev/null -w '%{redirect_url}' \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            "${api}/repos/${REPO}/actions/artifacts/${art_id}/zip") || true
+          [ -n "$loc" ] || { echo "::error::No redirect URL for the artifact zip."; exit 1; }
+          rm -rf "$art_dir"; mkdir -p "$art_dir/extracted"
+          curl -sS -f -L -o "$art_dir/artifact.zip" "$loc" \
+            || { echo "::error::Failed to download the regression-results artifact."; exit 1; }
+          unzip -q "$art_dir/artifact.zip" -d "$art_dir/extracted"
+
+          # Lay both suites out the way apply_suite expects: history/<prefix><ts>_<sha8>.csv
+          # and <suite>_outputs/<detail>. A suite whose summary is absent is simply skipped
+          # downstream (distance is soft), but cycle — the primary suite — is required.
+          rm -rf "$target"; mkdir -p "$target/history" "$target/cycle_outputs" "$target/distance_map_outputs"
+          for suite in cycle distance_map; do
+            prefix="${suite}_"
+            summary=$(find "$art_dir/extracted" -type f -name "${prefix}[0-9]*.csv" | sort | tail -n 1)
+            if [ -n "$summary" ]; then
+              ts=$(basename "$summary"); ts=${ts#"$prefix"}; ts=${ts%.csv}
+              cp "$summary" "$target/history/${prefix}${ts}_${sha8}.csv"
+            fi
+            find "$art_dir/extracted" -type f \
+              \( -name "${prefix}*.csv" -o -name "${prefix}*.txt" -o -name "${prefix}*.png" \) \
+              ! -name "${prefix}[0-9]*.csv" -exec cp -t "$target/${suite}_outputs" {} +
+          done
+          ls "$target/history"/cycle_*_"${sha8}.csv" >/dev/null 2>&1 \
+            || { echo "::error::No cycle summary in the artifact."; exit 1; }
+        }
+
+        # This PR's final sync state: its preview ref, or (fork PRs) its artifact.
         preview_dir="$RUNNER_TEMP/preview"
         rm -rf "$preview_dir"
-        git init -q "$preview_dir"
-        git -C "$preview_dir" fetch -q --depth 1 "https://github.com/$REPO" "$preview" \
-          || { echo "::error::Preview ref ${preview} not found — re-run the PR's last sync."; exit 1; }
-        git -C "$preview_dir" reset -q --hard FETCH_HEAD
+        if git init -q "$preview_dir" \
+          && git -C "$preview_dir" fetch -q --depth 1 "https://github.com/$REPO" "$preview" \
+          && git -C "$preview_dir" reset -q --hard FETCH_HEAD; then
+          echo "Recording from preview ref ${preview}."
+        else
+          echo "Preview ref ${preview} not found (expected for fork PRs) — using the PR's artifact."
+          source_from_artifact "$preview_dir"
+        fi
 
         # Apply one suite from the preview into the canonical subdir, with
         # per-suite retention. A missing suite warns and skips (in-flight PRs
@@ -413,7 +480,7 @@ jobs:
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v7
-    - uses: astral-sh/setup-uv@v9.0.0
+    - uses: astral-sh/setup-uv@v10.2.0
 
     - name: Promote latest runs to release
       shell: bash
@@ -517,7 +584,9 @@ jobs:
         body-includes: <!-- cycle-regression-report -->
 
     - name: Re-point PR comment
-      if: steps.find-comment.outcome == 'success'
+      # Only re-point a comment that exists; find-comment succeeds (empty
+      # comment-id) when it finds none, which would otherwise create one.
+      if: steps.find-comment.outputs.comment-id != ''
       uses: peter-evans/create-or-update-comment@v5.0.0
       with:
         issue-number: ${{ github.event.pull_request.number }}
