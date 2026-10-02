@@ -2,9 +2,9 @@ Cycle test results — all origin spaces
 ============================================================
 
 All spaces (left):
-  Total executable cycles: 272
-  Mean Pearson r: 0.603894
+  Total executable cycles: 400
+  Mean Pearson r: 0.656498
 
 All spaces (right):
-  Total executable cycles: 272
-  Mean Pearson r: 0.578637
+  Total executable cycles: 400
+  Mean Pearson r: 0.635545
