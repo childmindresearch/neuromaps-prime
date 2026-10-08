@@ -16,7 +16,7 @@ Yerkes29:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d13abfa9d18ebf7d3d4aa
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d13ab0f2fe4c9a34bf33b
       annotation:
-        AT_ChimpBNA:
+        PC_ChimpBNA:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d152d9ebacaefa84bf3b2
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d15f003f3684defd3d4e3
           references:
