@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 OSF_ATLAS = ("Yerkes19", "10k", "left", "sphere")  # space, density, hemi, type
 GITHUB_ATLAS = ("D99", "168k", "left", "sphere")  # space, density, hemi, type
 OSF_VOLUME = ("Yerkes29", "800um", "T1w")  # space, resolution, type
-OSF_ANNOTATION = ("Yerkes29", "AT_ChimpBNA", "32k", "left")  # space, label, dens, hemi
+OSF_ANNOTATION = ("Yerkes29", "PC_ChimpBNA", "32k", "left")  # space, label, dens, hemi
 
 
 def _atlas_uri(graph: NeuromapsGraph, coords: tuple[str, str, str, str]) -> str:
