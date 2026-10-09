@@ -17,17 +17,17 @@ Yerkes29:
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d13ab0f2fe4c9a34bf33b
       annotation:
         PC_ChimpBNA:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d152d9ebacaefa84bf3b2
-          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d152de0188a598ed3d4fd
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522b98c78b102fc5b138
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522ce8b507c646dcb7a2
           references:
           - citation: Wang, Y, et al. 2025. The Innovation, 6(2):100755
             doi: 10.1016/j.xinn.2024.100755
           notes:
-          - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d15f1e0188a598ed3d557'
-          - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d15f003f3684defd3d4e3'
+          - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522bf4338ff44b3b8b8f'
+          - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522727e0b77f3bdcb73a'
   volumes:
     800um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bcbb3d09fa484fe30a464
       annotation:
         PC_ChimpBNA:
-          uri: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d153b9d0eeb31dc8b87ff
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9523358c4c6cf85f3fd9f
