@@ -8,7 +8,3 @@ NenckiMonash:
   volumes:
     50um:
       T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c9f406cd2b941c3d90cb1
-      annotation:
-        PC: 
-          notes:
-          - https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2adec9e8a4df9d0612617f

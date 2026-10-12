@@ -419,16 +419,16 @@ Yerkes19:
           notes:
           - Myelin map (bias corrected). MacaqueYerkes19 v1.2.
         SMM:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527acd87cca253679b05
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527b80941e7c8fa7ad2d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d0d8bf292baf2c2d69
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d07a752a710f2c2b5d
           references:
           - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
             doi: 10.1073/pnas.1721653115
           notes:
           - Smoothed myelin map (bias corrected). MacaqueYerkes19 v1.2.
         CT:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d0d8bf292baf2c2d69
-          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d07a752a710f2c2b5d
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527acd87cca253679b05
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527b80941e7c8fa7ad2d
           references:
           - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
             doi: 10.1073/pnas.1721653115
