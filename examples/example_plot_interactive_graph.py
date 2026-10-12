@@ -1,191 +1,57 @@
-from neuromaps_prime.graph import NeuromapsGraph
+"""Render the neuromaps-prime transformation graph as an interactive HTML page.
 
-from pyvis.network import Network
+Run from the repository root:
+
+    uv run examples/example_plot_interactive_graph.py \
+        [-o <output_file>] [--yaml-file <yaml_file>]
+"""
+
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     # Uses this repo's checkout (editable) via ${PWD}; swap in a pinned
+#     # release (e.g. "neuromaps-prime==0.2.0") if you prefer.
+#     "neuromaps-prime @ file:///${PWD}",
+#     "networkx>=3.6.1",
+#     "pyvis>=0.3.2",
+# ]
+# ///
+
+from __future__ import annotations
+
+import argparse
+import re
+from collections import Counter
+from pathlib import Path
 
 import networkx as nx
-import numpy as np
-import re
+from pyvis.network import Network
 
+from neuromaps_prime.graph import NeuromapsGraph
 
-color_lut = {
-    'macaque': "#DEAC52",   # Amber
-    'human': "#95B46A",  # Sage green
-    'chimpanzee': "#C8D0D5",   # Slate gray
-    'marmoset': "#e98c8cff",   # Red
-    'volume_to_volume': '#E08E9A', # Pink
-    'surface_to_surface': '#80B2D4', # Blue
-    'both': '#A28DC7' # Purple
+_COLOR_BY_SPECIES = {
+    "macaque": "#DEAC52",  # Amber
+    "human": "#95B46A",  # Sage green
+    "chimpanzee": "#C8D0D5",  # Slate gray
+    "marmoset": "#e98c8cff",  # Red
 }
 
+_COLOR_BY_EDGE_TYPE = {
+    "surface_to_surface": "#80B2D4",  # Blue
+    "volume_to_volume": "#E08E9A",  # Pink
+    "both": "#A28DC7",  # Purple
+}
 
-def flatten(multiG):
-    flatG = nx.DiGraph()
-    flatG.add_nodes_from(multiG.nodes(data=True))
-
-    for u, v, attrs in multiG.edges(data=True):
-        # If the edge already exists, merge the attributes
-        if flatG.has_edge(u, v):
-            existing_attrs = flatG[u][v]
-
-            for k, v in existing_attrs.items():
-                if k != 'label':
-                    existing_attrs[k] += attrs[k]
-                else:
-                    existing_attrs[k] = ", ".join([existing_attrs[k], attrs[k]])
-
-            if len(existing_attrs['type']) > 1:
-                existing_attrs['type'] = 'both'
-                existing_attrs['color'] = color_lut[existing_attrs['type']]
-
-        else:
-            flatG.add_edge(u, v, **attrs)
-
-    return flatG
-
-def merge_edges(G):
-    processed_pairs = set()
-
-    for u, v, attrs in G.edges(data=True):
-        # Create a unique structural identifier for the unordered node pair
-        pair_id = tuple(sorted([u, v]))
-        if pair_id in processed_pairs:
-            continue
-
-        current_label = attrs.get('label')
-
-        # Check if the reverse edge exists in the graph
-        if G.has_edge(v, u):
-            reverse_attrs = G.edges[v, u]
-            reverse_label = reverse_attrs.get('label')
-
-            # If they both have labels and they match perfectly
-            if current_label == reverse_label:
-                # 1. Update the forward edge to render arrows on BOTH ends
-                G.edges[u, v]['arrows'] = "to, from"
-                
-                # 2. Safely remove the duplicate reverse edge
-                G.remove_edge(v, u)
-                
-                # Mark this node pair as completed
-                processed_pairs.add(pair_id)
-
-    return G
-
-
-def clean_graph(G):
-    """Removes Neuromaps specific types/attributes and only
-    keeps around elements that can be used to inform plotting
-    in some way.
-    """
-    # Do some tedius housekeeping that helps us with nice visualization later...
-    max_len = max([len(n) for n in G.nodes])
-
-    # Start with cleaning up the nodes...
-    # For every node, unpack the data values as top-level objects
-    # and for the surfaces/volumes/annotations, store the counts
-    for node, attrs in G.nodes(data=True):
-        data_dict = dict(attrs.get('data', {}))
-        keys_of_interest = ['name', 'species', 'description']  # Later I use "kois" for this
-        for k in keys_of_interest:
-            attrs[k] = data_dict.get(k, None)
-
-        len_kois = ['surfaces', 'volumes', 'surface_annotations', 'volume_annotations']
-        n_total = 0
-        for k in len_kois:
-            tmp = len(data_dict.get(k, []))
-            attrs[f'n_{k}'] = tmp
-            n_total += tmp
-        attrs['n_total'] = n_total
-
-        # Add visualization (eg. colour and size) here to get ahead of it later...
-        name_pad = int(max_len - len(attrs['name']))
-        attrs['color'] = color_lut[attrs['species']]
-
-        attrs['label'] = (" " * name_pad) + attrs['name'] + (" " * name_pad)
-        # attrs['size'] = 5 + 5*np.log2(attrs['n_total'])
-        attrs['shape'] = 'circle'
-
-        # Clean up the data field that breaks plotting tools
-        del attrs['data']
-
-    # Continue by cleaning up the edges... Actually, remake and merge all edges
-    # For every edge, unpack the source, dest, surfaces, and volumes and
-    # then derive the type based on which of those lists aren't empty.
-    for u, v, k, attrs in G.edges(keys=True, data=True):
-        data_dict = dict(attrs.get('data', {}))
-        kois = ['surface_transforms', 'volume_transforms']
-        pattern = re.compile(r"_([0-9]+[a-zA-Z]+)_")
-        n_xfms = 0
-        attrs['res'] = []
-        for koi in kois:
-            value = data_dict.get(koi, [])
-            attrs[f'n_{koi}'] = len(value)
-            attrs['res'] += list(set(pattern.findall(str(_))[0] for _ in value))
-            tmp = len(attrs['res'])
-            attrs[f'n_{koi}_res'] = tmp
-            n_xfms += tmp
-        attrs[f'n_xfms'] = n_xfms
-        attrs['type'] = k
-
-        # Similarly, add colour and weight to save another loop
-        attrs['color'] = color_lut[attrs['type']]
-        attrs['weight'] = attrs['n_xfms']
-        attrs['label'] = ", ".join(attrs['res'])
-
-        # Networkx quirk of how these are stored... ty google
-        del G.edges[u, v, k]['data']
-
-    G = flatten(G)
-    G = merge_edges(G)
-
-    return G
-
-
-G = NeuromapsGraph()
-G = clean_graph(G)
-
-net = Network(notebook=False, directed=True, select_menu=True,
-              height="1080px", width="1920px", bgcolor="#ffffff")
-net.from_nx(G)
-
-G = NeuromapsGraph()
-G = clean_graph(G)
-
-net = Network(
-    notebook=False,
-    directed=True,
-    select_menu=True,
-    height="1080px",
-    width="1920px",
-    bgcolor="#ffffff"
+_NODE_COUNT_FIELDS = (
+    "surfaces",
+    "volumes",
+    "surface_annotations",
+    "volume_annotations",
 )
 
-net.from_nx(G)
+_RESOURCE_RE = re.compile(r"(\d+)([a-zA-Z]+)")
 
-# Set preferred edge lengths based on the species of the connected nodes.
-# All other edges retain the default physics spring length.
-species_by_id = {
-    node["id"]: node.get("species")
-    for node in net.nodes
-}
-
-for edge in net.edges:
-    from_species = species_by_id.get(edge["from"])
-    to_species = species_by_id.get(edge["to"])
-
-    if from_species == to_species == "macaque":
-        edge["length"] = 600
-
-    elif {from_species, to_species} == {"human", "macaque"}:
-        edge["length"] = 200
-
-    elif (
-        from_species in {"human", "chimpanzee"}
-        and to_species in {"human", "chimpanzee"}
-    ):
-        edge["length"] = 300
-
-net.set_options("""
+_PYVIS_OPTIONS = """
 const options = {
   "nodes": {
     "borderWidth": 2,
@@ -216,12 +82,12 @@ const options = {
   },
   "physics": {
     "barnesHut": {
-      "gravitationalConstant": -30000,
+      "gravitationalConstant": -100000,
       "centralGravity": 0.3,
-      "springLength": 300,
-      "springConstant": 0.04,
+      "springLength": 450,
+      "springConstant": 0.03,
       "damping": 0.09,
-      "avoidOverlap": 0.5
+      "avoidOverlap": 1.0
     },
     "minVelocity": 0.75
   },
@@ -229,28 +95,13 @@ const options = {
     "randomSeed": 678
   }
 }
-""")
+"""
 
-net.write_html('./neuromaps_interactive_graph.html')
-
-# Post-process the generated HTML to inject Export SVG button and functions
-with open('./neuromaps_interactive_graph.html', 'r') as f:
-    html_content = f.read()
-
-# 1. Narrow the select column from col-10 to col-8
-html_content = html_content.replace('class="col-10 pb-2"', 'class="col-8 pb-2"')
-
-# 2. Inject the Export SVG button after the Reset Selection button's closing </div>
-button_html = '''                        <div class="col-2 pb-2">
+_EXPORT_SVG_BUTTON = """                        <div class="col-2 pb-2">
                             <button type="button" class="btn btn-outline-secondary btn-block" onclick="exportSVG();">Export SVG</button>
-                        </div>'''
-html_content = html_content.replace(
-    '                        </div>\n                    </div>\n                </div>',
-    f'                        </div>\n{button_html}\n                    </div>\n                </div>'
-)
+                        </div>"""
 
-# 3. Inject the SVG export JavaScript functions before the final </script>
-js_functions = '''              // ---------------------------------------------------------------
+_EXPORT_SVG_JS = """              // ---------------------------------------------------------------
               // Export the rendered graph as a true vector SVG (for Inkscape).
               // vis-network draws to <canvas>, so we reconstruct equivalent SVG
               // from the settled layout: node positions/sizes + edge geometry.
@@ -340,7 +191,7 @@ js_functions = '''              // ---------------------------------------------
                                   '<rect x="' + (lx - tw / 2) + '" y="' + (ly - th / 2) + '" width="' + tw +
                                   '" height="' + th + '" fill="#ffffff"/><text x="' + lx + '" y="' + (ly + fs * 0.35) +
                                   '" font-family="Nunito,sans-serif" font-size="' + fs +
-                                  '" text-anchor="middle" fill="#343434">' + _esc(e.label) + '</text></g>');
+                                  '" font-weight="bold" text-anchor="middle" fill="#343434">' + _esc(e.label) + '</text></g>');
                   }
                 });
 
@@ -351,7 +202,7 @@ js_functions = '''              // ---------------------------------------------
                   nodeSvg.push('<circle cx="' + c.x + '" cy="' + c.y + '" r="' + r + '" fill="' + _esc(fill) +
                                '" stroke="' + _esc(_darken(fill, 0.7)) + '" stroke-width="2"/>');
                   nodeSvg.push('<text x="' + c.x + '" y="' + (c.y + 7) + '" font-family="Nunito,sans-serif" font-size="20" ' +
-                               'text-anchor="middle" fill="#343434">' + _esc(lbl) + '</text>');
+                               'font-weight="bold" text-anchor="middle" fill="#343434">' + _esc(lbl) + '</text>');
                 });
 
                 var svg = '<?xml version="1.0" encoding="UTF-8"?>\\n' +
@@ -371,11 +222,226 @@ js_functions = '''              // ---------------------------------------------
                 document.body.appendChild(a); a.click(); document.body.removeChild(a);
                 setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
               }
-'''
+"""
 
-html_content = html_content.replace('              drawGraph();\n        </script>',
-                                    f'              drawGraph();\n{js_functions}        </script>')
 
-with open('./neuromaps_interactive_graph.html', 'w') as f:
-    f.write(html_content)
+def _resource_sort_key(token: str) -> tuple[int, int, str]:
+    """Sort resource tokens like ``41k`` or ``250um`` by their numeric part."""
+    match = _RESOURCE_RE.fullmatch(token)
+    if match is None:
+        return (2, 0, token)
+    unit = 0 if match[2].lower() == "k" else 1
+    return (unit, int(match[1]), token)
 
+
+def _clean_nodes(graph: nx.MultiDiGraph) -> None:
+    """Replace each node's data model with flat plotting attributes."""
+    max_name_len = max(len(name) for name in graph)
+
+    for name, attrs in graph.nodes(data=True):
+        data = attrs.pop("data")
+
+        counts = {
+            f"n_{field}": len(getattr(data, field)) for field in _NODE_COUNT_FIELDS
+        }
+        counts["n_total"] = sum(counts.values())
+
+        # Equal-width labels keep the rendered node boxes aligned.
+        pad = " " * (max_name_len - len(name))
+        attrs.update(
+            name=data.name,
+            species=data.species,
+            description=data.description,
+            **counts,
+            color=_COLOR_BY_SPECIES[data.species],
+            label=f"{pad}{name}{pad}",
+            shape="circle",
+        )
+
+
+def _clean_edges(graph: nx.MultiDiGraph) -> None:
+    """Replace each edge's data model with flat plotting attributes."""
+    for _u, _v, key, attrs in graph.edges(keys=True, data=True):
+        data = attrs.pop("data")
+
+        surface_res = {transform.density for transform in data.surface_transforms}
+        volume_res = {transform.resolution for transform in data.volume_transforms}
+        res = sorted(surface_res | volume_res, key=_resource_sort_key)
+
+        attrs.update(
+            n_surface_transforms=len(data.surface_transforms),
+            n_volume_transforms=len(data.volume_transforms),
+            n_surface_transforms_res=len(surface_res),
+            n_volume_transforms_res=len(volume_res),
+            n_xfms=len(res),
+            weight=len(res),
+            res=res,
+            type=key,
+            color=_COLOR_BY_EDGE_TYPE[key],
+            label=", ".join(res),
+        )
+
+
+def _merge_parallel_edges(graph: nx.MultiDiGraph) -> nx.DiGraph:
+    """Collapse the surface and volume parallel edges of each pair into one."""
+    flat = nx.DiGraph()
+    flat.add_nodes_from(graph.nodes(data=True))
+
+    for u, v, _key, attrs in graph.edges(keys=True, data=True):
+        if not flat.has_edge(u, v):
+            flat.add_edge(u, v, **dict(attrs))
+            continue
+
+        merged = flat[u][v]
+        merged["n_surface_transforms"] += attrs["n_surface_transforms"]
+        merged["n_volume_transforms"] += attrs["n_volume_transforms"]
+        merged["n_surface_transforms_res"] += attrs["n_surface_transforms_res"]
+        merged["n_volume_transforms_res"] += attrs["n_volume_transforms_res"]
+
+        res = sorted(set(merged["res"]) | set(attrs["res"]), key=_resource_sort_key)
+        edge_type = "both" if merged["type"] != attrs["type"] else merged["type"]
+        merged.update(
+            res=res,
+            label=", ".join(res),
+            n_xfms=len(res),
+            weight=len(res),
+            type=edge_type,
+            color=_COLOR_BY_EDGE_TYPE[edge_type],
+        )
+
+    return flat
+
+
+def _merge_bidirectional_edges(graph: nx.DiGraph) -> nx.DiGraph:
+    """Collapse u->v / v->u pairs with identical labels into one two-headed edge."""
+    seen: set[frozenset[str]] = set()
+    to_remove: list[tuple[str, str]] = []
+
+    for u, v in graph.edges:
+        pair = frozenset((u, v))
+        if pair in seen:
+            continue
+        seen.add(pair)
+        if not graph.has_edge(v, u):
+            continue
+        if graph[u][v].get("label") != graph[v][u].get("label"):
+            continue
+        graph[u][v]["arrows"] = "to, from"
+        to_remove.append((v, u))
+
+    for u, v in to_remove:
+        graph.remove_edge(u, v)
+
+    return graph
+
+
+def clean_graph(graph: nx.MultiDiGraph) -> nx.DiGraph:
+    """Reduce the graph to a flat directed graph of plotting attributes."""
+    _clean_nodes(graph)
+    _clean_edges(graph)
+    return _merge_bidirectional_edges(_merge_parallel_edges(graph))
+
+
+def _replace_once(page: str, old: str, new: str, what: str) -> str:
+    """Replace a pyvis template anchor, failing loudly if the template changed."""
+    if old not in page:
+        raise RuntimeError(f"pyvis template changed: could not find {what}.")
+    return page.replace(old, new, 1)
+
+
+_TOOLBAR_ROW_END = (
+    "                        </div>\n                    </div>\n                </div>"
+)
+_TOOLBAR_ROW_WITH_BUTTON = (
+    "                        </div>\n"
+    + _EXPORT_SVG_BUTTON
+    + "\n                    </div>\n                </div>"
+)
+
+
+def inject_svg_export(page: str) -> str:
+    """Add the "Export SVG" toolbar button and its client-side handler to ``page``."""
+    page = _replace_once(
+        page, 'class="col-10 pb-2"', 'class="col-8 pb-2"', "the select-menu column"
+    )
+    page = _replace_once(
+        page, _TOOLBAR_ROW_END, _TOOLBAR_ROW_WITH_BUTTON, "the toolbar row"
+    )
+    # _EXPORT_SVG_JS ends with a newline, so no separator is needed before the tag.
+    return _replace_once(
+        page,
+        "              drawGraph();\n        </script>",
+        f"              drawGraph();\n{_EXPORT_SVG_JS}        </script>",
+        "the closing script tag",
+    )
+
+
+def _set_edge_lengths(net: Network) -> None:
+    """Assign per-edge spring lengths based on the species of the endpoints.
+
+    Edges within one species scale with the number of spaces of that
+    species (``(n_spaces - 1) * 100``); edges between different species
+    all share one common length (250).
+    """
+    species_of = {node["id"]: node.get("species") for node in net.nodes}
+    n_spaces = Counter(species_of.values())
+
+    for edge in net.edges:
+        source = species_of.get(edge["from"])
+        target = species_of.get(edge["to"])
+        if source is not None and source == target:
+            edge["length"] = (n_spaces[source] - 1) * 100
+        else:
+            edge["length"] = 250
+
+
+def main() -> None:
+    """Build the interactive graph page and write it next to this script."""
+    parser = argparse.ArgumentParser(
+        description="Render interactive visualization of Neuromaps-PRIME graph.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        help="Output file path to save HTML file to (default: %(default)s)",
+        default=Path(__file__).with_name("neuromaps_interactive_graph.html")
+    )
+    parser.add_argument(
+        "--yaml-file",
+        type=Path,
+        metavar="FILE",
+        help=(
+            "YAML file representing nodes & edges for Neuromaps-PRIME graph; if none "
+            "provided, uses default graph (default: %(default)s)"
+        ),
+        default=None,
+    )
+    args = parser.parse_args()
+
+    output: Path = args.output
+    if not output.suffix == ".html":
+        print("Expected, but did not receive '.html' extension - saving as HTML")
+        output = args.output.with_suffix(".html")
+
+    graph = clean_graph(NeuromapsGraph(yaml_file=args.yaml_file))
+
+    net = Network(
+        height="1080px",
+        width="1920px",
+        notebook=False,
+        directed=True,
+        select_menu=True,
+        bgcolor="#ffffff",
+    )
+    net.from_nx(graph)
+    _set_edge_lengths(net)
+    net.set_options(_PYVIS_OPTIONS)
+
+    output.write_text(inject_svg_export(net.generate_html()))
+    print(f"Wrote {output}")
+
+
+if __name__ == "__main__":
+    main()
