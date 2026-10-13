@@ -148,6 +148,33 @@ net = Network(notebook=False, directed=True, select_menu=True,
               height="1080px", width="1920px", bgcolor="#ffffff")
 net.from_nx(G)
 
+G = NeuromapsGraph()
+G = clean_graph(G)
+
+net = Network(
+    notebook=False,
+    directed=True,
+    select_menu=True,
+    height="1080px",
+    width="1920px",
+    bgcolor="#ffffff"
+)
+
+net.from_nx(G)
+
+# Increase preferred length only between macaque nodes
+species_by_id = {
+    node["id"]: node.get("species")
+    for node in net.nodes
+}
+
+for edge in net.edges:
+    if (
+        species_by_id.get(edge["from"]) == "macaque"
+        and species_by_id.get(edge["to"]) == "macaque"
+    ):
+        edge["length"] = 800
+
 net.set_options("""
 const options = {
   "nodes": {
