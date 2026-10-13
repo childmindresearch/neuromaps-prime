@@ -162,18 +162,37 @@ net = Network(
 
 net.from_nx(G)
 
-# Increase preferred length only between macaque nodes
+# Set preferred edge lengths based on the species of the connected nodes.
+# All other edges retain the default physics spring length.
 species_by_id = {
     node["id"]: node.get("species")
     for node in net.nodes
 }
 
 for edge in net.edges:
-    if (
-        species_by_id.get(edge["from"]) == "macaque"
-        and species_by_id.get(edge["to"]) == "macaque"
+    from_species = species_by_id.get(edge["from"])
+    to_species = species_by_id.get(edge["to"])
+
+    if from_species == "macaque" and to_species == "macaque":
+        edge["length"] = 600
+
+    elif (
+        (from_species == "human" and to_species == "macaque")
+        or (from_species == "macaque" and to_species == "human")
     ):
-        edge["length"] = 800
+        edge["length"] = 200
+
+    elif from_species == "chimpanzee" and to_species == "chimpanzee":
+        edge["length"] = 300
+
+    elif from_species == "human" and to_species == "human":
+        edge["length"] = 300
+
+    elif (
+        (from_species == "human" and to_species == "chimpanzee")
+        or (from_species == "chimpanzee" and to_species == "human")
+    ):
+        edge["length"] = 300
 
 net.set_options("""
 const options = {
