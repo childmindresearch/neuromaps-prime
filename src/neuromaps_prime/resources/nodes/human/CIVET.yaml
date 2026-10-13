@@ -4,6 +4,8 @@
 CIVET:
   species: human
   description: CIVET Human Template
+  references:
+  - citation: Lepage, C, et al. 2017. Human MR Evaluation of Cortical Thickness Using CIVET v2.1. Organization for Human Brain Mapping
   surfaces:
     41k:
       sphere:
