@@ -148,6 +148,43 @@ net = Network(notebook=False, directed=True, select_menu=True,
               height="1080px", width="1920px", bgcolor="#ffffff")
 net.from_nx(G)
 
+G = NeuromapsGraph()
+G = clean_graph(G)
+
+net = Network(
+    notebook=False,
+    directed=True,
+    select_menu=True,
+    height="1080px",
+    width="1920px",
+    bgcolor="#ffffff"
+)
+
+net.from_nx(G)
+
+# Set preferred edge lengths based on the species of the connected nodes.
+# All other edges retain the default physics spring length.
+species_by_id = {
+    node["id"]: node.get("species")
+    for node in net.nodes
+}
+
+for edge in net.edges:
+    from_species = species_by_id.get(edge["from"])
+    to_species = species_by_id.get(edge["to"])
+
+    if from_species == to_species == "macaque":
+        edge["length"] = 600
+
+    elif {from_species, to_species} == {"human", "macaque"}:
+        edge["length"] = 200
+
+    elif (
+        from_species in {"human", "chimpanzee"}
+        and to_species in {"human", "chimpanzee"}
+    ):
+        edge["length"] = 300
+
 net.set_options("""
 const options = {
   "nodes": {
