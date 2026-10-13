@@ -339,8 +339,8 @@ def plot_resolution(
 
     outer = fig.add_gridspec(n_rows, N_PAIRS_PER_ROW, wspace=0.02, hspace=0.12)
 
-    cmap_categorical = colormaps["tab20"]
-    cmap_continuous = colormaps["viridis"]
+    cmap_categorical = colormaps["RdBu_r"]
+    cmap_continuous = colormaps["RdBu_r"]
 
     # ------------------------------------------------------------------
     # Plot every annotation.
