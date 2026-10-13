@@ -173,24 +173,15 @@ for edge in net.edges:
     from_species = species_by_id.get(edge["from"])
     to_species = species_by_id.get(edge["to"])
 
-    if from_species == "macaque" and to_species == "macaque":
+    if from_species == to_species == "macaque":
         edge["length"] = 600
 
-    elif (
-        (from_species == "human" and to_species == "macaque")
-        or (from_species == "macaque" and to_species == "human")
-    ):
+    elif {from_species, to_species} == {"human", "macaque"}:
         edge["length"] = 200
 
-    elif from_species == "chimpanzee" and to_species == "chimpanzee":
-        edge["length"] = 300
-
-    elif from_species == "human" and to_species == "human":
-        edge["length"] = 300
-
     elif (
-        (from_species == "human" and to_species == "chimpanzee")
-        or (from_species == "chimpanzee" and to_species == "human")
+        from_species in {"human", "chimpanzee"}
+        and to_species in {"human", "chimpanzee"}
     ):
         edge["length"] = 300
 
