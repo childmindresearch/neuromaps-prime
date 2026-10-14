@@ -1,7 +1,7 @@
 r"""Validate URLs from YAML files using HEAD requests (no download).
 
-Every URL must be unique across the scanned files — a URL referenced by
-more than one resource aborts the run before any request is made.
+URLs must be unique unless explicitly listed with ``--allow-shared-url``.
+Shared URLs are probed once; all source occurrences remain in the report.
 
 Usage::
     uv run scripts/validate_urls.py \\
@@ -493,9 +493,7 @@ async def _report_result(result: CheckResult, failed: list[CheckResult]) -> None
 
 
 def _should_validate(
-    url: str,
-    only_patterns: tuple[str, ...],
-    skip_patterns: tuple[str, ...],
+    url: str, only_patterns: tuple[str, ...], skip_patterns: tuple[str, ...]
 ) -> bool:
     """Return True if *url* should be probed under the filter patterns.
 
@@ -550,7 +548,9 @@ async def run(
     semaphore = asyncio.Semaphore(workers)
     connector = aiohttp.TCPConnector(limit=workers)
 
-    async with aiohttp.ClientSession(connector=connector, headers=_HEADERS) as session:
+    async with aiohttp.ClientSession(
+        connector=connector, headers=_HEADERS, trust_env=True
+    ) as session:
         pending: set[asyncio.Task[CheckResult]] = set()
         for url in index.urls():
             sources = index.sources(url)
@@ -626,6 +626,13 @@ def main() -> None:
     parser.add_argument(
         "--verbose", "-v", action="store_true", help="Enable DEBUG logging"
     )
+    parser.add_argument(
+        "--allow-shared-url",
+        action="append",
+        default=[],
+        metavar="URL",
+        help="Allow this exact URL to be referenced more than once (repeatable)",
+    )
     args = parser.parse_args()
 
     _configure_logging(verbose=args.verbose)
@@ -641,7 +648,13 @@ def main() -> None:
         log.info("No URLs found.")
         sys.exit(0)
 
-    if dups := index.duplicate_urls():
+    allowed_shared = set(args.allow_shared_url)
+    dups = {
+        url: sources
+        for url, sources in index.duplicate_urls().items()
+        if url not in allowed_shared
+    }
+    if dups:
         log.error("%s", _describe_duplicates(dups))
         sys.exit(1)
 

@@ -2,8 +2,10 @@ Yerkes19:
   species: macaque
   description: Yerkes19 Macaque Atlas
   references:
-    - citation: Van Essen, DC, et al. 2012. Cerebral Cortex, 22(10):2227–2240
-      doi: 10.1093/cercor/bhr290
+  - citation: Van Essen, DC, et al. 2012. Cerebral Cortex, 22(10):2227–2240
+    doi: 10.1093/cercor/bhr290
+  - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+    url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
   surfaces:
     10k:
       sphere:
@@ -29,7 +31,7 @@ Yerkes19:
           - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
-          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 
+          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey.
           - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a680941e7c8fa7ad49'
           - 'right lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a34572881301679ab8'
         PC_Yeo17Networks:
@@ -71,7 +73,7 @@ Yerkes19:
           - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
-          - Brodmann 1909 areal parcellation. Human-to-monkey. 
+          - Brodmann 1909 areal parcellation. Human-to-monkey.
         PC_Schaefer7Networks_100:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb71614316345a7577
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba79a37b24f6374aa8
@@ -208,21 +210,21 @@ Yerkes19:
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Functional connectivity homology index. Cross-species similarity of FC gradient profiles; high in sensory, low in association cortex.
-        
-        
+
+
     32k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f54791541aee377a7b0c8
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aab76e18c73904446
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_sphere.surf.gii
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ea52f9bb389712940
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aaa1f78e1979033b0
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226d743de820043eac3b
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b6846076e8371364a
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_white.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_white.surf.gii
       pial:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226be06110211c3eac62
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226ecd1f7a1773903f7a
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_pial.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_pial.surf.gii
       inflated:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226e3a883e73df3eb152
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226b2882bdb2bc3ebcbd
@@ -394,14 +396,14 @@ Yerkes19:
           - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
             doi: 10.1038/s41593-023-01351-2
           notes:
-          - Raw (non-normalized) receptor density, summed across all receptor types. 
+          - Raw (non-normalized) receptor density, summed across all receptor types.
         RG_perNeuron:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f4b0e02afd164fce3a045
           references:
           - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
             doi: 10.1038/s41593-023-01351-2
           notes:
-          - Receptor density gradients (per-neuron normalized). 
+          - Receptor density gradients (per-neuron normalized).
           - Multi-map - PC1 is the principal receptor gradient, PC2 is 5-HT1A-driven.
         RG_raw:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f4b0879d2d292ee6b1255
@@ -409,7 +411,7 @@ Yerkes19:
           - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
             doi: 10.1038/s41593-023-01351-2
           notes:
-          - Receptor density gradients (raw, non-normalized). 
+          - Receptor density gradients (raw, non-normalized).
           - Multi-map - PC1 is the principal receptor gradient, PC2 is 5-HT1A-driven.
         MM:
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52947a752a710f2c2b26
@@ -445,7 +447,7 @@ Yerkes19:
         PC_Yeo7Networks:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0
           notes:
-          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 
+          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey.
           - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a3d0d28dc642a7afe5'
         PC_Julich:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f50174012993bc0e3a12f
@@ -468,7 +470,7 @@ Yerkes19:
           - citation: Froudist-Walsh, S, et al. 2021. Neuron, 109(21):3500–3520.e13
             doi: 10.1016/j.neuron.2021.08.024
           notes:
-          - Anatomical cortical hierarchy. Complements the intrinsic timescale (Manea et al.) map. 
+          - Anatomical cortical hierarchy. Complements the intrinsic timescale (Manea et al.) map.
         DM_treeSize:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f48eac14e371e50e3a1c5
           references:
@@ -496,9 +498,41 @@ Yerkes19:
           - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
             doi: 10.1038/s41593-023-01351-2
           notes:
-          - HTR1A (serotonin 1A receptor) gene expression map. Derived from the Allen Human Brain Atlas (AHBA), mapped from human to macaque. 
+          - HTR1A (serotonin 1A receptor) gene expression map. Derived from the Allen Human Brain Atlas (AHBA), mapped from human to macaque.
           - Represents a single gene only, included as a worked example of a cross-species expression annotation.
 
+        CV_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_curvature.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_curvature.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - FreeSurfer mean curvature computed on the supplied white surface, with template-specific smoothing.
+        CT_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_thickness.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_thickness.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - FreeSurfer cortical thickness computed with neighborhood size 20 and a 5 mm limit.
+        SD_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_sulc.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_sulc.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - DPF-derived sulcal folding field computed with brain-slam 0.1.2, alpha=0.03; not a direct geometric depth measurement.
+        BM_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_cortexmask.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_cortexmask.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - 'Consensus cortex mask: 1=cortex, 0=medial wall. Fetching this annotation does not automatically apply an ROI during resampling or comparison.'
   volumes:
     500um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226eab76e18c7390444c

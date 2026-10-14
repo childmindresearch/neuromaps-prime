@@ -2,19 +2,24 @@ NMT2Sym:
   species: macaque
   description: NMT v2 Symmetric Macaque Template
   references:
-    - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
-      doi: 10.1016/j.neuroimage.2021.117997
+  - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
+    doi: 10.1016/j.neuroimage.2021.117997
+  - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+    url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
   surfaces:
     41k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523df23e17e1124712cc2
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfcc9143f354902a8a
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dd4d366de13d71403f
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dd6846076e837137e8
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_midthickness.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_midthickness.surf.gii
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfa52f9bb389712be0
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfa52f9bb389712bdf
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.surf.gii
+      pial:
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_pial.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_pial.surf.gii
       inflated:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfab76e18c73904626
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523df4d366de13d714041
@@ -22,9 +27,41 @@ NMT2Sym:
         SD:
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f5213cd87cca253679ac7
           references:
-            - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
-              doi: 10.1016/j.neuroimage.2021.117997
+          - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
+            doi: 10.1016/j.neuroimage.2021.117997
 
+        CV_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_curvature.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_curvature.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - FreeSurfer mean curvature computed on the supplied white surface, with template-specific smoothing.
+        CT_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_thickness.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_thickness.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - FreeSurfer cortical thickness computed with neighborhood size 20 and a 5 mm limit.
+        SD_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sulc.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sulc.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - DPF-derived sulcal folding field computed with brain-slam 0.1.2, alpha=0.03; not a direct geometric depth measurement.
+        BM_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_cortexmask.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_cortexmask.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - 'Consensus cortex mask: 1=cortex, 0=medial wall. Fetching this annotation does not automatically apply an ROI during resampling or comparison.'
   volumes:
     250um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523de8a846359933ec5a5
@@ -32,50 +69,50 @@ NMT2Sym:
         PC_CHARM_scale_1:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f17a752a710f2c2a9a
           references:
-            - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
-              doi: 10.1016/j.neuroimage.2021.117997
+          - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
+            doi: 10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 1 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e480941e7c8fa7ac9e'
+          - 'CHARM atlas scale 1 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e480941e7c8fa7ac9e'
         PC_CHARM_scale_2:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f01541aee377a7aef5
           references:
-            - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
-              doi: 10.1016/j.neuroimage.2021.117997
+          - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
+            doi: 10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 2 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e47da771710ca7aaf7'
+          - 'CHARM atlas scale 2 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e47da771710ca7aaf7'
         PC_CHARM_scale_3:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f01c9eacbdd92c2bcb
           references:
-            - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
-              doi: 10.1016/j.neuroimage.2021.117997
+          - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
+            doi: 10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 3 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e4d0d28dc642a7af64'
+          - 'CHARM atlas scale 3 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e4d0d28dc642a7af64'
         PC_CHARM_scale_4:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f3d8bf292baf2c2cec
           references:
-            - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
-              doi: 10.1016/j.neuroimage.2021.117997
+          - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
+            doi: 10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 4 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e5d8bf292baf2c2ce2'
+          - 'CHARM atlas scale 4 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e5d8bf292baf2c2ce2'
         PC_CHARM_scale_5:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f37a752a710f2c2a9c
           references:
-            - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
-              doi: 10.1016/j.neuroimage.2021.117997
+          - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
+            doi: 10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 5 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e2cd87cca253679a8a'
+          - 'CHARM atlas scale 5 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e2cd87cca253679a8a'
         PC_CHARM_scale_6:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51f37da771710ca7aafd
           references:
-            - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
-              doi: 10.1016/j.neuroimage.2021.117997
+          - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
+            doi: 10.1016/j.neuroimage.2021.117997
           notes:
-            - 'CHARM atlas scale 6 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e580941e7c8fa7aca0'
+          - 'CHARM atlas scale 6 lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f51e580941e7c8fa7aca0'
         BM:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52061c9eacbdd92c2be7
           references:
-            - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
-              doi: 10.1016/j.neuroimage.2021.117997
+          - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
+            doi: 10.1016/j.neuroimage.2021.117997
           notes:
-            - Cortical gray matter mask.
+          - Cortical gray matter mask.
 

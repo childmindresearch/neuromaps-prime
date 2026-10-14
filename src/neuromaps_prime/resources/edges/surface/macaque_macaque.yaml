@@ -1,6 +1,17 @@
 - from: CIVETNMT
   to: D99
   surfaces:
+    RheMAPSurf:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-CIVETNMT_to-D99_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-CIVETNMT_to-D99_den-41k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -17,6 +28,17 @@
 - from: CIVETNMT
   to: MEBRAINS
   surfaces:
+    RheMAPSurf:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-CIVETNMT_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -29,6 +51,17 @@
 - from: CIVETNMT
   to: NMT2Sym
   surfaces:
+    RheMAPSurf:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -43,8 +76,33 @@
         url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: CIVETNMT
+  to: NMT2Asym
+  surfaces:
+    RheMAPSurf:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-CIVETNMT_to-NMT2Asym_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-CIVETNMT_to-NMT2Asym_den-41k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
+- from: CIVETNMT
   to: Yerkes19
   surfaces:
+    RheMAPSurf:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-CIVETNMT_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-CIVETNMT_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -57,6 +115,17 @@
 - from: D99
   to: CIVETNMT
   surfaces:
+    RheMAPSurf:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-D99_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-D99_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -73,24 +142,17 @@
 - from: D99
   to: MEBRAINS
   surfaces:
-    RheMAPSurf_standard:
-      168k:
+    RheMAPSurf:
+      41k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.D99-to-MEBRAINS.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.D99-to-MEBRAINS.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-D99_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-D99_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      168k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.D99-to-MEBRAINS.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.D99-to-MEBRAINS.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -103,25 +165,17 @@
 - from: D99
   to: NMT2Sym
   surfaces:
-    RheMAPSurf_standard:
-      168k:
+    RheMAPSurf:
+      41k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.D99-to-NMTv2.0-sym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.D99-to-NMTv2.0-sym.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-D99_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-D99_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      168k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.D99-to-NMTv2.0-sym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.D99-to-NMTv2.0-sym.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -134,46 +188,31 @@
 - from: D99
   to: NMT2Asym
   surfaces:
-    RheMAPSurf_standard:
-      168k:
+    RheMAPSurf:
+      41k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.D99-to-NMTv2.0-asym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.D99-to-NMTv2.0-asym.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-D99_to-NMT2Asym_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-D99_to-NMT2Asym_den-41k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      168k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.D99-to-NMTv2.0-asym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.D99-to-NMTv2.0-asym.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
 - from: D99
   to: Yerkes19
   surfaces:
-    RheMAPSurf_standard:
-      168k:
+    RheMAPSurf:
+      41k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.D99-to-YRK.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.D99-to-YRK.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-D99_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-D99_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      168k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.D99-to-YRK.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.D99-to-YRK.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -186,6 +225,17 @@
 - from: MEBRAINS
   to: CIVETNMT
   surfaces:
+    RheMAPSurf:
+      101k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       101k:
         midthickness:
@@ -198,24 +248,17 @@
 - from: MEBRAINS
   to: D99
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       101k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.MEBRAINS-to-D99.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.MEBRAINS-to-D99.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-MEBRAINS_to-D99_den-101k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-MEBRAINS_to-D99_den-101k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      101k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.MEBRAINS-to-D99.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.MEBRAINS-to-D99.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       101k:
         midthickness:
@@ -228,24 +271,17 @@
 - from: MEBRAINS
   to: NMT2Sym
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       101k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.MEBRAINS-to-NMTv2.0-sym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.MEBRAINS-to-NMTv2.0-sym.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      101k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.MEBRAINS-to-NMTv2.0-sym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.MEBRAINS-to-NMTv2.0-sym.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       101k:
         midthickness:
@@ -258,46 +294,31 @@
 - from: MEBRAINS
   to: NMT2Asym
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       101k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.MEBRAINS-to-NMTv2.0-asym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.MEBRAINS-to-NMTv2.0-asym.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-MEBRAINS_to-NMT2Asym_den-101k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-MEBRAINS_to-NMT2Asym_den-101k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      101k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.MEBRAINS-to-NMTv2.0-asym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.MEBRAINS-to-NMTv2.0-asym.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
 - from: MEBRAINS
   to: Yerkes19
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       101k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.MEBRAINS-to-YRK.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.MEBRAINS-to-YRK.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-MEBRAINS_to-Yerkes19_den-101k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      101k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.MEBRAINS-to-YRK.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.MEBRAINS-to-YRK.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       101k:
         midthickness:
@@ -310,6 +331,17 @@
 - from: NMT2Sym
   to: CIVETNMT
   surfaces:
+    RheMAPSurf:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -326,24 +358,17 @@
 - from: NMT2Sym
   to: D99
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       41k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.NMTv2.0-sym-to-D99.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.NMTv2.0-sym-to-D99.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Sym_to-D99_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Sym_to-D99_den-41k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      41k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.NMTv2.0-sym-to-D99.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.NMTv2.0-sym-to-D99.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -360,24 +385,17 @@
 - from: NMT2Sym
   to: MEBRAINS
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       41k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.NMTv2.0-sym-to-MEBRAINS.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.NMTv2.0-sym-to-MEBRAINS.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      41k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.NMTv2.0-sym-to-MEBRAINS.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.NMTv2.0-sym-to-MEBRAINS.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -388,26 +406,33 @@
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f47b13a67df4a7bb8cd38
 
 - from: NMT2Sym
+  to: NMT2Asym
+  surfaces:
+    RheMAPSurf:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Sym_to-NMT2Asym_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Sym_to-NMT2Asym_den-41k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
+- from: NMT2Sym
   to: Yerkes19
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       41k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.NMTv2.0-sym-to-YRK.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.NMTv2.0-sym-to-YRK.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Sym_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      41k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.NMTv2.0-sym-to-YRK.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.NMTv2.0-sym-to-YRK.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       41k:
         midthickness:
@@ -418,74 +443,89 @@
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d359bf888fc296b991e
 
 - from: NMT2Asym
+  to: CIVETNMT
+  surfaces:
+    RheMAPSurf:
+      41k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Asym_to-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Asym_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
+- from: NMT2Asym
   to: D99
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       41k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.NMTv2.0-asym-to-D99.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.NMTv2.0-asym-to-D99.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Asym_to-D99_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Asym_to-D99_den-41k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      41k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.NMTv2.0-asym-to-D99.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.NMTv2.0-asym-to-D99.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
 - from: NMT2Asym
   to: MEBRAINS
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       41k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.NMTv2.0-asym-to-MEBRAINS.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.NMTv2.0-asym-to-MEBRAINS.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Asym_to-MEBRAINS_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Asym_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
+- from: NMT2Asym
+  to: NMT2Sym
+  surfaces:
+    RheMAPSurf:
       41k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.NMTv2.0-asym-to-MEBRAINS.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.NMTv2.0-asym-to-MEBRAINS.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Asym_to-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Asym_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
 - from: NMT2Asym
   to: Yerkes19
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       41k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.NMTv2.0-asym-to-YRK.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.NMTv2.0-asym-to-YRK.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Asym_to-Yerkes19_den-41k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-NMT2Asym_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      41k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.NMTv2.0-asym-to-YRK.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.NMTv2.0-asym-to-YRK.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
 - from: Yerkes19
   to: CIVETNMT
   surfaces:
+    RheMAPSurf:
+      32k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-Yerkes19_to-CIVETNMT_den-32k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-Yerkes19_to-CIVETNMT_den-32k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       32k:
         midthickness:
@@ -502,24 +542,17 @@
 - from: Yerkes19
   to: D99
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       32k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.YRK-to-D99.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.YRK-to-D99.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-Yerkes19_to-D99_den-32k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-Yerkes19_to-D99_den-32k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      32k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.YRK-to-D99.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.YRK-to-D99.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       32k:
         midthickness:
@@ -532,24 +565,17 @@
 - from: Yerkes19
   to: MEBRAINS
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       32k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.YRK-to-MEBRAINS.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.YRK-to-MEBRAINS.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-Yerkes19_to-MEBRAINS_den-32k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-Yerkes19_to-MEBRAINS_den-32k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      32k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.YRK-to-MEBRAINS.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.YRK-to-MEBRAINS.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       32k:
         midthickness:
@@ -562,24 +588,17 @@
 - from: Yerkes19
   to: NMT2Sym
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       32k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.YRK-to-NMTv2.0-sym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.YRK-to-NMTv2.0-sym.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-Yerkes19_to-NMT2Sym_den-32k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-Yerkes19_to-NMT2Sym_den-32k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
-      32k:
-        sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.YRK-to-NMTv2.0-sym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.YRK-to-NMTv2.0-sym.sphere.reg.surf.gii
-      references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
     CIVET:
       32k:
         midthickness:
@@ -592,21 +611,48 @@
 - from: Yerkes19
   to: NMT2Asym
   surfaces:
-    RheMAPSurf_standard:
+    RheMAPSurf:
       32k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/lh.YRK-to-NMTv2.0-asym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/standard_alignment/rh.YRK-to-NMTv2.0-asym.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-Yerkes19_to-NMT2Asym_den-32k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/alignments/src-Yerkes19_to-NMT2Asym_den-32k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
-    RheMAPSurf_approx_volume:
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+      - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
+        doi: 10.5281/zenodo.15642802
+        url: https://zenodo.org/records/15642802
+- from: F99
+  to: Yerkes19
+  surfaces:
+    BALSA_F99_Yerkes19:
+      74k:
+        sphere:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/F99/src-F99_den-74k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/F99/src-F99_den-74k_hemi-R_sphere.surf.gii
+      references:
+      - citation: 'BALSA: Macaque Cortical Parcellations and Yerkes19 MRI-based Atlas.'
+        url: https://balsa.wustl.edu/reference/show/976nz
+      - citation: Donahue, C. J., et al. 2016. Journal of Neuroscience.
+        doi: 10.1523/JNEUROSCI.0493-16.2016
+      - citation: Donahue, C. J., et al. 2018. PNAS.
+        doi: 10.1073/pnas.1721653115
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+- from: Yerkes19
+  to: F99
+  surfaces:
+    BALSA_F99_Yerkes19:
       32k:
         sphere:
-          left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/lh.YRK-to-NMTv2.0-asym.sphere.reg.surf.gii
-          right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/deformation_spheres/approx_volume_alignment/rh.YRK-to-NMTv2.0-asym.sphere.reg.surf.gii
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_sphere.surf.gii
       references:
-      - citation: Zhou, Z.-X., & Xu, T. 2025.
-        doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
+      - citation: 'BALSA: Macaque Cortical Parcellations and Yerkes19 MRI-based Atlas.'
+        url: https://balsa.wustl.edu/reference/show/976nz
+      - citation: Donahue, C. J., et al. 2016. Journal of Neuroscience.
+        doi: 10.1523/JNEUROSCI.0493-16.2016
+      - citation: Donahue, C. J., et al. 2018. PNAS.
+        doi: 10.1073/pnas.1721653115
+      - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources

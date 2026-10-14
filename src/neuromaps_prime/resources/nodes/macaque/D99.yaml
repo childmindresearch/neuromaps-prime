@@ -4,38 +4,55 @@ D99:
   references:
   - citation: Saleem KS, et al. 2021. Neuroimage. 245:118759.
     doi: 10.1016/j.neuroimage.2021.118759
-  - citation: Zhou, Z.-X., & Xu, T. 2025. OSF dataset.
-    doi: 10.5281/zenodo.15642801
+  - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+    url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
   surfaces:
     41k:
-    # 41k surfaces all use neuromaps OSF (https://osf.io/4mw3a)
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5230323e17e1124712b0a
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303aa1f78e197903529
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-L_midthickness.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-R_midthickness.surf.gii
       pial:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52300ab76e18c739044be
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52302c807054314902927
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-L_pial.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-R_pial.surf.gii
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303743de820043ead18
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303cd1f7a1773903ffc
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-L_sphere.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-R_sphere.surf.gii
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303cc9143f354902958
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523022882bdb2bc3ebdee
-    # 168k surfaces all use RheMAP-Surf (https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0)
-    168k:
-      midthickness:
-        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.mid.surf.gii
-        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.mid.surf.gii
-      pial:
-        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.pial.surf.gii
-        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.pial.surf.gii
-      sphere:
-        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.sphere.surf.gii
-        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.sphere.surf.gii
-      white:
-        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.wm.surf.gii
-        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.wm.surf.gii
-
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-L_white.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-R_white.surf.gii
+      annotation:
+        CV_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-L_curvature.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-R_curvature.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - FreeSurfer mean curvature computed on the supplied white surface, with template-specific smoothing.
+        CT_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-L_thickness.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-R_thickness.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - FreeSurfer cortical thickness computed with neighborhood size 20 and a 5 mm limit.
+        SD_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-L_sulc.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-R_sulc.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - DPF-derived sulcal folding field computed with brain-slam 0.1.2, alpha=0.03; not a direct geometric depth measurement.
+        BM_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-L_cortexmask.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/D99/src-D99_den-41k_hemi-R_cortexmask.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - 'Consensus cortex mask: 1=cortex, 0=medial wall. Fetching this annotation does not automatically apply an ROI during resampling or comparison.'
   volumes:
     250um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52302a52f9bb3897129cf

@@ -56,12 +56,18 @@ These codes appear after `desc-` in the filename and indicate the kind of data s
 | **PC** | Parcellations | Discrete atlas-based assignments mapping each surface vertex or voxel to a labeled cortical region, often used to define analysis units. |
 | **RG** | Receptor Gradients | Low-dimensional spatial gradients derived from neurotransmitter receptor distribution profiles (e.g., principal receptor gradients across non-human primate cortex). |
 | **RM** | Receptor Maps | Spatial maps of neurotransmitter receptor density or binding potential, derived from PET or autoradiography imaging (e.g., radioligand binding densities per-neuron or raw). |
-| **SD** | Sulcal Depth | Vertex-wise measure of the depth of cortical folds, defined as the distance between the cortical surface and a reference surface. |
+| **SD** | Sulcal Depth | Vertex-wise measures of sulcal depth or folding; the definition depends on the method and can include DPF-derived fields. |
 | **SMM** | Smoothed Myelin Maps | Spatially smoothed versions of myelin maps (e.g., using surface-based kernels) to improve signal-to-noise ratio and emphasize large-scale gradients. |
 | **TPM** | Tissue Probability Maps | Voxel-wise probabilistic maps indicating the likelihood that a given location belongs to a specific tissue class (e.g., gray matter, white matter, CSF; exception uses `probseg` suffix). |
 | **WMT** | White Matter Tracts | Probabilistic maps giving the likelihood that a voxel belongs to a given white matter tract.
 
 ---
+
+The macaque resources include `CV_RheMAPSurf`, `CT_RheMAPSurf`,
+`SD_RheMAPSurf`, and `BM_RheMAPSurf` for the supplied curvature, thickness,
+DPF-derived sulc, and consensus cortex mask maps. These method-specific labels
+distinguish them from existing annotations. The mask uses `1=cortex` and
+`0=medial wall`; it is not automatically applied during resampling or comparison.
 
 ## Sub-Label Naming Resources
 

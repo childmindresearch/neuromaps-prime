@@ -4,14 +4,49 @@ CIVETNMT:
   references:
   - citation: Lepage, C., et al. 2021. Organization for Human Brain Mapping
     doi: 10.1016/j.neuroimage.2020.117622
+  - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+    url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
   surfaces:
     41k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522ea3a883e73df3eb1c1
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522ec6846076e837136e2
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_sphere.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522e92882bdb2bc3ebd17
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522ed1e7b820217713433
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_midthickness.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_midthickness.surf.gii
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522eda52f9bb3897129b8
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d522ec4f3931c54c90480e
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_white.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_white.surf.gii
+      annotation:
+        CV_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_curvature.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_curvature.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - FreeSurfer mean curvature computed on the supplied white surface, with template-specific smoothing.
+        CT_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_thickness.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_thickness.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - 'Estimated cortical thickness: twice the distance between corresponding white and midthickness vertices.'
+        SD_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_sulc.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_sulc.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - DPF-derived sulcal folding field computed with brain-slam 0.1.2, alpha=0.03; not a direct geometric depth measurement.
+        BM_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-L_cortexmask.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/CIVETNMT/src-CIVETNMT_den-41k_hemi-R_cortexmask.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+          notes:
+          - 'Consensus cortex mask: 1=cortex, 0=medial wall. Fetching this annotation does not automatically apply an ROI during resampling or comparison.'

@@ -55,4 +55,8 @@ jobs:
         uv run --script scripts/validate_urls.py \
           src/neuromaps_prime/resources/**/*.yaml \
           --workers 2 \
-          --skip gin.g-node.org
+          --skip gin.g-node.org \
+          --allow-shared-url https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/F99/src-F99_den-74k_hemi-L_sphere.surf.gii \
+          --allow-shared-url https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/F99/src-F99_den-74k_hemi-R_sphere.surf.gii \
+          --allow-shared-url https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii \
+          --allow-shared-url https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/main/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_sphere.surf.gii
