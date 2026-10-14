@@ -46,7 +46,8 @@ class Resource(BaseModel):
         """Return the local path to this resource's file, downloading if needed.
 
         Resolution order:
-        1. ``file_path`` if set and the file exists (already resolved).
+        1. ``file_path`` if set and the file exists, except GitHub raw resources,
+           which revalidate their HTTP cache so branch updates are detected.
         2. ``uri`` if it points to an existing local file.
         3. Remote download into ``data_dir`` (named from storage metadata);
            the result is stored on ``file_path``.
@@ -58,7 +59,10 @@ class Resource(BaseModel):
             FileNotFoundError: if the file cannot be resolved or fetched.
             ValueError: if a remote fetch is required but no ``data_dir`` is set.
         """
-        if self.file_path is not None and self.file_path.exists():
+        github_raw = self.uri is not None and self.uri.startswith(
+            "https://raw.githubusercontent.com/"
+        )
+        if self.file_path is not None and self.file_path.exists() and not github_raw:
             return self.file_path
         if self.uri is None:
             raise FileNotFoundError("File does not exist and cannot be fetched.")

@@ -59,9 +59,9 @@ def _annotation_uri(graph: NeuromapsGraph, coords: tuple[str, str, str, str]) ->
 def _fetch(uri: str, tmp_path: Path) -> None:
     """Fetch ``uri`` through the production path into ``tmp_path``.
 
-    A successful call already implies the backend verified the file's hash
-    (OSF MD5 / GitHub blob SHA) and parsed live metadata, so the assertions
-    confirm a real, non-empty file landed in the requested directory.
+    OSF uses its published hash; GitHub uses direct raw downloads and HTTP
+    cache validators. These assertions confirm a real, non-empty file landed
+    in the requested directory.
     """
     result = download_and_validate(uri, tmp_path)
     assert result.parent == tmp_path

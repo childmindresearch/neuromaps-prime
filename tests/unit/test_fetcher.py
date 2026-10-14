@@ -12,7 +12,6 @@ import requests
 
 from neuromaps_prime import remote
 from neuromaps_prime.fetcher import download_and_validate, id_storage
-from neuromaps_prime.remote.github import GitHubFileMeta
 from neuromaps_prime.remote.osf import OSFFileMeta
 
 if TYPE_CHECKING:
@@ -27,15 +26,6 @@ def _osf_meta(payload: bytes, name: str = "file.surf.gii") -> OSFFileMeta:
         extra={
             "hashes": {"md5": hashlib.md5(payload, usedforsecurity=False).hexdigest()}
         },
-    )
-
-
-def _github_meta(payload: bytes, name: str = "file.surf.gii") -> GitHubFileMeta:
-    """Build a :class:`GitHubFileMeta` whose blob SHA matches ``payload``."""
-    header = f"blob {len(payload)}\0".encode()
-    sha = hashlib.sha1(header + payload, usedforsecurity=False).hexdigest()
-    return GitHubFileMeta(
-        name=name, size=len(payload), sha=sha, download_url=f"https://raw/{name}"
     )
 
 
@@ -280,71 +270,35 @@ class TestOSFDownload:
 
 
 class TestGitHubDownload:
-    """Test suite for GitHubStorage.download naming and cache behavior."""
+    """Check the public fetcher dispatches directly to raw HTTP downloads."""
 
-    def test_stores_under_storage_name(self, tmp_path: Path) -> None:
-        """File lands in dest_dir under its exact storage-side name."""
-        payload = b"surface data"
-        meta = _github_meta(payload)
-        with (
-            patch.object(remote.GitHubStorage, "get_meta", return_value=meta),
-            patch("neuromaps_prime.remote.github.requests.get", _fake_stream(payload)),
-        ):
-            result = remote.GitHubStorage().download("https://u1", tmp_path)
+    def test_raw_fetcher_stores_file(self, tmp_path: Path) -> None:
+        """The production entry point downloads the raw URL without an API call."""
+        uri = "https://raw.githubusercontent.com/owner/repo/main/file.surf.gii"
+        response = MagicMock(status_code=200, headers={})
+        response.iter_content.return_value = [b"surface data"]
+        with patch(
+            "neuromaps_prime.remote.github.requests.get", return_value=response
+        ) as get:
+            result = download_and_validate(uri, tmp_path)
         assert result == tmp_path / "file.surf.gii"
-        assert result.read_bytes() == payload
+        assert result.read_bytes() == b"surface data"
+        assert get.call_count == 1
+        assert get.call_args.args[0] == uri
 
-    def test_cache_hit_reuses_verified_file(self, tmp_path: Path) -> None:
-        """A verifying existing file is returned without downloading."""
-        payload = b"surface data"
-        meta = _github_meta(payload)
-        stored = tmp_path / "file.surf.gii"
-        stored.write_bytes(payload)
+    def test_raw_fetcher_retries_transient_failure(self, tmp_path: Path) -> None:
+        """Retries still target raw HTTP, not metadata API endpoints."""
+        uri = "https://raw.githubusercontent.com/owner/repo/main/file.surf.gii"
+        response = MagicMock(status_code=200, headers={})
+        response.iter_content.return_value = [b"surface data"]
         with (
-            patch.object(remote.GitHubStorage, "get_meta", return_value=meta),
-            patch("neuromaps_prime.remote.github.requests.get") as mock_get,
+            patch(
+                "neuromaps_prime.remote.github.requests.get",
+                side_effect=[_http_error(503), response],
+            ) as get,
+            patch("neuromaps_prime.fetcher.time.sleep"),
         ):
-            result = remote.GitHubStorage().download("https://u1", tmp_path)
-        assert result == stored
-        mock_get.assert_not_called()
-
-    def test_mismatch_warns_and_overwrites(
-        self, tmp_path: Path, caplog: pytest.LogCaptureFixture
-    ) -> None:
-        """A non-matching existing file is overwritten, with a warning."""
-        old, new = b"stale bytes", b"fresh bytes"
-        meta = _github_meta(new)
-        stored = tmp_path / "file.surf.gii"
-        stored.write_bytes(old)
-        with (
-            caplog.at_level(logging.WARNING),
-            patch.object(remote.GitHubStorage, "get_meta", return_value=meta),
-            patch("neuromaps_prime.remote.github.requests.get", _fake_stream(new)),
-        ):
-            result = remote.GitHubStorage().download("https://u1", tmp_path)
-        assert result == stored
-        assert stored.read_bytes() == new
-        assert any(
-            "already exists and is being overwritten" in record.getMessage()
-            for record in caplog.records
-        )
-
-    def test_failed_stream_keeps_existing_file(self, tmp_path: Path) -> None:
-        """A failed download stream keeps the existing file and leaves no partial."""
-        payload = b"surface data"
-        stored = tmp_path / "file.surf.gii"
-        stored.write_bytes(payload)  # a previously-good cached copy
-        resp = MagicMock()
-        resp.iter_content.side_effect = requests.exceptions.ChunkedEncodingError(
-            "stream truncated"
-        )
-        with (
-            patch.object(
-                remote.GitHubStorage, "get_meta", return_value=_github_meta(b"other")
-            ),
-            patch("neuromaps_prime.remote.github.requests.get", return_value=resp),
-            pytest.raises(requests.exceptions.ChunkedEncodingError),
-        ):
-            remote.GitHubStorage().download("https://u1", tmp_path)
-        assert stored.read_bytes() == payload
-        assert list(tmp_path.glob("*.part")) == []
+            result = download_and_validate(uri, tmp_path)
+        assert result.read_bytes() == b"surface data"
+        assert get.call_count == 2
+        assert all(call.args[0] == uri for call in get.call_args_list)

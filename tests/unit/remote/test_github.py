@@ -1,152 +1,201 @@
-"""Unit tests for GitHub remote storage."""
+"""Exercise direct raw downloads, branch updates, and cache recovery."""
 
 from __future__ import annotations
 
-import hashlib
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 
-from neuromaps_prime.remote.github import GitHubFileMeta, GitHubStorage
+from neuromaps_prime.remote.github import GitHubStorage
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-MOCK_CONTENT = b"test content"
-MOCK_SHA = hashlib.sha1(
-    f"blob {len(MOCK_CONTENT)}\0".encode() + MOCK_CONTENT, usedforsecurity=False
-).hexdigest()
-
-MOCK_OWNER = "mockowner"
-MOCK_REPO = "mockrepo"
-MOCK_REF = "v0.1"
-MOCK_PATH = "data/test.txt"
-MOCK_DOWNLOAD_URL = (
-    f"https://raw.githubusercontent.com/{MOCK_OWNER}/{MOCK_REPO}/{MOCK_REF}/{MOCK_PATH}"
-)
-MOCK_RAW_URL = (
-    f"https://raw.githubusercontent.com/{MOCK_OWNER}/{MOCK_REPO}/{MOCK_REF}/{MOCK_PATH}"
-)
-MOCK_RAW_TAG_URL = (
-    f"https://raw.githubusercontent.com/{MOCK_OWNER}/{MOCK_REPO}/"
-    f"refs/tags/{MOCK_REF}/{MOCK_PATH}"
-)
-MOCK_RAW_HEAD_URL = (
-    f"https://raw.githubusercontent.com/{MOCK_OWNER}/{MOCK_REPO}/"
-    f"refs/heads/{MOCK_REF}/{MOCK_PATH}"
-)
-
-MOCK_META = {
-    "name": "test.txt",
-    "size": len(MOCK_CONTENT),
-    "sha": MOCK_SHA,
-    "download_url": MOCK_DOWNLOAD_URL,
-}
+URL = "https://raw.githubusercontent.com/owner/repo/main/data/test.txt"
 
 
-@pytest.fixture
-def mock_meta_response() -> MagicMock:
-    """Mock metadata response object."""
-    return MagicMock(json=MagicMock(return_value=MOCK_META))
-
-
-class TestGitHubFileMeta:
-    """Test suite for GitHub file metadata."""
-
-    def test_valid(self) -> None:
-        """Test metadata fields are correctly assigned on instantiation."""
-        meta = GitHubFileMeta(**MOCK_META)
-        assert meta.name == "test.txt"
-        assert meta.sha == MOCK_SHA
-        assert meta.download_url == MOCK_DOWNLOAD_URL
+def _response(
+    payload: bytes = b"", status: int = 200, etag: str | None = '"v1"'
+) -> MagicMock:
+    response = MagicMock(spec=requests.Response)
+    response.status_code = status
+    response.headers = {"Content-Length": str(len(payload))}
+    if etag is not None:
+        response.headers["ETag"] = etag
+    response.iter_content.return_value = [payload]
+    if status >= 400:
+        response.raise_for_status.side_effect = requests.HTTPError(response=response)
+    return response
 
 
 class TestGitHubStorage:
-    """Test suite for GitHubStorage download and metadata retrieval."""
+    """Verify requests never leave the supplied raw URL."""
 
-    def test_parse_raw_url(self) -> None:
-        """Test bare raw URL is correctly parsed into owner/repo/ref/path."""
-        owner, repo, ref, path = GitHubStorage._parse(MOCK_RAW_URL)
-        assert owner == MOCK_OWNER
-        assert repo == MOCK_REPO
-        assert ref == MOCK_REF
-        assert path == MOCK_PATH
+    @pytest.mark.parametrize("prefix", ["", "refs/tags/", "refs/heads/"])
+    def test_parse_raw_url(self, prefix: str) -> None:
+        """Branch, tag, and existing explicit-ref raw URLs remain supported."""
+        assert GitHubStorage._parse(
+            f"https://raw.githubusercontent.com/owner/repo/{prefix}v1/data/test.txt"
+        ) == ("owner", "repo", "v1", "data/test.txt")
 
-    def test_parse_raw_tag_url(self) -> None:
-        """Test raw URL with refs/tags/ prefix is correctly parsed."""
-        owner, repo, ref, path = GitHubStorage._parse(MOCK_RAW_TAG_URL)
-        assert owner == MOCK_OWNER
-        assert repo == MOCK_REPO
-        assert ref == MOCK_REF
-        assert path == MOCK_PATH
-
-    def test_parse_raw_head_url(self) -> None:
-        """Test raw URL with refs/heads/ prefix is correctly parsed."""
-        owner, repo, ref, path = GitHubStorage._parse(MOCK_RAW_HEAD_URL)
-        assert owner == MOCK_OWNER
-        assert repo == MOCK_REPO
-        assert ref == MOCK_REF
-        assert path == MOCK_PATH
-
-    def test_parse_blob_url_raises(self) -> None:
-        """Test blob URL is raises ValueError."""
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://github.com/owner/repo/blob/main/file.txt",
+            "https://example.com/raw.githubusercontent.com/owner/repo/main/file.txt",
+            "https://raw.githubusercontent.com.evil/owner/repo/main/file.txt",
+        ],
+    )
+    def test_unsupported_url(self, url: str) -> None:
+        """Unsupported hosts and file-view pages are rejected before any request."""
         with pytest.raises(ValueError, match="unsupported"):
-            GitHubStorage._parse(
-                f"https://github.com/{MOCK_OWNER}/{MOCK_REPO}/blob/{MOCK_REF}/{MOCK_PATH}"
-            )
-
-    def test_parse_invalid_url_raises(self) -> None:
-        """Test parsing a non-GitHub URL raises ValueError."""
-        with pytest.raises(ValueError, match="Unrecognized"):
-            GitHubStorage._parse(f"https://github.com/{MOCK_OWNER}/{MOCK_REPO}")
+            GitHubStorage._parse(url)
 
     @patch("neuromaps_prime.remote.github.requests.get")
-    def test_get_meta(self, mock_get: MagicMock, mock_meta_response: MagicMock) -> None:
-        """Test get_meta returns parsed GitHubFileMeta and calls correct URL."""
-        mock_get.return_value = mock_meta_response
-        meta = GitHubStorage().get_meta(MOCK_RAW_URL)
-        assert meta.name == "test.txt"
-        assert meta.sha == MOCK_SHA
-        mock_get.assert_called_once_with(
-            f"https://api.github.com/repos/{MOCK_OWNER}/{MOCK_REPO}/contents/{MOCK_PATH}",
-            params={"ref": MOCK_REF},
-            timeout=90,
+    def test_direct_download(self, get: MagicMock, tmp_path: Path) -> None:
+        """A cold fetch makes one raw GET and stores the complete bytes."""
+        response = _response(b"original")
+        get.return_value = response
+        target = GitHubStorage().download(URL, tmp_path)
+        assert target == tmp_path / "test.txt"
+        assert target.read_bytes() == b"original"
+        get.assert_called_once_with(
+            URL, headers={"Accept-Encoding": "identity"}, stream=True, timeout=90
+        )
+        response.close.assert_called_once()
+
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_unchanged_cache(self, get: MagicMock, tmp_path: Path) -> None:
+        """A 304 validates the cache without downloading the body again."""
+        unchanged = _response(status=304)
+        get.side_effect = [_response(b"original"), unchanged]
+        storage = GitHubStorage()
+        target = storage.download(URL, tmp_path)
+        assert storage.download(URL, tmp_path) == target
+        assert target.read_bytes() == b"original"
+        assert get.call_args.kwargs["headers"]["If-None-Match"] == '"v1"'
+        unchanged.iter_content.assert_not_called()
+        assert all(call.args[0] == URL for call in get.call_args_list)
+
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_branch_update(self, get: MagicMock, tmp_path: Path) -> None:
+        """A new ETag and body replace an older cached branch version."""
+        get.side_effect = [_response(b"old"), _response(b"updated", etag='"v2"')]
+        storage = GitHubStorage()
+        target = storage.download(URL, tmp_path)
+        storage.download(URL, tmp_path)
+        assert target.read_bytes() == b"updated"
+        assert get.call_args.kwargs["headers"]["If-None-Match"] == '"v1"'
+
+    @pytest.mark.parametrize("corrupt", [b"tampered", b"short"])
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_corrupt_cache_recovers(
+        self, get: MagicMock, corrupt: bytes, tmp_path: Path
+    ) -> None:
+        """Corrupt local bytes force an unconditional raw download."""
+        get.side_effect = [_response(b"original"), _response(b"original")]
+        storage = GitHubStorage()
+        target = storage.download(URL, tmp_path)
+        target.write_bytes(corrupt)
+        storage.download(URL, tmp_path)
+        assert target.read_bytes() == b"original"
+        assert "If-None-Match" not in get.call_args.kwargs["headers"]
+
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_changed_uri_does_not_reuse_validator(
+        self, get: MagicMock, tmp_path: Path
+    ) -> None:
+        """A different URI with the same basename is fetched unconditionally."""
+        get.side_effect = [_response(b"main"), _response(b"other")]
+        storage = GitHubStorage()
+        storage.download(URL, tmp_path)
+        storage.download(URL.replace("/main/", "/other/"), tmp_path)
+        assert (tmp_path / "test.txt").read_bytes() == b"other"
+        assert "If-None-Match" not in get.call_args.kwargs["headers"]
+
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_old_cache_without_metadata_is_refreshed(
+        self, get: MagicMock, tmp_path: Path
+    ) -> None:
+        """Existing pre-change caches migrate through a complete raw request."""
+        (tmp_path / "test.txt").write_bytes(b"legacy")
+        get.return_value = _response(b"current")
+        GitHubStorage().download(URL, tmp_path)
+        assert (tmp_path / "test.txt").read_bytes() == b"current"
+        assert "If-None-Match" not in get.call_args.kwargs["headers"]
+
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_invalid_cache_metadata_is_ignored(
+        self, get: MagicMock, tmp_path: Path
+    ) -> None:
+        """Broken sidecar metadata never prevents an unconditional refresh."""
+        (tmp_path / "test.txt").write_bytes(b"old")
+        (tmp_path / "test.txt.http.json").write_text("not JSON")
+        get.return_value = _response(b"current")
+        GitHubStorage().download(URL, tmp_path)
+        assert (tmp_path / "test.txt").read_bytes() == b"current"
+
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_last_modified_fallback(self, get: MagicMock, tmp_path: Path) -> None:
+        """Last-Modified can revalidate servers without an ETag."""
+        first = _response(b"original", etag=None)
+        first.headers["Last-Modified"] = "Mon, 12 Oct 2026 12:00:00 GMT"
+        get.side_effect = [first, _response(status=304)]
+        storage = GitHubStorage()
+        storage.download(URL, tmp_path)
+        storage.download(URL, tmp_path)
+        assert (
+            get.call_args.kwargs["headers"]["If-Modified-Since"]
+            == (first.headers["Last-Modified"])
         )
 
     @patch("neuromaps_prime.remote.github.requests.get")
-    def test_get_meta_raises_on_http_error(self, mock_get: MagicMock) -> None:
-        """Test get_meta propagates HTTP errors from the remote server."""
-        mock_get.return_value.raise_for_status.side_effect = Exception("HTTP Error")
-        with pytest.raises(Exception, match="HTTP Error"):
-            GitHubStorage().get_meta(MOCK_RAW_URL)
-
-    @patch("neuromaps_prime.remote.github.requests.get")
-    def test_download_valid(
-        self, mock_get: MagicMock, mock_meta_response: MagicMock, tmp_path: Path
+    def test_failed_stream_preserves_cache(
+        self, get: MagicMock, tmp_path: Path
     ) -> None:
-        """Test download writes correct bytes to dest when checksum matches."""
-        mock_download = MagicMock(iter_content=MagicMock(return_value=[MOCK_CONTENT]))
-        mock_get.side_effect = [mock_meta_response, mock_download]
-        GitHubStorage().download(MOCK_RAW_URL, tmp_path)
-        assert (tmp_path / "test.txt").read_bytes() == MOCK_CONTENT
-
-    @patch("neuromaps_prime.remote.github.requests.get")
-    def test_download_checksum_mismatch(
-        self, mock_get: MagicMock, mock_meta_response: MagicMock, tmp_path: Path
-    ) -> None:
-        """Test download raises ValueError when downloaded content fails checksum."""
-        mock_download = MagicMock(
-            iter_content=MagicMock(return_value=[b"wrong content"])
+        """Interrupted transfers preserve the old complete file and remove partials."""
+        failing = _response(b"new")
+        failing.iter_content.side_effect = requests.exceptions.ChunkedEncodingError(
+            "stream truncated"
         )
-        mock_get.side_effect = [mock_meta_response, mock_download]
-        with pytest.raises(ValueError, match="Checksum mismatch"):
-            GitHubStorage().download(MOCK_RAW_URL, tmp_path)
+        get.side_effect = [_response(b"original"), failing]
+        storage = GitHubStorage()
+        target = storage.download(URL, tmp_path)
+        with pytest.raises(requests.exceptions.ChunkedEncodingError):
+            storage.download(URL, tmp_path)
+        assert target.read_bytes() == b"original"
+        assert not list(tmp_path.glob("*.part"))
 
-    def test_default_chunk_size(self) -> None:
-        """Test chunk_size defaults to 8192."""
-        assert GitHubStorage().chunk_size == 8192
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_incomplete_response_preserves_cache(
+        self, get: MagicMock, tmp_path: Path
+    ) -> None:
+        """An uncompressed short response does not overwrite good cached bytes."""
+        incomplete = _response(b"short")
+        incomplete.headers["Content-Length"] = "100"
+        get.side_effect = [_response(b"original"), incomplete]
+        storage = GitHubStorage()
+        target = storage.download(URL, tmp_path)
+        with pytest.raises(ValueError, match="Incomplete"):
+            storage.download(URL, tmp_path)
+        assert target.read_bytes() == b"original"
+        assert not list(tmp_path.glob("*.part"))
 
-    def test_custom_chunk_size(self) -> None:
-        """Test chunk_size is correctly set when provided."""
-        assert GitHubStorage(chunk_size=4096).chunk_size == 4096
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_http_error(self, get: MagicMock, tmp_path: Path) -> None:
+        """HTTP errors propagate without producing a cached file."""
+        get.return_value = _response(status=404)
+        with pytest.raises(requests.HTTPError):
+            GitHubStorage().download(URL, tmp_path)
+        assert not (tmp_path / "test.txt").exists()
+
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_304_without_cache_is_rejected(
+        self, get: MagicMock, tmp_path: Path
+    ) -> None:
+        """An unsolicited 304 cannot be mistaken for a complete local file."""
+        get.return_value = _response(status=304)
+        with pytest.raises(ValueError, match="without a valid cached file"):
+            GitHubStorage().download(URL, tmp_path)

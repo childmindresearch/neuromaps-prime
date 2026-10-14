@@ -1,108 +1,164 @@
-"""Model for fetching from GitHub repos (tag/branch/commit)."""
+"""Download GitHub raw files directly, with HTTP cache validation."""
+
+from __future__ import annotations
 
 import hashlib
 import logging
 import re
+import tempfile
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import requests
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+
+if TYPE_CHECKING:
+    from requests import Response
 
 _logger = logging.getLogger(__name__)
-
-
-class GitHubFileMeta(BaseModel):
-    """File metadata from GitHub contents API."""
-
-    name: str
-    size: int
-    sha: str
-    download_url: str
-
-
 _RAW_RE = re.compile(
-    r"raw\.githubusercontent\.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)/"
-    r"(?:refs/(?:tags|heads)/)?(?P<ref>[^/]+)/(?P<path>.+)"
+    r"https://raw\.githubusercontent\.com/(?P<owner>[^/?#]+)/"
+    r"(?P<repo>[^/?#]+)/(?:refs/(?:tags|heads)/)?"
+    r"(?P<ref>[^/?#]+)/(?P<path>[^?#]+)"
 )
 
 
-class GitHubStorage(BaseModel):
-    """Fetch file from public GitHub repo.
+class GitHubCacheMeta(BaseModel):
+    """Local cache identity and HTTP validators; no API metadata is needed."""
 
-    Handles both blob and raw urls.
+    url: str
+    size: int
+    sha256: str
+    etag: str | None = None
+    last_modified: str | None = None
+
+
+class GitHubStorage(BaseModel):
+    """Fetch public raw URLs without querying the GitHub REST API.
+
+    Cached bytes are checked locally before sending an HTTP conditional GET.
+    A 304 reuses the cache; a 200 atomically replaces it. Branch URLs therefore
+    follow updates without requiring tags, tokens, or Contents API requests.
     """
 
     chunk_size: int = 8192
 
     @staticmethod
     def _parse(url: str) -> tuple[str, str, str, str]:
-        m = _RAW_RE.search(url)
-        if not m:
+        match = _RAW_RE.fullmatch(url)
+        if match is None:
             raise ValueError(f"Unrecognized / unsupported GitHub URL: {url}")
-        return m["owner"], m["repo"], m["ref"], m["path"]
-
-    def get_meta(self, url: str) -> GitHubFileMeta:
-        """Get metadata from remote GitHub file (given blob URL)."""
-        owner, repo, ref, path = self._parse(url)
-        api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
-        r = requests.get(api_url, params={"ref": ref}, timeout=90)
-        r.raise_for_status()
-        return GitHubFileMeta(**r.json())
-
-    def download(self, url: str, dest_dir: Path) -> Path:
-        """Download the file into ``dest_dir`` and return its local path.
-
-        The file is stored under its storage-side name. An existing file is
-        reused only if it verifies against the blob SHA; otherwise a warning
-        is logged and the file is overwritten.
-        """
-        meta = self.get_meta(url)
-        target = dest_dir / meta.name
-        if target.exists():
-            if self._verify(target, meta):
-                return target
-            _logger.warning("%s already exists and is being overwritten.", target)
-        self._download_to(meta.download_url, target, meta)
-        return target
-
-    def _download_to(self, url: str, target: Path, meta: GitHubFileMeta) -> None:
-        """Stream the file to a temp file and move it to ``target`` if valid.
-
-        The download lands in a sibling ``.part`` file and is only renamed
-        into place with :meth:`Path.replace` once the blob SHA verifies, so a
-        failed download never leaves a partial ``target`` behind.
-        """
-        part = target.with_name(target.name + ".part")
-        r = requests.get(url, stream=True, timeout=90)
-        try:
-            r.raise_for_status()
-
-            content = bytearray()
-            with part.open("wb") as f:
-                for chunk in r.iter_content(self.chunk_size):
-                    f.write(chunk)
-                    content.extend(chunk)
-
-            header = f"blob {len(content)}\0".encode()
-            actual = hashlib.sha1(
-                header + bytes(content), usedforsecurity=False
-            ).hexdigest()
-            if actual != meta.sha:
-                raise ValueError(f"Checksum mismatch: {actual} != {meta.sha}")
-
-            part.replace(target)
-        except BaseException:
-            part.unlink(missing_ok=True)
-            raise
-        finally:
-            r.close()
+        return match["owner"], match["repo"], match["ref"], match["path"]
 
     @staticmethod
-    def _verify(path: Path, meta: GitHubFileMeta) -> bool:
-        """Check that ``path`` matches the storage-side size and blob SHA."""
-        if path.stat().st_size != meta.size:
-            return False
-        content = path.read_bytes()
-        header = f"blob {len(content)}\0".encode()
-        actual = hashlib.sha1(header + content, usedforsecurity=False).hexdigest()
-        return actual == meta.sha
+    def _read_cache(
+        metadata_path: Path, target: Path, url: str
+    ) -> GitHubCacheMeta | None:
+        if not target.is_file() or not metadata_path.is_file():
+            return None
+        try:
+            meta = GitHubCacheMeta.model_validate_json(metadata_path.read_bytes())
+            if meta.url != url or meta.size != target.stat().st_size:
+                return None
+            with target.open("rb") as stream:
+                digest = hashlib.file_digest(stream, "sha256").hexdigest()
+            return meta if digest == meta.sha256 else None
+        except (OSError, ValidationError):
+            return None
+
+    @staticmethod
+    def _write_cache(metadata_path: Path, meta: GitHubCacheMeta) -> None:
+        with tempfile.NamedTemporaryFile(
+            dir=metadata_path.parent, suffix=".part", delete=False
+        ) as stream:
+            temporary = Path(stream.name)
+        try:
+            temporary.write_text(meta.model_dump_json(), encoding="utf-8")
+            temporary.replace(metadata_path)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+    def download(self, url: str, dest_dir: Path) -> Path:
+        """Fetch a raw file, revalidating any existing cache over HTTP.
+
+        Args:
+            url: Public raw.githubusercontent.com URL.
+            dest_dir: Cache directory; files retain their URL basename.
+
+        Returns:
+            Local path to the complete file.
+
+        Raises:
+            ValueError: If the URL is unsupported or the response is incomplete.
+            requests.RequestException: If the raw request or stream fails.
+        """
+        _, _, _, file_path = self._parse(url)
+        name = Path(file_path).name
+        if name in ("", ".", ".."):
+            raise ValueError(f"Unsupported GitHub filename: {name!r}")
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        target = dest_dir / name
+        metadata_path = target.with_name(target.name + ".http.json")
+        cached = self._read_cache(metadata_path, target, url)
+        headers = {"Accept-Encoding": "identity"}
+        if cached is not None:
+            if cached.etag:
+                headers["If-None-Match"] = cached.etag
+            elif cached.last_modified:
+                headers["If-Modified-Since"] = cached.last_modified
+
+        response = requests.get(url, headers=headers, stream=True, timeout=90)
+        try:
+            if response.status_code == 304:
+                if cached is None:
+                    raise ValueError("Received HTTP 304 without a valid cached file.")
+                return target
+            response.raise_for_status()
+            meta = self._download_to(response, target, url)
+            self._write_cache(metadata_path, meta)
+        finally:
+            response.close()
+        return target
+
+    def _download_to(
+        self, response: Response, target: Path, url: str
+    ) -> GitHubCacheMeta:
+        digest = hashlib.sha256()
+        size = 0
+        with tempfile.NamedTemporaryFile(
+            dir=target.parent, suffix=".part", delete=False
+        ) as stream:
+            temporary = Path(stream.name)
+            try:
+                for chunk in response.iter_content(self.chunk_size):
+                    if chunk:
+                        stream.write(chunk)
+                        digest.update(chunk)
+                        size += len(chunk)
+            except BaseException:
+                stream.close()
+                temporary.unlink(missing_ok=True)
+                raise
+        try:
+            length = response.headers.get("Content-Length")
+            if (
+                length is not None
+                and not response.headers.get("Content-Encoding")
+                and size != int(length)
+            ):
+                raise ValueError(
+                    f"Incomplete GitHub download: {size} != {length} bytes"
+                )
+            meta = GitHubCacheMeta(
+                url=url,
+                size=size,
+                sha256=digest.hexdigest(),
+                etag=response.headers.get("ETag"),
+                last_modified=response.headers.get("Last-Modified"),
+            )
+            if target.exists():
+                _logger.info("Updating cached GitHub file %s.", target)
+            temporary.replace(target)
+            return meta
+        finally:
+            temporary.unlink(missing_ok=True)
