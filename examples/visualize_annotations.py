@@ -165,7 +165,6 @@ def annotation_is_categorical(name: str, values: np.ndarray) -> bool:
 # Plotting
 # ---------------------------------------------------------------------------
 
-
 def plot_surface_map(
     ax: Axes3D,
     coordinates: np.ndarray,
@@ -176,31 +175,19 @@ def plot_surface_map(
     categorical: bool,
     cmap: Colormap,
 ) -> None:
-    """Plot either a categorical ROI map or a continuous surface map."""
+    """Plot an annotation using a red-white-blue gradient."""
     surface = (coordinates, faces)
 
-    if categorical:
-        plotting.plot_surf_roi(
-            surface,
-            roi_map=values,
-            hemi=hemisphere,
-            view="lateral",
-            bg_on_data=True,
-            cmap=cmap,
-            colorbar=False,
-            axes=ax,
-        )
-    else:
-        plotting.plot_surf_stat_map(
-            surface,
-            stat_map=values,
-            hemi=hemisphere,
-            view="lateral",
-            bg_on_data=True,
-            cmap=cmap,
-            colorbar=False,
-            axes=ax,
-        )
+    plotting.plot_surf_stat_map(
+        surface,
+        stat_map=values,
+        hemi=hemisphere,
+        view="lateral",
+        bg_on_data=True,
+        cmap=colormaps["RdBu_r"],
+        colorbar=False,
+        axes=ax,
+    )
 
 
 def load_annotation_for_hemisphere(
