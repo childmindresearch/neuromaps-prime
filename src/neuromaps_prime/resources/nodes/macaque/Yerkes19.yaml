@@ -64,7 +64,7 @@ Yerkes19:
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Glasser 2016 multi-modal parcellation. Human-to-monkey.
-        PC_Broddman09:
+        PC_Brodmann09:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905309bf55aeca1f9300ef
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a90530a441f17df1392feeb
           references:
