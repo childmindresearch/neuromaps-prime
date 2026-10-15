@@ -15,6 +15,7 @@ Usage:
 #     "nibabel",
 #     "nilearn",
 #     "numpy",
+#     "neuromaps-prime @ file:///${PWD}",
 # ]
 # ///
 
