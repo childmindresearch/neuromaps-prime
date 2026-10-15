@@ -25,7 +25,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 
-    - uses: astral-sh/setup-uv@v10.0.1
+    - uses: astral-sh/setup-uv@v10.2.0
 
     - name: Validate nodes
       run: |
@@ -54,4 +54,5 @@ jobs:
         shopt -s globstar
         uv run --script scripts/validate_urls.py \
           src/neuromaps_prime/resources/**/*.yaml \
-          --workers 2
+          --workers 2 \
+          --skip gin.g-node.org

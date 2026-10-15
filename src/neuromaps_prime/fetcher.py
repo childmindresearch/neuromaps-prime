@@ -138,6 +138,7 @@ def download_and_validate(uri: str, dest_dir: str | Path) -> Path:
     """
     name = id_storage(uri)
     if name is None:
-        raise ValueError(f"Could not identify storage from uri: {uri}")
+        clean_uri = str(urlparse(uri)._replace(query=""))
+        raise ValueError(f"Could not identify storage from uri: {clean_uri}")
     storage = _STORAGES[name]
     return _with_retries(lambda: storage.download(uri, Path(dest_dir)))  # type: ignore[attr-defined]

@@ -51,8 +51,8 @@
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb4af356ed8292bcfa57
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb55c516830c5824bb1f
       references:
-      - citation: Fischl, B, et al. 1999. Human Brain Mapping, 8(4):272–284
-        doi: 10.1126/science.1235381
+      - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+        doi: 10.7554/eLife.70119
 
 - from: BigBrain
   to: fsaverage
@@ -63,5 +63,5 @@
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb556118ae2af4adf1a2
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb58b4d2af8068addeb9
       references:
-      - citation: Fischl, B, et al. 1999. Human Brain Mapping, 8(4):272–284
-        doi: 10.1126/science.1235381
+      - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+        doi: 10.7554/eLife.70119

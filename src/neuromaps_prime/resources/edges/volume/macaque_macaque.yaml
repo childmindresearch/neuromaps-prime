@@ -16,6 +16,26 @@
     RheMap:
       250um:
         composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4a8fedf908b2217df529?view_only=b214f40525fe44b5bea3103478d08d0d
+- from: MEBRAINS
+  to: F99
+  volumes:
+    RheMap:
+      500um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/MEBRAINS_to_F99_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: MEBRAINS
+  to: NMT2Asym
+  volumes:
+    RheMap:
+      250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/MEBRAINS_to_NMTv2.0-asym_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: D99
   to: MEBRAINS
   volumes:
@@ -29,11 +49,31 @@
       250um:
         composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f49cef44e0687016b9d7f?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: D99
-  to: Yerkes19
+  to: NMT2Asym
   volumes:
     RheMap:
       250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/D99_to_NMTv2.0-asym_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: D99
+  to: Yerkes19
+  volumes:
+    RheMap:
+      500um:
         composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4c241e78bf36907dfa17?view_only=b214f40525fe44b5bea3103478d08d0d
+- from: D99
+  to: F99
+  volumes:
+    RheMap:
+      500um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/D99_to_F99_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: NMT2Sym
   to: MEBRAINS
   volumes:
@@ -47,11 +87,81 @@
       250um:
         composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f45904cf949e3cd7df899?view_only=b214f40525fe44b5bea3103478d08d0d
 - from: NMT2Sym
-  to: Yerkes19
+  to: NMT2Asym
   volumes:
     RheMap:
       250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-sym_to_NMTv2.0-asym_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: NMT2Sym
+  to: Yerkes19
+  volumes:
+    RheMap:
+      500um:
         composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4d4daa01d3aabe3935e6?view_only=b214f40525fe44b5bea3103478d08d0d
+- from: NMT2Sym
+  to: F99
+  volumes:
+    RheMap:
+      500um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-0.5mm-sym_to_F99_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: NMT2Asym
+  to: MEBRAINS
+  volumes:
+    RheMap:
+      400um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_MEBRAINS_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: NMT2Asym
+  to: D99
+  volumes:
+    RheMap:
+      250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_D99_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: NMT2Asym
+  to: NMT2Sym
+  volumes:
+    RheMap:
+      250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_NMTv2.0-sym_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: NMT2Asym
+  to: Yerkes19
+  volumes:
+    RheMap:
+      500um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_YRK_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: NMT2Asym
+  to: F99
+  volumes:
+    RheMap:
+      500um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/NMTv2.0-asym_to_F99_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
 - from: Yerkes19
   to: MEBRAINS
   volumes:
@@ -70,3 +180,63 @@
     RheMap:
       250um:
         composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4b719b6fa812c2b8cc6d?view_only=b214f40525fe44b5bea3103478d08d0d
+- from: Yerkes19
+  to: F99
+  volumes:
+    RheMap:
+      500um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/YRK_to_F99_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: F99
+  to: MEBRAINS
+  volumes:
+    RheMap:
+      400um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_MEBRAINS_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: F99
+  to: NMT2Sym
+  volumes:
+    RheMap:
+      250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_NMTv2.0-sym_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: F99
+  to: Yerkes19
+  volumes:
+    RheMap:
+      500um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_YRK_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: F99
+  to: D99
+  volumes:
+    RheMap:
+      250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_D99_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589
+- from: F99
+  to: NMT2Asym
+  volumes:
+    RheMap:
+      250um:
+        composite: https://gin.g-node.org/ChrisKlink/RheMAP/raw/master/warps/final/F99_to_NMTv2.0-asym_CompositeWarp.nii.gz
+      references:
+      - citation: Sirmpilatze, N. & Klink, P.C. 2020.
+        doi: 10.5281/zenodo.3780711
+        url: https://zenodo.org/records/4748589

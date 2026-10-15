@@ -93,6 +93,15 @@ class TestDownloadAndValidate:
         with pytest.raises(ValueError, match="Could not identify storage"):
             download_and_validate("https://google.com", tmp_path)
 
+    def test_unknown_uri_error_hides_token(self, tmp_path: Path) -> None:
+        """Test the storage-identification error does not leak a URL token."""
+        token = "ghs_live_looks_real"  # noqa: S105 - mock token, not a real credential
+        with pytest.raises(ValueError, match="Could not identify storage") as excinfo:
+            download_and_validate(
+                f"https://not-a-storage.com/file.txt?token={token}", tmp_path
+            )
+        assert token not in str(excinfo.value)
+
     @pytest.mark.parametrize(
         ("storage_cls", "mock_uri"),
         [
