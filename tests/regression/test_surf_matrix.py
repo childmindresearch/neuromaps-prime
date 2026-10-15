@@ -39,6 +39,7 @@ import pandas as pd
 import pytest
 from niwrap import workbench
 from tests.cycle import resolve_artifact_dir
+from tests.regression.utils import get_valid_spaces
 
 from neuromaps_prime.transforms.utils import relocate_output
 
@@ -93,47 +94,6 @@ class SurfaceMatrixResult:
     output_dir: Path
     csv_path: Path
     summary_path: Path
-
-
-# -------------------------------------------------------------------------
-# Space selection
-# -------------------------------------------------------------------------
-
-
-def get_valid_spaces(graph: NeuromapsGraph, hemisphere: str) -> list[str]:
-    """Return the graph nodes that expose both a sphere and a midthickness.
-
-    A space is usable for the matrix only if it provides both a sphere (to
-    define the resampling mapping) and a midthickness surface (the geometry
-    being compared) at its highest available density for the hemisphere.
-    """
-    valid = []
-
-    for node in graph.nodes:
-        try:
-            density = graph.find_highest_density(node)
-
-            sphere = graph.fetch_surface_atlas(
-                space=node,
-                density=density,
-                hemisphere=hemisphere,
-                resource_type="sphere",
-            )
-
-            midthickness = graph.fetch_surface_atlas(
-                space=node,
-                density=density,
-                hemisphere=hemisphere,
-                resource_type="midthickness",
-            )
-
-            if sphere is not None and midthickness is not None:
-                valid.append(node)
-
-        except Exception as exc:  # A node that fails to probe is skipped, not fatal.
-            logger.debug("Skipping node %s due to error: %s", node, exc)
-
-    return valid
 
 
 # -------------------------------------------------------------------------
@@ -260,9 +220,7 @@ def _off_diag_stats(spaces: list[str], matrix: pd.DataFrame) -> OffDiagStats:
             nhp_mask[i, j] = True
 
     nhp_off_diag = mat[np.logical_and(mask, nhp_mask)]
-    nhp_median = (
-        float(np.nanmedian(nhp_off_diag)) if nhp_off_diag.size else float("nan")
-    )
+    nhp_median = float(np.nanmedian(nhp_off_diag)) if nhp_off_diag.size else np.nan
 
     human_nhp_vals = [
         float(mat[i, j])
