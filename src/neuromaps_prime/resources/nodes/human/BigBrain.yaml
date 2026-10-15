@@ -15,3 +15,61 @@ BigBrain:
       pial:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb5542c6a64a22adf344
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb55f6066b60a124bc74
+      midthickness:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6acfeb7ea98bf441cb240797
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6acfeb7b354f5e765e365289
+      annotation:
+        CT:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6acfeb4594307d1db8240515
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6acfeb47734c82da169877a4
+          notes: 
+          - Cortical thickness (vertex-wise distance between the pial and white surfaces)
+          - Not derived from the layer maps (CT_layer1-6), which come from different surfaces, so the two will not match exactly.
+        CT_layer1:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f2122a3963f2cf072a6e
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f212a7b4489ce507294d
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Thickness of cortical layer 1 (mm), distance between adjacent BigBrain layer surfaces.
+        CT_layer2:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f211a7b4489ce507294b
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f211a4a47e51723650b1
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Thickness of cortical layer 2 (mm), distance between adjacent BigBrain layer surfaces.
+        CT_layer3:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f20e7a50c6ffd9072992
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f2118545adbcaf24058f
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Thickness of cortical layer 3 (mm), distance between adjacent BigBrain layer surfaces.
+        CT_layer4:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f211bbf8a2634a987470
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f2125089d6c3d0240520
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Thickness of cortical layer 4 (mm), distance between adjacent BigBrain layer surfaces.
+        CT_layer5:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f2118fdcef2d5207293f
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f20d095b78616c364f81
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Thickness of cortical layer 5 (mm), distance between adjacent BigBrain layer surfaces.
+        CT_layer6:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f21162ef0bc247365049
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f21195fd171b49364f9f
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Thickness of cortical layer 6 (mm), distance between adjacent BigBrain layer surfaces.
