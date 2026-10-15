@@ -21,6 +21,7 @@ Usage:
 import argparse
 import logging
 from pathlib import Path
+from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -41,10 +42,9 @@ from neuromaps_prime.graph.models import SurfaceAnnotation, SurfaceAtlas
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Repository paths
+# Hemisphere handling
 # ---------------------------------------------------------------------------
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
+Hemisphere = Literal["left", "right"]
 
 # ---------------------------------------------------------------------------
 # Plot configuration
@@ -170,7 +170,7 @@ def plot_surface_map(
     coordinates: np.ndarray,
     faces: np.ndarray,
     values: np.ndarray,
-    hemisphere: str,
+    hemisphere: Hemisphere,
     *,
     categorical: bool,
     cmap: Colormap,
@@ -195,7 +195,7 @@ def load_annotation_for_hemisphere(
     space_name: str,
     density: str,
     label: str,
-    hemisphere: str,
+    hemisphere: Hemisphere,
     n_vertices: int,
 ) -> np.ndarray | None:
     """Fetch and load an annotation for one hemisphere."""
@@ -223,7 +223,7 @@ def plot_annotation_hemisphere(
     coordinates: np.ndarray,
     faces: np.ndarray,
     values: np.ndarray | None,
-    hemisphere: str,
+    hemisphere: Hemisphere,
     label: str,
     *,
     categorical: bool,
@@ -299,7 +299,7 @@ def plot_resolution(
             },
         }
 
-    except (FileNotFoundError, OSError, ValueError) as exc:
+    except (FileNotFoundError, OSError, ImageFileError, ValueError) as exc:
         logger.error("ERROR loading anatomical surfaces: %s", exc)
         return
 
@@ -440,8 +440,8 @@ def main() -> None:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=REPO_ROOT / "examples",
-        help="Directory for output figures (default: examples/)",
+        default=Path("output"),
+        help="Directory for output figures (default: output/)",
     )
 
     args = parser.parse_args()
