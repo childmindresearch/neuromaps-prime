@@ -37,6 +37,9 @@ MOCK_RAW_HEAD_URL = (
     f"refs/heads/{MOCK_REF}/{MOCK_PATH}"
 )
 
+MOCK_TOKEN = "ghs_mocktoken123"  # noqa: S105 - mock token, not a real credential
+MOCK_RAW_TOKEN_URL = f"{MOCK_RAW_URL}?token={MOCK_TOKEN}"
+
 MOCK_META = {
     "name": "test.txt",
     "size": len(MOCK_CONTENT),
@@ -89,6 +92,30 @@ class TestGitHubStorage:
         assert ref == MOCK_REF
         assert path == MOCK_PATH
 
+    def test_parse_strips_token_query(self) -> None:
+        """Test a ?token= query is stripped from the parsed parts."""
+        owner, repo, ref, path = GitHubStorage._parse(MOCK_RAW_TOKEN_URL)
+        assert owner == MOCK_OWNER
+        assert repo == MOCK_REPO
+        assert ref == MOCK_REF
+        assert path == MOCK_PATH
+        assert "token" not in path
+
+    def test_parse_error_hides_token(self) -> None:
+        """Test the error message does not leak a token from the URL query."""
+        with pytest.raises(ValueError, match="Unrecognized") as excinfo:
+            GitHubStorage._parse(f"https://example.com/{MOCK_REPO}?token={MOCK_TOKEN}")
+        assert MOCK_TOKEN not in str(excinfo.value)
+
+    def test_extract_token(self) -> None:
+        """Test token extraction finds ?token= values and returns None otherwise."""
+        assert (
+            GitHubStorage._extract_token(MOCK_RAW_TOKEN_URL).get_secret_value()
+            == MOCK_TOKEN
+        )
+        assert GitHubStorage._extract_token(MOCK_RAW_URL) is None
+        assert GitHubStorage._extract_token(f"{MOCK_RAW_URL}?token=") is None
+
     def test_parse_blob_url_raises(self) -> None:
         """Test blob URL is raises ValueError."""
         with pytest.raises(ValueError, match="unsupported"):
@@ -111,6 +138,21 @@ class TestGitHubStorage:
         mock_get.assert_called_once_with(
             f"https://api.github.com/repos/{MOCK_OWNER}/{MOCK_REPO}/contents/{MOCK_PATH}",
             params={"ref": MOCK_REF},
+            headers=None,
+            timeout=90,
+        )
+
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_get_meta_with_token(
+        self, mock_get: MagicMock, mock_meta_response: MagicMock
+    ) -> None:
+        """Test a URL token authenticates the API call via a Bearer header."""
+        mock_get.return_value = mock_meta_response
+        GitHubStorage().get_meta(MOCK_RAW_TOKEN_URL)
+        mock_get.assert_called_once_with(
+            f"https://api.github.com/repos/{MOCK_OWNER}/{MOCK_REPO}/contents/{MOCK_PATH}",
+            params={"ref": MOCK_REF},
+            headers={"Authorization": f"Bearer {MOCK_TOKEN}"},
             timeout=90,
         )
 
@@ -130,6 +172,21 @@ class TestGitHubStorage:
         mock_get.side_effect = [mock_meta_response, mock_download]
         GitHubStorage().download(MOCK_RAW_URL, tmp_path)
         assert (tmp_path / "test.txt").read_bytes() == MOCK_CONTENT
+        assert mock_get.call_args_list[1].kwargs["headers"] is None
+
+    @patch("neuromaps_prime.remote.github.requests.get")
+    def test_download_with_token(
+        self, mock_get: MagicMock, mock_meta_response: MagicMock, tmp_path: Path
+    ) -> None:
+        """Test the raw stream request carries the URL token as a Bearer header."""
+        mock_download = MagicMock(iter_content=MagicMock(return_value=[MOCK_CONTENT]))
+        mock_get.side_effect = [mock_meta_response, mock_download]
+        GitHubStorage().download(MOCK_RAW_TOKEN_URL, tmp_path)
+        assert (tmp_path / "test.txt").read_bytes() == MOCK_CONTENT
+        download_call = mock_get.call_args_list[1]
+        assert download_call.kwargs["headers"] == {
+            "Authorization": f"Bearer {MOCK_TOKEN}"
+        }
 
     @patch("neuromaps_prime.remote.github.requests.get")
     def test_download_checksum_mismatch(
