@@ -1,4 +1,4 @@
-"""Example script to test and demonstrate the neuromaps_nhp graph functionality.
+"""Example script to test and demonstrate the Neuromaps-PRIME graph functionality.
 
 Covers:
 - Loads the graph and prints a summary
@@ -6,10 +6,19 @@ Covers:
 - Finding paths between spaces
 - Plotting full, surface-only, and volume-only graphs
 
-Usage:
-    
-    python examples/example_graph_init.py
+Usage (from repository root):
+
+    uv run examples/example_graph_init.py
 """
+
+# ///
+# requires-python = ">=3.11"
+# dependencies = [
+#     # Uses this repo's checkout (editable) via ${PWD}; swap in a pinned
+#     # release (e.g. "neuromaps-prime==0.2.0") if you prefer.
+#     "neuromaps-prime @ file:///${PWD}",
+# ]
+# ///
 
 from pathlib import Path
 
