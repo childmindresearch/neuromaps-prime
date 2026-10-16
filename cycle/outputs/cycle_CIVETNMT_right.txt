@@ -5,7 +5,7 @@ Transformation path                                       Hops   Pearson r     M
 CIVETNMT -> D99 -> CIVETNMT                                  2    0.997363       3.338e-02
 CIVETNMT -> NMT2Sym -> CIVETNMT                              2    0.992902       3.755e-02
 CIVETNMT -> D99 -> Yerkes19 -> D99 -> CIVETNMT               4    0.986909       8.814e-02
-CIVETNMT -> D99 -> NMT2Asym -> D99 -> CIVETNMT               4    0.982554       9.600e-02
+CIVETNMT -> D99 -> NMT2Asym -> D99 -> CIVETNMT               4    0.982567       9.599e-02
 CIVETNMT -> NMT2Sym -> Yerkes19 -> CIVETNMT                  3    0.977109       7.726e-02
 CIVETNMT -> NMT2Sym -> D99 -> Yerkes19 -> CIVETNMT           4    0.972784       9.400e-02
 CIVETNMT -> MEBRAINS -> CIVETNMT                             2    0.914200       1.197e-01
