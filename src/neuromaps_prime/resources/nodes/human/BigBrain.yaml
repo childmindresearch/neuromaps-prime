@@ -7,11 +7,42 @@ BigBrain:
   references:
   - citation: Amunts, K, et al. 2013. Science, 340(6139):1472–1475
     doi: 10.1126/science.1235381
+  - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+    doi: 10.7554/eLife.70119
   surfaces:
+  # white from BigBrainWarp (2021), pial from BigBrain (2013)
     164k:
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb4baa9273e457bcf2ec
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb55aa9273e457bcf2f7
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad523aafc55cf932ea64939
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad523aba76f381d2e49f024
       pial:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb5542c6a64a22adf344
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb55f6066b60a124bc74
+
+      annotation:
+        PC_Economo:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528c3a83c7a42fda2807c
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528c31266cbf92c3df80e
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_DKT:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab67688db13fea27fc7
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab6e671bd7db249effb
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_BN:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5287e3a2b162fd7a2809c
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5287ea31bc4206ea6488e
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Destrieux:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528ad3a2b162fd7a280e2
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528ad27f390e9f9c0e951
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          notes:
+            - anatomical parcellation
