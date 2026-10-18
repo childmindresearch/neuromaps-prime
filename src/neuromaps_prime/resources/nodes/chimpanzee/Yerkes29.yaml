@@ -16,6 +16,7 @@ Yerkes29:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d13abfa9d18ebf7d3d4aa
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d13ab0f2fe4c9a34bf33b
       annotation:
+        MM: https://raw.githubusercontent.com/ChengLabX/cortical_geometry/b2e828f2351f3ea73ec99a64781e69332c2ba757/MyelinMap/ChimpYerkes29.L.MyelinMap.32k.func.gii
         PC_ChimpBNA:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522b98c78b102fc5b138
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522ce8b507c646dcb7a2
