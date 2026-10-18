@@ -46,3 +46,75 @@ BigBrain:
             doi: 10.7554/eLife.70119
           notes:
             - anatomical parcellation
+        PC_Schaefer7Networks_100:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d32f4aa49e8ab49f00a
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4feca106f185626213
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Schaefer17Networks_100:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d40e226a8ef99a2806c
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d5158a8547f8e49f03d
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Schaefer7Networks_200:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3398b84ff6eba28013
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d5579288335da6261f6
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Schaefer17Networks_200:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3598b84ff6eba28015
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d5598b84ff6eba2802d
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Schaefer7Networks_400:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d37f04674c52aa2804c
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d59e226a8ef99a28075
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Schaefer17Networks_400:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3b58a8547f8e49f019
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d5c58a8547f8e49f04c
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Schaefer7Networks_600:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3e7fb85691c66261ae
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d6058a8547f8e49f04e
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Schaefer17Networks_600:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4af4aa49e8ab49f016
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d60f04674c52aa280b4
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Schaefer7Networks_800:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d449cebfeeb616261f0
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d637fb85691c66261da
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Schaefer17Networks_800:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4679288335da6261e0
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d6558a8547f8e49f056
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Schaefer7Networks_1000:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4b79288335da6261e2
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d6aeca106f185626229
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+        PC_Schaefer17Networks_1000:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4ff4aa49e8ab49f01b
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d6a58a8547f8e49f05f
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
