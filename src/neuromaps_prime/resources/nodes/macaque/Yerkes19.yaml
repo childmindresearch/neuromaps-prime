@@ -322,7 +322,7 @@ Yerkes19:
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Functional connectivity gradients 1-15 (multi-map, 15 gradients in one file).
-        HTR1A:
+        GE_HTR1A:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f526e5e77f8cea96b11cf
           references:
           - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
