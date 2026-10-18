@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pytest
+
 from neuromaps_prime.fetcher import download_and_validate
 
 if TYPE_CHECKING:
@@ -69,6 +71,7 @@ def _fetch(uri: str, tmp_path: Path) -> None:
     assert result.stat().st_size > 0
 
 
+@pytest.mark.usefixtures("osf_api_status")
 class TestOSFStorage:
     """Fetch real OSF resources through the production path, end to end."""
 
@@ -87,6 +90,7 @@ class TestOSFStorage:
         _fetch(_annotation_uri(graph, OSF_ANNOTATION), tmp_path)
 
 
+@pytest.mark.usefixtures("gh_api_status")
 class TestGitHubStorage:
     """Fetch real GitHub resources through the production path, end to end."""
 
