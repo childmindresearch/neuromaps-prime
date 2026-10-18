@@ -1,0 +1,23 @@
+onavg:
+  species: human
+  description: onavg (OpenNeuro Average) Human Template
+  references:
+  - citation: Feilong, M, et al. 2024. Nat Methods 21, 1736–1742
+    url: https://www.nature.com/articles/s41592-024-02346-y
+surfaces:
+  10k:
+    sphere:
+      left: https://raw.githubusercontent.com/feilong/tpl-onavg/ghp.2024.01.19/tpl-onavg_hemi-L_den-10k_sphere.surf.gii
+      right: https://raw.githubusercontent.com/feilong/tpl-onavg/ghp.2024.01.19/tpl-onavg_hemi-R_den-10k_sphere.surf.gii
+  41k:
+    sphere:
+      left: https://raw.githubusercontent.com/feilong/tpl-onavg/ghp.2024.01.19/tpl-onavg_hemi-L_den-41k_sphere.surf.gii
+      right: https://raw.githubusercontent.com/feilong/tpl-onavg/ghp.2024.01.19/tpl-onavg_hemi-R_den-41k_sphere.surf.gii
+  164k:
+    sphere:
+      left: https://raw.githubusercontent.com/feilong/tpl-onavg/ghp.2024.01.19/tpl-onavg_hemi-L_den-164k_sphere.surf.gii
+      right: https://raw.githubusercontent.com/feilong/tpl-onavg/ghp.2024.01.19/tpl-onavg_hemi-R_den-164k_sphere.surf.gii
+  655k:
+    sphere:
+      left: https://raw.githubusercontent.com/feilong/tpl-onavg/ghp.2024.01.19/tpl-onavg_hemi-L_den-655k_sphere.surf.gii
+      right: https://raw.githubusercontent.com/feilong/tpl-onavg/ghp.2024.01.19/tpl-onavg_hemi-R_den-655k_sphere.surf.gii
