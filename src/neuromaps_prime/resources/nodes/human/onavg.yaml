@@ -7,17 +7,17 @@ onavg:
   surfaces:
     10k:
       sphere:
-        left: https://raw.githubusercontent.com/feilong/tpl-onavg/refs/heads/main/tpl-onavg_hemi-L_den-10k_sphere.surf.gii
-        right: https://raw.githubusercontent.com/feilong/tpl-onavg/refs/heads/main/tpl-onavg_hemi-R_den-10k_sphere.surf.gii
+        left: https://raw.githubusercontent.com/feilong/tpl-onavg/653b7b5349b21e045e1973b2f494f8bd9a91393e/tpl-onavg_hemi-L_den-10k_sphere.surf.gii
+        right: https://raw.githubusercontent.com/feilong/tpl-onavg/653b7b5349b21e045e1973b2f494f8bd9a91393e/tpl-onavg_hemi-R_den-10k_sphere.surf.gii
     41k:
       sphere:
-        left: https://raw.githubusercontent.com/feilong/tpl-onavg/refs/heads/main/tpl-onavg_hemi-L_den-41k_sphere.surf.gii
-        right: https://raw.githubusercontent.com/feilong/tpl-onavg/refs/heads/main/tpl-onavg_hemi-R_den-41k_sphere.surf.gii
+        left: https://raw.githubusercontent.com/feilong/tpl-onavg/653b7b5349b21e045e1973b2f494f8bd9a91393e/tpl-onavg_hemi-L_den-41k_sphere.surf.gii
+        right: https://raw.githubusercontent.com/feilong/tpl-onavg/653b7b5349b21e045e1973b2f494f8bd9a91393e/tpl-onavg_hemi-R_den-41k_sphere.surf.gii
     164k:
       sphere:
-        left: https://raw.githubusercontent.com/feilong/tpl-onavg/refs/heads/main/tpl-onavg_hemi-L_den-164k_sphere.surf.gii
-        right: https://raw.githubusercontent.com/feilong/tpl-onavg/refs/heads/main/tpl-onavg_hemi-R_den-164k_sphere.surf.gii
+        left: https://raw.githubusercontent.com/feilong/tpl-onavg/653b7b5349b21e045e1973b2f494f8bd9a91393e/tpl-onavg_hemi-L_den-164k_sphere.surf.gii
+        right: https://raw.githubusercontent.com/feilong/tpl-onavg/653b7b5349b21e045e1973b2f494f8bd9a91393e/tpl-onavg_hemi-R_den-164k_sphere.surf.gii
     655k:
       sphere:
-        left: https://raw.githubusercontent.com/feilong/tpl-onavg/refs/heads/main/tpl-onavg_hemi-L_den-655k_sphere.surf.gii
-        right: https://raw.githubusercontent.com/feilong/tpl-onavg/refs/heads/main/tpl-onavg_hemi-R_den-655k_sphere.surf.gii
+        left: https://raw.githubusercontent.com/feilong/tpl-onavg/653b7b5349b21e045e1973b2f494f8bd9a91393e/tpl-onavg_hemi-L_den-655k_sphere.surf.gii
+        right: https://raw.githubusercontent.com/feilong/tpl-onavg/653b7b5349b21e045e1973b2f494f8bd9a91393e/tpl-onavg_hemi-R_den-655k_sphere.surf.gii
