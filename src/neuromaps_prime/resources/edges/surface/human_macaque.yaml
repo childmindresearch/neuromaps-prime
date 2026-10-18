@@ -27,6 +27,8 @@
       references:
       - citation: Cross-Species Cortical Geometry Reveals Conserved Gradients Across Primates and Human-Specific Expansion bioRxiv 2025.11.28.691123
         doi: 10.1101/2025.11.28.691123
+      notes:
+      - experimental until published
 
 - from: fsLR
   to: Yerkes19
