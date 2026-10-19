@@ -25,10 +25,10 @@ onavg:
       sphere:
         left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad654f555793294c51b1404
         right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad654f176de664a12a28037
-        annotation:
-          BM:
-            left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a207034569895a27ffd
-            right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a21351358ea3e49f0ba
+      annotation:
+        BM:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a207034569895a27ffd
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a21351358ea3e49f0ba
     655k:
       sphere:
         left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6551155793294c51b1429
