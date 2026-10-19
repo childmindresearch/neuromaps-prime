@@ -3,14 +3,13 @@
 # Annotations are direct URL
 BigBrain:
   species: human
-  description: BigBrain Human Template
+  description: BigBrain Human Template - white surface from BigBrainWarp (2021), pial surface from BigBrain (2013)
   references:
   - citation: Amunts, K, et al. 2013. Science, 340(6139):1472–1475
     doi: 10.1126/science.1235381
   - citation: Paquola, C, et al. 2021. eLife, 10:e70119
     doi: 10.7554/eLife.70119
   surfaces:
-  # white from BigBrainWarp (2021), pial from BigBrain (2013)
     164k:
       white:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad523aafc55cf932ea64939
