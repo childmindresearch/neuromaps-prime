@@ -50,6 +50,9 @@
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad4e950133f4f944d49ef64
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad4e8ffa072d4505d6262c6
+      references:
+      - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+        doi: 10.7554/eLife.70119
 
 - from: fsLR
   to: BigBrain
@@ -59,6 +62,9 @@
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad4eb99643d4cf1ca626324
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad4eb90c3d3b8bf7549f097
+      references:
+      - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+        doi: 10.7554/eLife.70119
 
 - from: BigBrain
   to: fsaverage
@@ -68,6 +74,9 @@
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad4ec0bf60e48b32249ef78
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad4f09a70e87c865fa64969
+      references:
+      - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+        doi: 10.7554/eLife.70119
 
 - from: fsaverage
   to: BigBrain
@@ -77,3 +86,6 @@
         sphere:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad4f1033503bea52aa6494d
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad4f1b1fac77ceb0f49f01e
+      references:
+      - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+        doi: 10.7554/eLife.70119
