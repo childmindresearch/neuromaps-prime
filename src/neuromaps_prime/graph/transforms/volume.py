@@ -120,6 +120,7 @@ class VolumeTransformOps(BaseModel):
             source=input_file,
             target=target_atlas.fetch(),
             out_fpath=output_file_path,
+            transform=transform.fetch(),
             interp=interp,
             interp_params=interp_params,
         )

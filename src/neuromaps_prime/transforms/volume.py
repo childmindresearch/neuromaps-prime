@@ -42,6 +42,7 @@ def _get_interp_params(
 def vol_to_vol(
     source: Path,
     target: Path,
+    transform: Path,
     out_fpath: str,
     interp: str = "linear",
     interp_params: dict[str, Any] | None = None,
@@ -70,6 +71,7 @@ def vol_to_vol(
         reference_image=target,
         output=ants.ants_apply_transforms_warped_output(out_fpath),
         interpolation=interpolation,  # type: ignore[arg-type]
+        transforms=[transform],
     )
     return Path(xfm.output.output_image_outfile)
 

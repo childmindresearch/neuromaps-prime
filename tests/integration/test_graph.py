@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -122,3 +123,49 @@ class TestGraphIntegration:
             output_file_path=str(tmp_path / "test_output.nii"),
         )
         assert output.exists()
+
+    def test_volume_to_volume_forwards_transform(
+        self, graph: NeuromapsGraph, tmp_path: Path
+    ) -> None:
+        """Resolved warp must be forwarded to ANTs as ``transforms=[...]``.
+
+        Regression guard: a prior bug ran ANTs without the transform, silently
+        resampling the volume onto the target grid without applying any warp.
+        The external ANTs call is mocked so the test asserts wiring, not output.
+        """
+        assert isinstance(graph.data_dir, Path)
+        input_file = tmp_path / "input.nii.gz"
+        input_file.touch()
+        output_file = tmp_path / "output.nii.gz"
+
+        transform = graph.fetch_volume_to_volume_transform(
+            source="Yerkes19",
+            target="NMT2Sym",
+            resolution="250um",
+            resource_type="composite",
+        )
+        assert transform is not None
+        expected_transform_path = transform.fetch()
+
+        captured: dict[str, object] = {}
+
+        def fake_ants(**kwargs: object) -> MagicMock:
+            captured.update(kwargs)
+            output_file.touch()
+            return MagicMock(output=MagicMock(output_image_outfile=str(output_file)))
+
+        with patch(
+            "neuromaps_prime.transforms.volume.ants.ants_apply_transforms",
+            side_effect=fake_ants,
+        ):
+            output = graph.volume_to_volume_transformer(
+                input_file=input_file,
+                source_space="Yerkes19",
+                target_space="NMT2Sym",
+                resolution="250um",
+                resource_type="composite",
+                output_file_path=str(output_file),
+            )
+
+        assert output.exists()
+        assert captured["transforms"] == [expected_transform_path]

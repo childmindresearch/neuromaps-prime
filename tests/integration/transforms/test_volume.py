@@ -39,9 +39,18 @@ class TestVolumetricTransformIntegration:
         source_path = source_atlas.fetch()
         target_path = target_atlas.fetch()
 
+        transform = graph.fetch_volume_to_volume_transform(
+            source="D99",
+            target="NMT2Sym",
+            resolution="250um",
+            resource_type="composite",
+        )
+        assert transform is not None
+
         result = vol_to_vol(
             source=source_path,
             target=target_path,
+            transform=transform.fetch(),
             out_fpath=str(tmp_path / "test.nii.gz"),
             interp="linear",
         )

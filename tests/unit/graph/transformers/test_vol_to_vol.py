@@ -103,6 +103,11 @@ class TestVolumeToVolumeTransformer:
         mock_transformer.volume_ops.cache.get_volume_transform.assert_called_once()
         mock_transformer.volume_ops.cache.get_volume_atlas.assert_called_once()
         mock_vol_to_vol.assert_called_once()
+        # The fetched transform file (not the resource object) must reach vol_to_vol.
+        assert (
+            mock_vol_to_vol.call_args.kwargs["transform"]
+            == mock_volume_transform.fetch.return_value
+        )
         assert result == expected_output
 
     def test_no_transform(
