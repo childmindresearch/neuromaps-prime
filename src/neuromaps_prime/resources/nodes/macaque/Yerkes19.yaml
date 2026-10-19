@@ -252,9 +252,8 @@ Yerkes19:
           - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
             doi: 10.1073/pnas.1721653115
           notes:
-          - "left and right Myelin maps files are from DIFFERENT SOURCES: Wei, Y and Donahue, CJ, respectively"
-          - left file is experimental until published (besides bioRxiv) from Wei, Y 2025
-          - right file Myelin map (bias corrected). MacaqueYerkes19 v1.2. from Donahue, CJ 2018
+          - left myelin map (experimental) from Wei, Y 2025
+          - right myelin map (bias corrected) from MacaqueYerkes19 v1.2., Donahue, CJ 2018
         SMM:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d0d8bf292baf2c2d69
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d07a752a710f2c2b5d
