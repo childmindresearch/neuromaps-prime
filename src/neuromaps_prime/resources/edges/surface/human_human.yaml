@@ -65,3 +65,19 @@
       references:
       - citation: Paquola, C, et al. 2021. eLife, 10:e70119
         doi: 10.7554/eLife.70119
+
+- from: onavg
+  to: fsLR
+  surfaces:
+    tpl_onvg:
+      10k:
+        sphere:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6570e750ea5affb3238b0
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6570d3933c333bff53c06
+      41k:
+        sphere:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6570f21374266df323943
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6570f750ea5affb3238b2
+      references:
+      - citation: Feilong, M, et al. 2024. Nat Methods 21, 1736–1742
+        doi: 10.1038/s41592-024-02346-y
