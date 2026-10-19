@@ -40,9 +40,9 @@ if TYPE_CHECKING:
 # Experimental transformations that should throw a warning; only need to list one way
 EXPERIMENTAL_XFMS: list[tuple[list[str], str | None]] = [
     (["NMT2Sym", "MBM"], "macaque_marmoset"),
-    (["Yerkes19", "Yerkes29"], "macaque_chimpanzee"),
-    (["fsLR", "Yerkes29"], "human_chimpanzee"),
-    (["fsLR", "Yerkes19"], "human_macaque"), # 32k sphere from cortical_geometry only (surfaces from human_macaque are published)
+    (["Yerkes19", "Yerkes29"], "cortical_geometry"),
+    (["fsLR", "Yerkes29"], "cortical_geometry"),
+    (["fsLR", "Yerkes19"], "cortical_geometry")
 ]
 
 
