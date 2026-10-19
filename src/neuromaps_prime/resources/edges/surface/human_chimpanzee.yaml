@@ -26,6 +26,7 @@
 
 - from: Yerkes29
   to: fsLR
+  description: experimental until published
   surfaces:
     cortical_geometry:
       32k:
@@ -34,5 +35,3 @@
       references:
       - citation: Cross-Species Cortical Geometry Reveals Conserved Gradients Across Primates and Human-Specific Expansion bioRxiv 2025.11.28.691123
         doi: 10.1101/2025.11.28.691123
-      notes:
-      - experimental until published
