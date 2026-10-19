@@ -49,7 +49,7 @@ These codes appear after `desc-` in the filename and indicate the kind of data s
 | **DM** | Dendritic Morphology | Microstructural neuronal features, such as layer III pyramidal cell dendritic tree size or spine counts. |
 | **FG** | Functional Connectivity Gradients | Spatial gradients representing low-dimensional embeddings of functional connectivity profiles (often stored as multi-maps). |
 | **FHI** | Functional Homology Index | Functional connectivity homology index representing cross-species similarity of FC gradient profiles (e.g., high in sensory, low in association cortex). |
-| **HTR1A** | Gene Expression | Specific gene expression maps (e.g., serotonin 1A receptor gene expression mapped across species). |
+| **GE** | Gene Expression | Specific gene expression maps (e.g., serotonin 1A receptor gene expression mapped across species). |
 | **IT** | Intrinsic Timescale | Regional estimates of neural temporal autocorrelation (e.g., decay constants from fMRI time series), reflecting how quickly activity fluctuates over time. |
 | **MM** | Myelin Maps | Vertex-wise estimates of cortical myelin content, commonly derived from MRI contrasts such as T1w/T2w ratio and reflecting intracortical myelination. |
 | **ND** | Neuron Density | Quantitative spatial distribution and estimates of neuronal density across cortical areas. |
