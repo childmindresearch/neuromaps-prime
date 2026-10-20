@@ -48,6 +48,11 @@ from tests.regression.utils import make_sphere
 from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.graph.transforms.surface import EXPERIMENTAL_XFMS
 
+import copy
+from itertools import pairwise
+
+from neuromaps_prime.graph.transforms.surface import EXPERIMENTAL_XFMS
+
 logger = logging.getLogger(__name__)
 
 
@@ -67,7 +72,7 @@ def _is_experimental_provider(
     target: str,
     provider: str,
 ) -> bool:
-    """Return whether a provider is experimental for a surface-space pair."""
+    """Return whether a provider is experimental for a space pair."""
     return any(
         {source, target} == set(spaces)
         and (experimental_provider is None or provider == experimental_provider)
@@ -75,11 +80,11 @@ def _is_experimental_provider(
     )
 
 
-def _cycle_has_only_experimental_edges(
+def _cycle_uses_only_experimental_edges(
     graph: NeuromapsGraph,
     path: tuple[str, ...],
 ) -> bool:
-    """Return whether any hop has transforms exclusively from experimental providers."""
+    """Return whether a cycle contains a hop with only experimental providers."""
     for source, target in pairwise(path):
         transforms = graph._cache.get_surface_transforms(
             source=source,
@@ -346,6 +351,9 @@ def _run_origin_hemisphere(
         max_length=MAX_CYCLE_LENGTH,
         allow_revisits=True,
         same_species_only=SAME_SPECIES_ONLY,
+        path_filter=lambda path: not _cycle_uses_only_experimental_edges(
+            graph, path
+        ),
     )
 
     logger.info("Executed %d cycles for %s (%s)", len(results), origin, hemisphere)
