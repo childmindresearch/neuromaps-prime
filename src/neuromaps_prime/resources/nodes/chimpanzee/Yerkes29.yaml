@@ -1,6 +1,6 @@
 Yerkes29:
   species: chimpanzee
-  description: Yerkes29 Chimpanzee Atlas - 10k midthickness from Wei (2025), 32k surfaces from Donahue (2018)
+  description: Yerkes29 Chimpanzee Atlas - 10k midthickness, 800um volume from Wei (2025), 32k surfaces from Donahue (2018)
   references:
     - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
       doi: 10.1073/pnas.1721653115
