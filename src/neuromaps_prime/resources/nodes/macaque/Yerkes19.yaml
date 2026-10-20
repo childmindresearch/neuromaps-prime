@@ -244,12 +244,16 @@ Yerkes19:
           - Receptor density gradients (raw, non-normalized). 
           - Multi-map - PC1 is the principal receptor gradient, PC2 is 5-HT1A-driven.
         MM:
+          left: https://raw.githubusercontent.com/ChengLabX/cortical_geometry/b2e828f2351f3ea73ec99a64781e69332c2ba757/MyelinMap/MacaqueYerkes19.L.MyelinMap.32k_fs_LR.func.gii
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52947a752a710f2c2b26
           references:
+          - citation: Wei, Y, et al. 2025. Cross-Species Cortical Geometry Reveals Conserved Gradients Across Primates and Human-Specific Expansion. bioRxiv 2025.11.28.691123
+            doi: 10.1101/2025.11.28.691123
           - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
             doi: 10.1073/pnas.1721653115
           notes:
-          - Myelin map (bias corrected). MacaqueYerkes19 v1.2.
+          - left myelin map (experimental) from Wei, Y 2025
+          - right myelin map (bias corrected) from MacaqueYerkes19 v1.2., Donahue, CJ 2018
         SMM:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d0d8bf292baf2c2d69
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52d07a752a710f2c2b5d
@@ -322,7 +326,7 @@ Yerkes19:
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Functional connectivity gradients 1-15 (multi-map, 15 gradients in one file).
-        HTR1A:
+        GE_HTR1A:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f526e5e77f8cea96b11cf
           references:
           - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
