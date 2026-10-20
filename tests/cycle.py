@@ -51,6 +51,7 @@ from niwrap import StyxRuntimeError
 
 from neuromaps_prime.analysis.images import load_data
 from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.graph.transforms.surface import EXPERIMENTAL_XFMS
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -59,10 +60,51 @@ logger = logging.getLogger(__name__)
 
 Hemisphere = Literal["left", "right"]
 
+
 # Failures that skip a transformation attempt (next area surface) or a whole
 # cycle (next path); OSError covers FileNotFoundError.
 _SKIP_EXCEPTIONS = (StyxRuntimeError, RuntimeError, OSError, ValueError, TypeError)
 
+# -------------------------------------------------------------------------
+# Skip experimental edges
+# -------------------------------------------------------------------------
+
+def _is_experimental_provider(
+    source: str,
+    target: str,
+    provider: str,
+) -> bool:
+    """Return whether a provider is experimental for a space pair."""
+    return any(
+        {source, target} == set(spaces)
+        and (experimental_provider is None or provider == experimental_provider)
+        for spaces, experimental_provider in EXPERIMENTAL_XFMS
+    )
+
+def _cycle_uses_experimental_provider(
+    graph: NeuromapsGraph,
+    path: tuple[str, ...],
+) -> bool:
+    """Return whether any hop in a cycle has only experimental providers."""
+    for source, target in pairwise(path):
+        transforms = graph._cache.get_surface_transforms(
+            source=source,
+            target=target,
+            resource_type="sphere",
+        )
+
+        if not transforms:
+            continue
+
+        providers = {transform.provider for transform in transforms}
+
+        if providers and all(
+            _is_experimental_provider(source, target, provider)
+            for provider in providers
+        ):
+            return True
+
+    return False
 
 # -------------------------------------------------------------------------
 # Path identifiers
@@ -213,7 +255,14 @@ def find_return_paths(
 
             paths.add(tuple(rotated))
 
-    return sorted(paths, key=lambda path: (len(path) - 1, path))
+    return sorted(
+        (
+            path
+            for path in paths
+            if not _cycle_uses_experimental_provider(graph, path)
+        ),
+        key=lambda path: (len(path) - 1, path),
+    )
 
 
 # -------------------------------------------------------------------------
