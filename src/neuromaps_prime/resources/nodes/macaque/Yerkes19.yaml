@@ -208,8 +208,6 @@ Yerkes19:
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Functional connectivity homology index. Cross-species similarity of FC gradient profiles; high in sensory, low in association cortex.
-        
-        
     32k:
       sphere:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f54791541aee377a7b0c8

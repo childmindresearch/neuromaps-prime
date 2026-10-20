@@ -15,6 +15,7 @@ F99:
               doi: 10.1016/j.neuroimage.2020.116923
           notes:
           - XTRACT macaque connectivity blueprint. Cohort-averaged over 6 macaques.
+  
   volumes:
     500um: 
       T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6abc28e9863d30347939e097

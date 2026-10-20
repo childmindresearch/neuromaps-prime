@@ -106,7 +106,6 @@ fsLR:
       inflated:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa364a3d4a661aa761f0
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2fa39cc6bd5c3d4a13347
-    
     10k:
       # 10K surfaces all use https://github.com/TingsterX/alignment_macaque-human
       sphere:

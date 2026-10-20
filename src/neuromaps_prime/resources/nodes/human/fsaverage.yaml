@@ -32,7 +32,6 @@ fsaverage:
             doi: 10.7554/eLife.72129
           notes:
           - Abagen Gene PC1
-
     164k:
       sphere:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3784a4fb9e964cc78b5
@@ -71,7 +70,6 @@ fsaverage:
             doi: 10.1523/JNEUROSCI.2830-16.2016
           notes:
           - Beliveau 2017 cumi101
-
         RM_dasb:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/63854394228a5a18987bc26e
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/63854385c86e2818da88f94b

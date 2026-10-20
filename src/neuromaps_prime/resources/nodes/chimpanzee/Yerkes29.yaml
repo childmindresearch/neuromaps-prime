@@ -33,6 +33,7 @@ Yerkes29:
           notes:
           - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522bf4338ff44b3b8b8f'
           - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522727e0b77f3bdcb73a'
+  
   volumes:
     800um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bcbb3d09fa484fe30a464
