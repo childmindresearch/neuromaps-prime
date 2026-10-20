@@ -28,6 +28,7 @@ MEBRAINS:
           references:
           - citation: Balan, PF, et al. 2024. Imaging Neuroscience, 2:1–26
             doi: 10.1162/imag_a_00077
+            
   volumes:
     400um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523814d366de13d713ff6

@@ -17,7 +17,6 @@ BigBrain:
       pial:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb5542c6a64a22adf344
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb55f6066b60a124bc74
-
       annotation:
         CT:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6acfeb4594307d1db8240515
