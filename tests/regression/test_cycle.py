@@ -62,13 +62,38 @@ MAX_CYCLE_LENGTH: Final = 4
 # Include cross-species bridge cycles in the sweep.
 SAME_SPECIES_ONLY: Final = False
 
-def _is_experimental_edge(source: str, target: str, provider: str) -> bool:
+def _is_experimental_provider(
+    source: str,
+    target: str,
+    provider: str,
+) -> bool:
     """Return whether a provider is experimental for a surface-space pair."""
     return any(
         {source, target} == set(spaces)
         and (experimental_provider is None or provider == experimental_provider)
         for spaces, experimental_provider in EXPERIMENTAL_XFMS
     )
+
+
+def _cycle_has_only_experimental_edges(
+    graph: NeuromapsGraph,
+    path: tuple[str, ...],
+) -> bool:
+    """Return whether any hop has transforms exclusively from experimental providers."""
+    for source, target in pairwise(path):
+        transforms = graph._cache.get_surface_transforms(
+            source=source,
+            target=target,
+            resource_type="sphere",
+        )
+
+        if transforms and all(
+            _is_experimental_provider(source, target, transform.provider)
+            for transform in transforms
+        ):
+            return True
+
+    return False
 
 def _resolve_output_dir(base_dir: Path) -> Path:
     """Resolve and create the directory for cycle regression outputs.
