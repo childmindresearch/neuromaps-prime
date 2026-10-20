@@ -35,6 +35,7 @@ Run with:
 import logging
 from dataclasses import dataclass
 from datetime import datetime
+from itertools import pairwise
 from pathlib import Path
 from typing import Final
 
@@ -45,6 +46,7 @@ from tests.cycle import Hemisphere, resolve_artifact_dir, run_cycle_test
 from tests.regression.utils import make_sphere
 
 from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.graph.transforms.surface import EXPERIMENTAL_XFMS
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +62,13 @@ MAX_CYCLE_LENGTH: Final = 4
 # Include cross-species bridge cycles in the sweep.
 SAME_SPECIES_ONLY: Final = False
 
+def _is_experimental_edge(source: str, target: str, provider: str) -> bool:
+    """Return whether a provider is experimental for a surface-space pair."""
+    return any(
+        {source, target} == set(spaces)
+        and (experimental_provider is None or provider == experimental_provider)
+        for spaces, experimental_provider in EXPERIMENTAL_XFMS
+    )
 
 def _resolve_output_dir(base_dir: Path) -> Path:
     """Resolve and create the directory for cycle regression outputs.
