@@ -1,0 +1,36 @@
+onavg:
+  species: human
+  description: onavg (OpenNeuro Average) Human Template
+  references:
+  - citation: Feilong, M, et al. 2024. Nat Methods 21, 1736–1742
+    doi: 10.1038/s41592-024-02346-y
+    url: https://github.com/templateflow/tpl-onavg
+  surfaces:
+    10k:
+      sphere:
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad654e1041550b556a2808b
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad654e0041550b556a28087
+      annotation:
+        BM:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a23189c24d63349ef9a
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a22bbd71df1fe1b14e4
+    41k:
+      sphere:
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad654e655793294c51b13f0
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad654e6feabf12c0349ef43
+      annotation:
+        BM:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a22c6cf187085a281a4
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a227034569895a28003
+    164k:
+      sphere:
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad654f555793294c51b1404
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad654f176de664a12a28037
+      annotation:
+        BM:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a207034569895a27ffd
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a21351358ea3e49f0ba
+    655k:
+      sphere:
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6551155793294c51b1429
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6550f44c4856d6149ef5c

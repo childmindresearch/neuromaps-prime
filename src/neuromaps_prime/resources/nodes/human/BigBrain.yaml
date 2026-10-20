@@ -3,15 +3,207 @@
 # Annotations are direct URL
 BigBrain:
   species: human
-  description: BigBrain Human Template
+  description: BigBrain Human Template - white surface from BigBrainWarp (2021), pial surface from BigBrain (2013)
   references:
   - citation: Amunts, K, et al. 2013. Science, 340(6139):1472–1475
     doi: 10.1126/science.1235381
+  - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+    doi: 10.7554/eLife.70119
   surfaces:
     164k:
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb4baa9273e457bcf2ec
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb55aa9273e457bcf2f7
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad523aafc55cf932ea64939
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad523aba76f381d2e49f024
       pial:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb5542c6a64a22adf344
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb55f6066b60a124bc74
+
+      annotation:
+        CT:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6acfeb4594307d1db8240515
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6acfeb47734c82da169877a4
+          notes: 
+          - Cortical thickness (vertex-wise distance between the pial and white surfaces). The midthickness listed here is the average of those two surfaces.
+        LT_layer0to1:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f2122a3963f2cf072a6e
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f212a7b4489ce507294d
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Laminar thickness (mm) of cortical layer I (the outermost layer). Computed per vertex as the 3D distance between BigBrain layer surfaces 0 and 1.
+        LT_layer1to2:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f211a7b4489ce507294b
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f211a4a47e51723650b1
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Laminar thickness (mm) of cortical layer II. Computed per vertex as the 3D distance between BigBrain layer surfaces 1 and 2.
+        LT_layer2to3:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f20e7a50c6ffd9072992
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f2118545adbcaf24058f
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Laminar thickness (mm) of cortical layer III. Computed per vertex as the 3D distance between BigBrain layer surfaces 2 and 3.
+        LT_layer3to4:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f211bbf8a2634a987470
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f2125089d6c3d0240520
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Laminar thickness (mm) of cortical layer IV. Computed per vertex as the 3D distance between BigBrain layer surfaces 3 and 4.
+        LT_layer4to5:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f2118fdcef2d5207293f
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f20d095b78616c364f81
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Laminar thickness (mm) of cortical layer V. Computed per vertex as the 3D distance between BigBrain layer surfaces 4 and 5. 
+        LT_layer5to6:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f21162ef0bc247365049
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f21195fd171b49364f9f
+          references:
+          - citation: Wagstyl, K, et al. 2020. PLoS Biology, 18(4):e3000678
+            doi: 10.1371/journal.pbio.3000678
+          notes:
+          - Laminar thickness (mm) of cortical layer VI (the innermost layer). Computed per vertex as the 3D distance between BigBrain layer surfaces 5 and 6.
+        PC_Economo:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528c3a83c7a42fda2807c
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528c31266cbf92c3df80e
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: von Economo, C, Koskinas, GN. 1925. The Cytoarchitectonics of the Cerebral Cortex of the Adult Human.
+          - citation: Scholtens, LH, de Reus, MA, de Lange, SC, Schmidt, R, van den Heuvel, MP. 2018. An MRI Von Economo–Koskinas atlas. NeuroImage, 170:249–256.
+            doi: 10.1016/j.neuroimage.2016.12.069
+            url: https://www.sciencedirect.com/science/article/abs/pii/S1053811916307959?via%3Dihub
+        PC_DKT:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab67688db13fea27fc7
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab6e671bd7db249effb
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Klein, A, Tourville, J. 2012. 101 Labeled Brain Images and a Consistent Human Cortical Labeling Protocol. Frontiers in Neuroscience, 6:171.
+            doi: 10.3389/fnins.2012.00171
+            url: https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2012.00171/full
+        PC_BN:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5287e3a2b162fd7a2809c
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5287ea31bc4206ea6488e
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Fan, L, Li, H, Zhuo, J, Zhang, Y, Wang, J, Chen, L, Yang, Z, Chu, C, Xie, S, Laird, AR, Fox, PT, Eickhoff, SB, Yu, C, Jiang, T. 2016. The Human Brainnetome Atlas A New Brain Atlas Based on Connectional Architecture. Cerebral Cortex, 26(8):3508–3526.
+            doi: 10.1093/cercor/bhw157
+            url: https://doi.org/10.1093/cercor/bhw157
+        PC_Destrieux:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528ad3a2b162fd7a280e2
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528ad27f390e9f9c0e951
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Destrieux, C, Fischl, B, Dale, A, Halgren, E. 2010. Automatic parcellation of human cortical gyri and sulci using standard anatomical nomenclature. NeuroImage, 53(1):1–15.
+            doi: 10.1016/j.neuroimage.2010.06.010
+            url: https://www.sciencedirect.com/science/article/pii/S1053811910008542
+          notes:
+            - anatomical parcellation
+        PC_Schaefer7Networks_100:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d32f4aa49e8ab49f00a
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4feca106f185626213
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
+        PC_Schaefer17Networks_100:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d40e226a8ef99a2806c
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d5158a8547f8e49f03d
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
+        PC_Schaefer7Networks_200:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3398b84ff6eba28013
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d5579288335da6261f6
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
+        PC_Schaefer17Networks_200:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3598b84ff6eba28015
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d5598b84ff6eba2802d
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
+        PC_Schaefer7Networks_400:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d37f04674c52aa2804c
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d59e226a8ef99a28075
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
+        PC_Schaefer17Networks_400:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3b58a8547f8e49f019
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d5c58a8547f8e49f04c
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
+        PC_Schaefer7Networks_600:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3e7fb85691c66261ae
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d6058a8547f8e49f04e
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
+        PC_Schaefer17Networks_600:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4af4aa49e8ab49f016
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d60f04674c52aa280b4
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
+        PC_Schaefer7Networks_800:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d449cebfeeb616261f0
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d637fb85691c66261da
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
+        PC_Schaefer17Networks_800:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4679288335da6261e0
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d6558a8547f8e49f056
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
+        PC_Schaefer7Networks_1000:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4b79288335da6261e2
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d6aeca106f185626229
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
+        PC_Schaefer17Networks_1000:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4ff4aa49e8ab49f01b
+          right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d6a58a8547f8e49f05f
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+            doi: 10.1093/cercor/bhx179
