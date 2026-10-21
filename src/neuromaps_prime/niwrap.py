@@ -132,21 +132,3 @@ def setup_runner(
     return StyxContext(
         logger=neuromaps_prime_logger, runner=styx_runner, verbose=verbose > 0
     )
-
-
-def generate_exec_folder(suffix: str = "python") -> Path:
-    """Generate an execution folder following Styx hash pattern.
-
-    Args:
-        suffix: Task to append to suffix of folder (default: 'python')
-
-    Returns:
-        Path to created execution folder
-    """
-    runner = niwrap.get_global_runner()
-    dir_path = (
-        Path(runner.data_dir) / f"{runner.uid}_{runner.execution_counter}_{suffix}"
-    )
-    dir_path.mkdir(parents=True)
-    runner.execution_counter += 1
-    return dir_path
