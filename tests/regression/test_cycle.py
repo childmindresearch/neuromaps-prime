@@ -48,11 +48,6 @@ from tests.regression.utils import make_sphere
 from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.graph.transforms.surface import EXPERIMENTAL_XFMS
 
-import copy
-from itertools import pairwise
-
-from neuromaps_prime.graph.transforms.surface import EXPERIMENTAL_XFMS
-
 logger = logging.getLogger(__name__)
 
 
