@@ -8,7 +8,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-CIVETNMT_to-D99_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -35,7 +35,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignmentssrc-CIVETNMT_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -58,7 +58,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-CIVETNMT_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -85,7 +85,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-CIVETNMT_to-NMT2Asym_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -100,7 +100,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-CIVETNMT_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -123,7 +123,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-D99_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -150,7 +150,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-D99_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -173,7 +173,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-D99_to-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -196,7 +196,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-D99_to-NMT2Asym_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -211,7 +211,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-D99_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -234,7 +234,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-MEBRAINS_to-CIVETNMT_den-101k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -257,7 +257,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-MEBRAINS_to-D99_den-101k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -280,7 +280,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-MEBRAINS_to-NMT2Sym_den-101k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -303,7 +303,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-MEBRAINS_to-NMT2Asym_den-101k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -318,7 +318,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-MEBRAINS_to-Yerkes19_den-101k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -341,7 +341,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-NMT2Sym_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -368,7 +368,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-NMT2Sym_to-D99_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -395,7 +395,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-NMT2Sym_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -418,7 +418,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-NMT2Sym_to-NMT2Asym_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -433,7 +433,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-NMT2Sym_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -456,7 +456,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-NMT2Asym_to-D99_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -471,7 +471,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-NMT2Asym_to-MEBRAINS_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -486,7 +486,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-NMT2Asym_to-Yerkes19_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -501,7 +501,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-Yerkes19_to-CIVETNMT_den-41k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -528,7 +528,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-Yerkes19_to-D99_den-32k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -551,7 +551,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-Yerkes19_to-MEBRAINS_den-32k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -574,7 +574,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-Yerkes19_to-NMT2Sym_den-32k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -597,7 +597,7 @@
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/alignments/src-Yerkes19_to-NMT2Asym_den-32k_hemi-R_sphere.surf.gii
       references:
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
       - citation: 'Zhou, Z.-X., & Xu, T. 2025. RheMAP-Surf: Surface Transformations Among Commonly Used Rhesus Macaque Brain Templates.'
         doi: 10.5281/zenodo.15642802
         url: https://zenodo.org/records/15642802
@@ -618,7 +618,7 @@
       - citation: Donahue, C. J., et al. 2018. PNAS.
         doi: 10.1073/pnas.1721653115
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
 
 - from: Yerkes19
   to: F99
@@ -636,4 +636,4 @@
       - citation: Donahue, C. J., et al. 2018. PNAS.
         doi: 10.1073/pnas.1721653115
       - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+        url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6

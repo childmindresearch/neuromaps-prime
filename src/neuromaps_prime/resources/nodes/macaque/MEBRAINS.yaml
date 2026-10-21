@@ -34,7 +34,7 @@ MEBRAINS:
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_cortexmask.shape.gii
           references:
           - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
           notes:
           - 'Consensus cortex mask: 1=cortex, 0=medial wall. Fetching this annotation does not automatically apply an ROI during resampling or comparison.'
         CV:
@@ -42,7 +42,7 @@ MEBRAINS:
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_curvature.shape.gii
           references:
           - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
           notes:
           - FreeSurfer mean curvature computed on the supplied white surface, with template-specific smoothing.
         CT:
@@ -50,7 +50,7 @@ MEBRAINS:
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_thickness.shape.gii
           references:
           - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
           notes:
           - FreeSurfer cortical thickness computed with neighborhood size 20 and a 5 mm limit.
         SD:
@@ -58,7 +58,7 @@ MEBRAINS:
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/MEBRAINS/src-MEBRAINS_den-101k_hemi-R_sulc.shape.gii
           references:
           - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
           notes:
           - DPF-derived sulcal folding field computed with brain-slam 0.1.2, alpha=0.03; not a direct geometric depth measurement.
 

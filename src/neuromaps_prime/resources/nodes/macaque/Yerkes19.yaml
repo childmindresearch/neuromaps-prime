@@ -277,7 +277,7 @@ Yerkes19:
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_thickness.shape.gii
           references:
           - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
           notes:
           - FreeSurfer cortical thickness computed with neighborhood size 20 and a 5 mm limit.
         CV_Donahue:
@@ -357,7 +357,7 @@ Yerkes19:
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_sulc.shape.gii
           references:
           - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
           notes:
           - DPF-derived sulcal folding field computed with brain-slam 0.1.2, alpha=0.03; not a direct geometric depth measurement.
         BM:
@@ -365,7 +365,7 @@ Yerkes19:
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_cortexmask.shape.gii
           references:
           - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
           notes:
           - 'Consensus cortex mask: 1=cortex, 0=medial wall. Fetching this annotation does not automatically apply an ROI during resampling or comparison.'
 
