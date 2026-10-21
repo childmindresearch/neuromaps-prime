@@ -334,6 +334,1099 @@ Yerkes19:
           notes:
           - HTR1A (serotonin 1A receptor) gene expression map. Derived from the Allen Human Brain Atlas (AHBA), mapped from human to macaque. 
           - Represents a single gene only, included as a worked example of a cross-species expression annotation.
+        LCT_GABA_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf37688db13fea2807f
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic cell density and fraction in layer 1
+        LCT_GABA_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf39cebfeeb616261c6
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic cell density and fraction in layer 2
+        LCT_GABA_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf54af498d62949ef92
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic cell density and fraction in layer 3
+        LCT_GABA_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf49cebfeeb616261c8
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic cell density and fraction in layer 4
+        LCT_GABA_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf34af498d62949ef8f
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic cell density and fraction in layer 5
+        LCT_GABA_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf79f5456fbcb626292
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic cell density and fraction in layer 6
+        LCT_GLU_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf37daa106caf626272
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of glutamatergic cell density and fraction in layer 1
+        LCT_GLU_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf47daa106caf626274
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of glutamatergic cell density and fraction in layer 2
+        LCT_GLU_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf64af498d62949ef95
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of glutamatergic cell density and fraction in layer 3
+        LCT_GLU_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf5b27127f1a349ef9b
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of glutamatergic cell density and fraction in layer 4
+        LCT_GLU_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf9f4aa49e8ab49ef45
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of glutamatergic cell density and fraction in layer 5
+        LCT_GLU_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf858d2ff1e86a280ab
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of glutamatergic cell density and fraction in layer 6
+        LCT_NonNeuron_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf94af498d62949ef9e
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of non-neuronal cell density and fraction in layer 1
+        LCT_NonNeuron_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf89f5456fbcb626295
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of non-neuronal cell density and fraction in layer 2
+        LCT_NonNeuron_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf6f4aa49e8ab49ef43
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of non-neuronal cell density and fraction in layer 3
+        LCT_NonNeuron_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf65f98aaa185626263
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of non-neuronal cell density and fraction in layer 4
+        LCT_NonNeuron_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf87daa106caf626278
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of non-neuronal cell density and fraction in layer 5
+        LCT_NonNeuron_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52bf84af498d62949ef9a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of non-neuronal cell density and fraction in layer 6
+        LCT_GABA_LAMP5_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632186fa2a4aaf51b1588
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic LAMP5 cell density and fraction in layer 1
+        LCT_GABA_LAMP5_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632173860d8b4b449f064
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic LAMP5 cell density and fraction in layer 2
+        LCT_GABA_LAMP5_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63218b08fac3fcb49f15b
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic LAMP5 cell density and fraction in layer 3
+        LCT_GABA_LAMP5_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632186fa2a4aaf51b1586
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic LAMP5 cell density and fraction in layer 4
+        LCT_GABA_LAMP5_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632176fa2a4aaf51b1583
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic LAMP5 cell density and fraction in layer 5
+        LCT_GABA_LAMP5_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63217092d2ff14fa28221
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic LAMP5 cell density and fraction in layer 6
+        LCT_GABA_PV_CHC_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632196fa2a4aaf51b158a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV_CHC cell density and fraction in layer 1
+        LCT_GABA_PV_CHC_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321bb77d4dfebc1b1689
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV_CHC cell density and fraction in layer 2
+        LCT_GABA_PV_CHC_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321bafad5b342ba28128
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV_CHC cell density and fraction in layer 3
+        LCT_GABA_PV_CHC_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321a092d2ff14fa28224
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV_CHC cell density and fraction in layer 4
+        LCT_GABA_PV_CHC_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321ab08fac3fcb49f15d
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV_CHC cell density and fraction in layer 5
+        LCT_GABA_PV_CHC_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321f0ba848815749f10a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV_CHC cell density and fraction in layer 6
+        LCT_GABA_PV_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321b3860d8b4b449f06a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV cell density and fraction in layer 1
+        LCT_GABA_PV_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321d164fa026531b14c8
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV cell density and fraction in layer 2
+        LCT_GABA_PV_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321c092d2ff14fa2822a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV cell density and fraction in layer 3
+        LCT_GABA_PV_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321d164fa026531b14ca
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV cell density and fraction in layer 4
+        LCT_GABA_PV_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321eb77d4dfebc1b168b
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV cell density and fraction in layer 5
+        LCT_GABA_PV_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321fcf90346e5ea2825b
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic PV cell density and fraction in layer 6
+        LCT_GABA_RELN_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321e164fa026531b14cf
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic RELN cell density and fraction in layer 1
+        LCT_GABA_RELN_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63221afad5b342ba2812a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic RELN cell density and fraction in layer 2
+        LCT_GABA_RELN_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6321f092d2ff14fa28236
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic RELN cell density and fraction in layer 3
+        LCT_GABA_RELN_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63220b08fac3fcb49f161
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic RELN cell density and fraction in layer 4
+        LCT_GABA_RELN_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63221afad5b342ba2812c
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic RELN cell density and fraction in layer 5
+        LCT_GABA_RELN_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632240ba848815749f10f
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic RELN cell density and fraction in layer 6
+        LCT_GABA_SST_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63221b08fac3fcb49f163
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic SST cell density and fraction in layer 1
+        LCT_GABA_SST_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63222cf90346e5ea28263
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic SST cell density and fraction in layer 2
+        LCT_GABA_SST_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63222092d2ff14fa28239
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic SST cell density and fraction in layer 3
+        LCT_GABA_SST_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632243860d8b4b449f070
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic SST cell density and fraction in layer 4
+        LCT_GABA_SST_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63226cf90346e5ea2826a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic SST cell density and fraction in layer 5
+        LCT_GABA_SST_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632263860d8b4b449f07a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic SST cell density and fraction in layer 6
+        LCT_GABA_VIP_RELN_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63225164fa026531b14de
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP_RELN cell density and fraction in layer 1
+        LCT_GABA_VIP_RELN_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63227b08fac3fcb49f16e
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP_RELN cell density and fraction in layer 2
+        LCT_GABA_VIP_RELN_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322aafad5b342ba28131
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP_RELN cell density and fraction in layer 3
+        LCT_GABA_VIP_RELN_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63228595fd7b5901b13c9
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP_RELN cell density and fraction in layer 4
+        LCT_GABA_VIP_RELN_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63229cf90346e5ea28270
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP_RELN cell density and fraction in layer 5
+        LCT_GABA_VIP_RELN_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322a6fa2a4aaf51b15bc
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP_RELN cell density and fraction in layer 6
+        LCT_GABA_VIP_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63226b08fac3fcb49f16c
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP cell density and fraction in layer 1
+        LCT_GABA_VIP_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63227092d2ff14fa28244
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP cell density and fraction in layer 2
+        LCT_GABA_VIP_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63227092d2ff14fa28249
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP cell density and fraction in layer 3
+        LCT_GABA_VIP_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632246fa2a4aaf51b15b7
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP cell density and fraction in layer 4
+        LCT_GABA_VIP_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63225cf90346e5ea28266
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP cell density and fraction in layer 5
+        LCT_GABA_VIP_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632243860d8b4b449f073
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of GABAergic VIP cell density and fraction in layer 6
+        LCT_GLU_L2to3to4_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322fcf90346e5ea282aa
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3-4 cell density and fraction in layer 1
+        LCT_GLU_L2to3to4_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632300ba848815749f117
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3-4 cell density and fraction in layer 2
+        LCT_GLU_L2to3to4_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322fcf90346e5ea282ac
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3-4 cell density and fraction in layer 3
+        LCT_GLU_L2to3to4_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632316fa2a4aaf51b15c2
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3-4 cell density and fraction in layer 4
+        LCT_GLU_L2to3to4_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632310ba848815749f11c
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3-4 cell density and fraction in layer 5
+        LCT_GLU_L2to3to4_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632356fa2a4aaf51b15cc
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3-4 cell density and fraction in layer 6
+        LCT_GLU_L2to3_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322cafad5b342ba28142
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3 cell density and fraction in layer 1
+        LCT_GLU_L2to3_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322c3860d8b4b449f081
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3 cell density and fraction in layer 2
+        LCT_GLU_L2to3_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322d3860d8b4b449f085
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3 cell density and fraction in layer 3
+        LCT_GLU_L2to3_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322d595fd7b5901b13e8
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3 cell density and fraction in layer 4
+        LCT_GLU_L2to3_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322ecf90346e5ea282a8
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3 cell density and fraction in layer 5
+        LCT_GLU_L2to3_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632333860d8b4b449f08a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2-3 cell density and fraction in layer 6
+        LCT_GLU_L2_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63229595fd7b5901b13cc
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2 cell density and fraction in layer 1
+        LCT_GLU_L2_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63229092d2ff14fa28255
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2 cell density and fraction in layer 2
+        LCT_GLU_L2_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322ac863a6c701a2806c
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2 cell density and fraction in layer 3
+        LCT_GLU_L2_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322f595fd7b5901b13ea
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2 cell density and fraction in layer 4
+        LCT_GLU_L2_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322c092d2ff14fa28265
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2 cell density and fraction in layer 5
+        LCT_GLU_L2_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6322b595fd7b5901b13e5
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L2 cell density and fraction in layer 6
+        LCT_GLU_L3to4to5_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632376fa2a4aaf51b15cf
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4-5 cell density and fraction in layer 1
+        LCT_GLU_L3to4to5_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63236b08fac3fcb49f18a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4-5 cell density and fraction in layer 2
+        LCT_GLU_L3to4to5_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63235092d2ff14fa28279
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4-5 cell density and fraction in layer 3
+        LCT_GLU_L3to4to5_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632376fa2a4aaf51b15d1
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4-5 cell density and fraction in layer 4
+        LCT_GLU_L3to4to5_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63235cf90346e5ea282b8
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4-5 cell density and fraction in layer 5
+        LCT_GLU_L3to4to5_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323a3860d8b4b449f0a1
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4-5 cell density and fraction in layer 6
+        LCT_GLU_L3to4_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63233b08fac3fcb49f187
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4 cell density and fraction in layer 1
+        LCT_GLU_L3to4_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632326fa2a4aaf51b15c4
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4 cell density and fraction in layer 2
+        LCT_GLU_L3to4_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632346fa2a4aaf51b15ca
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4 cell density and fraction in layer 3
+        LCT_GLU_L3to4_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63232595fd7b5901b13fa
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4 cell density and fraction in layer 4
+        LCT_GLU_L3to4_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63233cf90346e5ea282b2
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4 cell density and fraction in layer 5
+        LCT_GLU_L3to4_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63234092d2ff14fa28277
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L3-4 cell density and fraction in layer 6
+        LCT_GLU_4to5to6_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323d3860d8b4b449f0ad
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5-6 cell density and fraction in layer 1
+        LCT_GLU_4to5to6_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632413860d8b4b449f0be
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5-6 cell density and fraction in layer 2
+        LCT_GLU_4to5to6_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632403860d8b4b449f0b6
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5-6 cell density and fraction in layer 3
+        LCT_GLU_4to5to6_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323fb08fac3fcb49f190
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5-6 cell density and fraction in layer 4
+        LCT_GLU_4to5to6_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323fc863a6c701a2807a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5-6 cell density and fraction in layer 5
+        LCT_GLU_L4to5to6_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632443860d8b4b449f0cb
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5-6 cell density and fraction in layer 6
+        LCT_GLU_L4to5_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323ac863a6c701a28072
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5 cell density and fraction in layer 1
+        LCT_GLU_L4to5_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323c092d2ff14fa28295
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5 cell density and fraction in layer 2
+        LCT_GLU_L4to5_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323b0ba848815749f123
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5 cell density and fraction in layer 3
+        LCT_GLU_L4to5_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323d092d2ff14fa28297
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5 cell density and fraction in layer 4
+        LCT_GLU_L4to5_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323d3860d8b4b449f0af
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5 cell density and fraction in layer 5
+        LCT_GLU_L4to5_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323e3860d8b4b449f0b2
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4-5 cell density and fraction in layer 6
+        LCT_GLU_L4_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323a3860d8b4b449f09f
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4 cell density and fraction in layer 1
+        LCT_GLU_L4_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63238be1b295f2249efc4
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4 cell density and fraction in layer 2
+        LCT_GLU_L4_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632386fa2a4aaf51b15d3
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4 cell density and fraction in layer 3
+        LCT_GLU_L4_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63239595fd7b5901b140f
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4 cell density and fraction in layer 4
+        LCT_GLU_L4_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63239cf90346e5ea282c1
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4 cell density and fraction in layer 5
+        LCT_GLU_L4_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6323b092d2ff14fa28293
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L4 cell density and fraction in layer 6
+        LCT_GLU_L5to6_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63241595fd7b5901b1420
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L5-6 cell density and fraction in layer 1
+        LCT_GLU_L5to6_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63241b08fac3fcb49f195
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L5-6 cell density and fraction in layer 2
+        LCT_GLU_L5to6_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63242092d2ff14fa282a2
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L5-6 cell density and fraction in layer 3
+        LCT_GLU_L5to6_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63245be1b295f2249efc8
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L5-6 cell density and fraction in layer 4
+        LCT_GLU_L5to6_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632420ba848815749f125
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L5-6 cell density and fraction in layer 5
+        LCT_GLU_L5to6_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63244f29f44551aa27f92
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L5-6 cell density and fraction in layer 6
+        LCT_GLU_L6_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63243b08fac3fcb49f19d
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L6 cell density and fraction in layer 1
+        LCT_GLU_L6_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63243092d2ff14fa282a4
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L6 cell density and fraction in layer 2
+        LCT_GLU_L6_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63244be1b295f2249efc6
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L6 cell density and fraction in layer 3
+        LCT_GLU_L6_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63243f29f44551aa27f8c
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L6 cell density and fraction in layer 4
+        LCT_GLU_L6_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63245092d2ff14fa282a7
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L6 cell density and fraction in layer 5
+        LCT_GLU_L6_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63246f29f44551aa27f94
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Glutamatergic L6 cell density and fraction in layer 6
+        LCT_NonNeuron_ASC_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632480ba848815749f134
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal ASC cell density and fraction in layer 1
+        LCT_NonNeuron_ASC_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632470ba848815749f131
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal ASC cell density and fraction in layer 2
+        LCT_NonNeuron_ASC_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632473860d8b4b449f0d7
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal ASC cell density and fraction in layer 3
+        LCT_NonNeuron_ASC_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63247595fd7b5901b1438
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal ASC cell density and fraction in layer 4
+        LCT_NonNeuron_ASC_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63248092d2ff14fa282ac
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal ASC cell density and fraction in layer 5
+        LCT_NonNeuron_ASC_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632486fa2a4aaf51b15e9
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal ASC cell density and fraction in layer 6
+        LCT_NonNeuron_EC_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324af29f44551aa27fa6
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal EC cell density and fraction in layer 1
+        LCT_NonNeuron_EC_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324a595fd7b5901b143b
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal EC cell density and fraction in layer 2
+        LCT_NonNeuron_EC_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324b595fd7b5901b1444
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal EC cell density and fraction in layer 3
+        LCT_NonNeuron_EC_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324b164fa026531b14f5
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal EC cell density and fraction in layer 4
+        LCT_NonNeuron_EC_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324a6fa2a4aaf51b15ed
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal EC cell density and fraction in layer 5
+        LCT_NonNeuron_EC_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324bafad5b342ba2816c
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal EC cell density and fraction in layer 6
+        LCT_NonNeuron_MG_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324db08fac3fcb49f1a8
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal MG cell density and fraction in layer 1
+        LCT_NonNeuron_MG_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324b3860d8b4b449f0da
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal MG cell density and fraction in layer 2
+        LCT_NonNeuron_MG_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324c595fd7b5901b1446
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal MG cell density and fraction in layer 3
+        LCT_NonNeuron_MG_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324d092d2ff14fa282b3
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal MG cell density and fraction in layer 4
+        LCT_NonNeuron_MG_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324e092d2ff14fa282b9
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal MG cell density and fraction in layer 5
+        LCT_NonNeuron_MG_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324df29f44551aa27fa9
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal MG cell density and fraction in layer 6
+        LCT_NonNeuron_OLG_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324d092d2ff14fa282b5
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OLG cell density and fraction in layer 1
+        LCT_NonNeuron_OLG_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324e092d2ff14fa282b7
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OLG cell density and fraction in layer 2
+        LCT_NonNeuron_OLG_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63250164fa026531b14f7
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OLG cell density and fraction in layer 3
+        LCT_NonNeuron_OLG_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63250b08fac3fcb49f1ab
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OLG cell density and fraction in layer 4
+        LCT_NonNeuron_OLG_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63250f29f44551aa27fb3
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OLG cell density and fraction in layer 5
+        LCT_NonNeuron_OLG_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6324fafad5b342ba28170
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OLG cell density and fraction in layer 6
+        LCT_NonNeuron_OPC_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63251f29f44551aa27fb5
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OPC cell density and fraction in layer 1
+        LCT_NonNeuron_OPC_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63251f29f44551aa27fb7
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OPC cell density and fraction in layer 2
+        LCT_NonNeuron_OPC_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632523860d8b4b449f0e5
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OPC cell density and fraction in layer 3
+        LCT_NonNeuron_OPC_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63251595fd7b5901b1450
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OPC cell density and fraction in layer 4
+        LCT_NonNeuron_OPC_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63252092d2ff14fa282bb
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OPC cell density and fraction in layer 5
+        LCT_NonNeuron_OPC_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63252b08fac3fcb49f1ae
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal OPC cell density and fraction in layer 6
+        LCT_NonNeuron_VLMC_Layer1:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632533860d8b4b449f0e7
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal VLMC cell density and fraction in layer 1
+        LCT_NonNeuron_VLMC_Layer2:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632543860d8b4b449f0ee
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal VLMC cell density and fraction in layer 2
+        LCT_NonNeuron_VLMC_Layer3:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63254b08fac3fcb49f1b2
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal VLMC cell density and fraction in layer 3
+        LCT_NonNeuron_VLMC_Layer4:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad632553860d8b4b449f0f0
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal VLMC cell density and fraction in layer 4
+        LCT_NonNeuron_VLMC_Layer5:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63254b08fac3fcb49f1b0
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal VLMC cell density and fraction in layer 5
+        LCT_NonNeuron_VLMC_Layer6:
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad63255595fd7b5901b145a
+          references:
+          - citation: Chen A, et al. 2023. Cell, 186, 3726-3743.e24
+            doi: 10.1016/j.cell.2023.06.009
+          notes:
+          - Laminar cell map of Non-Neuronal VLMC cell density and fraction in layer 6
+
 
   volumes:
     500um:
