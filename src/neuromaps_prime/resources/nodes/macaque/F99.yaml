@@ -11,7 +11,7 @@ F99:
   - citation: Donahue, C. J., et al. 2018. PNAS.
     doi: 10.1073/pnas.1721653115
   - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
-    url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources
+    url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
   surfaces:
     32k:
       annotation:
