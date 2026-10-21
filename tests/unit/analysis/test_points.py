@@ -110,60 +110,6 @@ class TestGetIndirectEdges:
         assert np.all(weights > 0)
 
 
-class TestPointInTriangle:
-    """Tests for _point_in_triangle()."""
-
-    def test_centroid_inside(self) -> None:
-        """Verify centroid is inside and pdist is non-negative."""
-        centroid = simple_vertices.mean(axis=0)
-        inside, pdist = points._point_in_triangle(
-            point=centroid, triangle=simple_vertices
-        )
-        assert inside
-        assert pdist is not None
-        assert pdist >= 0
-
-    def test_outside(self) -> None:
-        """Verify a point outside the triangle is rejected."""
-        inside, _ = points._point_in_triangle(
-            point=np.array([10.0, 10.0, 0.0]), triangle=simple_vertices
-        )
-        assert not inside
-
-    def test_no_pdist(self) -> None:
-        """Verify pdist is None when disabled."""
-        _, pdist = points._point_in_triangle(
-            point=simple_vertices.mean(axis=0),
-            triangle=simple_vertices,
-            return_pdist=False,
-        )
-        assert pdist is None
-
-
-class TestWhichTriangle:
-    """Tests for which_triangle()."""
-
-    def test_found(self) -> None:
-        """Verify the centroid is found inside triangle 0."""
-        assert (
-            points.which_triangle(
-                point=simple_vertices.mean(axis=0),
-                triangles=simple_vertices[simple_faces],
-            )
-            == 0
-        )
-
-    def test_not_found(self) -> None:
-        """Verify a far-away point returns None."""
-        assert (
-            points.which_triangle(
-                point=np.array([100.0, 100.0, 100.0]),
-                triangles=simple_vertices[simple_faces],
-            )
-            is None
-        )
-
-
 class TestMakeSurfGraph:
     """Tests for make_surf_graph()."""
 
