@@ -548,7 +548,6 @@ def run_cycle_test(
     max_length: int | None = None,
     allow_revisits: bool = False,
     same_species_only: bool = True,
-    path_filter: Callable[[tuple[str, ...]], bool] | None = None,
     add_edge: bool = False,
 ) -> list[CycleResult]:
     """Execute and score all return paths from an origin.

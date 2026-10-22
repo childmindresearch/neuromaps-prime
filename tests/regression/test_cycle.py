@@ -35,7 +35,6 @@ Run with:
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from itertools import pairwise
 from pathlib import Path
 from typing import Final
 
@@ -46,7 +45,6 @@ from tests.cycle import Hemisphere, resolve_artifact_dir, run_cycle_test
 from tests.regression.utils import make_sphere
 
 from neuromaps_prime.graph import NeuromapsGraph
-from neuromaps_prime.graph.transforms.surface import EXPERIMENTAL_XFMS
 
 logger = logging.getLogger(__name__)
 
@@ -61,39 +59,6 @@ HEMISPHERES = ("left", "right")
 MAX_CYCLE_LENGTH: Final = 4
 # Include cross-species bridge cycles in the sweep.
 SAME_SPECIES_ONLY: Final = False
-
-def _is_experimental_provider(
-    source: str,
-    target: str,
-    provider: str,
-) -> bool:
-    """Return whether a provider is experimental for a space pair."""
-    return any(
-        {source, target} == set(spaces)
-        and (experimental_provider is None or provider == experimental_provider)
-        for spaces, experimental_provider in EXPERIMENTAL_XFMS
-    )
-
-
-def _cycle_uses_only_experimental_edges(
-    graph: NeuromapsGraph,
-    path: tuple[str, ...],
-) -> bool:
-    """Return whether a cycle contains a hop with only experimental providers."""
-    for source, target in pairwise(path):
-        transforms = graph._cache.get_surface_transforms(
-            source=source,
-            target=target,
-            resource_type="sphere",
-        )
-
-        if transforms and all(
-            _is_experimental_provider(source, target, transform.provider)
-            for transform in transforms
-        ):
-            return True
-
-    return False
 
 def _resolve_output_dir(base_dir: Path) -> Path:
     """Resolve and create the directory for cycle regression outputs.
@@ -346,9 +311,6 @@ def _run_origin_hemisphere(
         max_length=MAX_CYCLE_LENGTH,
         allow_revisits=True,
         same_species_only=SAME_SPECIES_ONLY,
-        path_filter=lambda path: not _cycle_uses_only_experimental_edges(
-            graph, path
-        ),
     )
 
     logger.info("Executed %d cycles for %s (%s)", len(results), origin, hemisphere)
