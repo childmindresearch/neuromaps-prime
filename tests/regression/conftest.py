@@ -29,7 +29,7 @@ def _is_experimental(transform: object) -> bool:
 
 @pytest.fixture(scope="class")
 def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
-    """Load the graph without experimental transforms for regression tests."""
+    """Load the real transformation graph with automatic runner selection, without experimental transforms."""
     runner = request.config.getoption("--runner").lower()
     graph = NeuromapsGraph(runner=runner)
 
