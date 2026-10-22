@@ -60,6 +60,7 @@ MAX_CYCLE_LENGTH: Final = 4
 # Include cross-species bridge cycles in the sweep.
 SAME_SPECIES_ONLY: Final = False
 
+
 def _resolve_output_dir(base_dir: Path) -> Path:
     """Resolve and create the directory for cycle regression outputs.
 
