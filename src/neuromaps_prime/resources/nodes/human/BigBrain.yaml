@@ -82,7 +82,10 @@ BigBrain:
           - citation: Scholtens, LH, de Reus, MA, de Lange, SC, Schmidt, R, van den Heuvel, MP. 2018. An MRI Von Economo–Koskinas atlas. NeuroImage, 170:249–256.
             doi: 10.1016/j.neuroimage.2016.12.069
             url: https://www.sciencedirect.com/science/article/abs/pii/S1053811916307959?via%3Dihub
-        PC_DKT:
+          notes:
+          - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528c3319fa59aec49ef43'
+          - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528c327f390e9f9c0e953'
+        PC_DK:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab67688db13fea27fc7
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab6e671bd7db249effb
           references:
@@ -91,6 +94,9 @@ BigBrain:
           - citation: Klein, A, Tourville, J. 2012. 101 Labeled Brain Images and a Consistent Human Cortical Labeling Protocol. Frontiers in Neuroscience, 6:171.
             doi: 10.3389/fnins.2012.00171
             url: https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2012.00171/full
+          notes:
+          - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab776a37d0c5aa28106'
+          - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab67688db13fea27fc9'
         PC_BN:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5287e3a2b162fd7a2809c
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5287ea31bc4206ea6488e
@@ -100,6 +106,9 @@ BigBrain:
           - citation: Fan, L, Li, H, Zhuo, J, Zhang, Y, Wang, J, Chen, L, Yang, Z, Chu, C, Xie, S, Laird, AR, Fox, PT, Eickhoff, SB, Yu, C, Jiang, T. 2016. The Human Brainnetome Atlas A New Brain Atlas Based on Connectional Architecture. Cerebral Cortex, 26(8):3508–3526.
             doi: 10.1093/cercor/bhw157
             url: https://doi.org/10.1093/cercor/bhw157
+          notes:
+          - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5287f97ffa68fe649f070'
+          - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5288097ffa68fe649f072'
         PC_Destrieux:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528ad3a2b162fd7a280e2
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528ad27f390e9f9c0e951
@@ -207,3 +216,26 @@ BigBrain:
             doi: 10.7554/eLife.70119
           - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
+        PC_Glasser2016:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52836d51f97235462618a
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5283765b45925fea6491e
+          references: 
+          notes:
+          - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52836af0514ad5c49ef54'
+          - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5283780b23da098a6494c'
+        CV:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad501f1e77083d42d6261da
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad501dee77083d42d6261ba
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          notes:
+          - Curvature.
+        SD:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad501f332685bc92a49efa4
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad501f12ae2968daa626166
+          references:
+          - citation: Paquola, C, et al. 2021. eLife, 10:e70119
+            doi: 10.7554/eLife.70119
+          notes:
+          - Sulcal Depth.
