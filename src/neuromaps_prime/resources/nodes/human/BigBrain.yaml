@@ -78,7 +78,7 @@ BigBrain:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
           - citation: von Economo, C, Koskinas, GN. 1925. The Cytoarchitectonics of the Cerebral Cortex of the Adult Human.
-          - citation: Scholtens, LH, de Reus, MA, de Lange, SC, Schmidt, R, van den Heuvel, MP. 2018. An MRI Von Economo–Koskinas atlas. NeuroImage, 170:249–256.
+          - citation: Scholtens, LH, et al. 2018. An MRI Von Economo–Koskinas atlas. NeuroImage, 170:249–256.
             doi: 10.1016/j.neuroimage.2016.12.069
             url: https://www.sciencedirect.com/science/article/abs/pii/S1053811916307959?via%3Dihub
         PC_DKT:
@@ -96,7 +96,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Fan, L, Li, H, Zhuo, J, Zhang, Y, Wang, J, Chen, L, Yang, Z, Chu, C, Xie, S, Laird, AR, Fox, PT, Eickhoff, SB, Yu, C, Jiang, T. 2016. The Human Brainnetome Atlas A New Brain Atlas Based on Connectional Architecture. Cerebral Cortex, 26(8):3508–3526.
+          - citation: Fan, L, et al. 2016. The Human Brainnetome Atlas A New Brain Atlas Based on Connectional Architecture. Cerebral Cortex, 26(8):3508–3526.
             doi: 10.1093/cercor/bhw157
             url: https://doi.org/10.1093/cercor/bhw157
         PC_Destrieux:
@@ -105,7 +105,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Destrieux, C, Fischl, B, Dale, A, Halgren, E. 2010. Automatic parcellation of human cortical gyri and sulci using standard anatomical nomenclature. NeuroImage, 53(1):1–15.
+          - citation: Destrieux, C, et al. 2010. Automatic parcellation of human cortical gyri and sulci using standard anatomical nomenclature. NeuroImage, 53(1):1–15.
             doi: 10.1016/j.neuroimage.2010.06.010
             url: https://www.sciencedirect.com/science/article/pii/S1053811910008542
           notes:
@@ -116,7 +116,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
         PC_Schaefer17Networks_100:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d40e226a8ef99a2806c
@@ -124,7 +124,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
         PC_Schaefer7Networks_200:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3398b84ff6eba28013
@@ -132,7 +132,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
         PC_Schaefer17Networks_200:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3598b84ff6eba28015
@@ -140,7 +140,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
         PC_Schaefer7Networks_400:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d37f04674c52aa2804c
@@ -148,7 +148,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
         PC_Schaefer17Networks_400:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3b58a8547f8e49f019
@@ -156,7 +156,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
         PC_Schaefer7Networks_600:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d3e7fb85691c66261ae
@@ -164,7 +164,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
         PC_Schaefer17Networks_600:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4af4aa49e8ab49f016
@@ -172,7 +172,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
         PC_Schaefer7Networks_800:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d449cebfeeb616261f0
@@ -180,7 +180,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
         PC_Schaefer17Networks_800:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4679288335da6261e0
@@ -188,7 +188,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
         PC_Schaefer7Networks_1000:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4b79288335da6261e2
@@ -196,7 +196,7 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
         PC_Schaefer17Networks_1000:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52d4ff4aa49e8ab49f01b
@@ -204,5 +204,5 @@ BigBrain:
           references:
           - citation: Paquola, C, et al. 2021. eLife, 10:e70119
             doi: 10.7554/eLife.70119
-          - citation: Schaefer, A, Kong, R, Gordon, EM, Laumann, TO, Zuo, XN, Holmes, AJ, Eickhoff, SB, Yeo, BTT. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
+          - citation: Schaefer, A, et al. 2018. Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI. Cerebral Cortex, 28(9):3095–3114.
             doi: 10.1093/cercor/bhx179
