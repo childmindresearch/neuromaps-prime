@@ -2,8 +2,8 @@ Yerkes29:
   species: chimpanzee
   description: Yerkes29 Chimpanzee Atlas
   references:
-    - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
-      doi: 10.1073/pnas.1721653115
+  - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
+    doi: 10.1073/pnas.1721653115
   surfaces:
     32k:
       midthickness:
@@ -19,11 +19,11 @@ Yerkes29:
         MM:
           left: https://raw.githubusercontent.com/ChengLabX/cortical_geometry/b2e828f2351f3ea73ec99a64781e69332c2ba757/MyelinMap/ChimpYerkes29.L.MyelinMap.32k.func.gii
           references:
-            - citation: Wei, Y, et al., 2025. Cross-Species Cortical Geometry Reveals Conserved Gradients Across Primates and Human-Specific Expansion. bioRxiv 2025.11.28.691123
-              doi: 10.1101/2025.11.28.691123
+          - citation: Wei, Y, et al. 2025. Cross-Species Cortical Geometry Reveals Conserved Gradients Across Primates and Human-Specific Expansion. bioRxiv 2025.11.28.691123
+            doi: 10.1101/2025.11.28.691123
           notes:
-            - only left file available
-            - experimental until published (besides bioRxiv)
+          - only left annotation available
+          - experimental until published
         PC_ChimpBNA:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522b98c78b102fc5b138
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522ce8b507c646dcb7a2
