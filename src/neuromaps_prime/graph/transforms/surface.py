@@ -39,7 +39,10 @@ if TYPE_CHECKING:
 
 # Experimental transformations that should throw a warning; only need to list one way
 EXPERIMENTAL_XFMS: list[tuple[list[str], str | None]] = [
-    (["NMT2Sym", "MBM"], "macaque_marmoset")
+    (["NMT2Sym", "MBM"], "macaque_marmoset"),
+    (["Yerkes19", "Yerkes29"], "cortical_geometry"),
+    (["fsLR", "Yerkes29"], "cortical_geometry"),
+    (["fsLR", "Yerkes19"], "cortical_geometry")
 ]
 
 
