@@ -20,19 +20,6 @@ D99:
       white:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303cc9143f354902958/surfaces/D99/src-D99_den-41k_hemi-L_white.surf.gii
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523022882bdb2bc3ebdee/surfaces/D99/src-D99_den-41k_hemi-R_white.surf.gii
-    168k:
-      midthickness:
-        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.mid.surf.gii
-        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.mid.surf.gii
-      pial:
-        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.pial.surf.gii
-        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.pial.surf.gii
-      sphere:
-        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.sphere.surf.gii
-        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.sphere.surf.gii
-      white:
-        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.wm.surf.gii
-        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.wm.surf.gii
       annotation:
         CV:
           left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/D99/src-D99_den-41k_hemi-L_curvature.shape.gii
@@ -66,6 +53,19 @@ D99:
             url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
           notes:
           - 'Consensus cortex mask: 1=cortex, 0=medial wall. Fetching this annotation does not automatically apply an ROI during resampling or comparison.'
+    168k:
+      midthickness:
+        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.mid.surf.gii
+        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.mid.surf.gii
+      pial:
+        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.pial.surf.gii
+        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.pial.surf.gii
+      sphere:
+        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.sphere.surf.gii
+        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.sphere.surf.gii
+      white:
+        left: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/lh.D99.wm.surf.gii
+        right: https://raw.githubusercontent.com/HumanBrainED/RheMAP-Surf/v1.0/surfaces/rh.D99.wm.surf.gii
 
   volumes:
     250um:
