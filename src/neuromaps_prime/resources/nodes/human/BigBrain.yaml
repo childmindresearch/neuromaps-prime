@@ -19,11 +19,6 @@ BigBrain:
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6aa2cb55f6066b60a124bc74
 
       annotation:
-        CT:
-          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6acfeb4594307d1db8240515
-          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6acfeb47734c82da169877a4
-          notes: 
-          - Cortical thickness (vertex-wise distance between the pial and white surfaces). The midthickness listed here is the average of those two surfaces.
         LT_layer0to1:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f2122a3963f2cf072a6e
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad0f212a7b4489ce507294d
