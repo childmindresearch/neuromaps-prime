@@ -6,7 +6,7 @@
         composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4cc74ec6fad47d6b9a32?view_only=b214f40525fe44b5bea3103478d08d0d
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020.
-        doi: 10.5281/zenodo.3780711 
+        doi: 10.5281/zenodo.3780711
         url: https://zenodo.org/records/4748589
 
 - from: MEBRAINS
@@ -17,7 +17,7 @@
         composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4485b30df7012c7df93b?view_only=b214f40525fe44b5bea3103478d08d0d
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020.
-        doi: 10.5281/zenodo.3780711 
+        doi: 10.5281/zenodo.3780711
         url: https://zenodo.org/records/4748589
 
 - from: MEBRAINS
@@ -28,9 +28,9 @@
         composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4a8fedf908b2217df529?view_only=b214f40525fe44b5bea3103478d08d0d
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020.
-        doi: 10.5281/zenodo.3780711 
+        doi: 10.5281/zenodo.3780711
         url: https://zenodo.org/records/4748589
-        
+
 - from: MEBRAINS
   to: F99
   volumes:
@@ -61,7 +61,7 @@
         composite: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a1f4784d4be03f6846ba1df?view_only=b214f40525fe44b5bea3103478d08d0d
       references:
       - citation: Sirmpilatze, N. & Klink, P.C. 2020.
-        doi: 10.5281/zenodo.3780711 
+        doi: 10.5281/zenodo.3780711
         url: https://zenodo.org/records/4748589
 
 - from: D99
@@ -140,10 +140,6 @@
       - citation: Sirmpilatze, N. & Klink, P.C. 2020.
         doi: 10.5281/zenodo.3780711
         url: https://zenodo.org/records/4748589
-      references:
-      - citation:
-        doi:
-        url:
 
 - from: NMT2Sym
   to: Yerkes19
@@ -309,7 +305,7 @@
       - citation: Sirmpilatze, N. & Klink, P.C. 2020.
         doi: 10.5281/zenodo.3780711
         url: https://zenodo.org/records/4748589
-        
+
 - from: F99
   to: NMT2Asym
   volumes:
