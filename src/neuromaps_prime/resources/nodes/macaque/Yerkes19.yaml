@@ -2,8 +2,8 @@ Yerkes19:
   species: macaque
   description: Yerkes19 Macaque Atlas
   references:
-    - citation: Van Essen, DC, et al. 2012. Cerebral Cortex, 22(10):2227–2240
-      doi: 10.1093/cercor/bhr290
+  - citation: Van Essen, DC, et al. 2012. Cerebral Cortex, 22(10):2227–2240
+    doi: 10.1093/cercor/bhr290
   surfaces:
     10k:
       sphere:
@@ -29,7 +29,7 @@ Yerkes19:
           - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
-          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 
+          - Yeo2011 7 Network parcellation (N=1000). Transformed from human to macaque.
           - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a680941e7c8fa7ad49'
           - 'right lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a34572881301679ab8'
         PC_Yeo17Networks:
@@ -39,7 +39,7 @@ Yerkes19:
           - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
-          - Yeo2011 17 Network parcellation (N=1000). Human-to-monkey.
+          - Yeo2011 17 Network parcellation (N=1000). Transformed from human to macaque.
         PC_Markov:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37da771710ca7abbd
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a580941e7c8fa7ad47
@@ -63,7 +63,7 @@ Yerkes19:
           - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
-          - Glasser 2016 multi-modal parcellation. Human-to-monkey.
+          - Glasser 2016 multi-modal parcellation. Transformed from human to macaque.
         PC_Brodmann09:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905309bf55aeca1f9300ef
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a90530a441f17df1392feeb
@@ -71,7 +71,7 @@ Yerkes19:
           - citation: Xu, T, et al. 2020. NeuroImage, 223:117346
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
-          - Brodmann 1909 areal parcellation. Human-to-monkey. 
+          - Brodmann 1909 areal parcellation. Transformed from human to macaque.
         PC_Schaefer7Networks_100:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb71614316345a7577
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba79a37b24f6374aa8
@@ -231,7 +231,7 @@ Yerkes19:
           - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
             doi: 10.1038/s41593-023-01351-2
           notes:
-          - Receptor density gradients (per-neuron normalized). 
+          - Receptor density gradients (per-neuron normalized).
           - Multi-map - PC1 is the principal receptor gradient, PC2 is 5-HT1A-driven.
         RG_raw:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f4b0879d2d292ee6b1255
@@ -239,7 +239,7 @@ Yerkes19:
           - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
             doi: 10.1038/s41593-023-01351-2
           notes:
-          - Receptor density gradients (raw, non-normalized). 
+          - Receptor density gradients (raw, non-normalized).
           - Multi-map - PC1 is the principal receptor gradient, PC2 is 5-HT1A-driven.
         MM:
           left: https://raw.githubusercontent.com/ChengLabX/cortical_geometry/b2e828f2351f3ea73ec99a64781e69332c2ba757/MyelinMap/MacaqueYerkes19.L.MyelinMap.32k_fs_LR.func.gii
@@ -259,7 +259,7 @@ Yerkes19:
           - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
             doi: 10.1073/pnas.1721653115
           notes:
-          - Smoothed myelin map (bias corrected). MacaqueYerkes19 v1.2.
+          - Smoothed myelin map (bias corrected). From MacaqueYerkes19 v1.2.
         CT:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527acd87cca253679b05
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f527b80941e7c8fa7ad2d
@@ -267,7 +267,7 @@ Yerkes19:
           - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
             doi: 10.1073/pnas.1721653115
           notes:
-          - Cortical thickness. MacaqueYerkes19 v1.2.
+          - From MacaqueYerkes19 v1.2.
         CV:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52877a752a710f2c2b1c
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52881541aee377a7af33
@@ -275,11 +275,11 @@ Yerkes19:
           - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
             doi: 10.1073/pnas.1721653115
           notes:
-          - Curvature. MacaqueYerkes19 v1.2.
+          - From MacaqueYerkes19 v1.2.
         PC_Yeo7Networks:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0
           notes:
-          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey. 
+          - Yeo2011 7 Network parcellation (N=1000). Transformed from human to macaque.
           - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a3d0d28dc642a7afe5'
         PC_Julich:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f50174012993bc0e3a12f
@@ -294,15 +294,13 @@ Yerkes19:
           references:
           - citation: Collins, CE, et al. 2010. Proceedings of the National Academy of Sciences, 107(36):15927–15932
             doi: 10.1073/pnas.1010356107
-          notes:
-          - Neuron density.
         CH:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f47bcc14e371e50e3a122
           references:
           - citation: Froudist-Walsh, S, et al. 2021. Neuron, 109(21):3500–3520.e13
             doi: 10.1016/j.neuron.2021.08.024
           notes:
-          - Anatomical cortical hierarchy. Complements the intrinsic timescale (Manea et al.) map. 
+          - Anatomical cortical hierarchy. Complements the intrinsic timescale (Manea et al.) map.
         DM_treeSize:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f48eac14e371e50e3a1c5
           references:
@@ -330,7 +328,7 @@ Yerkes19:
           - citation: Froudist-Walsh, S, et al. 2023. Nature Neuroscience, 26(7):1281–1294
             doi: 10.1038/s41593-023-01351-2
           notes:
-          - HTR1A (serotonin 1A receptor) gene expression map. Derived from the Allen Human Brain Atlas (AHBA), mapped from human to macaque. 
+          - HTR1A (serotonin 1A receptor) gene expression map. Derived from the Allen Human Brain Atlas (AHBA), mapped from human to macaque.
           - Represents a single gene only, included as a worked example of a cross-species expression annotation.
 
   volumes:
