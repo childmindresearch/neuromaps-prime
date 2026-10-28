@@ -56,6 +56,12 @@ build-backend = "hatchling.build"
 [tool.hatch.build]
 source = ["src"]
 
+[tool.hatch.build.targets.wheel]
+exclude = ["src/**/*.md"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["src/**/*.md"]
+
 [tool.hatch.build.hooks.vcs]
 version-file = "src/neuromaps_prime/_version.py"
 
