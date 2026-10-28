@@ -1,6 +1,6 @@
 # Adding Local or Private Data to the Graph
 
-This guide shows how to describe a whole dataset in a graph YAML file, so it loads with the graph every time instead of being added to the graph step by step in code. The worked example is a small subset of the [BigMac](https://git.fmrib.ox.ac.uk/rmars/bigmac) macaque postmortem dataset.
+This guide shows how to describe a whole dataset in a graph YAML file, so it loads with the graph every time instead of being added to the graph step by step in code. The worked example is a small subset of the [BigMac](https://open.oxcin.ox.ac.uk/pages/amyh/bigmacdocumentation) macaque postmortem dataset.
 
 This guide is about **how to add data**. The process is the same for volumetric and surface resources: describe the files under a node (`volumes` or `surfaces`), and describe transforms under an edge (`volume_to_volume` or `surface_to_surface`). The BigMac example only has volumes, so it uses the volume layout. Surface resources are keyed by density and hemisphere instead of resolution.
 
