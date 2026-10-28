@@ -38,6 +38,9 @@ We welcome contributions of new resources (annotations, atlases, transforms, etc
    - Maintainers will review the request and reach out with any questions or next steps
    - After upload, open a [PR](https://github.com/childmindresearch/neuromaps-prime/pulls) to add the resource to the appropriate YAML file(s)
 
+> [!TIP]
+> To add local or private data (for example data under a data-use agreement, or not yet released) to your own copy of the graph, see the [data guide](src/neuromaps_prime/resources/GUIDE.md).
+
 > [!NOTE]
 > When contributing a resource, please include where possible:
 > - A direct URI or source link

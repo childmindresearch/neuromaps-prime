@@ -8,7 +8,7 @@ requires-python = ">=3.11"
 keywords = ["network neuroscience", "connectomics"]
 authors = [{name = "CMI DAIR", email = "dair@childmind.org"}]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
   "License :: OSI Approved",
   "Programming Language :: Python :: 3 :: Only"
@@ -55,6 +55,12 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build]
 source = ["src"]
+
+[tool.hatch.build.targets.wheel]
+exclude = ["src/**/*.md"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["src/**/*.md"]
 
 [tool.hatch.build.hooks.vcs]
 version-file = "src/neuromaps_prime/_version.py"
