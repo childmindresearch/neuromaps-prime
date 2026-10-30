@@ -15,7 +15,7 @@ from neuromaps_prime.graph.transforms.surface import EXPERIMENTAL_XFMS
 
 @pytest.fixture(scope="class")
 def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
-    """Load the real transformation graph without experimental transforms."""
+    """Load the real transformation graph with automatic runner selection, without experimental transforms."""
     runner = request.config.getoption("--runner").lower()
     graph = NeuromapsGraph(runner=runner)
 
