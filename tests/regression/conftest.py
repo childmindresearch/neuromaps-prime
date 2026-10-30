@@ -19,25 +19,19 @@ def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
     runner = request.config.getoption("--runner").lower()
     graph = NeuromapsGraph(runner=runner)
 
-    experimental = {
-        (source, target, provider)
-        for (source, target), provider in EXPERIMENTAL_XFMS
-        for source, target in ((source, target), (target, source))
+    experimental_pairs = {
+        (source, target)
+        for path, _provider in EXPERIMENTAL_XFMS
+        for source, target in (path, path[::-1])
     }
 
-    graph.remove_edges_from(
+    edges_to_remove = [
         (source, target, key)
-        for source, target, key, data in graph.edges(keys=True, data=True)
+        for source, target, key in graph.edges(keys=True)
         if key == graph.surface_to_surface_key
-        and all(
-            (
-                transform.source_space,
-                transform.target_space,
-                transform.provider,
-            )
-            in experimental
-            for transform in data["data"].surface_transforms
-        )
-    )
+        and (source, target) in experimental_pairs
+    ]
+
+    graph.remove_edges_from(edges_to_remove)
 
     return graph
