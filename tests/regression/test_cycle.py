@@ -45,6 +45,7 @@ from tests.cycle import Hemisphere, resolve_artifact_dir, run_cycle_test
 from tests.regression.utils import make_sphere
 
 from neuromaps_prime.graph import NeuromapsGraph
+from neuromaps_prime.graph.transforms.surface import EXPERIMENTAL_XFMS
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +73,6 @@ def _resolve_output_dir(base_dir: Path) -> Path:
     return resolve_artifact_dir(
         base_dir / "cycle_outputs", env_var="NEUROMAPS_CYCLE_OUTPUT_DIR"
     )
-
 
 # -------------------------------------------------------------------------
 # Result containers
@@ -330,6 +330,32 @@ def _run_origin_hemisphere(
         origin=origin, hemisphere=hemisphere, rows=rows, output_dir=output_dir
     )
 
+def _assert_no_experimental_transforms(graph: NeuromapsGraph) -> None:
+    """Ensure no experimental transforms remain in the graph."""
+    for path, provider in EXPERIMENTAL_XFMS:
+        for source, target in (path, path[::-1]):
+            if not graph.has_edge(
+                source,
+                target,
+                key=graph.surface_to_surface_key,
+            ):
+                continue
+
+            transforms = graph[source][target][
+                graph.surface_to_surface_key
+            ]["data"].surface_transforms
+
+            experimental = [
+                transform
+                for transform in transforms
+                if transform.provider == provider
+            ]
+
+            assert not experimental, (
+                f"Experimental transform(s) {source} -> {target} "
+                f"from provider {provider!r} must not be included "
+                "in cycle regression tests."
+            )
 
 # -------------------------------------------------------------------------
 # Test suite
@@ -361,6 +387,8 @@ class TestCycleRoundtrip:
         output_dir = _resolve_output_dir(tmp_path_factory.getbasetemp())
 
         logger.info("Cycle outputs will be written to: %s", output_dir)
+
+        _assert_no_experimental_transforms(graph)
 
         origins = sorted(graph.nodes)
 
