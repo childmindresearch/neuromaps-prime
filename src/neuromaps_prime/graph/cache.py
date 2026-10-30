@@ -1,12 +1,4 @@
-"""Cache layer for NeuromapsGraph atlas and transform resources.
-
-Provides O(1) keyed lookups for all resource types, plus filtered list
-queries and require_* helpers that raise on a miss.
-"""
-
-from __future__ import annotations
-
-from typing import Literal
+IiIiQ2FjaGUgbGF5ZXIgZm9yIE5ldXJvbWFwc0dyYXBoIGF0bGFzIGFuZCB0cmFuc2Zvcm0gcmVzb3VyY2VzLgoKUHJvdmlkZXMgTygxKSBrZXllZCBsb29rdXBzIGZvciBhbGwgcmVzb3VyY2UgdHlwZXMsIHBsdXMgZmlsdGVyZWQgbGlzdApxdWVyaWVzIGFuZCByZXF1aXJlXyogaGVscGVycyB0aGF0IHJhaXNlIG9uIGEgbWlzcy4KIiIiCgpmcm9tIF9fZnV0dXJlX18gaW1wb3J0IGFubm90YXRpb25zCgp from typing import Literal, NamedTuple
 
 from pydantic import BaseModel, Field
 
@@ -19,40 +11,86 @@ from neuromaps_prime.graph.models import (
     VolumeTransform,  # noqa: TC001 (pydantic req'd)
 )
 
-# Key type aliases
-SurfaceAtlasKey = tuple[str, str, str, str]  # (space, density, hemi, resource_type)
-SurfaceTransformKey = tuple[
-    str, str, str, str, str, str
-]  # (src, tgt, density, hemi, resource_type, provider)
-SurfaceAnnotationKey = tuple[str, str, str, str]  # (space, label, density, hemi)
-VolumeAtlasKey = tuple[str, str, str]  # (space, resolution, resource_type)
-VolumeTransformKey = tuple[
-    str, str, str, str, str
-]  # (src, tgt, resolution, resource_type, provider)
-VolumeAnnotationKey = tuple[str, str, str]  # (space, label, resolution)
+
+# Key types (NamedTuples for named fields while remaining hashable and
+# comparable to plain tuples of the same values)
+class SurfaceAtlasKey(NamedTuple):
+    """Key for surface atlas: space, density, hemi, resource_type."""
+
+    space: str
+    density: str
+    hemi: str
+    resource_type: str
+
+
+class SurfaceTransformKey(NamedTuple):
+    """Key for surface transform: src, tgt, density, hemi, resource_type, provider."""
+
+    src: str
+    tgt: str
+    density: str
+    hemi: str
+    resource_type: str
+    provider: str
+
+
+class SurfaceAnnotationKey(NamedTuple):
+    """Key for surface annotation: space, label, density, hemi."""
+
+    space: str
+    label: str
+    density: str
+    hemi: str
+
+
+class VolumeAtlasKey(NamedTuple):
+    """Key for volume atlas: space, resolution, resource_type."""
+
+    space: str
+    resolution: str
+    resource_type: str
+
+
+class VolumeTransformKey(NamedTuple):
+    """Key for volume transform: src, tgt, resolution, resource_type, provider."""
+
+    src: str
+    tgt: str
+    resolution: str
+    resource_type: str
+    provider: str
+
+
+class VolumeAnnotationKey(NamedTuple):
+    """Key for volume annotation: space, label, resolution."""
+
+    space: str
+    label: str
+    resolution: str
 
 
 class GraphCache(BaseModel):
     """Container for all atlas, transform, and annotation lookup tables.
 
-    All dictionaries are keyed by stable tuples so that lookups are O(1).
+    All dictionaries are keyed by NamedTuples (hashable and equal to plain
+    tuples of the same values) so that lookups are O(1).
     The cache is intentionally mutable: the graph builder populates it during
     construction and transform operations may extend it with composed
     multi-hop transforms at runtime.
 
     Attributes:
-        surface_atlas: Maps ``(space, density, hemisphere, resource_type)`` to a
-            :class:`SurfaceAtlas`.
-        surface_transform: Maps ``(source, target, density, hemisphere,
-            resource_type, provider)`` to a :class:`SurfaceTransform`.
-        surface_annotation: Maps ``(space, label, density, hemisphere)`` to a
-            :class:`SurfaceAnnotation`.
-        volume_atlas: Maps ``(space, resolution, resource_type)`` to a
-            :class:`VolumeAtlas`.
-        volume_transform: Maps ``(source, target, resolution, resource_type,
-            provider)`` to a :class:`VolumeTransform`.
-        volume_annotation: Maps ``(space, label, resolution)`` to a
-            :class:`VolumeAnnotation`.
+        surface_atlas: Maps a ``SurfaceAtlasKey`` (space, density, hemi, resource_type)
+            to a :class:`SurfaceAtlas`.
+        surface_transform: Maps a ``SurfaceTransformKey`` (src, tgt, density, hemi,
+            resource_type, provider) to a :class:`SurfaceTransform`.
+        surface_annotation: Maps a ``SurfaceAnnotationKey`` (space, label,
+            density, hemi) to a :class:`SurfaceAnnotation`.
+        volume_atlas: Maps a ``VolumeAtlasKey`` (space, resolution, resource_type)
+            to a :class:`VolumeAtlas`.
+        volume_transform: Maps a ``VolumeTransformKey`` (src, tgt, resolution,
+            resource_type, provider) to a :class:`VolumeTransform`.
+        volume_annotation: Maps a ``VolumeAnnotationKey`` (space, label, resolution)
+            to a :class:`VolumeAnnotation`.
     """
 
     model_config = {"arbitrary_types_allowed": True}
@@ -79,7 +117,12 @@ class GraphCache(BaseModel):
     def add_surface_atlas(self, atlas: SurfaceAtlas) -> None:
         """Insert or overwrite a surface atlas entry."""
         self.surface_atlas[
-            (atlas.space, atlas.density, atlas.hemisphere.lower(), atlas.resource_type)
+            SurfaceAtlasKey(
+                space=atlas.space,
+                density=atlas.density,
+                hemi=atlas.hemisphere.lower(),
+                resource_type=atlas.resource_type,
+            )
         ] = atlas
 
     def get_surface_atlas(
@@ -91,7 +134,12 @@ class GraphCache(BaseModel):
     ) -> SurfaceAtlas | None:
         """Return the matching :class:`SurfaceAtlas`, or ``None``."""
         return self.surface_atlas.get(
-            (space, density, hemisphere.lower(), resource_type)
+            SurfaceAtlasKey(
+                space=space,
+                density=density,
+                hemi=hemisphere.lower(),
+                resource_type=resource_type,
+            )
         )
 
     def get_surface_atlases(
@@ -157,11 +205,11 @@ class GraphCache(BaseModel):
     def add_surface_annotation(self, annotation: SurfaceAnnotation) -> None:
         """Insert or overwrite a surface annotation entry."""
         self.surface_annotation[
-            (
-                annotation.space,
-                annotation.label,
-                annotation.density,
-                annotation.hemisphere.lower(),
+            SurfaceAnnotationKey(
+                space=annotation.space,
+                label=annotation.label,
+                density=annotation.density,
+                hemi=annotation.hemisphere.lower(),
             )
         ] = annotation
 
@@ -169,7 +217,11 @@ class GraphCache(BaseModel):
         self, space: str, label: str, density: str, hemisphere: Literal["left", "right"]
     ) -> SurfaceAnnotation | None:
         """Return the matching :class:`SurfaceAnnotation`, or ``None``."""
-        return self.surface_annotation.get((space, label, density, hemisphere.lower()))
+        return self.surface_annotation.get(
+            SurfaceAnnotationKey(
+                space=space, label=label, density=density, hemi=hemisphere.lower()
+            )
+        )
 
     def get_surface_annotations(
         self,
@@ -230,13 +282,13 @@ class GraphCache(BaseModel):
     def add_surface_transform(self, transform: SurfaceTransform) -> None:
         """Insert or overwrite a surface transform entry."""
         self.surface_transform[
-            (
-                transform.source_space,
-                transform.target_space,
-                transform.density,
-                transform.hemisphere.lower(),
-                transform.resource_type,
-                transform.provider,
+            SurfaceTransformKey(
+                src=transform.source_space,
+                tgt=transform.target_space,
+                density=transform.density,
+                hemi=transform.hemisphere.lower(),
+                resource_type=transform.resource_type,
+                provider=transform.provider,
             )
         ] = transform
 
@@ -257,7 +309,14 @@ class GraphCache(BaseModel):
         """
         if provider is not None:
             result = self.surface_transform.get(
-                (source, target, density, hemisphere.lower(), resource_type, provider)
+                SurfaceTransformKey(
+                    src=source,
+                    tgt=target,
+                    density=density,
+                    hemi=hemisphere.lower(),
+                    resource_type=resource_type,
+                    provider=provider,
+                )
             )
             if result is not None:
                 return result
@@ -312,13 +371,23 @@ class GraphCache(BaseModel):
 
     def add_volume_atlas(self, atlas: VolumeAtlas) -> None:
         """Insert or overwrite a volume atlas entry."""
-        self.volume_atlas[(atlas.space, atlas.resolution, atlas.resource_type)] = atlas
+        self.volume_atlas[
+            VolumeAtlasKey(
+                space=atlas.space,
+                resolution=atlas.resolution,
+                resource_type=atlas.resource_type,
+            )
+        ] = atlas
 
     def get_volume_atlas(
         self, space: str, resolution: str, resource_type: str
     ) -> VolumeAtlas | None:
         """Return the matching :class:`VolumeAtlas`, or ``None``."""
-        return self.volume_atlas.get((space, resolution, resource_type))
+        return self.volume_atlas.get(
+            VolumeAtlasKey(
+                space=space, resolution=resolution, resource_type=resource_type
+            )
+        )
 
     def get_volume_atlases(
         self,
@@ -375,14 +444,20 @@ class GraphCache(BaseModel):
     def add_volume_annotation(self, annotation: VolumeAnnotation) -> None:
         """Insert or overwrite a volume annotation entry."""
         self.volume_annotation[
-            (annotation.space, annotation.label, annotation.resolution)
+            VolumeAnnotationKey(
+                space=annotation.space,
+                label=annotation.label,
+                resolution=annotation.resolution,
+            )
         ] = annotation
 
     def get_volume_annotation(
         self, space: str, label: str, resolution: str
     ) -> VolumeAnnotation | None:
         """Return the matching :class:`VolumeAnnotation`, or ``None``."""
-        return self.volume_annotation.get((space, label, resolution))
+        return self.volume_annotation.get(
+            VolumeAnnotationKey(space=space, label=label, resolution=resolution)
+        )
 
     def get_volume_annotations(
         self, space: str, label: str | None = None, resolution: str | None = None
@@ -436,12 +511,12 @@ class GraphCache(BaseModel):
     def add_volume_transform(self, transform: VolumeTransform) -> None:
         """Insert or overwrite a volume transform entry."""
         self.volume_transform[
-            (
-                transform.source_space,
-                transform.target_space,
-                transform.resolution,
-                transform.resource_type,
-                transform.provider,
+            VolumeTransformKey(
+                src=transform.source_space,
+                tgt=transform.target_space,
+                resolution=transform.resolution,
+                resource_type=transform.resource_type,
+                provider=transform.provider,
             )
         ] = transform
 
@@ -461,7 +536,13 @@ class GraphCache(BaseModel):
         """
         if provider is not None:
             result = self.volume_transform.get(
-                (source, target, resolution, resource_type, provider)
+                VolumeTransformKey(
+                    src=source,
+                    tgt=target,
+                    resolution=resolution,
+                    resource_type=resource_type,
+                    provider=provider,
+                )
             )
             if result is not None:
                 return result
