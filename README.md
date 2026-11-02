@@ -39,8 +39,9 @@ pip install git+https://github.com/childmindresearch/neuromaps-prime
 
 ## Examples
 
-See the [`examples/`](https://github.com/childmindresearch/neuromaps-prime/tree/main/examples) directory for sample scripts:
+See the [`examples/`](https://github.com/childmindresearch/neuromaps-prime/tree/main/examples) directory for sample scripts and tutorials. Below are some examples that may be helpful:
 
+- [`neuromaps_prime_tutorial.ipynb`](https://github.com/childmindresearch/neuromaps-prime/tree/main/examples/neuromaps_prime_tutorial.ipynb) - tutorial for exploring and learning neuromaps-prime
 - [`example_graph_init.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_graph_init.py) — graph inspection and plotting
 - [`example_surface_transform.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_surface_transform.py) — surface-to-surface resampling and surface-to-volume projection
 - [`example_volume_transform.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_volume_transform.py) — volume-to-volume warping and volume-to-surface projection

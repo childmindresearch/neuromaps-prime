@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, NamedTuple
 from unittest.mock import MagicMock, patch
 
 import pytest
-from niwrap import workbench
+from niwrap import ants, workbench
 
 from neuromaps_prime.transforms.volume import (
     INTERP_NOPARAMS,
@@ -40,6 +40,11 @@ def fake_workbench_result(
     return create_output
 
 
+def expected_transform_kwarg(transform: Path) -> list[Any]:
+    """Build the expected ``transform`` kwarg passed to ``ants_apply_transforms``."""
+    return [ants.ants_apply_transforms_transform_file_name(transform)]
+
+
 class TestVolumetricTransform:
     """Unit tests for volumetric transformations using `vol_to_vol`."""
 
@@ -48,12 +53,19 @@ class TestVolumetricTransform:
         """Create mock file paths for testing."""
         source = tmp_path / "source.nii.gz"
         target = tmp_path / "target.nii.gz"
+        transform = tmp_path / "transform.h5"
         output = tmp_path / "output.nii.gz"
 
         source.touch()
         target.touch()
+        transform.touch()
 
-        return {"source": source, "target": target, "output": output}
+        return {
+            "source": source,
+            "target": target,
+            "transform": transform,
+            "output": output,
+        }
 
     @pytest.fixture
     def mock_ants_transform(
@@ -80,6 +92,7 @@ class TestVolumetricTransform:
         result = vol_to_vol(
             source=mock_paths["source"],
             target=mock_paths["target"],
+            transform=mock_paths["transform"],
             out_fpath=str(mock_paths["output"]),
             interp=interp,
             interp_params=interp_params.get(interp),  # type: ignore[arg-type]
@@ -88,6 +101,9 @@ class TestVolumetricTransform:
         call_kwargs = mock_ants_transform.call_args.kwargs
         assert call_kwargs["input_image"] == mock_paths["source"]
         assert call_kwargs["reference_image"] == mock_paths["target"]
+        assert call_kwargs["transform"] == expected_transform_kwarg(
+            mock_paths["transform"]
+        )
         assert "interpolation" in call_kwargs
         assert "output" in call_kwargs
         assert result == mock_paths["output"]
@@ -102,6 +118,7 @@ class TestVolumetricTransform:
             vol_to_vol(
                 source=mock_paths["source"],
                 target=mock_paths["target"],
+                transform=mock_paths["transform"],
                 out_fpath=str(mock_paths["output"]),
                 interp=interp,
             )
@@ -113,6 +130,7 @@ class TestVolumetricTransform:
         result = vol_to_vol(
             source=mock_paths["source"],
             target=mock_paths["target"],
+            transform=mock_paths["transform"],
             out_fpath=str(mock_paths["output"]),
             interp="gaussian",
             interp_params={"sigma": 1.5, "alpha": 0.7},
@@ -140,6 +158,7 @@ class TestVolumetricTransform:
         vol_to_vol(
             source=mock_paths["source"],
             target=mock_paths["target"],
+            transform=mock_paths["transform"],
             out_fpath=str(mock_paths["output"]),
             interp="gaussian",
             interp_params=interp_params,
@@ -147,6 +166,9 @@ class TestVolumetricTransform:
         mock_get_params.assert_called_once_with("gaussian", interp_params)
         call_kwargs = mock_ants.call_args.kwargs
         assert call_kwargs["interpolation"] == mock_get_params.return_value
+        assert call_kwargs["transform"] == expected_transform_kwarg(
+            mock_paths["transform"]
+        )
 
 
 class Vol2SurfOutput(NamedTuple):

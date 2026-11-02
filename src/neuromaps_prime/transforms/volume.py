@@ -44,6 +44,7 @@ def _get_interp_params(
 def vol_to_vol(
     source: Path,
     target: Path,
+    transform: Path,
     out_fpath: str,
     interp: str = "linear",
     interp_params: dict[str, Any] | None = None,
@@ -53,6 +54,7 @@ def vol_to_vol(
     Args:
         source: Path to the source NIfTI volume to be transformed.
         target: Path to the target NIfTI volume defining the reference space.
+        transform: Path to volumetric transform from source to target.
         out_fpath: Full output file path to save transformed file
         interp: Interpolation method to use.
         interp_params: Optional parameters to pass to the interpolation method.
@@ -62,10 +64,13 @@ def vol_to_vol(
 
     Raises:
         ValueError: unsupported interpolator.
-        FileNotFoundError: If the output file is not created.
+        FileNotFoundError: If the transform file is missing or the output file is
+            not created.
     """
     if interp not in INTERP_PARAMS:
         raise ValueError(f"Unsupported interpolator '{interp}'.")
+    if not transform.exists():
+        raise FileNotFoundError(f"Transform file not found: {transform}")
 
     interpolation = _get_interp_params(interp, interp_params)
     final_path = Path(out_fpath)
@@ -74,6 +79,7 @@ def vol_to_vol(
         reference_image=target,
         output=ants.ants_apply_transforms_warped_output(final_path.name),
         interpolation=interpolation,  # type: ignore[arg-type]
+        transform=[ants.ants_apply_transforms_transform_file_name(transform)],
     )
     written = Path(xfm.output.output_image_outfile)
 
