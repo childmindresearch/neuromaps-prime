@@ -177,7 +177,7 @@ jobs:
     # manual trigger's channel and the fallback when no preview was published.
     - name: Upload artifact
       if: always() && (github.event_name == 'workflow_dispatch' || steps.publish.outputs.preview != 'true')
-      uses: actions/upload-artifact@v7.0.1
+      uses: actions/upload-artifact@v7.0.2
       with:
         name: regression-results
         # Each suite's per-path detail (no work_*/ GIFTI intermediates) + both
