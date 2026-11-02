@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
 # Experimental transformations that should throw a warning; only need to list one way
 EXPERIMENTAL_XFMS: list[tuple[list[str], str | None]] = [
-    (["NMT2Sym", "MBM"], "macaque_marmoset")
+    (["NMT2Sym", "MBM"], "NeuromapsPRIME")
 ]
 
 
