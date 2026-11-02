@@ -22,7 +22,11 @@ def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
     experimental_transforms = {
         (source, target, provider)
         for path, provider in EXPERIMENTAL_XFMS
-        for source, target in (path, path[::-1])
+        for source, target in zip(path, path[1:])
+        for source, target in (
+            (source, target),
+            (target, source),
+        )
     }
 
     edges_to_remove = []
@@ -44,7 +48,21 @@ def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
                 transform.provider,
             )
 
-            if identifier in experimental_transforms:
+            is_experimental = any(
+                experimental_source == identifier[0]
+                and experimental_target == identifier[1]
+                and (
+                    experimental_provider is None
+                    or experimental_provider == identifier[2]
+                )
+                for (
+                    experimental_source,
+                    experimental_target,
+                    experimental_provider,
+                ) in experimental_transforms
+            )
+
+            if is_experimental:
                 cache_key = (
                     transform.source_space,
                     transform.target_space,
