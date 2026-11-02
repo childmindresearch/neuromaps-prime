@@ -42,25 +42,23 @@ def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
         retained_transforms = []
 
         for transform in edge.surface_transforms:
-            identifier = (
-                transform.source_space,
-                transform.target_space,
-                transform.provider,
-            )
+            is_experimental = False
 
-            is_experimental = any(
-                experimental_source == identifier[0]
-                and experimental_target == identifier[1]
-                and (
-                    experimental_provider is None
-                    or experimental_provider == identifier[2]
-                )
-                for (
-                    experimental_source,
-                    experimental_target,
-                    experimental_provider,
-                ) in experimental_transforms
-            )
+            for (
+                experimental_source,
+                experimental_target,
+                experimental_provider,
+            ) in experimental_transforms:
+                if (
+                    experimental_source == transform.source_space
+                    and experimental_target == transform.target_space
+                    and (
+                        experimental_provider is None
+                        or experimental_provider == transform.provider
+                    )
+                ):
+                    is_experimental = True
+                    break
 
             if is_experimental:
                 cache_key = (
