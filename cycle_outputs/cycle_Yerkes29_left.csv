@@ -1,0 +1,2 @@
+path,n_hops,pearson_r,max_abs_diff
+Yerkes29 -> fsLR -> Yerkes19 -> Yerkes29,3,0.3942300285122355,0.302741177380085
