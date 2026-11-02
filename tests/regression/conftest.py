@@ -7,6 +7,8 @@ fixture rather than redeclared in each test class.
 
 from __future__ import annotations
 
+from itertools import pairwise
+
 import pytest
 
 from neuromaps_prime.graph import NeuromapsGraph
@@ -22,18 +24,15 @@ def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
     experimental_transforms = {
         (source, target, provider)
         for path, provider in EXPERIMENTAL_XFMS
-        for source, target in zip(path, path[1:])
+        for source, target in pairwise(path)
         for source, target in (
             (source, target),
             (target, source),
         )
     }
 
-    edges_to_remove = []
-
-    for source, target, key, edge_data in graph.edges(
-        keys=True,
-        data=True,
+    for source, target, key, edge_data in list(
+        graph.edges(keys=True, data=True)
     ):
         if key != graph.surface_to_surface_key:
             continue
@@ -76,9 +75,6 @@ def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
         edge.surface_transforms = retained_transforms
 
         if not retained_transforms:
-            edges_to_remove.append((source, target, key))
-
-    for source, target, key in edges_to_remove:
-        graph.remove_edge(source, target, key)
+            graph.remove_edge(source, target, key)
 
     return graph
