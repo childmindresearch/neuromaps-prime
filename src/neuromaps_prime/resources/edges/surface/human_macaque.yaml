@@ -1,5 +1,6 @@
 - from: Yerkes19
   to: fsLR
+  description: 32k sphere from cortical_geometry experimental until published
   surfaces:
     human_macaque:
       10k:
@@ -20,6 +21,13 @@
       - citation: Xu, T., et al. 2021. NeuroImage. 226:117346.
         doi: 10.1016/j.neuroimage.2020.117346
         url: https://www.sciencedirect.com/science/article/pii/S1053811920308326?via%3Dihub
+    cortical_geometry:
+      32k:
+        sphere:
+          left: https://raw.githubusercontent.com/ChengLabX/cortical_geometry/7e33f72a458850e4655e7ee3aadf370584981986/Deformation/macaque_to_human.L.sphere.reg.surf.gii
+      references:
+      - citation: Cross-Species Cortical Geometry Reveals Conserved Gradients Across Primates and Human-Specific Expansion bioRxiv 2025.11.28.691123
+        doi: 10.1101/2025.11.28.691123
 
 - from: fsLR
   to: Yerkes19

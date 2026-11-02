@@ -1,10 +1,15 @@
 Yerkes29:
   species: chimpanzee
-  description: Yerkes29 Chimpanzee Atlas
+  description: Yerkes29 Chimpanzee Atlas - 10k midthickness, 800um volume from Wei (2025), 32k surfaces from Donahue (2018)
   references:
     - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
       doi: 10.1073/pnas.1721653115
+    - citation: Wei, Y, et al., 2025. Cross-Species Cortical Geometry Reveals Conserved Gradients Across Primates and Human-Specific Expansion. bioRxiv 2025.11.28.691123
+      doi: 10.1101/2025.11.28.691123
   surfaces:
+    10k:
+      midthickness:
+        left: https://raw.githubusercontent.com/ChengLabX/cortical_geometry/b2e828f2351f3ea73ec99a64781e69332c2ba757/Surface/10k/ChimpYerkes29.L.midthickness.10k_fs_LR.surf.gii
     32k:
       midthickness:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bd36edcc5f1dde330a2c4
@@ -33,6 +38,7 @@ Yerkes29:
           notes:
           - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522bf4338ff44b3b8b8f'
           - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9522727e0b77f3bdcb73a'
+  
   volumes:
     800um:
       T1w: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2bcbb3d09fa484fe30a464

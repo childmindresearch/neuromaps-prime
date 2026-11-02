@@ -211,7 +211,7 @@ fsLR:
           references:
             - citation: Margulies, DS, et al. 2016. Proceedings of the National Academy of Sciences, 113(45):12574–12579
               doi: 10.1073/pnas.1608282113
-        myelinmap:
+        MM:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe1c4e5ee50219291a2a
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fe29af610c0216dfdd20
           notes:
