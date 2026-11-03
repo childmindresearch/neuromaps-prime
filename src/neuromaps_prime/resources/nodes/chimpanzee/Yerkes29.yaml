@@ -39,3 +39,6 @@ Yerkes29:
       annotation:
         PC_ChimpBNA:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ac9523358c4c6cf85f3fd9f
+        references:
+          - citation: Wang, Y, et al. 2025. The Innovation, 6(2):100755
+            doi: 10.1016/j.xinn.2024.100755

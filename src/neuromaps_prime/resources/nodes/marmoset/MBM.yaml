@@ -19,8 +19,14 @@ MBM:
       annotation:
         BM:
           uri: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c092c5d7719ed1618bcc9
+        references:
+        - citation: Liu, C, et al. 2021. NeuroImage. 226:117620.
+          doi: 10.1016/j.neuroimage.2020.117620
     150um:
       T2w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c0c98f0cc7c123318bbb6
       annotation:
         BM:
           uri: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c0f741dc445e36e18bc29
+        references:
+        - citation: Liu, C, et al. 2021. NeuroImage. 226:117620.
+          doi: 10.1016/j.neuroimage.2020.117620
