@@ -4,7 +4,6 @@ onavg:
   references:
   - citation: Feilong, M, et al. 2024. Nat Methods 21, 1736–1742
     doi: 10.1038/s41592-024-02346-y
-    url: https://github.com/templateflow/tpl-onavg
   surfaces:
     10k:
       sphere:
@@ -17,7 +16,8 @@ onavg:
           references:
           - citation: Feilong, M, et al. 2024. Nat Methods 21, 1736–1742
             doi: 10.1038/s41592-024-02346-y
-            url: https://github.com/templateflow/tpl-onavg
+          notes:
+          - 'files downloaded from TemplateFlow: https://github.com/templateflow/tpl-onavg'
     41k:
       sphere:
         left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad654e655793294c51b13f0
@@ -29,7 +29,8 @@ onavg:
           references:
           - citation: Feilong, M, et al. 2024. Nat Methods 21, 1736–1742
             doi: 10.1038/s41592-024-02346-y
-            url: https://github.com/templateflow/tpl-onavg
+          notes:
+          - 'files downloaded from TemplateFlow: https://github.com/templateflow/tpl-onavg'
     164k:
       sphere:
         left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad654f555793294c51b1404
@@ -39,9 +40,10 @@ onavg:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a207034569895a27ffd
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad65a21351358ea3e49f0ba
           references:
-            - citation: Feilong, M, et al. 2024. Nat Methods 21, 1736–1742
-              doi: 10.1038/s41592-024-02346-y
-              url: https://github.com/templateflow/tpl-onavg
+          - citation: Feilong, M, et al. 2024. Nat Methods 21, 1736–1742
+            doi: 10.1038/s41592-024-02346-y
+          notes:
+          - 'files downloaded from TemplateFlow: https://github.com/templateflow/tpl-onavg'
     655k:
       sphere:
         left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad6551155793294c51b1429

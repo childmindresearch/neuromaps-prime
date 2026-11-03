@@ -12,7 +12,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: CIVETNMT
   to: MEBRAINS
@@ -28,7 +27,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: CIVETNMT
   to: NMT2Sym
@@ -44,7 +42,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: CIVETNMT
   to: Yerkes19
@@ -60,7 +57,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: D99
   to: CIVETNMT
@@ -76,7 +72,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: D99
   to: MEBRAINS
@@ -89,7 +84,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       168k:
         sphere:
@@ -98,7 +92,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       41k:
         midthickness:
@@ -110,7 +103,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: D99
   to: NMT2Sym
@@ -123,7 +115,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       168k:
         sphere:
@@ -132,7 +123,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       41k:
         midthickness:
@@ -144,7 +134,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: D99
   to: NMT2Asym
@@ -157,7 +146,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       168k:
         sphere:
@@ -166,7 +154,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
 
 - from: D99
   to: Yerkes19
@@ -179,7 +166,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       168k:
         sphere:
@@ -188,7 +174,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       41k:
         midthickness:
@@ -200,7 +185,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: MEBRAINS
   to: CIVETNMT
@@ -216,7 +200,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: MEBRAINS
   to: D99
@@ -229,7 +212,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       101k:
         sphere:
@@ -238,7 +220,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       101k:
         midthickness:
@@ -250,7 +231,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: MEBRAINS
   to: NMT2Sym
@@ -263,7 +243,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       101k:
         sphere:
@@ -272,7 +251,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       101k:
         midthickness:
@@ -284,7 +262,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: MEBRAINS
   to: NMT2Asym
@@ -297,7 +274,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       101k:
         sphere:
@@ -306,7 +282,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
 
 - from: MEBRAINS
   to: Yerkes19
@@ -319,7 +294,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       101k:
         sphere:
@@ -328,7 +302,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       101k:
         midthickness:
@@ -352,7 +325,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: NMT2Sym
   to: D99
@@ -365,7 +337,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       41k:
         sphere:
@@ -374,7 +345,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       41k:
         midthickness:
@@ -386,7 +356,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: NMT2Sym
   to: MEBRAINS
@@ -399,7 +368,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       41k:
         sphere:
@@ -408,7 +376,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       41k:
         midthickness:
@@ -420,7 +387,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: NMT2Sym
   to: Yerkes19
@@ -433,7 +399,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       41k:
         sphere:
@@ -442,7 +407,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       41k:
         midthickness:
@@ -454,7 +418,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: NMT2Asym
   to: D99
@@ -467,7 +430,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       41k:
         sphere:
@@ -476,7 +438,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
 
 - from: NMT2Asym
   to: MEBRAINS
@@ -489,7 +450,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       41k:
         sphere:
@@ -498,7 +458,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
 
 - from: NMT2Asym
   to: Yerkes19
@@ -511,7 +470,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       41k:
         sphere:
@@ -520,7 +478,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
 - from: Yerkes19
   to: CIVETNMT
   surfaces:
@@ -535,7 +492,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: Yerkes19
   to: D99
@@ -548,7 +504,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       32k:
         sphere:
@@ -557,7 +512,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       32k:
         midthickness:
@@ -569,7 +523,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: Yerkes19
   to: MEBRAINS
@@ -582,7 +535,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       32k:
         sphere:
@@ -591,7 +543,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       32k:
         midthickness:
@@ -603,7 +554,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: Yerkes19
   to: NMT2Sym
@@ -616,7 +566,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       32k:
         sphere:
@@ -625,7 +574,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     CIVET:
       32k:
         midthickness:
@@ -637,7 +585,6 @@
       references:
       - citation: Lepage, C, et al. 2021. NeuroImage. 227:117622.
         doi: 10.1016/j.neuroimage.2020.117622
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920311071?via%3Dihub
 
 - from: Yerkes19
   to: NMT2Asym
@@ -650,7 +597,6 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
     RheMAPSurf_approx_volume:
       32k:
         sphere:
@@ -659,4 +605,3 @@
       references:
       - citation: Zhou, Z.-X., & Xu, T. 2025.
         doi: 10.5281/zenodo.15642801
-        url: https://zenodo.org/records/15642801
