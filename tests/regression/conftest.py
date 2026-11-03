@@ -25,15 +25,10 @@ def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
         (source, target, provider)
         for path, provider in EXPERIMENTAL_XFMS
         for source, target in pairwise(path)
-        for source, target in (
-            (source, target),
-            (target, source),
-        )
+        for source, target in ((source, target), (target, source))
     }
 
-    for source, target, key, edge_data in list(
-        graph.edges(keys=True, data=True)
-    ):
+    for source, target, key, edge_data in list(graph.edges(keys=True, data=True)):
         if key != graph.surface_to_surface_key:
             continue
 

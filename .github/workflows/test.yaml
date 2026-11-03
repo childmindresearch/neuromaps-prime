@@ -2,13 +2,12 @@ name: Python Tests
 
 permissions:
   contents: read
-  pull-requests: write
 
 on:
   push:
     branches:
     - main
-  pull_request_target:
+  pull_request:
 
 jobs:
   unit:
@@ -26,12 +25,18 @@ jobs:
           --cov=src \
           --log-level=DEBUG \
           --verbose tests
-    - name: Coverage comment
+    - name: Record PR number
       if: github.event_name == 'pull_request'
-      uses: MishaKav/pytest-coverage-comment@v1.13.0
+      run: echo "${{ github.event.pull_request.number }}" > pr_number.txt
+    - name: Upload coverage reports
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v7.0.2
       with:
-        pytest-xml-coverage-path: ./coverage.xml
-        junitxml-path: ./pytest.xml
+        name: coverage-reports
+        path: |
+          coverage.xml
+          pytest.xml
+          pr_number.txt
 
   ruff:
     runs-on: ubuntu-latest
