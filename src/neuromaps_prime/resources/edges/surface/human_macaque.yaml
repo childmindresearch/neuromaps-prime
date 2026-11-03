@@ -19,7 +19,6 @@
       references:
       - citation: Xu, T, et al. 2020. NeuroImage. 226:117346.
         doi: 10.1016/j.neuroimage.2020.117346
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920308326?via%3Dihub
 
 - from: fsLR
   to: Yerkes19
@@ -42,4 +41,3 @@
       references:
       - citation: Xu, T, et al. 2020. NeuroImage. 226:117346.
         doi: 10.1016/j.neuroimage.2020.117346
-        url: https://www.sciencedirect.com/science/article/pii/S1053811920308326?via%3Dihub

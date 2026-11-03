@@ -75,11 +75,7 @@ BigBrain:
           - citation: von Economo, C, Koskinas, GN. 1925. The Cytoarchitectonics of the Cerebral Cortex of the Adult Human.
           - citation: Scholtens, LH, et al. 2018. An MRI Von Economo–Koskinas atlas. NeuroImage, 170:249–256.
             doi: 10.1016/j.neuroimage.2016.12.069
-            url: https://www.sciencedirect.com/science/article/abs/pii/S1053811916307959?via%3Dihub
-          notes:
-          - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528c3319fa59aec49ef43'
-          - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528c327f390e9f9c0e953'
-        PC_DK:
+        PC_DKT:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab67688db13fea27fc7
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab6e671bd7db249effb
           references:
@@ -87,10 +83,6 @@ BigBrain:
             doi: 10.7554/eLife.70119
           - citation: Klein, A, Tourville, J. 2012. 101 Labeled Brain Images and a Consistent Human Cortical Labeling Protocol. Frontiers in Neuroscience, 6:171.
             doi: 10.3389/fnins.2012.00171
-            url: https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2012.00171/full
-          notes:
-          - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab776a37d0c5aa28106'
-          - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad52ab67688db13fea27fc9'
         PC_BN:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5287e3a2b162fd7a2809c
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5287ea31bc4206ea6488e
@@ -99,10 +91,6 @@ BigBrain:
             doi: 10.7554/eLife.70119
           - citation: Fan, L, et al. 2016. The Human Brainnetome Atlas A New Brain Atlas Based on Connectional Architecture. Cerebral Cortex, 26(8):3508–3526.
             doi: 10.1093/cercor/bhw157
-            url: https://doi.org/10.1093/cercor/bhw157
-          notes:
-          - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5287f97ffa68fe649f070'
-          - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad5288097ffa68fe649f072'
         PC_Destrieux:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528ad3a2b162fd7a280e2
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528ad27f390e9f9c0e951
@@ -111,7 +99,6 @@ BigBrain:
             doi: 10.7554/eLife.70119
           - citation: Destrieux, C, et al. 2010. Automatic parcellation of human cortical gyri and sulci using standard anatomical nomenclature. NeuroImage, 53(1):1–15.
             doi: 10.1016/j.neuroimage.2010.06.010
-            url: https://www.sciencedirect.com/science/article/pii/S1053811910008542
           notes:
           - anatomical parcellation
         PC_Schaefer7Networks_100:
