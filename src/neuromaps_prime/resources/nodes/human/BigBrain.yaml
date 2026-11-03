@@ -82,7 +82,6 @@ BigBrain:
           - citation: Scholtens, LH, de Reus, MA, de Lange, SC, Schmidt, R, van den Heuvel, MP. 2018. An MRI Von Economo–Koskinas atlas. NeuroImage, 170:249–256.
             doi: 10.1016/j.neuroimage.2016.12.069
             url: https://www.sciencedirect.com/science/article/abs/pii/S1053811916307959?via%3Dihub
-        PC_DKT:
           notes:
           - 'left lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528c3319fa59aec49ef43'
           - 'right lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6ad528c327f390e9f9c0e953'
