@@ -23,3 +23,15 @@
       - citation: Lepage, C., et al. 2026. NeuroImage Reports. 6(3):100360.
         doi: 10.1016/j.ynirp.2026.100360
         url: https://www.sciencedirect.com/science/article/pii/S2666956026000437?via%3Dihub
+
+- from: Yerkes29
+  to: fsLR
+  description: experimental until published
+  surfaces:
+    cortical_geometry:
+      32k:
+        sphere:
+          left: https://raw.githubusercontent.com/ChengLabX/cortical_geometry/7e33f72a458850e4655e7ee3aadf370584981986/Deformation/chimpanzee_to_human.L.sphere.reg.surf.gii
+      references:
+      - citation: Cross-Species Cortical Geometry Reveals Conserved Gradients Across Primates and Human-Specific Expansion bioRxiv 2025.11.28.691123
+        doi: 10.1101/2025.11.28.691123
