@@ -18,9 +18,7 @@ from neuromaps_prime.graph.models import (
     TransformMetadata,
     TransformResult,
 )
-from neuromaps_prime.graph.transforms.surface import (
-    SurfaceTransformOps,  # noqa: TC001 (pydantic req'd)
-)
+from neuromaps_prime.graph.transforms.surface import SurfaceTransformOps  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.graph.utils import GraphUtils  # noqa: TC001 (pydantic req'd)
 from neuromaps_prime.transforms.utils import validate_volume_file
 from neuromaps_prime.transforms.volume import (
