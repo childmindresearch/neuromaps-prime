@@ -21,6 +21,8 @@ and specialized tools for NHP-specific analyses.
 Data currently included in the Neuromaps-PRIME graph:
 <img src=".github/neuromaps-graph.svg" align="center" width="100%"/>
 
+For the annotation files and their naming convention, see the [resources README](src/neuromaps_prime/resources/README.md). To add your own local or private data to the graph, see the [data guide](src/neuromaps_prime/resources/GUIDE.md).
+
 ## Installation
 
 To install the latest stable release version from PyPI, run:
