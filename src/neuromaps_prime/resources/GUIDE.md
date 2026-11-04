@@ -158,7 +158,7 @@ Then check that the files resolve:
 ```python
 node = graph.get_node_data("BigMac")
 for atlas in node.volumes:
-    print(atlas.name, atlas.fetch())      # raises FileNotFoundError if the path is wrong
+    print(atlas.name, atlas.fetch())  # raises FileNotFoundError if the path is wrong
 for annot in node.volume_annotations:
     print(annot.name, annot.fetch())
 ```
