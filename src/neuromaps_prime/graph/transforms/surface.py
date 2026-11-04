@@ -39,7 +39,27 @@ if TYPE_CHECKING:
 
 # Experimental transformations that should throw a warning; only need to list one way
 EXPERIMENTAL_XFMS: list[tuple[list[str], str | None]] = [
-    (["NMT2Sym", "MBM"], "macaque_marmoset")
+    (["NMT2Sym", "MBM"], "macaque_marmoset"),
+    (["CIVETNMT", "D99"], "RheMAPSurf"),
+    (["CIVETNMT", "MEBRAINS"], "RheMAPSurf"),
+    (["CIVETNMT", "NMT2Sym"], "RheMAPSurf"),
+    (["CIVETNMT", "NMT2Asym"], "RheMAPSurf"),
+    (["CIVETNMT", "Yerkes19"], "RheMAPSurf"),
+    (["MEBRAINS", "D99"], "RheMAPSurf"),
+    (["CIVETNMT", "D99"], "RheMAPSurf"),
+    (["NMT2Asym", "D99"], "RheMAPSurf"),
+    (["Yerkes19", "D99"], "RheMAPSurf"),
+    (["CIVETNMT", "MEBRAINS"], "RheMAPSurf"),
+    (["MEBRAINS", "NMT2Sym"], "RheMAPSurf"),
+    (["MEBRAINS", "NMT2Asym"], "RheMAPSurf"),
+    (["MEBRAINS", "Yerkes19"], "RheMAPSurf"),
+    (["NMT2Sym", "D99"], "RheMAPSurf"),
+    (["NMT2Sym", "MEBRAINS"], "RheMAPSurf"),
+    (["NMT2Sym", "NMT2Asym"], "RheMAPSurf"),
+    (["NMT2Sym", "Yerkes19"], "RheMAPSurf"),
+    (["NMT2Asym", "MEBRAINS"], "RheMAPSurf"),
+    (["NMT2Asym", "Yerkes19"], "RheMAPSurf"),
+    (["Yerkes19", "F99"], "RheMAPSurf")
 ]
 
 

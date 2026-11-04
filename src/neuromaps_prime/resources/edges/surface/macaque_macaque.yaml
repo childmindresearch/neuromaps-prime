@@ -605,7 +605,7 @@
 - from: F99
   to: Yerkes19
   surfaces:
-    BALSA_F99_Yerkes19:
+    RheMAPSurf:
       74k:
         sphere:
           left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/F99/src-F99_den-74k_hemi-L_sphere.surf.gii
@@ -623,7 +623,7 @@
 - from: Yerkes19
   to: F99
   surfaces:
-    BALSA_F99_Yerkes19:
+    RheMAPSurf:
       74k:
         sphere:
           left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
