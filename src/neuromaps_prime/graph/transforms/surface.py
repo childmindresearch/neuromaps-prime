@@ -63,7 +63,7 @@ EXPERIMENTAL_XFMS: list[tuple[list[str], str | None]] = [
     (["NMT2Sym", "MBM"], "NeuromapsPRIME"),
     (["Yerkes19", "Yerkes29"], "cortical_geometry"),
     (["fsLR", "Yerkes29"], "cortical_geometry"),
-    (["fsLR", "Yerkes19"], "cortical_geometry")
+    (["fsLR", "Yerkes19"], "cortical_geometry"),
 ]
 
 

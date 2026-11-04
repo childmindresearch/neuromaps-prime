@@ -295,16 +295,6 @@ Yerkes19:
             url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
           notes:
           - FreeSurfer mean curvature computed on the supplied white surface, with template-specific smoothing.
-        PC_Yeo7Networks:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0
-          notes:
-          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey.
-          - From MacaqueYerkes19 v1.2.
-        PC_Yeo7Networks:
-          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0
-          notes:
-          - Yeo2011 7 Network parcellation (N=1000). Transformed from human to macaque.
-          - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a3d0d28dc642a7afe5'
         PC_Julich:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f50174012993bc0e3a12f
           references:
