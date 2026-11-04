@@ -5,7 +5,7 @@ CIVET:
   species: human
   description: CIVET Human Template
   references:
-  - citation: Lepage, C., et al. 2017. Organization for Human Brain Mapping
+  - citation: Lepage, C, et al. 2017. Organization for Human Brain Mapping
   surfaces:
     41k:
       sphere:
@@ -27,25 +27,18 @@ CIVET:
           references:
           - citation: Reardon, PK, et al. 2018. Science, 360(6390):1221–1226
             doi: 10.1126/science.aar2578
-          notes:
-          - Reardon 2018 scalinghcp
         RM_scalingnih:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ffd5af610c0216dfe093
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ffe24e5ee5021829148a
           references:
           - citation: Reardon, PK, et al. 2018. Science, 360(6390):1221–1226
             doi: 10.1126/science.aar2578
-          notes:
-          - Reardon 2018 RM_scalingnih
         RM_scalingpnc:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130ffedab8bca0225edc80c
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6130fff94e5ee502182914c1
           references:
           - citation: Reardon, PK, et al. 2018. Science, 360(6390):1221–1226
             doi: 10.1126/science.aar2578
-          notes:
-          - Reardon 2018 RM_scalingpnc
-
     164k:
       sphere:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f348c2575abdbd829ac5

@@ -205,7 +205,9 @@ class TestPermtestMetric:
         x, y = random_vectors
         result1 = stats.permtest_metric(x, y, seed=42)
         result2 = stats.permtest_metric(x, y, seed=42)
-        assert result1 == pytest.approx(result2)
+        assert result1.similarity == pytest.approx(result2.similarity)
+        assert result1.pvalue == pytest.approx(result2.pvalue)
+        assert result1.nulls == pytest.approx(result2.nulls)
 
     def test_return_null_distribution(
         self, random_vectors: tuple[np.ndarray, np.ndarray]

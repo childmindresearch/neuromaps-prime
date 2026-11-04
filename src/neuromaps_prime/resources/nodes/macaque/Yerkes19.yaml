@@ -31,7 +31,7 @@ Yerkes19:
           - citation: Xu, T, et al. 2020. NeuroImage, 223:117346.
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
-          - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey.
+          - Yeo2011 7 Network parcellation (N=1000). Transformed from human to macaque.
           - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a680941e7c8fa7ad49'
           - 'right lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a34572881301679ab8'
         PC_Yeo17Networks:
@@ -41,7 +41,7 @@ Yerkes19:
           - citation: Xu, T, et al. 2020. NeuroImage, 223:117346.
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
-          - Yeo2011 17 Network parcellation (N=1000). Human-to-monkey.
+          - Yeo2011 17 Network parcellation (N=1000). Transformed from human to macaque.
         PC_Markov:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a37da771710ca7abbd
           right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a580941e7c8fa7ad47
@@ -65,7 +65,7 @@ Yerkes19:
           - citation: Xu, T, et al. 2020. NeuroImage, 223:117346.
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
-          - Glasser 2016 multi-modal parcellation. Human-to-monkey.
+          - Glasser 2016 multi-modal parcellation. Transformed from human to macaque.
         PC_Brodmann09:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905309bf55aeca1f9300ef
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a90530a441f17df1392feeb
@@ -73,7 +73,7 @@ Yerkes19:
           - citation: Xu, T, et al. 2020. NeuroImage, 223:117346.
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
-          - Brodmann 1909 areal parcellation. Human-to-monkey.
+          - Brodmann 1909 areal parcellation. Transformed from human to macaque.
         PC_Schaefer7Networks_100:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bbb71614316345a7577
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a905bba79a37b24f6374aa8
@@ -210,8 +210,6 @@ Yerkes19:
             doi: 10.1016/j.neuroimage.2020.117346
           notes:
           - Functional connectivity homology index. Cross-species similarity of FC gradient profiles; high in sensory, low in association cortex.
-        
-        
     32k:
       sphere:
         left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
@@ -271,6 +269,7 @@ Yerkes19:
           - citation: Donahue, CJ, et al. 2018. Proceedings of the National Academy of Sciences, 115(22):E5183–E5192
             doi: 10.1073/pnas.1721653115
           notes:
+          - Smoothed myelin map (bias corrected). From MacaqueYerkes19 v1.2.
           - Cortical thickness. MacaqueYerkes19 v1.2.
         CT_RheMAPSurf:
           left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_thickness.shape.gii
@@ -300,6 +299,11 @@ Yerkes19:
           left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0
           notes:
           - Yeo2011 7 Network parcellation (N=1000). Human-to-monkey.
+          - From MacaqueYerkes19 v1.2.
+        PC_Yeo7Networks:
+          left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a77da771710ca7abc0
+          notes:
+          - Yeo2011 7 Network parcellation (N=1000). Transformed from human to macaque.
           - 'left lookup file: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f52a3d0d28dc642a7afe5'
         PC_Julich:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f50174012993bc0e3a12f
@@ -314,8 +318,6 @@ Yerkes19:
           references:
           - citation: Collins, CE, et al. 2010. Proceedings of the National Academy of Sciences, 107(36):15927–15932
             doi: 10.1073/pnas.1010356107
-          notes:
-          - Neuron density.
         CH:
           left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a8f47bcc14e371e50e3a122
           references:

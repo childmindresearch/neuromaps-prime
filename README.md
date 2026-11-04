@@ -21,6 +21,8 @@ and specialized tools for NHP-specific analyses.
 Data currently included in the Neuromaps-PRIME graph:
 <img src=".github/neuromaps-graph.svg" align="center" width="100%"/>
 
+For the annotation files and their naming convention, see the [resources README](src/neuromaps_prime/resources/README.md). To add your own local or private data to the graph, see the [data guide](src/neuromaps_prime/resources/GUIDE.md).
+
 ## Installation
 
 To install the latest stable release version from PyPI, run:
@@ -39,8 +41,9 @@ pip install git+https://github.com/childmindresearch/neuromaps-prime
 
 ## Examples
 
-See the [`examples/`](https://github.com/childmindresearch/neuromaps-prime/tree/main/examples) directory for sample scripts:
+See the [`examples/`](https://github.com/childmindresearch/neuromaps-prime/tree/main/examples) directory for sample scripts and tutorials. Below are some examples that may be helpful:
 
+- [`neuromaps_prime_tutorial.ipynb`](https://github.com/childmindresearch/neuromaps-prime/tree/main/examples/neuromaps_prime_tutorial.ipynb) - tutorial for exploring and learning neuromaps-prime
 - [`example_graph_init.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_graph_init.py) — graph inspection and plotting
 - [`example_surface_transform.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_surface_transform.py) — surface-to-surface resampling and surface-to-volume projection
 - [`example_volume_transform.py`](https://raw.githubusercontent.com/childmindresearch/neuromaps-prime/refs/heads/main/examples/example_volume_transform.py) — volume-to-volume warping and volume-to-surface projection

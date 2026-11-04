@@ -2,7 +2,7 @@ F99:
   species: macaque
   description: F99 Macaque Atlas
   references:
-  - citation: Van Essen, D.C., 2002. Ann N Y Acad Sci. 978, 468-479.
+  - citation: Van Essen, DC. 2002. Ann N Y Acad Sci. 978, 468-479.
     doi: 10.1111/j.1749-6632.2002.tb07588.x
   - citation: 'BALSA: Macaque Cortical Parcellations and Yerkes19 MRI-based Atlas.'
     url: https://balsa.wustl.edu/reference/show/976nz
@@ -174,7 +174,7 @@ F99:
           - citation: Warrington, S, et al. 2020. NeuroImage.
             doi: 10.1016/j.neuroimage.2020.116923
           notes:
-          - Inferior Fronto-Occipital R tract probability map (XTRACT). 
+          - Inferior Fronto-Occipital R tract probability map (XTRACT).
         WMT_ilf_L:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a98377cf0964917a32a9d43
           references:

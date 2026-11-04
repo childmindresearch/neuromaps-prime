@@ -31,8 +31,7 @@ fsaverage:
           - citation: Markello, RD, et al. 2021. eLife, 10:e72129
             doi: 10.7554/eLife.72129
           notes:
-          - Abagen Gene PC1
-
+          - from Abagen
     164k:
       sphere:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a15f3784a4fb9e964cc78b5
@@ -53,41 +52,30 @@ fsaverage:
           references:
           - citation: Beliveau, V, et al. 2017. Journal of Neuroscience, 37(1):120–128
             doi: 10.1523/JNEUROSCI.2830-16.2016
-          notes:
-          - Beliveau 2017 AZ10419369
         RM_cimbi36:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543bf228a5a18987bc2c1
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543cdc86e2818da88f9e7
           references:
           - citation: Beliveau, V, et al. 2017. Journal of Neuroscience, 37(1):120–128
             doi: 10.1523/JNEUROSCI.2830-16.2016
-          notes:
-          - Beliveau 2017 cimbi36
         RM_cumi101:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543ea1daa6b183975935a
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638543dbc86e2818d988f7ea
           references:
           - citation: Beliveau, V, et al. 2017. Journal of Neuroscience, 37(1):120–128
             doi: 10.1523/JNEUROSCI.2830-16.2016
-          notes:
-          - Beliveau 2017 cumi101
-
         RM_dasb:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/63854394228a5a18987bc26e
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/63854385c86e2818da88f94b
           references:
           - citation: Beliveau, V, et al. 2017. Journal of Neuroscience, 37(1):120–128
             doi: 10.1523/JNEUROSCI.2830-16.2016
-          notes:
-          - Beliveau 2017 dasb
         RM_sb207145:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638542c2c86e2818d588f461
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638542b2a98e5f1ac2103866
           references:
           - citation: Beliveau, V, et al. 2017. Journal of Neuroscience, 37(1):120–128
             doi: 10.1523/JNEUROSCI.2830-16.2016
-          notes:
-          - Beliveau 2017 sb207145
         RM_norgaard_flumazenil:
           left: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/638553fe228a5a18d67bcac8
           right: https://files.osf.io/v1/resources/4mw3a/providers/osfstorage/6385540d228a5a18d67bcadd

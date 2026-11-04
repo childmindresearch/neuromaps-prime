@@ -2,20 +2,19 @@ name: Python Tests
 
 permissions:
   contents: read
-  pull-requests: write
 
 on:
   push:
     branches:
     - main
-  pull_request_target:
+  pull_request:
 
 jobs:
   unit:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
-    - uses: astral-sh/setup-uv@v10.2.0
+    - uses: astral-sh/setup-uv@v10.3.3
     - run: uv sync --group tests --frozen
     - name: Run tests
       run: >
@@ -26,18 +25,24 @@ jobs:
           --cov=src \
           --log-level=DEBUG \
           --verbose tests
-    - name: Coverage comment
+    - name: Record PR number
       if: github.event_name == 'pull_request'
-      uses: MishaKav/pytest-coverage-comment@v1.12.2
+      run: echo "${{ github.event.pull_request.number }}" > pr_number.txt
+    - name: Upload coverage reports
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v7.0.2
       with:
-        pytest-xml-coverage-path: ./coverage.xml
-        junitxml-path: ./pytest.xml
+        name: coverage-reports
+        path: |
+          coverage.xml
+          pytest.xml
+          pr_number.txt
 
   ruff:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
-    - uses: astral-sh/setup-uv@v10.2.0
+    - uses: astral-sh/setup-uv@v10.3.3
     - run: uv sync --only-dev
     - name: Ruff format
       run: uv run ruff format --check
@@ -48,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
-    - uses: astral-sh/setup-uv@v10.2.0
+    - uses: astral-sh/setup-uv@v10.3.3
     - run: uv sync --only-dev
     - run: uv run mypy ./src
 
@@ -56,6 +61,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
-    - uses: astral-sh/setup-uv@v10.2.0
+    - uses: astral-sh/setup-uv@v10.3.3
     - run: uv sync --only-dev
     - run: uv run deptry ./src

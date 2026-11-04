@@ -2,6 +2,8 @@
 
 This document describes the annotation files and the naming convention used to identify them across the dataset.
 
+To add your own local or private data to the graph, see the [data guide](GUIDE.md).
+
 ---
 
 ## Naming Convention
@@ -36,7 +38,7 @@ src-{space}_res-{res}mm_desc-{annotationCode}_annot.{extension}
 
 ## Annotation Type Codes
 
-These codes appear after `desc-` in the filename and indicate the kind of data stored in the file. 
+These codes appear after `desc-` in the filename and indicate the kind of data stored in the file.
 
 | Code | Annotation Type | Description |
 | :--- | :--- | :--- |
@@ -70,7 +72,7 @@ The `subLabelCode-subLabel` portion of the filename identifies the specific sour
 
 ### File Naming Examples
 
-* **Surface File:**  
+* **Surface File:**\
   `src-Yerkes19_den-10k_hemi-L_atlas-Yeo7Networks_desc-PC_annot.label.gii`
   * **Space:** Yerkes19
   * **Density:** 10k vertices
@@ -78,7 +80,7 @@ The `subLabelCode-subLabel` portion of the filename identifies the specific sour
   * **Atlas:** Yeo7Networks
   * **Annotation Type:** Parcellation (`PC`)
 
-* **Volume File:**  
+* **Volume File:**\
   `src-NCBR_res-0p40mm_desc-T1w_mask.nii`
   * **Space:** NCBR
   * **Resolution:** 0.40mm resolution

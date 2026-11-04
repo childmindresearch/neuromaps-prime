@@ -2,7 +2,7 @@ D99:
   species: macaque
   description: D99 Macaque Atlas. Surfaces from RheMAPSurf
   references:
-  - citation: Saleem KS, et al. 2021. Neuroimage. 245:118759.
+  - citation: Saleem, KS, et al. 2021. Neuroimage. 245:118759.
     doi: 10.1016/j.neuroimage.2021.118759
   - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
     url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6

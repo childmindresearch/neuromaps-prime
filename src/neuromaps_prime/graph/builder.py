@@ -322,7 +322,7 @@ class GraphBuilder(BaseModel):
                 transform_refs = None
 
             for density, types in density_dict.items():
-                if density == "references":
+                if density in ("notes", "references"):
                     continue
                 for surf_type, hemispheres in types.items():
                     if surf_type == "annotation":
@@ -390,7 +390,7 @@ class GraphBuilder(BaseModel):
                 resolution_dict = {outer_key: outer_val}
 
             for res, types in resolution_dict.items():
-                if res == "references":
+                if res in ("notes", "references"):
                     continue
                 for vol_type, vol_value in types.items():
                     if vol_type == "annotation":

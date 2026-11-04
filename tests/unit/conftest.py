@@ -78,7 +78,7 @@ def _rewrite_edge_surfaces(
 ) -> None:
     for provider, density_dict in surfaces.items():
         for density, types in density_dict.items():
-            if density == "references":
+            if density in ("notes", "references"):
                 continue
             for surf_type, hemis in types.items():
                 for hemi in list(hemis):
