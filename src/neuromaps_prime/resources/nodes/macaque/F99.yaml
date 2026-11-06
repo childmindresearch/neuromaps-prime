@@ -25,8 +25,8 @@ F99:
           - XTRACT macaque connectivity blueprint. Cohort-averaged over 6 macaques.
     74k:
       sphere:
-        left: todo
-        right: todo
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6aee3f286dcd5ead23ca3425
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6aee3f216ee329eac5e2c353
       midthickness:
         left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/F99/src-F99_den-74k_hemi-L_midthickness.surf.gii
         right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/F99/src-F99_den-74k_hemi-R_midthickness.surf.gii
