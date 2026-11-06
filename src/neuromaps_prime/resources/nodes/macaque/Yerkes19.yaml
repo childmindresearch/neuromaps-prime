@@ -212,8 +212,8 @@ Yerkes19:
           - Functional connectivity homology index. Cross-species similarity of FC gradient profiles; high in sensory, low in association cortex.
     32k:
       sphere:
-        left: 6a0f54791541aee377a7b0c8
-        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_sphere.surf.gii
+        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f54791541aee377a7b0c8
+        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d5226aab76e18c73904446
       midthickness:
         left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_midthickness.surf.gii
         right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_midthickness.surf.gii
