@@ -23,7 +23,7 @@ D99:
       annotation:
         CV:
           left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/D99/src-D99_den-41k_hemi-L_curvature.shape.gii
-          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/D99/D99/src-D99_den-41k_hemi-R_curvature.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/D99/src-D99_den-41k_hemi-R_curvature.shape.gii
           references:
           - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
             url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
