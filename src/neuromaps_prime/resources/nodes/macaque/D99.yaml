@@ -18,8 +18,8 @@ D99:
         left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/D99/src-D99_den-41k_hemi-L_sphere.surf.gii
         right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/D99/src-D99_den-41k_hemi-R_sphere.surf.gii
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d52303cc9143f354902958/surfaces/D99/src-D99_den-41k_hemi-L_white.surf.gii
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523022882bdb2bc3ebdee/surfaces/D99/src-D99_den-41k_hemi-R_white.surf.gii
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/D99/src-D99_den-41k_hemi-L_white.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/D99/src-D99_den-41k_hemi-R_white.surf.gii
       annotation:
         CV:
           left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/D99/src-D99_den-41k_hemi-L_curvature.shape.gii
