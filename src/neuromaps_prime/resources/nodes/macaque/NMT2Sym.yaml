@@ -47,7 +47,7 @@ NMT2Sym:
             doi: 10.1016/j.neuroimage.2021.117997
         SD_RheMAPSurf:
           left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sulc.shape.gii
-          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sulc.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sulc.shape.gii
           references:
           - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
             url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
