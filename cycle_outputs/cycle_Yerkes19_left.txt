@@ -1,0 +1,8 @@
+Cycle test results — origin: Yerkes19, hemisphere: left
+--------------------------------------------------------------
+Transformation path           Hops   Pearson r     Max |delta|
+--------------------------------------------------------------
+Yerkes19 -> fsLR -> Yerkes19     2    0.999961       1.024e+04
+--------------------------------------------------------------
+Total cycles: 1
+Mean Pearson r: 0.999961

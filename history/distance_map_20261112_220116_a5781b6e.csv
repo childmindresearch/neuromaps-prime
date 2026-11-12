@@ -1,0 +1,9 @@
+seed,scope,hemisphere,mean_pearson_r
+caudal,connected,left,0.8832598143758904
+lateral,connected,left,0.664069740376694
+dorsal,connected,left,0.8600171169040778
+all,connected,left,0.8024488905522207
+caudal,direct,left,0.78118118483159
+lateral,direct,left,0.4083483804412065
+dorsal,direct,left,0.8574290645453876
+all,direct,left,0.6823195432727281

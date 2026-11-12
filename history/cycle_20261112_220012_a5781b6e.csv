@@ -1,0 +1,11 @@
+origin,species,hemisphere,mean_pearson_r
+all,all,left,0.9992043327586122
+all,all,right,0.9992508865335941
+NCBR,chimpanzee,left,0.9987461152149381
+NCBR,chimpanzee,right,0.9987467386923522
+fsLR,human,left,0.9999702915779698
+fsLR,human,right,0.9999696118329516
+fsaverage,human,left,0.9981396324013404
+fsaverage,human,right,0.9983379056786036
+Yerkes19,macaque,left,0.9999612918402004
+Yerkes19,macaque,right,0.9999492899304689
