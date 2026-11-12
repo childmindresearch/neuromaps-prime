@@ -57,6 +57,17 @@ jobs:
           --log-level=DEBUG \
           --verbose
 
+    - name: Run regression tests with experimental transforms
+      shell: bash
+      run: |
+        uv run pytest tests/regression/ \
+          -n 8 \
+          --runner=podman \
+          --include-experimental \
+          --durations=0 \
+          --log-level=DEBUG \
+          --verbose
+
     - name: Locate cycle run summary CSV
       id: summary
       if: success()
