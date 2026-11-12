@@ -32,7 +32,10 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 
 @pytest.fixture(scope="class")
 def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
-    """Load the real transformation graph, experimental transforms optional."""
+    """Load the real transformation graph, excluding experimental transforms by default.
+
+    Experimental transforms are included when ``--include-experimental`` is set.
+    """
     runner = request.config.getoption("--runner").lower()
     graph = NeuromapsGraph(runner=runner)
 
