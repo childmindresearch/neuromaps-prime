@@ -15,11 +15,29 @@ from neuromaps_prime.graph import NeuromapsGraph
 from neuromaps_prime.graph.transforms.surface import EXPERIMENTAL_XFMS
 
 
+def pytest_addoption(parser: pytest.Parser) -> None:
+    """Register options for configuring regression test behaviour.
+
+    The ``--include-experimental`` flag enables experimental surface
+    transformations in regression tests. By default, experimental
+    transformations are excluded.
+    """
+    parser.addoption(
+        "--include-experimental",
+        action="store_true",
+        default=False,
+        help="Include experimental transforms in regression tests.",
+    )
+
+
 @pytest.fixture(scope="class")
 def graph(request: pytest.FixtureRequest) -> NeuromapsGraph:
-    """Load the real transformation graph without experimental transforms."""
+    """Load the real transformation graph, experimental transforms optional."""
     runner = request.config.getoption("--runner").lower()
     graph = NeuromapsGraph(runner=runner)
+
+    if request.config.getoption("--include-experimental"):
+        return graph
 
     experimental_transforms = {
         (source, target, provider)
