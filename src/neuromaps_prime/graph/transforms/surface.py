@@ -7,6 +7,7 @@ transformations. All resource lookups go through GraphCache directly.
 from __future__ import annotations
 
 import logging
+from itertools import pairwise
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -395,7 +396,11 @@ class SurfaceTransformOps(BaseModel):
 
         # Throw experimental warnings if following transformations encountered
         self._experimental_warn(
-            paths=space_path, spaces=self.experimental_xfms, provider=provider
+            paths=space_path,
+            density=density,
+            hemisphere=hemisphere,
+            spaces=self.experimental_xfms,
+            provider=provider,
         )
 
         if len(space_path) == 2:
@@ -719,18 +724,26 @@ class SurfaceTransformOps(BaseModel):
     def _experimental_warn(
         self,
         paths: list[str],
+        density: str,
+        hemisphere: Literal["left", "right"],
         *,
         spaces: Sequence[tuple[Sequence[str], str | None]] | None = None,
         provider: str | None = None,
     ) -> None:
-        """Warn if any experimental transform space matches a transform path.
+        """Warn if an experimental transform is actually used along a path.
+
+        The provider applied for each hop is resolved through the cache (same
+        fallback as :meth:`GraphCache.get_surface_transform`), so a
+        non-experimental default transform does not trigger a false positive.
 
         Args:
             paths: Transform paths to check.
+            density: Surface mesh density, used to resolve the applied provider.
+            hemisphere: Hemisphere, used to resolve the applied provider.
             spaces: Experimental transform paths paired with an optional
                 provider. A space with provider ``None`` applies to all
                 providers.
-            provider: Provider to filter spaces by. ``None`` skips filtering.
+            provider: Requested provider. ``None`` uses the cache default.
         """
         if not spaces:
             return
@@ -739,24 +752,39 @@ class SurfaceTransformOps(BaseModel):
         sep_paths = f"{sep}{sep.join(paths)}{sep}"
 
         for space, experimental_provider in spaces:
-            if (
-                provider is not None
-                and experimental_provider is not None
-                and experimental_provider != provider
-            ):
-                continue
-
             space = tuple(space)
-            fwd = f"{sep}{sep.join(space)}{sep}"
-            if fwd in sep_paths:
-                self._logger.warning(
-                    "Experimental transformation found: %s", " -> ".join(space)
-                )
+            if f"{sep}{sep.join(space)}{sep}" in sep_paths:
+                ordered = space
+            elif f"{sep}{sep.join(reversed(space))}{sep}" in sep_paths:
+                ordered = tuple(reversed(space))
+            else:
                 continue
 
-            rev = f"{sep}{sep.join(reversed(space))}{sep}"
-            if rev in sep_paths:
+            if experimental_provider is None or self._applies_provider(
+                ordered, experimental_provider, density, hemisphere, provider
+            ):
                 self._logger.warning(
-                    "Experimental transformation found: %s",
-                    " -> ".join(reversed(space)),
+                    "Experimental transformation found: %s", " -> ".join(ordered)
                 )
+
+    def _applies_provider(
+        self,
+        space: Sequence[str],
+        target_provider: str,
+        density: str,
+        hemisphere: Literal["left", "right"],
+        provider: str | None,
+    ) -> bool:
+        """Return whether any hop along *space* resolves to *target_provider*."""
+        for src, tgt in pairwise(space):
+            applied = self.cache.get_surface_transform(
+                source=src,
+                target=tgt,
+                density=density,
+                hemisphere=hemisphere,
+                resource_type="sphere",
+                provider=provider,
+            )
+            if applied is not None and applied.provider == target_provider:
+                return True
+        return False
