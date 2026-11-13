@@ -174,6 +174,7 @@ class TestSurfaceToSurfaceTransformPrivate:
     def test_single_hop(self, mock_graph: NeuromapsGraph) -> None:
         """Test single-hop surface transformation."""
         mock_result = MagicMock(spec=models.SurfaceTransform)
+        mock_result.provider = "default"
         mock_graph.surface_ops.cache.get_surface_transform = MagicMock(
             return_value=mock_result
         )
@@ -186,8 +187,64 @@ class TestSurfaceToSurfaceTransformPrivate:
             space_path=["Yerkes19", "fsLR"],
             add_edge=False,
         )
-        mock_graph.surface_ops.cache.get_surface_transform.assert_called_once()
+        mock_graph.surface_ops.cache.get_surface_transform.assert_called_with(
+            source="Yerkes19",
+            target="fsLR",
+            density="32k",
+            hemisphere="right",
+            resource_type="sphere",
+            provider=None,
+        )
         assert out is mock_result
+
+    @pytest.mark.parametrize(
+        ("applied", "requested", "warns"),
+        [
+            ("cortical_geometry", None, True),
+            ("other", None, False),
+            ("other", "cortical_geometry", False),
+            ("cortical_geometry", "cortical_geometry", True),
+        ],
+    )
+    def test_experimental_warn_uses_applied_provider(
+        self,
+        mock_graph: NeuromapsGraph,
+        caplog: pytest.LogCaptureFixture,
+        applied: str,
+        requested: str | None,
+        *,
+        warns: bool,
+    ) -> None:
+        """Warn only when the provider actually applied is experimental."""
+        ops = mock_graph.surface_ops
+        ops.cache.get_surface_transform = MagicMock(
+            return_value=MagicMock(provider=applied)
+        )
+        with caplog.at_level("WARNING", logger="neuromaps-PRIME"):
+            ops._experimental_warn(
+                ["fsLR", "Yerkes19"],
+                "32k",
+                "left",
+                spaces=[(["Yerkes19", "fsLR"], "cortical_geometry")],
+                provider=requested,
+            )
+        assert ("Experimental transformation found" in caplog.text) is warns
+
+    def test_experimental_warn_provider_none_always_warns(
+        self, mock_graph: NeuromapsGraph, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """An experimental entry without provider warns without cache lookup."""
+        ops = mock_graph.surface_ops
+        ops.cache.get_surface_transform = MagicMock()
+        with caplog.at_level("WARNING", logger="neuromaps-PRIME"):
+            ops._experimental_warn(
+                ["fsLR", "Yerkes19"],
+                "32k",
+                "left",
+                spaces=[(["Yerkes19", "fsLR"], None)],
+            )
+        assert "Experimental transformation found" in caplog.text
+        ops.cache.get_surface_transform.assert_not_called()
 
     def test_multi_hop(self, mock_graph: NeuromapsGraph) -> None:
         """Test multi-hop path surface transformation."""
