@@ -4,6 +4,14 @@ F99:
   references:
   - citation: Van Essen, DC. 2002. Ann N Y Acad Sci. 978, 468-479.
     doi: 10.1111/j.1749-6632.2002.tb07588.x
+  - citation: 'BALSA: Macaque Cortical Parcellations and Yerkes19 MRI-based Atlas.'
+    url: https://balsa.wustl.edu/reference/show/976nz
+  - citation: Donahue, C. J., et al. 2016. Journal of Neuroscience.
+    doi: 10.1523/JNEUROSCI.0493-16.2016
+  - citation: Donahue, C. J., et al. 2018. PNAS.
+    doi: 10.1073/pnas.1721653115
+  - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+    url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
   surfaces:
     32k:
       annotation:
@@ -15,7 +23,14 @@ F99:
             doi: 10.1016/j.neuroimage.2020.116923
           notes:
           - XTRACT macaque connectivity blueprint. Cohort-averaged over 6 macaques.
-
+    74k:
+      sphere:
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6aee3f286dcd5ead23ca3425
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6aee3f216ee329eac5e2c353
+      midthickness:
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/F99/src-F99_den-74k_hemi-L_midthickness.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/F99/src-F99_den-74k_hemi-R_midthickness.surf.gii
+  
   volumes:
     500um:
       T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6abc28e9863d30347939e097
