@@ -53,14 +53,6 @@ jobs:
         uv run pytest \
           -n 8 \
           --runner=podman \
-          --ignore=tests/regression \
-          --durations=0 \
-          --log-level=DEBUG \
-          --verbose
-
-        uv run pytest tests/regression/ \
-          -n 8 \
-          --runner=podman \
           --include-experimental \
           --durations=0 \
           --log-level=DEBUG \
