@@ -378,14 +378,18 @@ class TestCycleRoundtrip:
     @pytest.fixture(scope="class")
     @classmethod
     def cycle_run(
-        cls, graph: NeuromapsGraph, tmp_path_factory: pytest.TempPathFactory
+        cls,
+        graph: NeuromapsGraph,
+        tmp_path_factory: pytest.TempPathFactory,
+        request: pytest.FixtureRequest,
     ) -> CycleRunResult:
         """Execute every cycle once and record this run's artifacts."""
         output_dir = _resolve_output_dir(tmp_path_factory.getbasetemp())
 
         logger.info("Cycle outputs will be written to: %s", output_dir)
 
-        _assert_no_experimental_transforms(graph)
+        if not request.config.getoption("--include-experimental"):
+            _assert_no_experimental_transforms(graph)
 
         origins = sorted(graph.nodes)
 
