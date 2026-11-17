@@ -5,6 +5,46 @@ NenckiMonash:
     39k:
       midthickness:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2ad36777f4a86d2148f4a5
+      annotation:
+        CT:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6af77f992a58deac980f02cd
+          references:
+          - citation: Majka, P, et al. 2020. NeuroImage. 226:117625.
+            doi: 10.1016/j.neuroimage.2020.117625
+        PC_Paxinos2012:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6af77f76268635994d0f02a3
+          references:
+          - citation: Majka, P, et al. 2020. NeuroImage. 226:117625.
+            doi: 10.1016/j.neuroimage.2020.117625
+          notes:
+          - Surface projection of the maximum-probability segmentation into the cortical areas of Paxinos et al. 2012.
+          - 'lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6af77f739784ee22c4a8862a'
   volumes:
     50um:
       T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c9f406cd2b941c3d90cb1
+      annotation:
+        PC_Paxinos2012:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6af77f741d0306e8c5a886d1
+          references:
+          - citation: Majka, P, et al. 2020. NeuroImage. 226:117625.
+            doi: 10.1016/j.neuroimage.2020.117625
+          notes:
+          - Maximum-probability segmentation into the 116 cortical areas of Paxinos et al. (2012).
+          - 'lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6af77f739784ee22c4a8862a'
+        CT:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6af77f9b268635994d0f02d4
+          references:
+          - citation: Majka, P, et al. 2020. NeuroImage. 226:117625.
+            doi: 10.1016/j.neuroimage.2020.117625
+        CT_normalized:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6af77f9b4bb46c6d40a884f5
+          references:
+          - citation: Majka, P, et al. 2020. NeuroImage. 226:117625.
+            doi: 10.1016/j.neuroimage.2020.117625
+          notes:
+          - Normalized cortical thickness (0 to 1), the relative depth within the cortex from the pial surface (0) to the white matter boundary (1).
+        CD:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6af77f90268635994d0f02ca
+          references:
+          - citation: Majka, P, et al. 2020. NeuroImage. 226:117625.
+            doi: 10.1016/j.neuroimage.2020.117625
