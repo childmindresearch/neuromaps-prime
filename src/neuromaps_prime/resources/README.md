@@ -45,6 +45,7 @@ These codes appear after `desc-` in the filename and indicate the kind of data s
 | **AE** | Area Expansion | Relative surface area expansion. |
 | **BM** | Brain Masks | Binary or probabilistic maps defining which surface vertices or voxels correspond to valid cortical tissue (used for masking and analysis inclusion; volumes (`.nii.gz` files) use the `mask` suffix). |
 | **CB** | Connectivity Blueprint | Vertex-by-tract matrix summarizing each cortical location's structural connectivity fingerprint across white matter tracts.
+| **CD** | Conrtical Depth | Voxel-wise distance from the pial surface, measured along the cortical streamline toward the white matter boundary.
 | **CH** | Cortical Hierarchy | Anatomical cortical hierarchy estimates (e.g., hierarchy indices complementing intrinsic timescales). |
 | **CT** | Cortical Thickness | Vertex-wise estimates of the distance between the white matter and pial surfaces, reflecting local cortical thickness. |
 | **CV** | Curvature | Vertex-wise measures of cortical surface geometry (e.g., mean or Gaussian curvature) indicating gyral and sulcal folding patterns. |
