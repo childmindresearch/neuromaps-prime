@@ -1,0 +1,43 @@
+BMA2:
+  species: marmoset
+  description: Brain/MINDS Marmoset Brain Atlas 2.0 (BMA 2.0)
+  references:
+  - citation: Gong, R, et al. 2026. Scientific Data. 13:274.
+    doi: 10.1038/s41597-026-06601-z
+  surfaces:
+    167k:
+      midthickness:
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc7b6f9dc58f1076bd90d
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc7b2efacd1d4565571de
+      white:
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc7b6efacd1d4565571e7
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc7b443d3f47a65557227
+      pial:
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc7b3012ee29665ba2ea2
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc7b643d3f47a65557229
+      annotation:
+        PC_BMA2:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc856f651d2a7547f790a
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc855b7a21027376bd970
+          references:
+          - citation: Gong, R, et al. 2026. Scientific Data. 13:274.
+            doi: 10.1038/s41597-026-06601-z
+  volumes:
+    100um:
+      T2w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc819b695fb9e3e7f78e0
+      annotation:
+        PC_BMA2:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc80ba29cb842c37f793e
+          references:
+          - citation: Gong, R, et al. 2026. Scientific Data. 13:274.
+            doi: 10.1038/s41597-026-06601-z
+        MM:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc7ee1870d90a3cc3d9bd
+          references:
+          - citation: Gong, R, et al. 2026. Scientific Data. 13:274.
+            doi: 10.1038/s41597-026-06601-z
+        ND_nissl:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afe0b4987e37828acba2ecd
+          references:
+          - citation: Gong, R, et al. 2026. Scientific Data. 13:274.
+            doi: 10.1038/s41597-026-06601-z

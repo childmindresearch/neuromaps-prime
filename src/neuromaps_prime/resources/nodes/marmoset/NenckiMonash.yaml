@@ -21,7 +21,7 @@ NenckiMonash:
           - 'lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6af77f739784ee22c4a8862a'
   volumes:
     50um:
-      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a7c9f406cd2b941c3d90cb1
+      Nissl: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6af77fac22898a6aaf0f0406?view_only=b214f40525fe44b5bea3103478d08d0d
       annotation:
         PC_Paxinos2012:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6af77f741d0306e8c5a886d1
