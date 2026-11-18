@@ -58,12 +58,12 @@ These codes appear after `desc-` in the filename and indicate the kind of data s
 | **MM** | Myelin Maps | Vertex-wise estimates of cortical myelin content, commonly derived from MRI contrasts such as T1w/T2w ratio and reflecting intracortical myelination. |
 | **ND** | Neuron Density | Quantitative spatial distribution and estimates of neuronal density across cortical areas. |
 | **PC** | Parcellations | Discrete atlas-based assignments mapping each surface vertex or voxel to a labeled cortical region, often used to define analysis units. |
-| **PM** | Probability Maps | Voxel-wise probabilistic maps indicating the likelihood that a given location belongs to a specific cortical area; expection uses the `.probseg` suffix. |
+| **PM** | Probability Maps | Voxel-wise probabilistic maps indicating the likelihood that a given location belongs to a specific cortical area; exception uses the `.probseg` suffix. |
 | **RG** | Receptor Gradients | Low-dimensional spatial gradients derived from neurotransmitter receptor distribution profiles (e.g., principal receptor gradients across non-human primate cortex). |
 | **RM** | Receptor Maps | Spatial maps of neurotransmitter receptor density or binding potential, derived from PET or autoradiography imaging (e.g., radioligand binding densities per-neuron or raw). |
 | **SD** | Sulcal Depth | Vertex-wise measure of the depth of cortical folds, defined as the distance between the cortical surface and a reference surface. |
 | **SMM** | Smoothed Myelin Maps | Spatially smoothed versions of myelin maps (e.g., using surface-based kernels) to improve signal-to-noise ratio and emphasize large-scale gradients. |
-| **TPM** | Tissue Probability Maps | Voxel-wise probabilistic maps indicating the likelihood that a given location belongs to a specific tissue class (e.g., gray matter, white matter, CSF); expection uses the `.probseg` suffix. |
+| **TPM** | Tissue Probability Maps | Voxel-wise probabilistic maps indicating the likelihood that a given location belongs to a specific tissue class (e.g., gray matter, white matter, CSF); exception uses the `.probseg` suffix. |
 | **WMT** | White Matter Tracts | Probabilistic maps giving the likelihood that a voxel belongs to a given white matter tract.
 
 ---
