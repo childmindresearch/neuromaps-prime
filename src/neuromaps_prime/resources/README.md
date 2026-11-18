@@ -45,7 +45,7 @@ These codes appear after `desc-` in the filename and indicate the kind of data s
 | **AE** | Area Expansion | Relative surface area expansion. |
 | **BM** | Brain Masks | Binary or probabilistic maps defining which surface vertices or voxels correspond to valid cortical tissue (used for masking and analysis inclusion; volumes (`.nii.gz` files) use the `mask` suffix). |
 | **CB** | Connectivity Blueprint | Vertex-by-tract matrix summarizing each cortical location's structural connectivity fingerprint across white matter tracts.
-| **CD** | Conrtical Depth | Voxel-wise distance from the pial surface, measured along the cortical streamline toward the white matter boundary.
+| **CD** | Cortical Depth | Voxel-wise distance from the pial surface, measured along the cortical streamline toward the white matter boundary.
 | **CH** | Cortical Hierarchy | Anatomical cortical hierarchy estimates (e.g., hierarchy indices complementing intrinsic timescales). |
 | **CT** | Cortical Thickness | Vertex-wise estimates of the distance between the white matter and pial surfaces, reflecting local cortical thickness. |
 | **CV** | Curvature | Vertex-wise measures of cortical surface geometry (e.g., mean or Gaussian curvature) indicating gyral and sulcal folding patterns. |
@@ -58,11 +58,12 @@ These codes appear after `desc-` in the filename and indicate the kind of data s
 | **MM** | Myelin Maps | Vertex-wise estimates of cortical myelin content, commonly derived from MRI contrasts such as T1w/T2w ratio and reflecting intracortical myelination. |
 | **ND** | Neuron Density | Quantitative spatial distribution and estimates of neuronal density across cortical areas. |
 | **PC** | Parcellations | Discrete atlas-based assignments mapping each surface vertex or voxel to a labeled cortical region, often used to define analysis units. |
+| **PM** | Probability Maps | Voxel-wise probabilistic maps indicating the likelihood that a given location belongs to a specific cortical area; expection uses the `.probseg` suffix. |
 | **RG** | Receptor Gradients | Low-dimensional spatial gradients derived from neurotransmitter receptor distribution profiles (e.g., principal receptor gradients across non-human primate cortex). |
 | **RM** | Receptor Maps | Spatial maps of neurotransmitter receptor density or binding potential, derived from PET or autoradiography imaging (e.g., radioligand binding densities per-neuron or raw). |
 | **SD** | Sulcal Depth | Vertex-wise measure of the depth of cortical folds, defined as the distance between the cortical surface and a reference surface. |
 | **SMM** | Smoothed Myelin Maps | Spatially smoothed versions of myelin maps (e.g., using surface-based kernels) to improve signal-to-noise ratio and emphasize large-scale gradients. |
-| **TPM** | Tissue Probability Maps | Voxel-wise probabilistic maps indicating the likelihood that a given location belongs to a specific tissue class (e.g., gray matter, white matter, CSF; exception uses `probseg` suffix). |
+| **TPM** | Tissue Probability Maps | Voxel-wise probabilistic maps indicating the likelihood that a given location belongs to a specific tissue class (e.g., gray matter, white matter, CSF); expection uses the `.probseg` suffix. |
 | **WMT** | White Matter Tracts | Probabilistic maps giving the likelihood that a voxel belongs to a given white matter tract.
 
 ---
