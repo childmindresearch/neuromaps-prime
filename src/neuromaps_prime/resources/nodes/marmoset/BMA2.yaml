@@ -25,6 +25,7 @@ BMA2:
   volumes:
     100um:
       T2w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc819b695fb9e3e7f78e0
+      Nissl: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afe0b4987e37828acba2ecd
       annotation:
         PC_BMA2:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc80ba29cb842c37f793e
@@ -33,11 +34,6 @@ BMA2:
             doi: 10.1038/s41597-026-06601-z
         MM:
           uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afcc7ee1870d90a3cc3d9bd
-          references:
-          - citation: Gong, R, et al. 2026. Scientific Data. 13:274.
-            doi: 10.1038/s41597-026-06601-z
-        ND_nissl:
-          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6afe0b4987e37828acba2ecd
           references:
           - citation: Gong, R, et al. 2026. Scientific Data. 13:274.
             doi: 10.1038/s41597-026-06601-z
