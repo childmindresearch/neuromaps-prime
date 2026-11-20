@@ -4,26 +4,63 @@ NMT2Sym:
   references:
   - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
     doi: 10.1016/j.neuroimage.2021.117997
+  - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+    url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
   surfaces:
     41k:
       sphere:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523df23e17e1124712cc2
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfcc9143f354902a8a
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sphere.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sphere.surf.gii
       midthickness:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dd4d366de13d71403f
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dd6846076e837137e8
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_midthickness.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_midthickness.surf.gii
       white:
-        left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfa52f9bb389712be0
-        right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfa52f9bb389712bdf
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_white.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_white.surf.gii
+      pial:
+        left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_pial.surf.gii
+        right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_pial.surf.gii
       inflated:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523dfab76e18c73904626
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/69d523df4d366de13d714041
       annotation:
-        SD:
+        CV:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_curvature.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_curvature.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
+          notes:
+          - FreeSurfer mean curvature computed on the supplied white surface, with template-specific smoothing.
+        CT:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_thickness.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_thickness.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
+          notes:
+          - FreeSurfer cortical thickness computed with neighborhood size 20 and a 5 mm limit.
+        SD_Jung:
           right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a0f5213cd87cca253679ac7
           references:
           - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
             doi: 10.1016/j.neuroimage.2021.117997
+        SD_RheMAPSurf:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_sulc.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_sulc.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
+          notes:
+          - DPF-derived sulcal folding field computed with brain-slam 0.1.2, alpha=0.03; not a direct geometric depth measurement.
+        BM:
+          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-L_cortexmask.shape.gii
+          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/NMT2Sym/src-NMT2Sym_den-41k_hemi-R_cortexmask.shape.gii
+          references:
+          - citation: 'RheMAP-Surf resources: macaque template surfaces, cortical maps, and spherical registrations.'
+            url: https://github.com/zhouzx-UCAS/RheMAP-Surf-resources/commit/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6
+          notes:
+          - 'Consensus cortex mask: 1=cortex, 0=medial wall. Fetching this annotation does not automatically apply an ROI during resampling or comparison.'
 
   volumes:
     250um:
@@ -76,3 +113,6 @@ NMT2Sym:
           references:
           - citation: Jung, B, et al. 2021. NeuroImage, 235:117997
             doi: 10.1016/j.neuroimage.2021.117997
+          notes:
+            - Cortical gray matter mask.
+
