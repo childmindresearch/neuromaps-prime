@@ -641,8 +641,8 @@
     RheMAPSurf:
       74k:
         sphere:
-          left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/F99/src-F99_den-74k_hemi-L_sphere.surf.gii
-          right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/F99/src-F99_den-74k_hemi-R_sphere.surf.gii
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00bd674c41f229a2e0bf60
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00bd66add43fbd3fd4199d
       references:
       - citation: 'BALSA: Macaque Cortical Parcellations and Yerkes19 MRI-based Atlas.'
         url: https://balsa.wustl.edu/reference/show/976nz
@@ -657,7 +657,7 @@
   to: F99
   surfaces:
     RheMAPSurf:
-      74k:
+      32k:
         sphere:
           left: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-L_sphere.surf.gii
           right: https://raw.githubusercontent.com/zhouzx-UCAS/RheMAP-Surf-resources/8123c52df7cf6e0c83f50f17b1c8fbe305b53ba6/surfaces/Yerkes19/src-Yerkes19_den-32k_hemi-R_sphere.surf.gii
