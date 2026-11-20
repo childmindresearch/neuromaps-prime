@@ -1,6 +1,6 @@
 MBM:
   species: marmoset
-  description: MBM Marmoset template
+  description: MBM 3.0 Marmoset template
   references:
   - citation: Liu, C, et al. 2021. NeuroImage. 226:117620.
     doi: 10.1016/j.neuroimage.2020.117620
@@ -9,6 +9,28 @@ MBM:
       sphere:
         left: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d5798d9836c75278b86e2
         right: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2d574f2243b23cd8d3d56c
+      white:
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be94d2745170ffd4194f
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be93e073f4f275e0c09b
+      pial:
+        left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be935c3597a82ed41ada
+        right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be944c41f229a2e0c0fe
+      annotation:
+        PC_MBMvPaxinos:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be4776644f861d263a38
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be474c41f229a2e0c04d
+          references:
+          - citation: Liu, C, et al. 2021. NeuroImage. 226:117620.
+            doi: 10.1016/j.neuroimage.2020.117620
+          notes:
+          - Surface labels of the MBM cortical parcellation (vPaxinos).
+          - 'lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be48d2745170ffd4188f'
+        MM:
+          left: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be3bd2745170ffd41880
+          right: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be3b5c3597a82ed41a90
+          references:
+          - citation: Liu, C, et al. 2021. NeuroImage. 226:117620.
+            doi: 10.1016/j.neuroimage.2020.117620
   volumes:
     50um:
       T2w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c10ee838ee07b3d30a310
@@ -26,6 +48,28 @@ MBM:
       annotation:
         BM:
           uri: https://files.osf.io/v1/resources/nmxfh/providers/osfstorage/6a2c0f741dc445e36e18bc29
+          references:
+          - citation: Liu, C, et al. 2021. NeuroImage. 226:117620.
+            doi: 10.1016/j.neuroimage.2020.117620
+    200um:
+      T2w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be93404a4694e6263ad9
+      T1w: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be935556658d15d41a9c
+      annotation:
+        BM:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be31a5c9d7d9e7e0c057
+          references:
+          - citation: Liu, C, et al. 2021. NeuroImage. 226:117620.
+            doi: 10.1016/j.neuroimage.2020.117620
+        PC_MBMvPaxinos:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be474c41f229a2e0c04b
+          references:
+          - citation: Liu, C, et al. 2021. NeuroImage. 226:117620.
+            doi: 10.1016/j.neuroimage.2020.117620
+          notes:
+          - Maximum-probability parcellation of the MBM cortex (vPaxinos).
+          - 'lookup file: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be48d2745170ffd4188f'
+        MM:
+          uri: https://files.us.osf.io/v1/resources/nmxfh/providers/osfstorage/6b00be3ba5c9d7d9e7e0c064
           references:
           - citation: Liu, C, et al. 2021. NeuroImage. 226:117620.
             doi: 10.1016/j.neuroimage.2020.117620
